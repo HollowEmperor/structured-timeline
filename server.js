@@ -13,6 +13,7 @@ const BLOCKED_FILES = new Set([
   '/package.json',
   '/package-lock.json',
   '/metadata.json',
+  '/memo-spike-physics.test.mjs',
 ]);
 
 export function createApp() {
