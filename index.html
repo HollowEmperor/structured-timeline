@@ -226,13 +226,18 @@
       will-change: transform;
     }
     .memo-paper-btn {
-      transition: filter 0.16s ease, transform 0.14s cubic-bezier(0.2, 0, 0, 1);
+      pointer-events: none;
+      transition: filter 0.14s ease;
+    }
+    .memo-paper-btn .memo-paper-hit {
+      pointer-events: visibleFill;
+      cursor: pointer;
     }
     .memo-paper-btn:hover {
-      filter: brightness(1.06);
+      filter: brightness(1.12);
     }
     .memo-paper-btn:active {
-      transform: scale(0.985);
+      filter: brightness(0.95);
     }
     @media (prefers-reduced-motion: reduce) {
       .memo-note-stab,
@@ -2986,7 +2991,7 @@
       }));
 
       const layout = physics.computeMemoSpikeLayout(tasksWithHex, { stageWidth: 340 });
-      const { stageWidth, stageHeight, centerX, collarY, tipY, sheets } = layout;
+      const { stageWidth, stageHeight, centerX, collarY, tipY, base, sheets } = layout;
 
       const cascadeAll = Boolean(state.memoSpikeJustEntered && sheets.length > 0);
       const hasSingleNew = !cascadeAll && state.newlyCompletedTaskId !== null;
@@ -3007,10 +3012,8 @@
 
           const uid = `ms-${task.id}-${stackIndex}`;
           const faceGradId = `${uid}-face`;
-          const tentGradId = `${uid}-tent`;
           const rodGradId = `${uid}-rod`;
           const shadowFilterId = `${uid}-shadow`;
-          const grainFilterId = `${uid}-grain`;
 
           const dropDelaySec = cascadeAll ? (stackIndex * 0.075).toFixed(3) : '0';
           const dropDurSec = cascadeAll ? '0.48' : '0.56';
@@ -3035,15 +3038,15 @@
               aria-label="Inspect completed slip: ${escapeHtml(task.title)}"
               title="${escapeHtml(task.title)} — Tap to unfold"
               style="left: ${bbox.minX}px; top: ${bbox.minY}px; width: ${bbox.width}px; height: ${bbox.height}px; z-index: ${sheet.zIndex}; transform-origin: ${originX}px ${originY}px; --drop-dist: ${sheet.dropDistance}px; --drop-delay: ${dropDelaySec}s; --drop-dur: ${dropDurSec}s;"
-              class="${animClass} memo-paper-btn absolute block p-0 border-0 bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/70 rounded cursor-pointer"
+              class="${animClass} memo-paper-btn absolute block p-0 border-0 bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/70 rounded"
             >
               <svg
-                class="w-full h-full overflow-visible block"
+                class="w-full h-full overflow-visible block pointer-events-none"
                 viewBox="${bbox.minX} ${bbox.minY} ${bbox.width} ${bbox.height}"
                 aria-hidden="true"
               >
                 <defs>
-                  <!-- Directional studio paper lighting matching tilted 3D plane -->
+                  <!-- 100% opaque directional studio matte cardstock lighting (front-lit -> receding back) -->
                   <linearGradient
                     id="${faceGradId}"
                     gradientUnits="userSpaceOnUse"
@@ -3052,24 +3055,11 @@
                     x2="${sheet.gradVector.x2}"
                     y2="${sheet.gradVector.y2}"
                   >
-                    <stop offset="0%" stop-color="${colors.midShade}" />
-                    <stop offset="34%" stop-color="${colors.highlight}" />
-                    <stop offset="68%" stop-color="${colors.face}" />
-                    <stop offset="100%" stop-color="${colors.deepShade}" />
+                    <stop offset="0%" stop-color="${colors.highlight}" stop-opacity="1" />
+                    <stop offset="40%" stop-color="${colors.face}" stop-opacity="1" />
+                    <stop offset="76%" stop-color="${colors.midShade}" stop-opacity="1" />
+                    <stop offset="100%" stop-color="${colors.deepShade}" stop-opacity="1" />
                   </linearGradient>
-
-                  <!-- Subtle tenting shade around spindle puncture -->
-                  <radialGradient
-                    id="${tentGradId}"
-                    gradientUnits="userSpaceOnUse"
-                    cx="${sheet.holeScreenX}"
-                    cy="${sheet.holeScreenY}"
-                    r="24"
-                  >
-                    <stop offset="0%" stop-color="#000000" stop-opacity="0.26" />
-                    <stop offset="45%" stop-color="#FFFFFF" stop-opacity="0.14" />
-                    <stop offset="100%" stop-color="#000000" stop-opacity="0" />
-                  </radialGradient>
 
                   <!-- Chrome steel spindle gradient (identical to main vertical shaft) -->
                   <linearGradient id="${rodGradId}" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -3081,58 +3071,44 @@
                     <stop offset="100%" stop-color="#18181B" />
                   </linearGradient>
 
-                  <!-- Weighted downward cast shadow onto the paper slip beneath -->
+                  <!-- Crisp tight downward cast shadow for thin stacked sheets -->
                   <filter id="${shadowFilterId}" x="-18%" y="-20%" width="136%" height="165%">
-                    <feDropShadow dx="0" dy="5.5" stdDeviation="3.8" flood-color="#000000" flood-opacity="0.54" />
-                    <feDropShadow dx="0" dy="1.8" stdDeviation="1.1" flood-color="#000000" flood-opacity="0.42" />
-                  </filter>
-
-                  <!-- Fine matte paper grain -->
-                  <filter id="${grainFilterId}" x="0%" y="0%" width="100%" height="100%">
-                    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="${(task.id + stackIndex) % 97}" result="noise" />
-                    <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.055 0" in="noise" result="softNoise" />
-                    <feComposite in="softNoise" in2="SourceGraphic" operator="in" />
+                    <feDropShadow dx="0" dy="2.6" stdDeviation="1.9" flood-color="#000000" flood-opacity="0.52" />
                   </filter>
                 </defs>
 
-                <g filter="url(#${shadowFilterId})">
-                  <!-- 1. Front cut-edge paper thickness rim -->
+                <g filter="url(#${shadowFilterId})" class="pointer-events-none">
+                  <!-- 1. Razor-thin solid 100% opaque front paper edge -->
                   ${sheet.edgeRimPaths
                     .map(
                       (rimPath) => `
                         <path
                           d="${rimPath}"
                           fill="${colors.cutEdge}"
-                          stroke="#000000"
-                          stroke-opacity="0.34"
-                          stroke-width="0.6"
+                          fill-opacity="1"
+                          stroke="${colors.edgeOutline}"
+                          stroke-opacity="0.55"
+                          stroke-width="0.28"
+                          stroke-linejoin="miter"
+                          class="memo-paper-hit"
                         />
                       `
                     )
                     .join('')}
 
-                  <!-- 2. Main foreshortened rectangular paper sheet -->
+                  <!-- 2. Solid 100% opaque foreshortened thin square paper sheet (exact polygon click target) -->
                   <path
                     d="${sheet.mainPath}"
                     fill="url(#${faceGradId})"
-                    stroke="${isInspected ? '#F5F5F7' : '#FFFFFF'}"
-                    stroke-opacity="${isInspected ? '0.9' : '0.26'}"
-                    stroke-width="${isInspected ? '1.6' : '0.75'}"
+                    fill-opacity="1"
+                    stroke="${isInspected ? '#F5F5F7' : colors.edgeOutline}"
+                    stroke-opacity="${isInspected ? '1' : '0.72'}"
+                    stroke-width="${isInspected ? '1.6' : '0.45'}"
                     stroke-linejoin="miter"
+                    class="memo-paper-hit"
                   />
 
-                  <!-- 3. Subtle bent corner plane for crisp paper-fold volume -->
-                  <path
-                    d="${sheet.cornerFacetPath}"
-                    fill="${sheet.cornerFacetLight ? '#FFFFFF' : '#000000'}"
-                    fill-opacity="${sheet.cornerFacetOpacity}"
-                  />
-
-                  <!-- 4. Puncture tenting shade & subtle fibrous paper grain -->
-                  <path d="${sheet.mainPath}" fill="url(#${tentGradId})" />
-                  <path d="${sheet.mainPath}" filter="url(#${grainFilterId})" />
-
-                  <!-- 5. Perspective-projected faint ruled memo/receipt ink lines -->
+                  <!-- 3. Perspective-projected faint ruled memo lines converging to true vanishing points -->
                   ${sheet.ruledLines
                     .map(
                       (linePath, li) => `
@@ -3140,58 +3116,55 @@
                           d="${linePath}"
                           fill="none"
                           stroke="${colors.ink}"
-                          stroke-opacity="${li === 0 ? '0.24' : '0.15'}"
-                          stroke-width="${li === 0 ? '1.1' : '0.85'}"
+                          stroke-opacity="${li === 0 ? '0.26' : '0.16'}"
+                          stroke-width="${li === 0 ? '1.05' : '0.8'}"
                           stroke-linecap="butt"
+                          class="pointer-events-none"
                         />
                       `
                     )
                     .join('')}
 
-                  <!-- 6. Crisp diagonal fold crease (shadow + light catch) -->
+                  <!-- 4. Subtle solid paper crease -->
                   <path
                     d="${sheet.creasePath}"
                     fill="none"
-                    stroke="#000000"
-                    stroke-opacity="0.18"
-                    stroke-width="0.95"
-                  />
-                  <path
-                    d="${sheet.creasePath}"
-                    transform="translate(0, 0.9)"
-                    fill="none"
-                    stroke="#FFFFFF"
+                    stroke="${colors.underside}"
                     stroke-opacity="0.22"
-                    stroke-width="0.7"
+                    stroke-width="0.8"
+                    class="pointer-events-none"
                   />
 
-                  <!-- 7. Soft directional shadow cast by vertical spike onto paper -->
+                  <!-- 5. Soft directional shadow cast by vertical chrome spike onto opaque paper -->
                   <path
                     d="${sheet.rodShadowPath}"
-                    fill="#000000"
-                    fill-opacity="0.22"
+                    fill="${colors.underside}"
+                    fill-opacity="0.34"
+                    class="pointer-events-none"
                   />
 
-                  <!-- 8. Foreshortened elliptical spindle puncture slit (exact centerX) -->
+                  <!-- 6. Foreshortened elliptical spindle puncture slit (dead center, exact centerX) -->
                   <ellipse
                     cx="${sheet.holeScreenX}"
                     cy="${sheet.holeScreenY}"
-                    rx="3.4"
-                    ry="1.35"
-                    fill="#09090B"
-                    stroke="#FFFFFF"
-                    stroke-opacity="0.32"
+                    rx="3.3"
+                    ry="1.25"
+                    fill="#111113"
+                    stroke="${colors.highlight}"
+                    stroke-opacity="0.65"
                     stroke-width="0.6"
+                    class="pointer-events-none"
                   />
                 </g>
 
-                <!-- 9. Pixel-aligned vertical chrome spindle emerging straight UP out of puncture slit -->
+                <!-- 7. Pixel-aligned vertical chrome spindle emerging straight UP out of center puncture -->
                 <rect
                   x="${(sheet.rodSegment.x - rodWidth / 2).toFixed(2)}"
                   y="${sheet.rodSegment.yTop}"
                   width="${rodWidth}"
                   height="${rodSegH.toFixed(2)}"
                   fill="url(#${rodGradId})"
+                  class="pointer-events-none"
                 />
               </svg>
             </button>
@@ -3333,11 +3306,6 @@
         `;
       }
 
-      const baseTopY = Number((collarY + 9).toFixed(2));
-      const baseRimBottomY = Number((collarY + 27).toFixed(2));
-      const baseRx = 68;
-      const baseRy = 14.5;
-
       container.innerHTML = `
         <div class="py-3 px-2 flex flex-col items-center select-none">
           <div class="w-full flex items-center justify-between px-2 mb-1">
@@ -3413,30 +3381,27 @@
                 </linearGradient>
               </defs>
 
-              <!-- Soft desk contact shadow -->
+              <!-- Soft desk contact shadow projected in the same 3D perspective -->
               <ellipse
-                cx="${centerX}"
-                cy="${(baseRimBottomY + 4).toFixed(2)}"
-                rx="88"
-                ry="16"
+                cx="${base.shadowCx}"
+                cy="${base.shadowCy}"
+                rx="${(base.rx * 1.24).toFixed(2)}"
+                ry="${(base.ry * 1.15).toFixed(2)}"
                 fill="url(#spike-ground-shadow)"
               />
 
-              <!-- Cylindrical metallic base side wall -->
+              <!-- Cylindrical metallic base side wall projected through unified pinhole camera -->
               <path
-                d="M ${centerX - baseRx},${baseTopY} L ${centerX - baseRx},${baseRimBottomY} A ${baseRx},${baseRy} 0 0 0 ${centerX + baseRx},${baseRimBottomY} L ${centerX + baseRx},${baseTopY} Z"
+                d="${base.wallPath}"
                 fill="url(#spike-base-wall)"
               />
 
-              <!-- Top circular beveled face of weighted base -->
-              <ellipse
-                cx="${centerX}"
-                cy="${baseTopY}"
-                rx="${baseRx}"
-                ry="${baseRy}"
+              <!-- Top circular beveled face of weighted base projected through unified pinhole camera -->
+              <path
+                d="${base.topPath}"
                 fill="url(#spike-base-top)"
                 stroke="#E4E4E7"
-                stroke-opacity="0.36"
+                stroke-opacity="0.4"
                 stroke-width="1"
               />
 
@@ -3444,21 +3409,21 @@
               ${
                 sheets.length > 0
                   ? `<ellipse
-                      cx="${centerX}"
-                      cy="${(baseTopY - 0.5).toFixed(2)}"
-                      rx="${Math.min(baseRx - 6, 46 + sheets.length * 4)}"
-                      ry="11"
+                      cx="${base.collarX}"
+                      cy="${(base.collarY + 1).toFixed(2)}"
+                      rx="${Math.min(base.rx - 5, 42 + sheets.length * 3.5).toFixed(2)}"
+                      ry="${(base.ry * 0.72).toFixed(2)}"
                       fill="url(#spike-pile-ao)"
                     />`
                   : ''
               }
 
-              <!-- Chrome mounting nut / collar locked around base of shaft -->
+              <!-- Chrome mounting nut / collar locked at projected base origin (0, 0, 0) -->
               <rect
-                x="${(centerX - 6.5).toFixed(2)}"
-                y="${(collarY - 2).toFixed(2)}"
+                x="${(base.collarX - 6.5).toFixed(2)}"
+                y="${(base.collarY - 7).toFixed(2)}"
                 width="13"
-                height="10"
+                height="9.5"
                 rx="2"
                 fill="url(#spike-shaft-chrome)"
                 stroke="#000000"
@@ -3466,12 +3431,12 @@
                 stroke-width="0.6"
               />
               <ellipse
-                cx="${centerX}"
-                cy="${(collarY - 2).toFixed(2)}"
+                cx="${base.collarX}"
+                cy="${(base.collarY - 7).toFixed(2)}"
                 rx="6.5"
                 ry="2.2"
                 fill="#D4D4D8"
-                fill-opacity="0.72"
+                fill-opacity="0.78"
               />
 
               <!-- Continuous vertical chrome steel spindle shaft -->
