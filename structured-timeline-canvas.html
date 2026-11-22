@@ -245,6 +245,487 @@
         animation: none !important;
       }
     }
+
+    /* Spatial Edge Panel & Detachable Radial Bubble */
+    :root {
+      --spring-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --smooth-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .spatial-glass-panel {
+      background: rgba(35, 35, 37, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid #3A3A3F;
+      box-shadow: 0 22px 54px rgba(0, 0, 0, 0.62);
+    }
+
+    #spatial-edge-handle {
+      position: absolute;
+      z-index: 44;
+      width: 24px;
+      height: 88px;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      background: transparent;
+      touch-action: none;
+      user-select: none;
+      cursor: grab;
+      transition: transform 0.25s var(--spring-ease), opacity 0.2s ease;
+    }
+    #spatial-edge-handle:active { cursor: grabbing; }
+    .spatial-edge-sliver {
+      width: 3.5px;
+      height: 72px;
+      background: rgba(242, 139, 130, 0.42);
+      border-radius: 4px 0 0 4px;
+      transition: background 0.2s ease, height 0.2s ease, width 0.2s ease;
+    }
+    #spatial-edge-handle:hover .spatial-edge-sliver,
+    #spatial-edge-handle.dragging .spatial-edge-sliver {
+      background: #F28B82;
+      height: 80px;
+      width: 4.5px;
+    }
+
+    #spatial-edge-handle.hidden,
+    #spatial-edge-drawer.hidden,
+    #spatial-edge-backdrop.hidden,
+    body.spatial-disabled #spatial-edge-handle,
+    body.spatial-disabled #spatial-edge-drawer,
+    body.spatial-disabled #spatial-edge-backdrop,
+    body.spatial-disabled #spatial-bubble-wrap,
+    body.spatial-popup-active #spatial-edge-handle,
+    body.spatial-popup-active #spatial-edge-drawer,
+    body.spatial-popup-active #spatial-edge-backdrop {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    #spatial-scribble-canvas,
+    #spatial-teardrop-svg {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 68;
+      overflow: visible;
+    }
+    #spatial-scribble-canvas {
+      transition: opacity 0.35s ease;
+    }
+
+    #spatial-edge-drawer {
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      z-index: 46;
+      width: 66px;
+      border-radius: 34px;
+      background: rgba(245, 245, 247, 0.96);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1.5px solid rgba(255, 255, 255, 0.92);
+      box-shadow: 0 22px 54px rgba(0, 0, 0, 0.58);
+      transform: translate(120%, -50%) scale(0.92);
+      transition: transform 0.34s var(--spring-ease), opacity 0.22s ease;
+      pointer-events: none;
+      opacity: 0;
+      touch-action: pan-y;
+      overflow: visible;
+    }
+    #spatial-edge-drawer.open {
+      transform: translate(0, -50%) scale(1);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    @keyframes botIdleFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-2.5px) rotate(-1.5deg); }
+    }
+    @keyframes botAntennaBob {
+      0%, 100% { transform: rotate(0deg); }
+      35% { transform: rotate(-7deg); }
+      70% { transform: rotate(6deg); }
+    }
+    @keyframes botEyeBlink {
+      0%, 90%, 100% { transform: scaleY(1); }
+      94% { transform: scaleY(0.1); }
+    }
+    @keyframes botAuraBreathe {
+      0%, 100% { opacity: 0.32; transform: scale(0.94); }
+      50% { opacity: 0.68; transform: scale(1.06); }
+    }
+
+    .spatial-mascot-stage {
+      position: relative;
+      width: 50px;
+      height: 50px;
+      border-radius: 9999px;
+      background: #2B2B2E;
+      border: 1.5px solid #3A3A3F;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+      cursor: pointer;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s var(--spring-ease);
+    }
+    .spatial-mascot-stage:hover {
+      transform: scale(1.06);
+      border-color: #F28B82;
+    }
+    #spatial-bot-body-group {
+      transform-origin: 32px 30px;
+      animation: botIdleFloat 3.4s ease-in-out infinite;
+    }
+    #spatial-bot-antenna-group {
+      transform-origin: 32px 15px;
+      animation: botAntennaBob 4.2s ease-in-out infinite;
+    }
+    #spatial-bot-core-aura {
+      transform-origin: 32px 29px;
+      animation: botAuraBreathe 2.8s ease-in-out infinite;
+    }
+    .spatial-bot-eye {
+      transform-origin: center;
+      animation: botEyeBlink 4.4s infinite;
+      transition: stroke 0.22s ease;
+    }
+
+    .spatial-capture-group {
+      width: 46px;
+      padding: 4px 0;
+      border-radius: 9999px;
+      background: #FFFFFF;
+      border: 1px solid rgba(20, 20, 22, 0.08);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .spatial-capture-group .spatial-rail-btn {
+      width: 38px;
+      height: 38px;
+      background: transparent;
+      border: none;
+    }
+    .spatial-capture-group .spatial-rail-btn:hover {
+      background: rgba(20, 20, 22, 0.08);
+      transform: scale(1.1);
+    }
+
+    .spatial-rail-btn {
+      position: relative;
+      width: 42px;
+      height: 42px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(20, 20, 22, 0.05);
+      border: 1px solid rgba(20, 20, 22, 0.06);
+      transition: transform 0.2s var(--spring-ease), background 0.18s ease, border-color 0.18s ease;
+      cursor: pointer;
+    }
+    .spatial-rail-btn:hover {
+      transform: scale(1.08);
+      background: #FFFFFF;
+      border-color: rgba(242, 139, 130, 0.55);
+    }
+    .spatial-rail-tooltip {
+      position: absolute;
+      top: 50%;
+      right: calc(100% + 12px);
+      transform: translateY(-50%) scale(0.94);
+      white-space: nowrap;
+      padding: 5px 11px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #F5F5F7;
+      background: #2B2B2E;
+      border: 1px solid #3A3A3F;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.16s ease, transform 0.16s ease;
+      z-index: 70;
+    }
+    .spatial-rail-btn:hover .spatial-rail-tooltip {
+      opacity: 1;
+      transform: translateY(-50%) scale(1);
+    }
+
+    #spatial-bubble-wrap {
+      position: fixed;
+      z-index: 70;
+      top: 0;
+      left: 0;
+      touch-action: none;
+      user-select: none;
+      will-change: transform;
+    }
+    #spatial-bubble-wrap.animating {
+      transition: transform 0.42s var(--spring-ease);
+    }
+
+    .spatial-bubble-core {
+      width: 54px;
+      height: 54px;
+      border-radius: 9999px;
+      background: #2B2B2E;
+      border: 1.5px solid #3A3A3F;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      transition: width 0.32s var(--spring-ease), height 0.32s var(--spring-ease), margin-left 0.32s var(--spring-ease), transform 0.25s var(--spring-ease), box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+      position: relative;
+      z-index: 4;
+      overflow: hidden;
+    }
+    .spatial-bubble-core:active {
+      cursor: grabbing;
+      transform: scale(0.94);
+    }
+    .spatial-bubble-core.wheel-open {
+      background: #F28B82;
+      border-color: #F28B82;
+      box-shadow: 0 12px 32px rgba(242, 139, 130, 0.28), 0 0 0 4px rgba(242, 139, 130, 0.16);
+    }
+
+    .spatial-bubble-core.island-active {
+      width: 288px;
+      height: 54px;
+      margin-left: -117px;
+      border-radius: 20px;
+      background: #232325;
+      border: 1px solid #3A3A3F;
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(242, 139, 130, 0.18);
+      cursor: pointer;
+    }
+    .spatial-bubble-core.island-active.island-expanded {
+      width: 312px;
+      height: 172px;
+      margin-left: -129px;
+      border-radius: 24px;
+      align-items: stretch;
+    }
+
+    @keyframes spatialIslandShrink {
+      from { transform: scaleX(1); }
+      to { transform: scaleX(0); }
+    }
+    .spatial-island-timer-bar {
+      transform-origin: left center;
+      animation: spatialIslandShrink var(--island-duration, 3600ms) linear forwards;
+    }
+
+    .spatial-radial-cluster {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      margin-left: -94px;
+      margin-top: -94px;
+      width: 188px;
+      height: 188px;
+      pointer-events: none;
+      opacity: 0;
+      transform: scale(0.45) rotate(-14deg);
+      transform-origin: 94px 94px;
+      transition: transform 0.36s var(--spring-ease), opacity 0.22s ease;
+      z-index: 3;
+    }
+    .wheel-active .spatial-radial-cluster {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1) rotate(0deg);
+    }
+    .spatial-radial-cluster-svg {
+      position: absolute;
+      inset: 0;
+      width: 188px;
+      height: 188px;
+      overflow: visible;
+      filter: drop-shadow(0 12px 26px rgba(0, 0, 0, 0.45));
+      pointer-events: none;
+    }
+    .spatial-radial-cluster-item {
+      position: absolute;
+      width: 38px;
+      height: 38px;
+      margin-left: -19px;
+      margin-top: -19px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.18s var(--spring-ease), background-color 0.16s ease;
+      z-index: 4;
+    }
+    .spatial-radial-cluster-item:hover {
+      background: rgba(20, 20, 22, 0.08);
+      transform: scale(1.14);
+    }
+
+    .spatial-radial-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 48px;
+      height: 48px;
+      margin-left: -24px;
+      margin-top: -24px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #F5F5F7;
+      border: 1.5px solid rgba(255, 255, 255, 0.92);
+      color: #1C1C1E;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(0, 0) scale(0.3);
+      transition: transform 0.38s var(--spring-ease), opacity 0.22s ease, background 0.18s ease;
+      z-index: 3;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.48);
+    }
+    .wheel-active .spatial-radial-btn {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(var(--tx), var(--ty)) scale(1);
+    }
+    .wheel-active .spatial-radial-btn:hover {
+      background: #FFFFFF;
+      transform: translate(var(--tx), var(--ty)) scale(1.12);
+      z-index: 5;
+    }
+
+    @keyframes spatialTeardropPop {
+      0%   { transform: scale(1.28, 0.76); }
+      32%  { transform: scale(0.86, 1.16); }
+      62%  { transform: scale(1.08, 0.94); }
+      82%  { transform: scale(0.98, 1.03); }
+      100% { transform: scale(1, 1); }
+    }
+    .spatial-bubble-core.teardrop-pop {
+      animation: spatialTeardropPop 0.52s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes spatialDetachRipple {
+      0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0.9; }
+      100% { transform: translate(-50%, -50%) scale(2.8); opacity: 0; }
+    }
+    .spatial-ripple-burst {
+      position: fixed;
+      width: 60px;
+      height: 60px;
+      border-radius: 9999px;
+      border: 2px solid #F28B82;
+      background: rgba(242, 139, 130, 0.16);
+      pointer-events: none;
+      z-index: 95;
+      animation: spatialDetachRipple 0.55s var(--smooth-ease) forwards;
+    }
+
+    #spatial-dismiss-target {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      width: 56px;
+      height: 56px;
+      border-radius: 9999px;
+      z-index: 68;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #232325;
+      border: 1.5px solid #3A3A3F;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65);
+      color: #9A9AA0;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateX(-50%) translateY(96px) scale(0.72);
+      transition: transform 0.34s var(--spring-ease), opacity 0.22s ease, background 0.22s ease, border-color 0.22s ease, color 0.22s ease;
+    }
+    #spatial-dismiss-target.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+    #spatial-dismiss-target.over-target {
+      transform: translateX(-50%) translateY(-4px) scale(1.18);
+      background: #DC2626;
+      border-color: #F28B82;
+      color: #F5F5F7;
+    }
+
+    #spatial-bubble-wrap.dismissing {
+      transition: transform 0.24s var(--smooth-ease), opacity 0.22s ease;
+      opacity: 0;
+      pointer-events: none;
+    }
+    #spatial-bubble-wrap.dismissing .spatial-bubble-core {
+      transform: scale(0.35);
+    }
+    .spatial-bubble-core.over-dismiss {
+      border-color: #DC2626;
+      box-shadow: 0 12px 32px rgba(220, 38, 38, 0.4), 0 0 0 4px rgba(242, 139, 130, 0.16);
+    }
+
+    .spatial-text-highlight {
+      outline: 2px solid rgba(242, 139, 130, 0.78);
+      outline-offset: 4px;
+      background-color: rgba(242, 139, 130, 0.12) !important;
+      border-radius: 10px;
+    }
+    .spatial-bubble-core.scribbling,
+    .spatial-bubble-core.reading-text {
+      border-color: #F28B82;
+      box-shadow: 0 12px 34px rgba(242, 139, 130, 0.34), 0 0 0 6px rgba(242, 139, 130, 0.16);
+    }
+
+    @keyframes spatialVoiceAura {
+      0%, 100% { box-shadow: 0 14px 36px rgba(242, 139, 130, 0.36), 0 0 0 4px rgba(242, 139, 130, 0.18); }
+      50% { box-shadow: 0 14px 44px rgba(129, 201, 83, 0.38), 0 0 0 9px rgba(242, 139, 130, 0.14); }
+    }
+    .spatial-bubble-core.voice-recording {
+      width: 118px;
+      height: 50px;
+      margin-left: -32px;
+      background: #232325;
+      border-color: #F28B82;
+      animation: spatialVoiceAura 1.3s ease-in-out infinite;
+      cursor: pointer;
+    }
+
+    .spatial-popover {
+      position: fixed;
+      z-index: 82;
+      width: 326px;
+      max-width: calc(100vw - 24px);
+    }
+
+    #spatial-screen-sketch-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 88;
+      touch-action: none;
+      cursor: crosshair;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center sm:py-4 selection:bg-coral/25 selection:text-white">
@@ -855,6 +1336,83 @@
               <p class="text-secondarytext leading-relaxed">
                 Tasks within 24 minutes connect with a solid linear gradient. Gaps of 25 minutes or more show a dashed gradient spine. Dragging any task vertically expands the hourly ruler in-place around your finger.
               </p>
+            </div>
+          </div>
+
+          <!-- Spatial Edge Panel Toggle -->
+          <div class="bg-cardbg border border-borderline rounded-2xl px-4 py-3.5 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="w-8 h-8 rounded-xl bg-pillbg border border-borderline text-coral flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5h6m0 0v6m0-6L10 14M5 10v9h9"/></svg>
+              </span>
+              <div class="min-w-0">
+                <p class="text-xs font-semibold text-primarytext">Spatial Edge Panel</p>
+                <p id="settings-spatial-summary" class="text-[11px] text-secondarytext truncate">Edge sliver &amp; floating radial tools</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              id="settings-spatial-toggle"
+              onclick="toggleSpatialPanelEnabled()"
+              aria-label="Toggle Spatial Edge Panel"
+              class="tactile-btn w-11 h-6 rounded-full bg-coral border border-coral p-0.5 flex items-center transition-colors flex-shrink-0"
+            >
+              <span id="settings-spatial-knob" style="transform: translateX(20px);" class="w-4 h-4 rounded-full bg-appbg transition-transform"></span>
+            </button>
+          </div>
+
+          <!-- Notifications Toggle & Tone Settings -->
+          <div class="bg-cardbg border border-borderline rounded-2xl overflow-hidden">
+            <div class="px-4 py-3.5 flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onclick="toggleSettingsSection('notifications')"
+                class="tactile-btn flex items-center gap-3 min-w-0 flex-1 text-left"
+              >
+                <span class="w-8 h-8 rounded-xl bg-pillbg border border-borderline text-coral flex items-center justify-center flex-shrink-0">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+                </span>
+                <div class="min-w-0">
+                  <p class="text-xs font-semibold text-primarytext">Notifications</p>
+                  <p id="settings-notif-summary" class="text-[11px] text-secondarytext truncate">On • Sweet tone</p>
+                </div>
+              </button>
+              <div class="flex items-center gap-2 flex-shrink-0">
+                <button
+                  type="button"
+                  id="settings-notif-toggle"
+                  onclick="toggleNotificationsEnabled()"
+                  aria-label="Toggle Notifications"
+                  class="tactile-btn w-11 h-6 rounded-full bg-coral border border-coral p-0.5 flex items-center transition-colors"
+                >
+                  <span id="settings-notif-knob" style="transform: translateX(20px);" class="w-4 h-4 rounded-full bg-appbg transition-transform"></span>
+                </button>
+                <button
+                  type="button"
+                  onclick="toggleSettingsSection('notifications')"
+                  class="p-1 text-secondarytext hover:text-primarytext"
+                  aria-label="Expand notification options"
+                >
+                  <svg id="settings-chev-notifications" class="w-4 h-4 text-secondarytext transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div id="settings-panel-notifications" class="hidden px-4 pb-4 pt-3 border-t border-borderline space-y-3 text-xs">
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <p class="text-[11px] font-semibold uppercase tracking-wider text-secondarytext">Companion Tone</p>
+                  <span id="settings-notif-tone-label" class="text-[11px] font-semibold text-coral capitalize">Sweet</span>
+                </div>
+                <div id="settings-notif-tone-grid" class="grid grid-cols-2 gap-1.5"></div>
+              </div>
+              <button
+                type="button"
+                onclick="triggerTestNotificationAlert()"
+                class="tactile-btn w-full py-2.5 rounded-xl bg-pillbg border border-borderline hover:border-coral text-[11px] font-semibold text-coral flex items-center justify-center gap-1.5"
+              >
+                <span>Send Test Notification</span>
+              </button>
             </div>
           </div>
         </div>
@@ -1802,7 +2360,274 @@
       </footer>
     </div>
 
+    <!-- ==================== SPATIAL EDGE HANDLE & EDGE PANEL ==================== -->
+    <div id="spatial-edge-backdrop" class="hidden absolute inset-0 bg-black/35 z-[43] transition-opacity"></div>
+
+    <div id="spatial-edge-handle" style="top: 38%;" title="Swipe inward for Edge Tools • Drag further to pop out Bubble">
+      <div class="spatial-edge-sliver"></div>
+    </div>
+
+    <aside id="spatial-edge-drawer" class="py-2.5 px-2 flex flex-col items-center gap-2" aria-label="Spatial Edge Tools">
+      <div id="spatial-mascot-stage" class="spatial-mascot-stage" title="Tap Bot to view alerts">
+        <svg id="spatial-mascot-svg" class="w-10 h-10 overflow-visible" viewBox="0 0 64 52" fill="none">
+          <circle id="spatial-bot-core-aura" cx="32" cy="29" r="18" fill="rgba(242, 139, 130, 0.26)" />
+          <g id="spatial-bot-body-group">
+            <g id="spatial-bot-antenna-group">
+              <line x1="32" y1="15" x2="32" y2="8.5" stroke="#F5F5F7" stroke-width="2.1" stroke-linecap="round" />
+              <circle id="spatial-bot-antenna-orb" cx="32" cy="6.5" r="3.4" fill="#F28B82" stroke="#141416" stroke-width="1.2" />
+            </g>
+            <path
+              d="M 16 25 C 16 17.5, 22.5 14.5, 32 14.5 C 41.5 14.5, 48 17.5, 48 25 C 52.5 25.5, 54.5 29.5, 53.5 34.5 C 52.5 39, 48 41.5, 42.5 41.8 L 39.2 46.5 C 38.4 47.6, 36.8 47.5, 36.2 46.2 L 34.4 42.2 C 25.5 42.4, 15 40.5, 11.5 35.5 C 9 31.8, 11 26, 16 25 Z"
+              fill="#F5F5F7"
+              stroke="#141416"
+              stroke-width="1.6"
+              stroke-linejoin="round"
+            />
+            <rect x="20.5" y="21.5" width="23" height="14.5" rx="7" fill="#141416" />
+            <g id="spatial-bot-visor-eyes">
+              <path class="spatial-bot-eye" d="M 26.8 25.4 V 31.6 H 29.6" stroke="#F28B82" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" />
+              <path class="spatial-bot-eye" d="M 35.2 25.4 V 31.6 H 38.0" stroke="#F28B82" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" />
+            </g>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Grouped Capture Capsule (Screenshot, Screen Record & Voice Memo Together) -->
+      <div class="spatial-capture-group">
+        <button type="button" data-spatial-tool="screenshot" class="spatial-rail-btn text-[#169859]" aria-label="Screenshot">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h2l2-2h6l2 2h2a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3.5"/></svg>
+          <span class="spatial-rail-tooltip">Screenshot</span>
+        </button>
+
+        <button type="button" data-spatial-tool="record" class="spatial-rail-btn text-[#E05246]" aria-label="Screen Record">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><rect x="2" y="6" width="14" height="12" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 10l5-3v10l-5-3"/></svg>
+          <span class="spatial-rail-tooltip">Screen Record</span>
+        </button>
+
+        <button type="button" data-spatial-tool="audio" class="spatial-rail-btn text-[#9E4F73]" aria-label="Voice Memo">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>
+          <span class="spatial-rail-tooltip">Voice Memo</span>
+        </button>
+      </div>
+
+      <button type="button" data-spatial-tool="inbox" class="spatial-rail-btn text-[#169859]" aria-label="Add to Inbox">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 00-2.15-1.588H6.911a2.25 2.25 0 00-2.15 1.588L2.35 13.177a2.25 2.25 0 00-.1.661z"/></svg>
+        <span class="spatial-rail-tooltip">Add to Inbox</span>
+      </button>
+
+      <button type="button" data-spatial-tool="note" class="spatial-rail-btn text-[#2B6CB0]" aria-label="Quick Note">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        <span class="spatial-rail-tooltip">Quick Note</span>
+      </button>
+
+      <button type="button" data-spatial-tool="sketch" class="spatial-rail-btn text-[#B7791F]" aria-label="Draw on Screen">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+        <span class="spatial-rail-tooltip">Draw on Screen</span>
+      </button>
+
+      <div class="w-6 h-px bg-black/15 my-0.5"></div>
+
+      <button type="button" id="spatial-edge-popout-btn" class="spatial-rail-btn text-[#1C1C1E] hover:text-[#E05246]" aria-label="Pop Out to Bubble">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5h6m0 0v6m0-6L10 14M5 10v9h9"/></svg>
+        <span class="spatial-rail-tooltip">Pop Out Bubble</span>
+      </button>
+    </aside>
+
   </main>
+
+  <!-- ==================== GLOBAL SPATIAL OVERLAYS ==================== -->
+  <canvas id="spatial-scribble-canvas" aria-hidden="true"></canvas>
+
+  <svg id="spatial-teardrop-svg" aria-hidden="true">
+    <defs>
+      <linearGradient id="spatial-teardrop-fill" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="rgba(43, 43, 46, 0.96)" />
+        <stop offset="65%" stop-color="rgba(35, 35, 37, 0.96)" />
+        <stop offset="100%" stop-color="rgba(242, 139, 130, 0.34)" />
+      </linearGradient>
+    </defs>
+    <path id="spatial-teardrop-glow" d="" fill="rgba(242, 139, 130, 0.16)" stroke="none"></path>
+    <path id="spatial-teardrop-path" d="" fill="url(#spatial-teardrop-fill)" stroke="rgba(242, 139, 130, 0.65)" stroke-width="1.6"></path>
+    <g id="spatial-teardrop-icon" opacity="0" transform="translate(0,0)">
+      <path d="M0 -9 L2.2 -2.2 L9 0 L2.2 2.2 L0 9 L-2.2 2.2 L-9 0 L-2.2 -2.2 Z" fill="none" stroke="#F28B82" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" />
+    </g>
+  </svg>
+
+  <div id="spatial-dismiss-target" aria-hidden="true">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+    </svg>
+  </div>
+
+  <!-- Live Screen Recording Pill -->
+  <div id="spatial-recording-pill" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[95] spatial-glass-panel rounded-full px-4 py-2 flex items-center gap-3 border border-coral/50 shadow-2xl">
+    <span class="w-2.5 h-2.5 rounded-full bg-coral animate-pulse"></span>
+    <span class="text-xs font-bold tracking-wide text-coral uppercase">REC</span>
+    <span id="spatial-rec-timer" class="text-sm font-mono font-semibold text-primarytext tabular-nums">00:00</span>
+    <button type="button" id="spatial-stop-rec-btn" class="ml-1 px-3 py-1 rounded-full bg-coral hover:opacity-90 text-appbg text-xs font-semibold transition cursor-pointer">
+      Stop &amp; Save
+    </button>
+  </div>
+
+  <!-- Full-Screen On-Screen Sketch Overlay -->
+  <div id="spatial-screen-sketch-overlay" class="hidden" aria-label="On-screen sketch canvas">
+    <canvas id="spatial-screen-sketch-canvas" class="w-full h-full block"></canvas>
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[90] max-w-[calc(100vw-24px)] spatial-glass-panel rounded-full px-3.5 py-2 flex items-center gap-2 border border-amber/50 shadow-2xl">
+      <div id="spatial-ss-colors" class="flex items-center gap-1.5">
+        <button type="button" data-color="#F28B82" class="w-5 h-5 rounded-full border-2 border-primarytext scale-110 transition cursor-pointer" style="background:#F28B82"></button>
+        <button type="button" data-color="#F6C244" class="w-5 h-5 rounded-full border border-borderline transition cursor-pointer" style="background:#F6C244"></button>
+        <button type="button" data-color="#81C953" class="w-5 h-5 rounded-full border border-borderline transition cursor-pointer" style="background:#81C953"></button>
+        <button type="button" data-color="#6EA8D8" class="w-5 h-5 rounded-full border border-borderline transition cursor-pointer" style="background:#6EA8D8"></button>
+        <button type="button" data-color="#F5F5F7" class="w-5 h-5 rounded-full border border-borderline transition cursor-pointer" style="background:#F5F5F7"></button>
+      </div>
+      <div class="w-px h-5 bg-borderline mx-0.5"></div>
+      <button type="button" id="spatial-ss-undo" class="p-1.5 rounded-full bg-pillbg hover:bg-borderline text-secondarytext hover:text-primarytext border border-borderline transition cursor-pointer" title="Undo">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/></svg>
+      </button>
+      <button type="button" id="spatial-ss-clear" class="px-2 py-1 rounded-full text-[11px] font-medium text-secondarytext hover:text-primarytext hover:bg-pillbg transition cursor-pointer">Clear</button>
+      <button type="button" id="spatial-ss-cancel" class="p-1.5 rounded-full hover:bg-pillbg text-secondarytext hover:text-primarytext transition cursor-pointer" title="Cancel">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <button type="button" id="spatial-ss-save" class="px-3.5 py-1.5 rounded-full bg-amber hover:opacity-90 text-appbg text-xs font-bold transition cursor-pointer whitespace-nowrap">
+        Save to Inbox
+      </button>
+    </div>
+  </div>
+
+  <!-- Detached Floating Bubble & Curved Circular Tools Wheel (Including Add to Inbox) -->
+  <div id="spatial-bubble-wrap" class="hidden">
+    <!-- Curved Arc Pill Grouping Screenshot, Screen Record & Voice Memo -->
+    <div id="spatial-radial-cluster" class="spatial-radial-cluster">
+      <svg class="spatial-radial-cluster-svg" viewBox="0 0 188 188" fill="none">
+        <path d="M 102 32 A 62 62 0 0 1 138 138" stroke="#F5F5F7" stroke-width="48" stroke-linecap="round" />
+        <path d="M 102 32 A 62 62 0 0 1 138 138" stroke="rgba(255,255,255,0.96)" stroke-width="45" stroke-linecap="round" />
+      </svg>
+
+      <button type="button" data-spatial-tool="screenshot" class="spatial-radial-cluster-item text-[#169859]" style="left: 104px; top: 33px;" title="Screenshot" aria-label="Screenshot">
+        <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h2l2-2h6l2 2h2a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3.5"/></svg>
+      </button>
+
+      <button type="button" data-spatial-tool="record" class="spatial-radial-cluster-item text-[#E05246]" style="left: 152px; top: 73px;" title="Screen Record" aria-label="Screen Record">
+        <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><rect x="2" y="6" width="14" height="12" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 10l5-3v10l-5-3"/></svg>
+      </button>
+
+      <button type="button" data-spatial-tool="audio" class="spatial-radial-cluster-item text-[#9E4F73]" style="left: 138px; top: 138px;" title="Voice Memo" aria-label="Voice Memo">
+        <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>
+      </button>
+    </div>
+
+    <!-- Circular Satellites Completing the Left Arc (Add to Inbox, Quick Note, Draw on Screen) -->
+    <button type="button" data-spatial-tool="inbox" class="spatial-radial-btn text-[#169859]" style="--tx: -34px; --ty: -56px;" title="Add to Inbox" aria-label="Add to Inbox">
+      <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 00-2.15-1.588H6.911a2.25 2.25 0 00-2.15 1.588L2.35 13.177a2.25 2.25 0 00-.1.661z"/></svg>
+    </button>
+
+    <button type="button" data-spatial-tool="note" class="spatial-radial-btn text-[#2B6CB0]" style="--tx: -64px; --ty: 0px;" title="Quick Note" aria-label="Quick Note">
+      <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+    </button>
+
+    <button type="button" data-spatial-tool="sketch" class="spatial-radial-btn text-[#B7791F]" style="--tx: -34px; --ty: 56px;" title="Draw on Screen" aria-label="Draw on Screen">
+      <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+    </button>
+
+    <!-- Bubble Core -->
+    <div id="spatial-bubble-core" class="spatial-bubble-core" title="Tap for Tools • Hold to Record Voice">
+      <svg id="spatial-bubble-icon-bot" class="w-11 h-11 transition-transform duration-300 overflow-visible" viewBox="0 0 44 44" fill="none">
+        <line x1="22" y1="11" x2="22" y2="5.5" stroke="#F5F5F7" stroke-width="2" stroke-linecap="round" />
+        <circle cx="22" cy="4.2" r="2.8" fill="#F28B82" stroke="#141416" stroke-width="1" />
+        <path
+          d="M 9 20 C 9 13.5, 14.5 11, 22 11 C 29.5 11, 35 13.5, 35 20 C 38.5 20.5, 40 23.8, 39.2 28 C 38.4 31.8, 34.8 33.8, 30.2 34 L 27.6 38 C 26.9 38.9, 25.6 38.8, 25.1 37.7 L 23.7 34.3 C 16.5 34.5, 8 33, 5.2 28.8 C 3.2 25.6, 4.8 20.8, 9 20 Z"
+          fill="#F5F5F7"
+          stroke="#141416"
+          stroke-width="1.4"
+          stroke-linejoin="round"
+        />
+        <rect x="12.5" y="16.8" width="19" height="12" rx="5.8" fill="#141416" />
+        <g id="spatial-bubble-visor-eyes">
+          <path class="spatial-bot-eye" d="M 17.8 20.1 V 25.3 H 20.2" stroke="#F28B82" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" />
+          <path class="spatial-bot-eye" d="M 24.6 20.1 V 25.3 H 27.0" stroke="#F28B82" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" />
+        </g>
+      </svg>
+
+      <svg id="spatial-bubble-icon-close" class="w-5 h-5 text-appbg hidden transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+
+      <div id="spatial-bubble-wispr-wrap" class="hidden flex items-center justify-center gap-2 px-2.5 w-full h-full pointer-events-none">
+        <canvas id="spatial-wispr-canvas" width="64" height="26" class="block shrink-0" style="width:64px;height:26px;"></canvas>
+        <span id="spatial-wispr-timer" class="text-[11px] font-mono font-semibold text-primarytext tabular-nums shrink-0">0:00</span>
+      </div>
+
+      <!-- Rectangular Dynamic Island Notification Card (Title Only) -->
+      <div id="spatial-bubble-island-card" class="hidden w-full h-full px-3.5 py-2 flex flex-col justify-between text-left relative overflow-hidden">
+        <div class="flex items-center justify-between gap-2.5 min-w-0 my-auto">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span id="spatial-island-badge-icon" class="w-9 h-9 rounded-xl bg-coral/15 border border-coral/35 text-coral flex items-center justify-center shrink-0">
+              <svg class="w-6 h-6 overflow-visible" viewBox="0 0 44 44" fill="none">
+                <line x1="22" y1="11" x2="22" y2="5.5" stroke="#F5F5F7" stroke-width="2" stroke-linecap="round" />
+                <circle id="spatial-island-bot-orb" cx="22" cy="4.2" r="2.8" fill="#F28B82" stroke="#141416" stroke-width="1" />
+                <path
+                  d="M 9 20 C 9 13.5, 14.5 11, 22 11 C 29.5 11, 35 13.5, 35 20 C 38.5 20.5, 40 23.8, 39.2 28 C 38.4 31.8, 34.8 33.8, 30.2 34 L 27.6 38 C 26.9 38.9, 25.6 38.8, 25.1 37.7 L 23.7 34.3 C 16.5 34.5, 8 33, 5.2 28.8 C 3.2 25.6, 4.8 20.8, 9 20 Z"
+                  fill="#F5F5F7"
+                  stroke="#141416"
+                  stroke-width="1.4"
+                  stroke-linejoin="round"
+                />
+                <rect x="12.5" y="16.8" width="19" height="12" rx="5.8" fill="#141416" />
+                <g style="transform: translate(3.2px, 0px);">
+                  <path class="spatial-bot-eye" d="M 17.8 20.1 V 25.3 H 20.2" stroke="#F28B82" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" />
+                  <path class="spatial-bot-eye" d="M 24.6 20.1 V 25.3 H 27.0" stroke="#F28B82" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" />
+                </g>
+              </svg>
+            </span>
+            <p id="spatial-island-title" class="text-xs font-semibold text-primarytext truncate leading-snug">Added to Brain Dump</p>
+          </div>
+
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button id="spatial-island-action-btn" type="button" class="px-2.5 py-1 rounded-lg bg-coral text-appbg text-[10.5px] font-bold hover:opacity-90 transition cursor-pointer">
+              Inbox
+            </button>
+            <button id="spatial-island-dismiss-btn" type="button" class="p-1 rounded-lg text-secondarytext hover:text-primarytext hover:bg-pillbg transition cursor-pointer" aria-label="Collapse island">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="spatial-island-expanded-body" class="hidden pt-2 mt-1.5 border-t border-borderline/80 flex-1 flex flex-col justify-between gap-2">
+          <div id="spatial-island-history-list" class="space-y-1 overflow-y-auto max-h-[64px] pr-0.5"></div>
+          <div class="flex items-center justify-between gap-1.5 pt-0.5">
+            <button id="spatial-island-sim-btn" type="button" class="flex-1 py-1.5 px-2 rounded-lg bg-pillbg hover:bg-borderline text-[10.5px] font-semibold text-primarytext border border-borderline transition cursor-pointer">
+              + Test Alert
+            </button>
+            <button id="spatial-island-tools-btn" type="button" class="flex-1 py-1.5 px-2 rounded-lg bg-coral/15 hover:bg-coral/25 text-[10.5px] font-semibold text-coral border border-coral/35 transition cursor-pointer">
+              Radial Tools
+            </button>
+          </div>
+        </div>
+
+        <div id="spatial-island-progress-track" class="absolute bottom-0 left-0 right-0 h-[2px] bg-pillbg/60 pointer-events-none">
+          <div id="spatial-island-progress-fill" class="h-full bg-coral spatial-island-timer-bar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contextual Text Capture Card -->
+  <div id="spatial-text-capture-card" class="hidden spatial-popover spatial-glass-panel rounded-[24px] p-4 border border-coral/45">
+    <div class="flex items-center justify-between gap-2 mb-2">
+      <span class="text-xs font-semibold text-primarytext">Text Captured</span>
+      <button type="button" id="spatial-tc-close" class="p-1 rounded-lg hover:bg-pillbg text-secondarytext hover:text-primarytext cursor-pointer" aria-label="Close">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div id="spatial-tc-preview" class="max-h-36 overflow-y-auto rounded-xl bg-pillbg border border-borderline px-3 py-2 text-xs text-primarytext leading-relaxed whitespace-pre-wrap"></div>
+    <div class="mt-2.5 flex items-center justify-end gap-2">
+      <button type="button" id="spatial-tc-save-inbox" class="flex-1 py-2 rounded-xl bg-coral hover:opacity-90 text-appbg text-xs font-bold cursor-pointer">
+        Save to Inbox
+      </button>
+    </div>
+  </div>
+
+  <div id="spatial-floating-popover-root"></div>
 
     <script>
     // =========================================================================
@@ -3112,6 +3937,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       promptAddModalOpen: false,
       profileSettingsOpen: false,
       openSettingsSection: null,
+      spatialPanelEnabled: true,
+      notificationsEnabled: true,
+      notificationTone: 'sweet',
       topics: [
         {
           id: 1,
@@ -3478,13 +4306,18 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           inventoryItems: state.inventoryItems,
           compartments: state.compartments,
           journalPrompts: state.journalPrompts,
+          spatialPanelEnabled: state.spatialPanelEnabled,
+          notificationsEnabled: state.notificationsEnabled,
+          notificationTone: state.notificationTone,
         };
         localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(payload));
         if (typeof horizonState !== 'undefined' && horizonState.horizonGoals) {
           localStorage.setItem(STORAGE_KEY_HORIZON, JSON.stringify(horizonState.horizonGoals));
         }
-        if (window.StructuredNotificationEngine && typeof window.StructuredNotificationEngine.syncAllAppNotifications === 'function') {
+        if (state.notificationsEnabled && window.StructuredNotificationEngine && typeof window.StructuredNotificationEngine.syncAllAppNotifications === 'function') {
           window.StructuredNotificationEngine.syncAllAppNotifications(state);
+        } else if (!state.notificationsEnabled && window.StructuredNotificationEngine && typeof window.StructuredNotificationEngine.cancelAll === 'function') {
+          window.StructuredNotificationEngine.cancelAll();
         }
       } catch (err) {
         console.warn('Failed to save state to localStorage:', err);
@@ -3564,6 +4397,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           if (Array.isArray(parsed.inventoryItems)) state.inventoryItems = parsed.inventoryItems;
           if (Array.isArray(parsed.compartments) && parsed.compartments.length > 0) state.compartments = parsed.compartments;
           if (Array.isArray(parsed.journalPrompts)) state.journalPrompts = parsed.journalPrompts;
+          if (typeof parsed.spatialPanelEnabled === 'boolean') state.spatialPanelEnabled = parsed.spatialPanelEnabled;
+          if (typeof parsed.notificationsEnabled === 'boolean') state.notificationsEnabled = parsed.notificationsEnabled;
+          if (typeof parsed.notificationTone === 'string') state.notificationTone = parsed.notificationTone;
         }
         const savedHorizon = localStorage.getItem(STORAGE_KEY_HORIZON);
         if (savedHorizon && typeof horizonState !== 'undefined') {
@@ -3700,7 +4536,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
     function toggleSettingsSection(sectionId) {
       state.openSettingsSection = state.openSettingsSection === sectionId ? null : sectionId;
-      ['theme', 'windows', 'rules'].forEach((id) => {
+      ['theme', 'windows', 'rules', 'notifications'].forEach((id) => {
         const panel = document.getElementById(`settings-panel-${id}`);
         const chev = document.getElementById(`settings-chev-${id}`);
         const isOpen = state.openSettingsSection === id;
@@ -3761,6 +4597,124 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             `;
           })
           .join('');
+      }
+    }
+
+    function applySpatialPanelPreference() {
+      const enabled = state.spatialPanelEnabled !== false;
+      document.body.classList.toggle('spatial-disabled', !enabled);
+
+      const toggleBtn = document.getElementById('settings-spatial-toggle');
+      const knob = document.getElementById('settings-spatial-knob');
+      const summary = document.getElementById('settings-spatial-summary');
+
+      if (toggleBtn && knob) {
+        toggleBtn.classList.toggle('bg-coral', enabled);
+        toggleBtn.classList.toggle('border-coral', enabled);
+        toggleBtn.classList.toggle('bg-pillbg', !enabled);
+        toggleBtn.classList.toggle('border-borderline', !enabled);
+        knob.style.transform = enabled ? 'translateX(20px)' : 'translateX(0px)';
+        knob.classList.toggle('bg-appbg', enabled);
+        knob.classList.toggle('bg-secondarytext', !enabled);
+      }
+      if (summary) {
+        summary.textContent = enabled ? 'On • Edge sliver & radial tools' : 'Off • Hidden from edge';
+      }
+      if (!enabled && typeof window.resetSpatialPanelToDocked === 'function') {
+        window.resetSpatialPanelToDocked();
+      }
+    }
+
+    function toggleSpatialPanelEnabled(force) {
+      state.spatialPanelEnabled = typeof force === 'boolean' ? force : !state.spatialPanelEnabled;
+      applySpatialPanelPreference();
+      saveState();
+    }
+
+    function renderNotificationSettingsControls() {
+      const enabled = state.notificationsEnabled !== false;
+      const tone = state.notificationTone || 'sweet';
+      const toggleBtn = document.getElementById('settings-notif-toggle');
+      const knob = document.getElementById('settings-notif-knob');
+      const summary = document.getElementById('settings-notif-summary');
+      const toneLabel = document.getElementById('settings-notif-tone-label');
+      const toneGrid = document.getElementById('settings-notif-tone-grid');
+
+      const toneMeta = [
+        { id: 'sweet', label: 'Sweet' },
+        { id: 'comforting', label: 'Comforting' },
+        { id: 'begging', label: 'Begging' },
+        { id: 'passiveAggressive', label: 'Sassy' },
+      ];
+      const activeToneObj = toneMeta.find((t) => t.id === tone) || toneMeta[0];
+
+      if (toggleBtn && knob) {
+        toggleBtn.classList.toggle('bg-coral', enabled);
+        toggleBtn.classList.toggle('border-coral', enabled);
+        toggleBtn.classList.toggle('bg-pillbg', !enabled);
+        toggleBtn.classList.toggle('border-borderline', !enabled);
+        knob.style.transform = enabled ? 'translateX(20px)' : 'translateX(0px)';
+        knob.classList.toggle('bg-appbg', enabled);
+        knob.classList.toggle('bg-secondarytext', !enabled);
+      }
+      if (summary) {
+        summary.textContent = enabled ? `On • ${activeToneObj.label} tone` : 'Off • All reminders paused';
+      }
+      if (toneLabel) {
+        toneLabel.textContent = activeToneObj.label;
+      }
+      if (toneGrid) {
+        toneGrid.innerHTML = toneMeta
+          .map((t) => {
+            const active = t.id === tone;
+            return `
+              <button
+                type="button"
+                onclick="setNotificationTone('${t.id}')"
+                class="tactile-btn py-2 px-3 rounded-xl border text-[11px] font-semibold transition ${
+                  active
+                    ? 'bg-coral text-appbg border-coral'
+                    : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext'
+                }"
+              >${t.label}</button>
+            `;
+          })
+          .join('');
+      }
+    }
+
+    function toggleNotificationsEnabled(force) {
+      state.notificationsEnabled = typeof force === 'boolean' ? force : !state.notificationsEnabled;
+      renderNotificationSettingsControls();
+      if (state.notificationsEnabled && window.StructuredNotificationEngine) {
+        window.StructuredNotificationEngine.requestPermissions().then(() => {
+          window.StructuredNotificationEngine.syncAllAppNotifications(state);
+        });
+      }
+      saveState();
+    }
+
+    function setNotificationTone(toneKey) {
+      state.notificationTone = toneKey;
+      renderNotificationSettingsControls();
+      saveState();
+    }
+
+    function triggerTestNotificationAlert() {
+      const engine = window.StructuredNotificationEngine;
+      const tone = state.notificationTone || 'sweet';
+      const sampleHabit = state.habits[0] || { title: 'Deep Work Block', completedDays: 14, masteryDays: 21 };
+      const copy = engine
+        ? engine.getHabitNotificationCopy(sampleHabit, tone)
+        : { title: 'Focus Sprint Starts in 5m' };
+      if (typeof window.showSpatialIslandAlert === 'function') {
+        window.showSpatialIslandAlert({
+          title: copy.title,
+          accent: 'coral',
+          duration: 4200,
+          actionLabel: 'Timeline',
+          onAction: () => switchBottomTab('timeline'),
+        });
       }
     }
 
@@ -7620,6 +8574,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (viewName === 'settings') {
         renderSettingsThemeControls();
         renderCompartmentEditors();
+        applySpatialPanelPreference();
+        renderNotificationSettingsControls();
       }
       if (viewName === 'main') {
         renderProfileRadar();
@@ -10123,13 +11079,744 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       syncProfileActionCounts();
       renderHorizonView();
       switchBottomTab('timeline');
+      applySpatialPanelPreference();
+      renderNotificationSettingsControls();
 
-      if (window.StructuredNotificationEngine) {
+      if (state.notificationsEnabled && window.StructuredNotificationEngine) {
         window.StructuredNotificationEngine.requestPermissions().then(() => {
           window.StructuredNotificationEngine.syncAllAppNotifications(state);
         });
       }
     });
+
+    // =========================================================================
+    // SPATIAL EDGE PANEL & RADIAL TOOLS CONTROLLER
+    // =========================================================================
+    (() => {
+      const edgeHandle = document.getElementById('spatial-edge-handle');
+      const edgeDrawer = document.getElementById('spatial-edge-drawer');
+      const edgeBackdrop = document.getElementById('spatial-edge-backdrop');
+      const edgePopoutBtn = document.getElementById('spatial-edge-popout-btn');
+      const mascotStage = document.getElementById('spatial-mascot-stage');
+      const bubbleWrap = document.getElementById('spatial-bubble-wrap');
+      const bubbleCore = document.getElementById('spatial-bubble-core');
+      const iconBot = document.getElementById('spatial-bubble-icon-bot');
+      const iconClose = document.getElementById('spatial-bubble-icon-close');
+      const wisprWrap = document.getElementById('spatial-bubble-wispr-wrap');
+      const wisprCanvas = document.getElementById('spatial-wispr-canvas');
+      const wisprTimer = document.getElementById('spatial-wispr-timer');
+      const islandCard = document.getElementById('spatial-bubble-island-card');
+      const islandBadge = document.getElementById('spatial-island-badge-icon');
+      const islandBotOrb = document.getElementById('spatial-island-bot-orb');
+      const islandTitle = document.getElementById('spatial-island-title');
+      const islandActionBtn = document.getElementById('spatial-island-action-btn');
+      const islandDismissBtn = document.getElementById('spatial-island-dismiss-btn');
+      const islandExpandedBody = document.getElementById('spatial-island-expanded-body');
+      const islandHistoryList = document.getElementById('spatial-island-history-list');
+      const islandSimBtn = document.getElementById('spatial-island-sim-btn');
+      const islandToolsBtn = document.getElementById('spatial-island-tools-btn');
+      const islandProgressTrack = document.getElementById('spatial-island-progress-track');
+      const islandProgressFill = document.getElementById('spatial-island-progress-fill');
+      const dismissTarget = document.getElementById('spatial-dismiss-target');
+      const teardropPath = document.getElementById('spatial-teardrop-path');
+      const teardropGlow = document.getElementById('spatial-teardrop-glow');
+      const teardropIcon = document.getElementById('spatial-teardrop-icon');
+      const scribbleCanvas = document.getElementById('spatial-scribble-canvas');
+      const textCaptureCard = document.getElementById('spatial-text-capture-card');
+      const tcPreview = document.getElementById('spatial-tc-preview');
+      const tcClose = document.getElementById('spatial-tc-close');
+      const tcSaveInbox = document.getElementById('spatial-tc-save-inbox');
+      const popoverRoot = document.getElementById('spatial-floating-popover-root');
+      const recordingPill = document.getElementById('spatial-recording-pill');
+      const recTimer = document.getElementById('spatial-rec-timer');
+      const stopRecBtn = document.getElementById('spatial-stop-rec-btn');
+
+      if (!edgeHandle || !edgeDrawer || !bubbleWrap || !bubbleCore) return;
+
+      const sp = {
+        mode: 'docked',
+        handleTopPct: 38,
+        bubbleX: window.innerWidth - 96,
+        bubbleY: window.innerHeight * 0.45,
+        wheelOpen: false,
+        islandActive: false,
+        islandExpanded: false,
+        islandTimer: null,
+        islandHandler: null,
+        islandHistory: [
+          { title: 'Deep Work Block in 12m', accent: '#F28B82' },
+          { title: 'Brain Dump Ready', accent: '#81C953' },
+        ],
+        isRecording: false,
+        recStart: 0,
+        recInterval: null,
+        capturedEls: [],
+        capturedText: '',
+        scribbleHoldTimer: null,
+        scribbleFadeTimer: null,
+      };
+
+      const clampVal = (v, min, max) => Math.max(min, Math.min(max, v));
+
+      function pushToAppInbox(text, tag = 'Spatial') {
+        const clean = String(text || '').trim();
+        if (!clean) return;
+        state.inboxItems.unshift({
+          id: Date.now(),
+          text: clean,
+          tag,
+          added: 'Just now',
+        });
+        saveState();
+        if (state.activeTab === 'inbox') renderInboxDeck();
+      }
+
+      function clearTeardrop() {
+        teardropPath.setAttribute('d', '');
+        teardropGlow.setAttribute('d', '');
+        teardropIcon.setAttribute('opacity', '0');
+      }
+
+      function renderTeardrop(edgeX, anchorY, headX, headY, progress) {
+        const baseHalf = 36 * (1 - progress * 0.42);
+        const headR = 14 + progress * 13;
+        const neckX = edgeX + (headX - edgeX) * 0.48;
+        const neckY = anchorY + (headY - anchorY) * 0.48;
+        const neckHalf = Math.max(4, headR * (0.46 - progress * 0.22));
+        const d = [
+          `M ${edgeX} ${anchorY - baseHalf}`,
+          `C ${edgeX - 18} ${anchorY - baseHalf}, ${neckX} ${neckY - neckHalf}, ${headX} ${headY - headR}`,
+          `A ${headR} ${headR} 0 1 0 ${headX} ${headY + headR}`,
+          `C ${neckX} ${neckY + neckHalf}, ${edgeX - 18} ${anchorY + baseHalf}, ${edgeX} ${anchorY + baseHalf}`,
+          'Z',
+        ].join(' ');
+        teardropPath.setAttribute('d', d);
+        teardropGlow.setAttribute('d', d);
+        teardropIcon.setAttribute('transform', `translate(${headX.toFixed(1)}, ${headY.toFixed(1)}) scale(${(0.65 + progress * 0.35).toFixed(2)})`);
+        teardropIcon.setAttribute('opacity', String(clampVal(progress * 1.4, 0, 1)));
+      }
+
+      function updateBubblePos(animate = false) {
+        bubbleWrap.classList.toggle('animating', animate);
+        bubbleWrap.style.transform = `translate3d(${sp.bubbleX}px, ${sp.bubbleY}px, 0)`;
+      }
+
+      function setMode(mode, coords = null) {
+        sp.mode = mode;
+        sp.wheelOpen = false;
+        bubbleWrap.classList.remove('wheel-active');
+        bubbleCore.classList.remove('wheel-open');
+        iconBot.classList.remove('hidden');
+        iconClose.classList.add('hidden');
+
+        if (mode === 'docked') {
+          clearTeardrop();
+          bubbleWrap.classList.add('hidden');
+          edgeDrawer.classList.remove('open');
+          edgeDrawer.classList.add('hidden');
+          edgeBackdrop.classList.add('hidden');
+          edgeHandle.classList.remove('hidden');
+          edgeDrawer.style.transition = '';
+          edgeDrawer.style.transform = '';
+          edgeDrawer.style.opacity = '';
+          edgeHandle.style.top = `${sp.handleTopPct}%`;
+        } else if (mode === 'drawer') {
+          bubbleWrap.classList.add('hidden');
+          edgeHandle.classList.add('hidden');
+          edgeDrawer.classList.remove('hidden');
+          edgeDrawer.style.transition = '';
+          edgeDrawer.style.transform = '';
+          edgeDrawer.style.opacity = '';
+          edgeBackdrop.classList.remove('hidden');
+          requestAnimationFrame(() => edgeDrawer.classList.add('open'));
+        } else if (mode === 'bubble') {
+          edgeHandle.classList.add('hidden');
+          edgeDrawer.classList.remove('open');
+          edgeDrawer.classList.add('hidden');
+          edgeBackdrop.classList.add('hidden');
+          bubbleWrap.classList.remove('hidden', 'dismissing');
+          if (coords) {
+            sp.bubbleX = clampVal(coords.x - 27, 16, window.innerWidth - 70);
+            sp.bubbleY = clampVal(coords.y - 27, 16, window.innerHeight - 70);
+          }
+          updateBubblePos(true);
+          bubbleCore.classList.remove('teardrop-pop');
+          void bubbleCore.offsetWidth;
+          bubbleCore.classList.add('teardrop-pop');
+        }
+      }
+
+      window.resetSpatialPanelToDocked = () => {
+        collapseIsland();
+        toggleWheel(false);
+        closePopover();
+        setMode('docked');
+      };
+
+      function toggleWheel(force = null) {
+        const next = force !== null ? force : !sp.wheelOpen;
+        sp.wheelOpen = next;
+        if (next) {
+          collapseIsland();
+          clearTextHighlight();
+          const cx = clampVal(sp.bubbleX + 27, 96, Math.max(116, window.innerWidth - 104));
+          const cy = clampVal(sp.bubbleY + 27, 98, Math.max(118, window.innerHeight - 98));
+          sp.bubbleX = cx - 27;
+          sp.bubbleY = cy - 27;
+          updateBubblePos(true);
+          bubbleWrap.classList.add('wheel-active');
+          bubbleCore.classList.add('wheel-open');
+          iconBot.classList.add('hidden');
+          iconClose.classList.remove('hidden');
+        } else {
+          bubbleWrap.classList.remove('wheel-active');
+          bubbleCore.classList.remove('wheel-open');
+          iconBot.classList.remove('hidden');
+          iconClose.classList.add('hidden');
+        }
+      }
+
+      function dismissBubble() {
+        if (sp.mode !== 'bubble') return;
+        if (wispr.active) stopHoldVoice(true);
+        collapseIsland();
+        toggleWheel(false);
+        closePopover();
+        clearTextHighlight();
+        dismissTarget.classList.remove('visible', 'over-target');
+        bubbleCore.classList.remove('over-dismiss');
+        bubbleWrap.classList.add('dismissing');
+        setTimeout(() => setMode('docked'), 230);
+      }
+
+      /* Dynamic Island Rectangular Card */
+      function showIslandAlert(opts = {}) {
+        const {
+          title = 'Added to Brain Dump',
+          accent = 'coral',
+          duration = 3600,
+          actionLabel = 'Inbox',
+          onAction = () => switchBottomTab('inbox'),
+        } = opts;
+
+        if (state.spatialPanelEnabled === false || wispr.active) return;
+        const hexMap = { coral: '#F28B82', lime: '#81C953', emerald: '#169859', sky: '#6EA8D8', amber: '#F6C244', plum: '#C47B9B' };
+        const barHex = hexMap[accent] || '#F28B82';
+
+        if (sp.mode !== 'bubble') {
+          const anchorY = (sp.handleTopPct / 100) * window.innerHeight;
+          setMode('bubble', { x: window.innerWidth - 190, y: anchorY });
+        }
+        if (sp.wheelOpen) toggleWheel(false);
+
+        sp.islandActive = true;
+        sp.islandHandler = onAction;
+        sp.islandHistory.unshift({ title, accent: barHex });
+        if (sp.islandHistory.length > 5) sp.islandHistory.pop();
+
+        if (islandBotOrb) islandBotOrb.setAttribute('fill', barHex);
+        document.querySelectorAll('#spatial-bubble-island-card .spatial-bot-eye').forEach((eye) => eye.setAttribute('stroke', barHex));
+        islandTitle.textContent = title;
+        islandActionBtn.textContent = actionLabel;
+
+        sp.bubbleX = clampVal(sp.bubbleX, 152, window.innerWidth - 198);
+        updateBubblePos(true);
+
+        iconBot.classList.add('hidden');
+        iconClose.classList.add('hidden');
+        wisprWrap.classList.add('hidden');
+        bubbleCore.classList.add('island-active');
+        bubbleCore.classList.toggle('island-expanded', sp.islandExpanded);
+        islandCard.classList.remove('hidden');
+        islandExpandedBody.classList.toggle('hidden', !sp.islandExpanded);
+
+        if (islandHistoryList) {
+          islandHistoryList.innerHTML = sp.islandHistory
+            .map((h) => `<div class="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-pillbg/80 text-[10.5px] text-primarytext truncate"><span class="w-1.5 h-1.5 rounded-full shrink-0" style="background:${h.accent};"></span><span class="truncate">${escapeHtml(h.title)}</span></div>`)
+            .join('');
+        }
+
+        clearTimeout(sp.islandTimer);
+        if (duration > 0 && !sp.islandExpanded) {
+          islandProgressTrack.classList.remove('hidden');
+          islandProgressFill.style.backgroundColor = barHex;
+          islandProgressFill.style.setProperty('--island-duration', `${duration}ms`);
+          islandProgressFill.classList.remove('spatial-island-timer-bar');
+          void islandProgressFill.offsetWidth;
+          islandProgressFill.classList.add('spatial-island-timer-bar');
+          sp.islandTimer = setTimeout(() => {
+            if (!sp.islandExpanded) collapseIsland();
+          }, duration);
+        } else {
+          islandProgressTrack.classList.add('hidden');
+        }
+      }
+      window.showSpatialIslandAlert = showIslandAlert;
+
+      function toggleIslandExpand(force = null) {
+        if (!sp.islandActive) return;
+        sp.islandExpanded = force !== null ? force : !sp.islandExpanded;
+        clearTimeout(sp.islandTimer);
+        bubbleCore.classList.toggle('island-expanded', sp.islandExpanded);
+        islandExpandedBody.classList.toggle('hidden', !sp.islandExpanded);
+        islandProgressTrack.classList.toggle('hidden', sp.islandExpanded);
+      }
+
+      function collapseIsland() {
+        clearTimeout(sp.islandTimer);
+        sp.islandActive = false;
+        sp.islandExpanded = false;
+        sp.islandHandler = null;
+        bubbleCore.classList.remove('island-active', 'island-expanded');
+        islandCard.classList.add('hidden');
+        islandExpandedBody.classList.add('hidden');
+        if (!wispr.active && !sp.wheelOpen) iconBot.classList.remove('hidden');
+      }
+
+      islandActionBtn?.addEventListener('pointerdown', (e) => e.stopPropagation());
+      islandActionBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (typeof sp.islandHandler === 'function') sp.islandHandler();
+        collapseIsland();
+      });
+      islandDismissBtn?.addEventListener('pointerdown', (e) => e.stopPropagation());
+      islandDismissBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        collapseIsland();
+      });
+      islandSimBtn?.addEventListener('pointerdown', (e) => e.stopPropagation());
+      islandSimBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        triggerTestNotificationAlert();
+      });
+      islandToolsBtn?.addEventListener('pointerdown', (e) => e.stopPropagation());
+      islandToolsBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        collapseIsland();
+        toggleWheel(true);
+      });
+      mascotStage?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setMode('docked');
+        sp.islandExpanded = true;
+        triggerTestNotificationAlert();
+      });
+
+      /* Edge Handle Gestures */
+      let handleDrag = null;
+      edgeHandle.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        edgeHandle.setPointerCapture(e.pointerId);
+        const rect = edgeHandle.getBoundingClientRect();
+        handleDrag = { id: e.pointerId, startX: e.clientX, startY: e.clientY, origTop: rect.top, mode: null, inward: 0 };
+      });
+      edgeHandle.addEventListener('pointermove', (e) => {
+        if (!handleDrag || e.pointerId !== handleDrag.id) return;
+        const dx = handleDrag.startX - e.clientX;
+        const dy = e.clientY - handleDrag.startY;
+        if (!handleDrag.mode) {
+          if (Math.abs(dy) > 14 && dx < 16) handleDrag.mode = 'vertical';
+          else if (dx > 12) handleDrag.mode = 'inward';
+        }
+        if (handleDrag.mode === 'vertical') {
+          const newTop = clampVal(handleDrag.origTop + dy, 72, window.innerHeight - 150);
+          sp.handleTopPct = (newTop / window.innerHeight) * 100;
+          edgeHandle.style.top = `${sp.handleTopPct}%`;
+          return;
+        }
+        if (handleDrag.mode === 'inward') {
+          const inward = Math.max(0, dx);
+          handleDrag.inward = inward;
+          edgeHandle.classList.add('dragging');
+          const shellRect = edgeHandle.parentElement.getBoundingClientRect();
+          const edgeX = shellRect.right;
+          const anchorY = clampVal(handleDrag.startY, 72, window.innerHeight - 72);
+
+          if (inward <= 86) {
+            clearTeardrop();
+            const ratio = clampVal(inward / 86, 0, 1);
+            edgeDrawer.classList.remove('hidden');
+            edgeDrawer.style.transition = 'none';
+            edgeDrawer.style.opacity = String(clampVal(0.25 + ratio * 0.75, 0, 1));
+            edgeDrawer.style.transform = `translate(${((1 - ratio) * 115).toFixed(1)}%, -50%) scale(${(0.94 + ratio * 0.06).toFixed(3)})`;
+            return;
+          }
+
+          edgeDrawer.style.opacity = '0';
+          const progress = clampVal((inward - 86) / 46, 0, 1);
+          const pull = Math.min(28 + Math.pow(progress, 0.85) * 62, 98);
+          const headX = edgeX - pull;
+          const headY = clampVal(anchorY + dy * 0.34, 48, window.innerHeight - 48);
+          handleDrag.headX = headX;
+          handleDrag.headY = headY;
+          renderTeardrop(edgeX, anchorY, headX, headY, progress);
+        }
+      });
+      function endHandleDrag(e) {
+        if (!handleDrag || e.pointerId !== handleDrag.id) return;
+        const d = handleDrag;
+        handleDrag = null;
+        edgeHandle.classList.remove('dragging');
+        edgeDrawer.style.transition = '';
+        edgeDrawer.style.transform = '';
+        edgeDrawer.style.opacity = '';
+        clearTeardrop();
+        if (d.mode === 'vertical') return;
+        if (d.inward >= 132) {
+          setMode('bubble', { x: d.headX ?? e.clientX, y: d.headY ?? e.clientY });
+        } else if (d.inward >= 18 || (Math.abs(e.clientX - d.startX) < 10 && Math.abs(e.clientY - d.startY) < 10)) {
+          setMode('drawer');
+        } else {
+          setMode('docked');
+        }
+      }
+      edgeHandle.addEventListener('pointerup', endHandleDrag);
+      edgeHandle.addEventListener('pointercancel', endHandleDrag);
+      edgeBackdrop?.addEventListener('click', () => setMode('docked'));
+      edgePopoutBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const r = edgePopoutBtn.getBoundingClientRect();
+        setMode('bubble', { x: r.left - 80, y: r.top });
+      });
+
+      /* Wispr Hold-to-Record Voice */
+      const wispr = { active: false, start: 0, raf: null, timer: null, heights: new Array(13).fill(0.16), transcript: '', rec: null };
+      function drawWisprFrame(now) {
+        if (!wispr.active) return;
+        const ctx = wisprCanvas.getContext('2d');
+        ctx.clearRect(0, 0, 64, 26);
+        const t = now * 0.005;
+        ctx.fillStyle = '#F28B82';
+        for (let i = 0; i < 13; i++) {
+          const env = Math.exp(-Math.pow((i / 12 - 0.5) * 2, 2) * 2.4);
+          const target = 0.16 + env * (0.35 + 0.45 * Math.abs(Math.sin(t * 2 - i * 0.55)));
+          wispr.heights[i] += (target - wispr.heights[i]) * 0.25;
+          const h = Math.max(3.5, wispr.heights[i] * 24);
+          ctx.fillRect(i * 5, (26 - h) / 2, 2.8, h);
+        }
+        wispr.raf = requestAnimationFrame(drawWisprFrame);
+      }
+      function startHoldVoice() {
+        if (wispr.active) return;
+        wispr.active = true;
+        wispr.start = Date.now();
+        wispr.transcript = '';
+        if (sp.wheelOpen) toggleWheel(false);
+        collapseIsland();
+        bubbleCore.classList.add('voice-recording');
+        iconBot.classList.add('hidden');
+        wisprWrap.classList.remove('hidden');
+        wisprTimer.textContent = '0:00';
+        wispr.raf = requestAnimationFrame(drawWisprFrame);
+        wispr.timer = setInterval(() => {
+          const sec = Math.floor((Date.now() - wispr.start) / 1000);
+          wisprTimer.textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+        }, 250);
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRec) {
+          try {
+            const rec = new SpeechRec();
+            rec.continuous = true;
+            rec.interimResults = true;
+            rec.onresult = (ev) => {
+              let full = '';
+              for (let i = 0; i < ev.results.length; i++) full += ev.results[i][0].transcript + ' ';
+              wispr.transcript = full.trim();
+            };
+            rec.start();
+            wispr.rec = rec;
+          } catch (_) {}
+        }
+      }
+      function stopHoldVoice(cancelled = false) {
+        if (!wispr.active) return;
+        wispr.active = false;
+        cancelAnimationFrame(wispr.raf);
+        clearInterval(wispr.timer);
+        if (wispr.rec) { try { wispr.rec.stop(); } catch (_) {} wispr.rec = null; }
+        bubbleCore.classList.remove('voice-recording');
+        wisprWrap.classList.add('hidden');
+        iconBot.classList.remove('hidden');
+        if (!cancelled) {
+          const dur = Math.max(1, Math.round((Date.now() - wispr.start) / 1000));
+          const label = wispr.transcript || `Voice Memo (${dur}s)`;
+          pushToAppInbox(label, 'Voice');
+          showIslandAlert({ title: 'Voice Memo Saved to Inbox', accent: 'plum' });
+        }
+      }
+
+      /* Scribble-to-Select Text Highlight */
+      function clearTextHighlight() {
+        sp.capturedEls.forEach((n) => n.classList.remove('spatial-text-highlight'));
+        sp.capturedEls = [];
+        sp.capturedText = '';
+        textCaptureCard?.classList.add('hidden');
+      }
+      tcClose?.addEventListener('click', clearTextHighlight);
+      tcSaveInbox?.addEventListener('click', () => {
+        if (sp.capturedText) {
+          pushToAppInbox(sp.capturedText, 'Text Clip');
+          showIslandAlert({ title: 'Clipped Text to Inbox', accent: 'lime' });
+        }
+        clearTextHighlight();
+      });
+
+      /* Bubble Drag, Tap & Dismiss */
+      let bDrag = null;
+      bubbleCore.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        bubbleCore.setPointerCapture(e.pointerId);
+        const obj = { id: e.pointerId, startX: e.clientX, startY: e.clientY, origX: sp.bubbleX, origY: sp.bubbleY, moved: false, overDismiss: false, holdTimer: null, startedRec: false };
+        if (!wispr.active) {
+          obj.holdTimer = setTimeout(() => {
+            if (bDrag === obj && !obj.moved) { obj.startedRec = true; startHoldVoice(); }
+          }, 320);
+        }
+        bDrag = obj;
+      });
+      bubbleCore.addEventListener('pointermove', (e) => {
+        if (!bDrag || e.pointerId !== bDrag.id) return;
+        const dx = e.clientX - bDrag.startX;
+        const dy = e.clientY - bDrag.startY;
+        if (!bDrag.moved && Math.hypot(dx, dy) > 8) {
+          clearTimeout(bDrag.holdTimer);
+          bDrag.moved = true;
+          if (sp.wheelOpen) toggleWheel(false);
+          dismissTarget.classList.add('visible');
+        }
+        if (!bDrag.moved) return;
+        let nx = clampVal(bDrag.origX + dx, 8, window.innerWidth - 62);
+        let ny = clampVal(bDrag.origY + dy, 8, window.innerHeight - 62);
+        const tx = window.innerWidth / 2;
+        const ty = window.innerHeight - 56;
+        if (Math.hypot(nx + 27 - tx, ny + 27 - ty) <= 92) {
+          bDrag.overDismiss = true;
+          dismissTarget.classList.add('over-target');
+          bubbleCore.classList.add('over-dismiss');
+          nx = tx - 27;
+          ny = ty - 27;
+        } else {
+          bDrag.overDismiss = false;
+          dismissTarget.classList.remove('over-target');
+          bubbleCore.classList.remove('over-dismiss');
+        }
+        sp.bubbleX = nx;
+        sp.bubbleY = ny;
+        updateBubblePos(false);
+      });
+      function endBubbleDrag(e) {
+        if (!bDrag || e.pointerId !== bDrag.id) return;
+        const d = bDrag;
+        bDrag = null;
+        clearTimeout(d.holdTimer);
+        if (d.startedRec && !d.moved) return;
+        if (!d.moved) {
+          if (wispr.active) { stopHoldVoice(false); return; }
+          if (sp.islandActive) { toggleIslandExpand(); return; }
+          toggleWheel();
+          return;
+        }
+        if (d.overDismiss) {
+          dismissBubble();
+          return;
+        }
+        dismissTarget.classList.remove('visible', 'over-target');
+        bubbleCore.classList.remove('over-dismiss');
+        updateBubblePos(true);
+      }
+      bubbleCore.addEventListener('pointerup', endBubbleDrag);
+      bubbleCore.addEventListener('pointercancel', endBubbleDrag);
+
+      /* Spatial Tools Dispatcher (Including Add to Inbox) */
+      function closePopover() {
+        if (popoverRoot) popoverRoot.innerHTML = '';
+      }
+
+      function openInboxOrNotePopover(mode = 'inbox') {
+        closePopover();
+        const isInbox = mode === 'inbox';
+        const left = clampVal(sp.bubbleX > window.innerWidth / 2 ? sp.bubbleX - 336 : sp.bubbleX + 68, 12, window.innerWidth - 338);
+        const top = clampVal(sp.bubbleY - 40, 68, window.innerHeight - 260);
+        const card = document.createElement('div');
+        card.className = `spatial-popover spatial-glass-panel rounded-[26px] p-4 border ${isInbox ? 'border-emerald/45' : 'border-sky/45'}`;
+        card.style.left = `${left}px`;
+        card.style.top = `${top}px`;
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full ${isInbox ? 'bg-emerald' : 'bg-sky'}"></span>
+              <span class="text-sm font-semibold text-primarytext">${isInbox ? 'Add to Inbox' : 'Quick Note'}</span>
+            </div>
+            <button type="button" id="sp-pop-close" class="p-1.5 rounded-full hover:bg-pillbg text-secondarytext hover:text-primarytext cursor-pointer">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <textarea id="sp-pop-input" rows="3" placeholder="${isInbox ? 'Dump a thought straight to Brain Dump...' : 'Jot down a quick note...'}" class="w-full px-3.5 py-2.5 rounded-2xl bg-pillbg border border-borderline text-xs text-primarytext placeholder-mutedtext focus:outline-none focus:border-coral resize-none leading-relaxed"></textarea>
+          <div class="mt-3 flex items-center justify-end gap-2">
+            <button type="button" id="sp-pop-cancel" class="px-3.5 py-2 rounded-full text-xs text-secondarytext hover:text-primarytext cursor-pointer">Cancel</button>
+            <button type="button" id="sp-pop-save" class="px-4 py-2 rounded-full ${isInbox ? 'bg-emerald text-primarytext' : 'bg-coral text-appbg'} text-xs font-bold cursor-pointer">
+              ${isInbox ? 'Add to Inbox' : 'Save Note'}
+            </button>
+          </div>
+        `;
+        popoverRoot.appendChild(card);
+        const inputEl = card.querySelector('#sp-pop-input');
+        inputEl?.focus();
+        card.querySelector('#sp-pop-close').onclick = closePopover;
+        card.querySelector('#sp-pop-cancel').onclick = closePopover;
+        card.querySelector('#sp-pop-save').onclick = () => {
+          const val = inputEl.value.trim();
+          if (!val) return;
+          pushToAppInbox(val, isInbox ? 'Brain Dump' : 'Quick Note');
+          closePopover();
+          showIslandAlert({ title: isInbox ? 'Added to Brain Dump' : 'Quick Note Saved', accent: isInbox ? 'emerald' : 'sky' });
+        };
+      }
+
+      document.querySelectorAll('[data-spatial-tool]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const tool = btn.dataset.spatialTool;
+          if (sp.mode === 'drawer') setMode('docked');
+          if (sp.wheelOpen) toggleWheel(false);
+
+          if (tool === 'inbox') {
+            openInboxOrNotePopover('inbox');
+          } else if (tool === 'note') {
+            openInboxOrNotePopover('note');
+          } else if (tool === 'screenshot') {
+            const label = `Screenshot (${state.activeTab} • Nov ${state.selectedDay})`;
+            pushToAppInbox(label, 'Screenshot');
+            showIslandAlert({ title: 'Screenshot Saved to Inbox', accent: 'emerald' });
+          } else if (tool === 'record') {
+            if (!sp.isRecording) {
+              sp.isRecording = true;
+              sp.recStart = Date.now();
+              recordingPill?.classList.remove('hidden');
+              sp.recInterval = setInterval(() => {
+                const sec = Math.floor((Date.now() - sp.recStart) / 1000);
+                if (recTimer) recTimer.textContent = `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+              }, 500);
+              showIslandAlert({ title: 'Screen Recording Started', accent: 'coral' });
+            } else {
+              stopRecBtn?.click();
+            }
+          } else if (tool === 'audio') {
+            startHoldVoice();
+          } else if (tool === 'sketch') {
+            const overlay = document.getElementById('spatial-screen-sketch-overlay');
+            const canvas = document.getElementById('spatial-screen-sketch-canvas');
+            if (overlay && canvas) {
+              overlay.classList.remove('hidden');
+              const dpr = window.devicePixelRatio || 1;
+              canvas.width = window.innerWidth * dpr;
+              canvas.height = window.innerHeight * dpr;
+              const ctx = canvas.getContext('2d');
+              ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            }
+          }
+        });
+      });
+
+      stopRecBtn?.addEventListener('click', () => {
+        if (!sp.isRecording) return;
+        sp.isRecording = false;
+        clearInterval(sp.recInterval);
+        recordingPill?.classList.add('hidden');
+        const dur = Math.max(1, Math.round((Date.now() - sp.recStart) / 1000));
+        pushToAppInbox(`Screen Recording (${dur}s)`, 'Recording');
+        showIslandAlert({ title: 'Recording Saved to Inbox', accent: 'coral' });
+      });
+
+      /* Live Screen Sketch Wiring */
+      (() => {
+        const overlay = document.getElementById('spatial-screen-sketch-overlay');
+        const canvas = document.getElementById('spatial-screen-sketch-canvas');
+        if (!overlay || !canvas) return;
+        let drawing = false;
+        let color = '#F28B82';
+        let strokes = [];
+        let current = null;
+
+        function redraw() {
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          const list = current ? [...strokes, current] : strokes;
+          list.forEach((s) => {
+            if (!s.pts.length) return;
+            ctx.strokeStyle = s.color;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(s.pts[0].x, s.pts[0].y);
+            for (let i = 1; i < s.pts.length; i++) ctx.lineTo(s.pts[i].x, s.pts[i].y);
+            ctx.stroke();
+          });
+        }
+
+        canvas.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          canvas.setPointerCapture(e.pointerId);
+          drawing = true;
+          current = { color, pts: [{ x: e.clientX, y: e.clientY }] };
+          redraw();
+        });
+        canvas.addEventListener('pointermove', (e) => {
+          if (!drawing || !current) return;
+          current.pts.push({ x: e.clientX, y: e.clientY });
+          redraw();
+        });
+        const finish = () => {
+          if (!drawing) return;
+          drawing = false;
+          if (current) { strokes.push(current); current = null; }
+        };
+        canvas.addEventListener('pointerup', finish);
+        canvas.addEventListener('pointercancel', finish);
+
+        document.querySelectorAll('#spatial-ss-colors button[data-color]').forEach((b) => {
+          b.addEventListener('click', () => {
+            color = b.dataset.color;
+            document.querySelectorAll('#spatial-ss-colors button[data-color]').forEach((x) => x.classList.remove('border-2', 'border-primarytext', 'scale-110'));
+            b.classList.add('border-2', 'border-primarytext', 'scale-110');
+          });
+        });
+        document.getElementById('spatial-ss-undo')?.addEventListener('click', () => { strokes.pop(); redraw(); });
+        document.getElementById('spatial-ss-clear')?.addEventListener('click', () => { strokes = []; redraw(); });
+        document.getElementById('spatial-ss-cancel')?.addEventListener('click', () => { strokes = []; overlay.classList.add('hidden'); });
+        document.getElementById('spatial-ss-save')?.addEventListener('click', () => {
+          pushToAppInbox(`Screen Sketch (${strokes.length} strokes)`, 'Sketch');
+          strokes = [];
+          overlay.classList.add('hidden');
+          showIslandAlert({ title: 'Screen Sketch Saved to Inbox', accent: 'amber' });
+        });
+      })();
+
+      /* Cursor Eye Tracking for Bot Mascot */
+      window.addEventListener('pointermove', (e) => {
+        const refX = sp.mode === 'bubble' ? sp.bubbleX + 27 : window.innerWidth - 51;
+        const refY = sp.mode === 'bubble' ? sp.bubbleY + 27 : window.innerHeight * 0.45;
+        const dx = e.clientX - refX;
+        const dy = e.clientY - refY;
+        const dist = Math.hypot(dx, dy);
+        const norm = dist > 0.5 ? Math.min(1, dist / 240) : 0;
+        const ox = dist > 0.5 ? (dx / dist) * 3.0 * norm : 0;
+        const oy = dist > 0.5 ? (dy / dist) * 1.9 * norm : 0;
+        const drawerEyes = document.getElementById('spatial-bot-visor-eyes');
+        const bubbleEyes = document.getElementById('spatial-bubble-visor-eyes');
+        if (drawerEyes) drawerEyes.style.transform = `translate(${ox.toFixed(2)}px, ${oy.toFixed(2)}px)`;
+        if (bubbleEyes) bubbleEyes.style.transform = `translate(${(ox * 0.72).toFixed(2)}px, ${(oy * 0.72).toFixed(2)}px)`;
+      }, { passive: true });
+
+      document.addEventListener('pointerdown', (e) => {
+        if (sp.wheelOpen && !e.target.closest('#spatial-bubble-wrap')) toggleWheel(false);
+        if (sp.islandExpanded && !e.target.closest('#spatial-bubble-wrap')) toggleIslandExpand(false);
+      });
+
+      setMode('docked');
+    })();
   </script>
 </body>
 </html>
