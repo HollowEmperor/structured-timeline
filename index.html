@@ -440,43 +440,6 @@
 
       <!-- VIEW 4: JOURNAL TIMELINE -->
       <section id="view-journal" class="hidden flex-1 overflow-y-auto no-scrollbar px-4 pb-24 pt-3.5 space-y-3">
-        <!-- Add Prompt Drawer Section -->
-        <div id="journal-prompt-section" class="hidden bg-cardbg border border-borderline rounded-2xl p-3.5 space-y-3">
-          <div class="flex items-center justify-between gap-2">
-            <div>
-              <p class="text-[10px] font-bold uppercase tracking-wider text-coral">Reflection Prompts</p>
-              <p class="text-[11px] text-secondarytext">Tap a prompt to insert into your latest entry or add your own</p>
-            </div>
-            <button
-              type="button"
-              onclick="toggleJournalPromptDrawer(false)"
-              class="tactile-btn p-1 rounded-full text-secondarytext hover:text-primarytext"
-              title="Close prompts"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
-
-          <div id="journal-prompt-chips" class="flex flex-wrap gap-1.5"></div>
-
-          <form onsubmit="handleAddCustomJournalPrompt(event)" class="flex items-center gap-2 pt-0.5">
-            <input
-              id="journal-custom-prompt-input"
-              type="text"
-              placeholder="Write a new prompt question..."
-              class="flex-1 bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3 py-2 rounded-xl border border-borderline focus:border-coral focus:outline-none"
-            />
-            <button
-              type="submit"
-              class="tactile-btn px-3 py-2 rounded-xl bg-coral text-appbg text-[11px] font-bold whitespace-nowrap"
-            >
-              Add Prompt
-            </button>
-          </form>
-        </div>
-
         <div id="journal-timeline-stream" class="flex flex-col"></div>
       </section>
 
@@ -578,8 +541,8 @@
             </div>
           </div>
 
-          <!-- Clickable Topics, Inventory & Routines 3-Column Grid -->
-          <div class="grid grid-cols-3 gap-2.5">
+          <!-- Clickable Topics, Inventory, Routines & Prompts 2x2 Grid -->
+          <div class="grid grid-cols-2 gap-2.5">
             <button
               type="button"
               onclick="openProfileSubView('topics')"
@@ -620,6 +583,20 @@
                 <span id="profile-routines-count" class="text-xs font-bold text-coral">3</span>
               </div>
               <p class="text-xs font-semibold text-primarytext truncate">Routines</p>
+            </button>
+
+            <button
+              type="button"
+              onclick="openProfileSubView('prompts')"
+              class="tactile-btn bg-cardbg border border-borderline hover:border-coral/60 rounded-[22px] p-3.5 flex flex-col justify-between gap-3.5 text-left"
+            >
+              <div class="flex items-center justify-between gap-2 w-full">
+                <span class="w-9 h-9 rounded-xl bg-pillbg border border-borderline text-coral flex items-center justify-center flex-shrink-0">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+                </span>
+                <span id="profile-prompts-count" class="text-xs font-bold text-coral">5</span>
+              </div>
+              <p class="text-xs font-semibold text-primarytext truncate">Prompts</p>
             </button>
           </div>
         </div>
@@ -749,6 +726,30 @@
           <div id="profile-routines-list" class="space-y-2.5"></div>
         </div>
 
+        <!-- Prompts Sub-View Inside Profile -->
+        <div id="profile-prompts-content" class="hidden space-y-3 pb-16">
+          <div class="flex items-center justify-between pb-1">
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                onclick="openProfileSubView('main')"
+                title="Back to Karma"
+                class="tactile-btn w-7 h-7 rounded-full bg-cardbg border border-borderline hover:border-coral text-primarytext flex items-center justify-center"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+                </svg>
+              </button>
+              <p class="text-xs font-semibold uppercase tracking-wider text-coral">Prompts</p>
+            </div>
+            <button type="button" onclick="openProfileSubView('main')" class="text-xs text-secondarytext hover:text-primarytext">
+              ← Back to Karma
+            </button>
+          </div>
+
+          <div id="profile-prompts-list" class="space-y-2"></div>
+        </div>
+
         <!-- Settings Sub-View Inside Profile -->
         <div id="profile-settings-content" class="hidden space-y-2.5">
           <div class="flex items-center justify-between pb-1">
@@ -871,7 +872,7 @@
         </div>
       </section>
 
-      <!-- Floating Journal + Action Menu (Add Journal Entry / Add Prompt / Mood / Energy / Exercise) -->
+      <!-- Floating Journal + Action Menu (Add Journal Entry / Mood / Energy / Exercise) -->
       <div
         id="journal-fab-menu"
         class="hidden absolute right-5 bottom-[142px] z-40 bg-cardbg border border-borderline rounded-2xl p-1.5 shadow-2xl space-y-1 min-w-[208px]"
@@ -887,18 +888,6 @@
             </svg>
           </span>
           <span>Add Journal Entry</span>
-        </button>
-        <button
-          type="button"
-          onclick="handleJournalFabOption('prompt')"
-          class="tactile-btn w-full px-3.5 py-2.5 rounded-xl hover:bg-pillbg flex items-center gap-2.5 text-left text-xs font-semibold text-primarytext"
-        >
-          <span class="w-6 h-6 rounded-lg bg-amber/15 text-amber flex items-center justify-center flex-shrink-0">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
-            </svg>
-          </span>
-          <span>Add Prompt</span>
         </button>
         <div class="border-t border-borderline/70 my-1"></div>
         <button
@@ -1080,6 +1069,19 @@
         </svg>
       </button>
 
+      <!-- Floating + Action Button for Prompts -->
+      <button
+        id="prompts-fab"
+        type="button"
+        onclick="openPromptAddModal()"
+        title="Add Prompt"
+        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-appbg shadow-xl shadow-black/50 flex items-center justify-center ring-2 ring-appbg/60"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+        </svg>
+      </button>
+
       <!-- Profile Modals -->
       <div
         id="new-topic-modal"
@@ -1164,6 +1166,33 @@
             <button type="button" onclick="selectRoutineAddMode('step')" id="routine-modal-mode-step" class="tactile-btn rounded-2xl border py-2.5 px-3 text-xs font-medium bg-cardbg border-borderline text-secondarytext hover:text-primarytext">Add Step</button>
           </div>
           <form id="routine-add-modal-form" onsubmit="handleSubmitRoutineAddModal(event)" class="space-y-3"></form>
+        </div>
+      </div>
+
+      <div
+        id="prompt-add-modal"
+        class="hidden absolute inset-0 z-40 flex flex-col justify-end bg-black/60 backdrop-blur-[2px] transition-opacity"
+        onclick="if (event.target === this) closePromptAddModal()"
+      >
+        <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 shadow-2xl max-h-[88%] overflow-y-auto no-scrollbar">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-[10.5px] font-bold uppercase tracking-wider text-coral">Prompts</p>
+              <h3 class="font-display text-base font-bold text-primarytext">Add Reflection Prompt</h3>
+            </div>
+            <button type="button" onclick="closePromptAddModal()" class="tactile-btn w-8 h-8 rounded-full bg-cardbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center" title="Close">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <form onsubmit="handleAddProfilePrompt(event)" class="space-y-3">
+            <div class="bg-cardbg border border-borderline rounded-2xl p-3.5 space-y-3">
+              <div class="space-y-1">
+                <label class="text-[10.5px] font-semibold uppercase tracking-wider text-secondarytext">Prompt Question</label>
+                <input id="new-prompt-input" type="text" required placeholder="e.g. What gave me the most clarity today?" class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3.5 py-2.5 rounded-xl border border-borderline focus:border-coral focus:outline-none" />
+              </div>
+            </div>
+            <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-appbg font-bold text-xs">Add Prompt</button>
+          </form>
         </div>
       </div>
 
@@ -1890,7 +1919,6 @@
       habitSortMode: 'default',
       journalMoodFilter: 'all',
       journalFabMenuOpen: false,
-      journalPromptDrawerOpen: false,
       journalPrompts: [
         'What gave me the most energy today?',
         'One small win I want to remember:',
@@ -1990,6 +2018,7 @@
       topicAddCategory: 'branches',
       routineAddModalOpen: false,
       routineAddMode: 'routine',
+      promptAddModalOpen: false,
       profileSettingsOpen: false,
       openSettingsSection: null,
       topics: [
@@ -4209,11 +4238,6 @@
       toggleJournalFabMenu(false);
       if (choice === 'entry') {
         addNewJournalDayCard();
-      } else if (choice === 'prompt') {
-        toggleJournalPromptDrawer(true);
-        setTimeout(() => {
-          document.getElementById('journal-custom-prompt-input')?.focus();
-        }, 40);
       } else if (choice === 'mood') {
         openJournalMoodModal();
       } else if (choice === 'energy') {
@@ -5190,34 +5214,6 @@
       return n + (s[(v - 20) % 10] || s[v] || s[0]);
     }
 
-    function toggleJournalPromptDrawer(force) {
-      const drawer = document.getElementById('journal-prompt-section');
-      if (!drawer) return;
-      state.journalPromptDrawerOpen = typeof force === 'boolean' ? force : !state.journalPromptDrawerOpen;
-      drawer.classList.toggle('hidden', !state.journalPromptDrawerOpen);
-      if (state.journalPromptDrawerOpen) {
-        renderJournalPromptChips();
-      }
-    }
-
-    function renderJournalPromptChips() {
-      const chipsEl = document.getElementById('journal-prompt-chips');
-      if (!chipsEl) return;
-      chipsEl.innerHTML = state.journalPrompts
-        .map(
-          (prompt, idx) => `
-          <button
-            type="button"
-            onclick="insertJournalPrompt(${idx})"
-            class="tactile-btn text-left px-3 py-1.5 rounded-xl bg-pillbg border border-borderline hover:border-coral text-[11px] font-medium text-primarytext transition"
-          >
-            + ${escapeHtml(prompt)}
-          </button>
-        `
-        )
-        .join('');
-    }
-
     function insertJournalPrompt(promptIdx, targetEntryId = null) {
       const promptText = state.journalPrompts[promptIdx];
       if (!promptText) return;
@@ -5242,17 +5238,6 @@
           ta.setSelectionRange(ta.value.length, ta.value.length);
         }
       }, 30);
-    }
-
-    function handleAddCustomJournalPrompt(e) {
-      e.preventDefault();
-      const input = document.getElementById('journal-custom-prompt-input');
-      const val = input ? input.value.trim() : '';
-      if (!val) return;
-      state.journalPrompts.unshift(val);
-      input.value = '';
-      renderJournalPromptChips();
-      insertJournalPrompt(0);
     }
 
     function addNewJournalDayCard() {
@@ -6060,10 +6045,12 @@
       const topicsCountEl = document.getElementById('profile-topics-count');
       const inventoryCountEl = document.getElementById('profile-inventory-count');
       const routinesCountEl = document.getElementById('profile-routines-count');
+      const promptsCountEl = document.getElementById('profile-prompts-count');
 
       if (topicsCountEl) topicsCountEl.textContent = String(state.topics.length);
       if (inventoryCountEl) inventoryCountEl.textContent = String(state.inventoryItems.length);
       if (routinesCountEl) routinesCountEl.textContent = String(state.routines.length);
+      if (promptsCountEl) promptsCountEl.textContent = String(state.journalPrompts.length);
     }
 
     function renderProfileEnergyBars() {
@@ -6177,12 +6164,14 @@
       }
       if (viewName !== 'inventory') state.inventoryAddModalOpen = false;
       if (viewName !== 'routines') state.routineAddModalOpen = false;
+      if (viewName !== 'prompts') state.promptAddModalOpen = false;
 
       const views = {
         main: document.getElementById('profile-main-content'),
         topics: document.getElementById('profile-topics-content'),
         inventory: document.getElementById('profile-inventory-content'),
         routines: document.getElementById('profile-routines-content'),
+        prompts: document.getElementById('profile-prompts-content'),
         settings: document.getElementById('profile-settings-content'),
       };
 
@@ -6196,6 +6185,7 @@
       if (viewName === 'topics') renderProfileTopics();
       if (viewName === 'inventory') renderProfileInventory();
       if (viewName === 'routines') renderProfileRoutines();
+      if (viewName === 'prompts') renderProfilePrompts();
       if (viewName === 'settings') {
         renderSettingsThemeControls();
         renderCompartmentEditors();
@@ -6211,6 +6201,7 @@
       syncTopicDetailFabVisibility();
       syncInventoryFabVisibility();
       syncRoutinesFabVisibility();
+      syncPromptsFabVisibility();
     }
 
     function syncTopicsListFabVisibility() {
@@ -6243,6 +6234,25 @@
       const showFab = state.activeTab === 'profile' && state.profileSubView === 'routines';
       if (fabEl) fabEl.classList.toggle('hidden', !showFab);
       if (modalEl) modalEl.classList.toggle('hidden', !(showFab && state.routineAddModalOpen));
+    }
+
+    function syncPromptsFabVisibility() {
+      const fabEl = document.getElementById('prompts-fab');
+      const modalEl = document.getElementById('prompt-add-modal');
+      const showFab = state.activeTab === 'profile' && state.profileSubView === 'prompts';
+      if (fabEl) fabEl.classList.toggle('hidden', !showFab);
+      if (modalEl) modalEl.classList.toggle('hidden', !(showFab && state.promptAddModalOpen));
+    }
+
+    function openPromptAddModal() {
+      state.promptAddModalOpen = true;
+      syncPromptsFabVisibility();
+      setTimeout(() => document.getElementById('new-prompt-input')?.focus(), 40);
+    }
+
+    function closePromptAddModal() {
+      state.promptAddModalOpen = false;
+      syncPromptsFabVisibility();
     }
 
     function openNewTopicModal() {
@@ -8114,6 +8124,76 @@
       renderProfileRoutines();
     }
 
+    function renderProfilePrompts() {
+      const listEl = document.getElementById('profile-prompts-list');
+      if (!listEl) return;
+
+      if (state.journalPrompts.length === 0) {
+        listEl.innerHTML = `<p class="text-xs text-mutedtext text-center py-6">No prompts saved yet. Tap + to add one.</p>`;
+        return;
+      }
+
+      listEl.innerHTML = state.journalPrompts
+        .map(
+          (prompt, idx) => `
+          <div class="bg-cardbg border border-borderline rounded-2xl px-3.5 py-3 flex items-center justify-between gap-2.5">
+            <div class="flex items-start gap-2.5 min-w-0 flex-1">
+              <span class="w-7 h-7 rounded-xl bg-pillbg border border-borderline text-coral flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+              </span>
+              <p class="text-xs font-medium text-primarytext leading-snug break-words">${escapeHtml(prompt)}</p>
+            </div>
+
+            <div class="flex items-center gap-1 flex-shrink-0">
+              <button
+                type="button"
+                onclick="useProfilePromptInJournal(${idx})"
+                title="Insert into Journal"
+                class="tactile-btn px-2.5 py-1 rounded-full bg-pillbg border border-borderline hover:border-coral text-[10.5px] font-semibold text-coral whitespace-nowrap"
+              >
+                Use
+              </button>
+              <button
+                type="button"
+                onclick="removeProfilePrompt(${idx})"
+                title="Remove prompt"
+                class="tactile-btn p-1.5 rounded-full text-secondarytext hover:text-coral flex-shrink-0"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+          </div>
+        `
+        )
+        .join('');
+    }
+
+    function handleAddProfilePrompt(e) {
+      e.preventDefault();
+      const input = document.getElementById('new-prompt-input');
+      const val = input ? input.value.trim() : '';
+      if (!val) return;
+      state.journalPrompts.unshift(val);
+      input.value = '';
+      state.promptAddModalOpen = false;
+      syncAllProfileFabs();
+      syncProfileActionCounts();
+      renderProfilePrompts();
+    }
+
+    function removeProfilePrompt(idx) {
+      if (idx < 0 || idx >= state.journalPrompts.length) return;
+      state.journalPrompts.splice(idx, 1);
+      syncProfileActionCounts();
+      renderProfilePrompts();
+    }
+
+    function useProfilePromptInJournal(idx) {
+      if (!state.journalPrompts[idx]) return;
+      switchBottomTab('journal');
+      insertJournalPrompt(idx);
+    }
+
     // =========================================================================
     // NAVIGATION & INITIALIZATION
     // =========================================================================
@@ -8198,7 +8278,7 @@
           tab === 'habit'
             ? 'New Habit'
             : tab === 'journal'
-              ? 'Add Journal Entry or Prompt'
+              ? 'Add Journal Entry or Check-In'
               : 'New Task';
       }
 
