@@ -2364,6 +2364,10 @@
           themeId: state.themeId,
           accentKey: state.accentKey,
           karmaAxes: state.karmaAxes,
+          routines: state.routines,
+          inventoryItems: state.inventoryItems,
+          compartments: state.compartments,
+          journalPrompts: state.journalPrompts,
         };
         localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(payload));
         if (typeof horizonState !== 'undefined' && horizonState.horizonGoals) {
@@ -2443,6 +2447,10 @@
           if (parsed.themeId && typeof parsed.themeId === 'string') state.themeId = parsed.themeId;
           if (parsed.accentKey && typeof parsed.accentKey === 'string') state.accentKey = parsed.accentKey;
           if (Array.isArray(parsed.karmaAxes)) state.karmaAxes = parsed.karmaAxes;
+          if (Array.isArray(parsed.routines)) state.routines = parsed.routines;
+          if (Array.isArray(parsed.inventoryItems)) state.inventoryItems = parsed.inventoryItems;
+          if (Array.isArray(parsed.compartments) && parsed.compartments.length > 0) state.compartments = parsed.compartments;
+          if (Array.isArray(parsed.journalPrompts)) state.journalPrompts = parsed.journalPrompts;
         }
         const savedHorizon = localStorage.getItem(STORAGE_KEY_HORIZON);
         if (savedHorizon && typeof horizonState !== 'undefined') {
@@ -2649,19 +2657,40 @@
     const CAL_COLLAPSED_H = 44;
     const CAL_EXPANDED_H = 284;
 
+        function isTaskOnDay(t, dayNum) {
+      const repeat = t.repeat || (t.recurring ? 'daily' : 'once');
+      if (repeat === 'daily') return true;
+      if (repeat === 'weekly') {
+        if (!Array.isArray(t.weekDays) || t.weekDays.length === 0) return true;
+        const dayOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date(2026, 10, dayNum).getDay()];
+        return t.weekDays.includes(dayOfWeek);
+      }
+      if (repeat === 'monthly') {
+        const taskDay = t.day !== undefined && t.day !== null ? Number(t.day) : 22;
+        return Number(taskDay) === Number(dayNum);
+      }
+      const taskDay = t.day !== undefined && t.day !== null ? Number(t.day) : 22;
+      return Number(taskDay) === Number(dayNum);
+    }
+
+    function isTaskDoneOnDay(t, dayNum) {
+      const repeat = t.repeat || (t.recurring ? 'daily' : 'once');
+      if (repeat !== 'once') {
+        return Boolean(t.doneDays && t.doneDays[dayNum]);
+      }
+      return Boolean(t.done);
+    }
+
     function computeSelectedDayRings() {
       state.monthCells.forEach((cell) => {
         if (cell.out) return;
         const d = cell.d;
-        const dayTasks = (state.tasks || []).filter((t) => {
-          const taskDay = t.day !== undefined && t.day !== null ? Number(t.day) : 22;
-          return taskDay === Number(d);
-        });
+        const dayTasks = (state.tasks || []).filter((t) => isTaskOnDay(t, d));
         if (dayTasks.length === 0) {
           cell.r = [0, 0, 0];
           return;
         }
-        const doneTasks = dayTasks.filter((t) => t.done);
+        const doneTasks = dayTasks.filter((t) => isTaskDoneOnDay(t, d));
         const totalEnergy = dayTasks.reduce((sum, t) => sum + (t.energy || 1), 0);
         const doneEnergy = doneTasks.reduce((sum, t) => sum + (t.energy || 1), 0);
         const physical = Math.min(100, Math.max(12, Math.round(18 + totalEnergy * 4)));
@@ -2810,6 +2839,7 @@
       comp.name = val.trim() || comp.name;
       renderCompartmentEditors();
       renderCompartmentBar();
+      saveState();
     }
 
     function updateCompartmentTime(id, field, timeStr) {
@@ -2821,6 +2851,7 @@
         syncTaskCompartments();
         renderCompartmentEditors();
         renderTimeline();
+        saveState();
       }
     }
 
@@ -3114,18 +3145,15 @@
 
     function getFilteredTasks() {
       const currentDay = state.selectedDay;
-      const isForSelectedDay = (t) => {
-        const taskDay = t.day !== undefined && t.day !== null ? Number(t.day) : 22;
-        return taskDay === Number(currentDay);
-      };
+      const tasksForDay = (state.tasks || []).filter((t) => isTaskOnDay(t, currentDay));
 
       if (state.compartmentFilter === 'completed') {
-        return [...state.tasks]
-          .filter((t) => t.done && isForSelectedDay(t))
+        return tasksForDay
+          .filter((t) => isTaskDoneOnDay(t, currentDay))
           .sort((a, b) => (b.completedAt || b.id) - (a.completedAt || a.id));
       }
-      return [...state.tasks]
-        .filter((t) => !t.done && isForSelectedDay(t) && (state.compartmentFilter === 'all' || t.compartment === state.compartmentFilter))
+      return tasksForDay
+        .filter((t) => !isTaskDoneOnDay(t, currentDay) && (state.compartmentFilter === 'all' || t.compartment === state.compartmentFilter))
         .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || a.startMin - b.startMin || a.id - b.id);
     }
 
@@ -3844,7 +3872,7 @@
                   ${task.pinned ? '<span class="text-[9.5px] font-semibold px-1.5 py-0.2 rounded bg-coral/20 text-coral">Pinned</span>' : ''}
                 </div>
                 <p class="text-[14.5px] font-semibold leading-snug truncate ${
-                  task.done ? 'line-through text-secondarytext' : 'text-primarytext'
+                  isTaskDoneOnDay(task, state.selectedDay) ? 'line-through text-secondarytext' : 'text-primarytext'
                 }">
                   ${escapeHtml(task.title)}
                 </p>
@@ -3890,11 +3918,11 @@
                 type="button"
                 onpointerdown="event.stopPropagation()"
                 onclick="toggleTaskDone(${task.id})"
-                style="${task.done ? `background-color:${c.hex}; border-color:${c.hex}; color:#141414;` : `border-color:${c.hex};`}"
+                style="${isTaskDoneOnDay(task, state.selectedDay) ? `background-color:${c.hex}; border-color:${c.hex}; color:#141414;` : `border-color:${c.hex};`}"
                 class="tactile-btn w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition"
                 title="Toggle complete"
               >
-                ${task.done ? '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
+                ${isTaskDoneOnDay(task, state.selectedDay) ? '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
               </button>
             </div>
           </div>
@@ -4449,7 +4477,7 @@
       if (intraInput) intraInput.value = '';
       if (postInput) postInput.value = '';
 
-      state.modalColor = 'coral';
+      state.modalColor = state.accentKey || 'coral';
       state.modalIcon = 'at';
       state.modalAllDay = false;
       state.modalStartMin = 510;
@@ -4457,6 +4485,8 @@
       state.modalEnergyTier = 1;
       state.modalPriority = 2;
       state.modalRepeat = 'once';
+      const curWeekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date(2026, 10, state.selectedDay).getDay()];
+      state.modalWeekDays = [curWeekday];
       state.modalAlertStart = true;
       state.modalAlertEnd = false;
       state.modalPinned = false;
@@ -4508,6 +4538,7 @@
       state.modalEnergyTier = task.energy !== undefined ? task.energy : 1;
       state.modalPriority = task.priority !== undefined ? task.priority : 2;
       state.modalRepeat = task.repeat || (task.recurring ? 'daily' : 'once');
+      state.modalWeekDays = Array.isArray(task.weekDays) && task.weekDays.length > 0 ? [...task.weekDays] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
       state.modalAlertStart = Boolean(task.alertStart);
       state.modalAlertEnd = Boolean(task.alertEnd);
       state.modalPinned = Boolean(task.pinned);
@@ -4802,18 +4833,22 @@
           .join('');
       }
 
+      const activeColor = CAPSULE_COLORS[state.modalColor] || CAPSULE_COLORS[state.accentKey] || CAPSULE_COLORS.coral;
+      const activeColorHex = activeColor.hex;
+      const activeColorText = activeColor.text;
+
       const repeatSummary = document.getElementById('modal-repeat-summary');
       const repeatBar = document.getElementById('modal-repeat-bar');
       const weeklyDaysEl = document.getElementById('modal-weekly-days');
-      const repeatLabels = { once: 'One-time', daily: 'Every day', weekly: 'Weekly', monthly: 'Monthly' };
-      if (repeatSummary) repeatSummary.textContent = repeatLabels[state.modalRepeat] || 'One-time';
+      const repeatLabels = { once: 'Once', daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly' };
+      if (repeatSummary) repeatSummary.textContent = repeatLabels[state.modalRepeat] || 'Once';
       if (repeatBar) {
         repeatBar.innerHTML = Object.entries(repeatLabels)
           .map(([key, label]) => {
             const active = key === state.modalRepeat;
-            return `<button type="button" onclick="setModalRepeat('${key}')" class="tactile-btn py-1.5 px-1 rounded-xl text-[11px] font-semibold transition truncate ${
-              active ? 'bg-coral text-appbg' : 'text-secondarytext hover:text-primarytext'
-            }">${label.split(' ')[0]}</button>`;
+            return `<button type="button" onclick="setModalRepeat('${key}')" style="${active ? `background-color:${activeColorHex}; color:${activeColorText};` : ''}" class="tactile-btn py-1.5 px-1 rounded-xl text-[11px] font-semibold transition truncate ${
+              active ? '' : 'text-secondarytext hover:text-primarytext'
+            }">${label}</button>`;
           })
           .join('');
       }
@@ -4822,8 +4857,8 @@
         weeklyDaysEl.innerHTML = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
           .map((d) => {
             const active = state.modalWeekDays.includes(d);
-            return `<button type="button" onclick="toggleModalWeekDay('${d}')" class="tactile-btn py-1.5 rounded-xl text-[10.5px] font-bold border ${
-              active ? 'bg-coral text-appbg border-coral' : 'bg-cardbg border-borderline text-secondarytext'
+            return `<button type="button" onclick="toggleModalWeekDay('${d}')" style="${active ? `background-color:${activeColorHex}; color:${activeColorText}; border-color:${activeColorHex};` : ''}" class="tactile-btn py-1.5 rounded-xl text-[10.5px] font-bold border ${
+              active ? '' : 'bg-cardbg border-borderline text-secondarytext'
             }">${d[0]}</button>`;
           })
           .join('');
@@ -4863,6 +4898,7 @@
           existingTask.icon = state.modalIcon;
           existingTask.recurring = state.modalRepeat !== 'once';
           existingTask.repeat = state.modalRepeat;
+          existingTask.weekDays = state.modalRepeat === 'weekly' ? [...state.modalWeekDays] : null;
           existingTask.energy = state.modalEnergyTier;
           existingTask.priority = state.modalPriority;
           existingTask.alertStart = state.modalAlertStart;
@@ -4886,6 +4922,7 @@
           icon: state.modalIcon,
           recurring: state.modalRepeat !== 'once',
           repeat: state.modalRepeat,
+          weekDays: state.modalRepeat === 'weekly' ? [...state.modalWeekDays] : null,
           energy: state.modalEnergyTier,
           priority: state.modalPriority,
           alertStart: state.modalAlertStart,
@@ -8231,6 +8268,7 @@
         category: catInput?.value.trim() || 'Gear',
         ready: true,
       });
+      saveState();
       input.value = '';
       if (catInput) catInput.value = '';
       state.inventoryAddModalOpen = false;
@@ -8244,12 +8282,14 @@
       if (!item) return;
       item.ready = !item.ready;
       renderProfileInventory();
+      saveState();
     }
 
     function removeInventoryItem(id) {
       state.inventoryItems = state.inventoryItems.filter((i) => i.id !== id);
       syncProfileActionCounts();
       renderProfileInventory();
+      saveState();
     }
 
     function renderProfileRoutines() {
@@ -8376,6 +8416,7 @@
       state.routines = state.routines.filter((item) => item.id !== id);
       syncProfileActionCounts();
       renderProfileRoutines();
+      saveState();
     }
 
     function handleAddRoutineStep(e, routineId) {
@@ -8388,6 +8429,7 @@
       r.steps.push({ id: `rs-${Date.now()}`, title, duration: '', done: false });
       input.value = '';
       renderProfileRoutines();
+      saveState();
     }
 
     function toggleRoutineStepDone(routineId, stepId) {
@@ -8396,6 +8438,7 @@
       if (!step) return;
       step.done = !step.done;
       renderProfileRoutines();
+      saveState();
     }
 
     function removeRoutineStep(routineId, stepId) {
@@ -8403,6 +8446,7 @@
       if (!r) return;
       r.steps = r.steps.filter((s) => s.id !== stepId);
       renderProfileRoutines();
+      saveState();
     }
 
     function renderProfilePrompts() {
@@ -8460,6 +8504,7 @@
       syncAllProfileFabs();
       syncProfileActionCounts();
       renderProfilePrompts();
+      saveState();
     }
 
     function removeProfilePrompt(idx) {
@@ -8467,6 +8512,7 @@
       state.journalPrompts.splice(idx, 1);
       syncProfileActionCounts();
       renderProfilePrompts();
+      saveState();
     }
 
     function useProfilePromptInJournal(idx) {
