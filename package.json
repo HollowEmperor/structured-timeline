@@ -10,6 +10,10 @@
     "lint": "node --check server.js && node --check memo-spike-physics.js"
   },
   "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/cli": "^8.6.2",
+    "@capacitor/core": "^8.6.2",
+    "@capacitor/local-notifications": "^8.3.1",
     "express": "^4.21.2"
   }
 }

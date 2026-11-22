@@ -1808,6 +1808,7 @@
     import { computeMemoSpikeLayout, buildPaperPalette } from '/memo-spike-physics.js';
     window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette };
   </script>
+  <script src="notification-engine.js"></script>
 
   <script>
     // =========================================================================
@@ -2372,6 +2373,9 @@
         localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(payload));
         if (typeof horizonState !== 'undefined' && horizonState.horizonGoals) {
           localStorage.setItem(STORAGE_KEY_HORIZON, JSON.stringify(horizonState.horizonGoals));
+        }
+        if (window.StructuredNotificationEngine && typeof window.StructuredNotificationEngine.syncAllAppNotifications === 'function') {
+          window.StructuredNotificationEngine.syncAllAppNotifications(state);
         }
       } catch (err) {
         console.warn('Failed to save state to localStorage:', err);
@@ -9010,6 +9014,12 @@
       syncProfileActionCounts();
       renderHorizonView();
       switchBottomTab('timeline');
+
+      if (window.StructuredNotificationEngine) {
+        window.StructuredNotificationEngine.requestPermissions().then(() => {
+          window.StructuredNotificationEngine.syncAllAppNotifications(state);
+        });
+      }
     });
   </script>
 </body>
