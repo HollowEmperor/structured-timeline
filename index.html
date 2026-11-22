@@ -263,7 +263,13 @@
     >
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2 text-left">
-          <h1 id="main-header-title" class="font-display text-[26px] font-bold tracking-tight leading-none flex items-center gap-2">
+          <h1
+            id="main-header-title"
+            onpointerdown="event.stopPropagation()"
+            onclick="toggleMonthCalendar()"
+            title="Tap to expand / collapse full month"
+            class="font-display text-[26px] font-bold tracking-tight leading-none flex items-center gap-2 cursor-pointer hover:opacity-90"
+          >
             <span class="text-primarytext">November</span>
             <span class="text-coral">2026</span>
           </h1>
@@ -299,6 +305,7 @@
 
           <button
             type="button"
+            id="header-calendar-btn"
             onpointerdown="event.stopPropagation()"
             onclick="toggleHorizonGoalsView(true)"
             title="Open Goals Timeline"
@@ -313,18 +320,18 @@
       </div>
 
       <!-- Unified 6-Row Calendar: Full static month grid behind a cropped 1-week viewport mask -->
-      <div id="unified-calendar-container" class="mt-3 space-y-1">
-        <div class="grid grid-cols-7 gap-1 text-center text-[10.5px] font-medium text-secondarytext pb-0.5">
+      <div id="unified-calendar-container" onpointerdown="event.stopPropagation()" class="mt-3 space-y-1">
+        <div class="grid grid-cols-7 gap-1 text-center text-[10.5px] font-medium text-secondarytext pb-0.5 px-1.5">
           <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
         </div>
-        <div id="calendar-viewport-mask" style="height: 44px;">
+        <div id="calendar-viewport-mask" style="height: 44px;" class="px-1.5">
           <div id="unified-calendar-rows" class="flex flex-col gap-1"></div>
         </div>
       </div>
 
       <!-- Drag Handle Pill -->
-      <div id="calendar-drag-handle" class="pt-2.5 pb-1 flex justify-center">
-        <span class="w-10 h-1 rounded-full bg-borderline"></span>
+      <div id="calendar-drag-handle" style="touch-action: none;" onpointerdown="handleCalendarHeaderDown(event)" onpointermove="handleCalendarHeaderMove(event)" onpointerup="handleCalendarHeaderUp(event)" onpointercancel="handleCalendarHeaderUp(event)" onclick="toggleMonthCalendar()" title="Tap to toggle month calendar" class="pt-2.5 pb-1 flex justify-center cursor-pointer">
+        <span class="w-10 h-1 rounded-full bg-borderline hover:bg-coral transition"></span>
       </div>
     </header>
 
@@ -1741,8 +1748,8 @@
       </button>
     </div>
 
-    <!-- Horizon Goals Timeline Screen (Connected via Top-Right Calendar Icon) -->
-    <div id="horizon-goals-screen" class="hidden absolute inset-x-0 top-[36px] bottom-0 z-40 bg-appbg flex flex-col justify-between overflow-hidden">
+  <!-- Horizon Goals Timeline Screen (Connected via Top-Right Calendar Icon) -->
+    <div id="horizon-goals-screen" class="hidden absolute inset-0 z-40 bg-appbg flex flex-col justify-between overflow-hidden">
       <header class="px-5 pt-2 pb-3 flex-shrink-0 flex items-center justify-between gap-3">
         <div>
           <h1 class="font-display text-[26px] font-bold tracking-tight text-primarytext leading-none">
@@ -1962,32 +1969,13 @@
         { d: 23, out: false, r: [50, 85, 65] }, { d: 24, out: false, r: [60, 70, 50] }, { d: 25, out: false, r: [75, 65, 80] }, { d: 26, out: false, r: [55, 75, 60] }, { d: 27, out: false, r: [45, 60, 50] }, { d: 28, out: false, r: [70, 80, 65] }, { d: 29, out: false, r: [80, 75, 85] },
         { d: 30, out: false, r: [65, 70, 75] }, { d: 1, out: true, r: [20, 30, 25] }, { d: 2, out: true, r: [30, 40, 35] }, { d: 3, out: true, r: [25, 35, 30] }, { d: 4, out: true, r: [40, 30, 25] }, { d: 5, out: true, r: [30, 25, 35] }, { d: 6, out: true, r: [25, 30, 20] },
       ],
-      tasks: [
-        { id: 1, title: 'Rise and Shine', startMin: 480, durationMin: 0, color: 'coral', icon: 'alarm', recurring: true, repeat: 'daily', energy: 0, priority: 2, alertStart: true, alertEnd: false, pinned: false, location: '', note: '', subtasks: null, done: false, compartment: 'dawn' },
-        { id: 2, title: 'Meet with Friends', startMin: 495, durationMin: 10, color: 'lime', icon: 'users', recurring: false, repeat: 'once', energy: 1, priority: 2, alertStart: true, alertEnd: false, pinned: false, location: '', note: '', subtasks: null, done: false, compartment: 'morning' },
-        { id: 3, title: 'Answer Emails', startMin: 495, durationMin: 90, color: 'coral', icon: 'at', recurring: false, repeat: 'once', energy: 4, priority: 3, alertStart: true, alertEnd: true, pinned: false, location: '', note: '', subtasks: null, done: false, compartment: 'morning' },
-        { id: 4, title: 'meet new people', startMin: 500, durationMin: 15, color: 'emerald', icon: 'users', recurring: false, repeat: 'once', energy: 0, priority: 2, alertStart: false, alertEnd: false, pinned: false, location: '', note: '', subtasks: '2/2', done: false, compartment: 'morning' },
-        { id: 5, title: 'I saw them', startMin: 570, durationMin: 15, color: 'coral', icon: 'at', recurring: false, repeat: 'once', energy: 0, priority: 2, alertStart: false, alertEnd: false, pinned: false, location: '', note: '', subtasks: null, done: false, compartment: 'morning' },
-        { id: 6, title: 'Wind Down', startMin: 1320, durationMin: 0, color: 'sky', icon: 'moon', recurring: true, repeat: 'daily', energy: 0, priority: 2, alertStart: true, alertEnd: false, pinned: false, location: '', note: '', subtasks: null, done: false, compartment: 'evening' },
-      ],
-      unscheduledQueue: [
-        { id: 501, text: 'Review JNI audio ring buffer latency' },
-        { id: 502, text: 'Benchmark Vulkan frame pacing' },
-      ],
+      tasks: [],
+      unscheduledQueue: [],
       scheduledFromQueueCount: 0,
-      inboxItems: [
-        { id: 901, text: 'Refactor JNI audio buffer callback lock', tag: 'Engineering', added: '10m ago' },
-        { id: 902, text: 'Book evening physiotherapy session', tag: 'Health', added: '35m ago' },
-        { id: 903, text: 'Outline Q4 habit streak milestones', tag: 'Planning', added: '1h ago' },
-      ],
+      inboxItems: [],
       archivedDumps: [],
       swipeHistory: [],
-      habits: [
-        { id: 1, title: 'Rise and Shine', timeLabel: '08:00 AM', masteryDays: 66, completedDays: 14, color: 'coral', icon: 'alarm', done: true, history: buildSeededHabitHistory(14, true, 1) },
-        { id: 2, title: 'Deep Work Block', timeLabel: '08:15 AM', masteryDays: 90, completedDays: 22, color: 'lime', icon: 'code', done: false, history: buildSeededHabitHistory(22, false, 2) },
-        { id: 3, title: 'Midday Sunlight Walk', timeLabel: '01:30 PM', masteryDays: 30, completedDays: 11, color: 'sky', icon: 'spark', done: false, history: buildSeededHabitHistory(11, false, 3) },
-        { id: 4, title: 'Wind Down', timeLabel: '10:00 PM', masteryDays: 21, completedDays: 16, color: 'emerald', icon: 'moon', done: true, history: buildSeededHabitHistory(16, true, 4) },
-      ],
+      habits: [],
       journalDays: [
         { id: 101, month: 'NOV', day: '9', fullDate: 'Monday, November 9th', mood: 'neutral', text: '', moodLogs: [], energyLogs: [], exerciseLogs: [] },
         { id: 102, month: 'NOV', day: '8', fullDate: 'Sunday, November 8th', mood: 'neutral', text: '', moodLogs: [], energyLogs: [], exerciseLogs: [] },
@@ -2387,17 +2375,68 @@
     }
 
     function loadState() {
+      const DUMMY_TASKS = new Set([
+        'Rise and Shine',
+        'Meet with Friends',
+        'Answer Emails',
+        'meet new people',
+        'I saw them',
+        'Wind Down',
+        'Evening Walk',
+      ]);
+      const DUMMY_QUEUE = new Set([
+        'Review JNI audio ring buffer latency',
+        'Benchmark Vulkan frame pacing',
+        'Review JNI Thread Safety Spec',
+        'Benchmark Vulkan Render Pass',
+      ]);
+      const DUMMY_HABITS = new Set([
+        'Rise and Shine',
+        'Deep Work Block',
+        'Midday Sunlight Walk',
+        'Wind Down',
+        'Drink 2L Water',
+        'Deep Work Sprint',
+      ]);
+      const DUMMY_INBOX = new Set([
+        'Refactor JNI audio buffer callback lock',
+        'Book evening physiotherapy session',
+        'Outline Q4 habit streak milestones',
+      ]);
+      const DUMMY_GOAL_TITLES = new Set([
+        'Open the sidebar and navigate to the roadmap',
+        'Complete Vulkan frame pacing benchmark',
+        'Ship core JNI audio buffer module',
+        'Launch v2.0 Structured Visual Timeline engine',
+        'Zero-missed-day habit streak',
+        'Build an independent creative tools studio',
+      ]);
+
       try {
         const saved = localStorage.getItem(STORAGE_KEY_STATE);
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed.tasks)) state.tasks = parsed.tasks;
-          if (Array.isArray(parsed.unscheduledQueue)) state.unscheduledQueue = parsed.unscheduledQueue;
+          if (Array.isArray(parsed.tasks)) {
+            state.tasks = parsed.tasks.filter((t) => !DUMMY_TASKS.has(t.title));
+          }
+          if (Array.isArray(parsed.unscheduledQueue)) {
+            state.unscheduledQueue = parsed.unscheduledQueue.filter(
+              (q) => !DUMMY_QUEUE.has(q.text) && !DUMMY_QUEUE.has(q.title)
+            );
+          }
           if (typeof parsed.scheduledFromQueueCount === 'number') state.scheduledFromQueueCount = parsed.scheduledFromQueueCount;
-          if (Array.isArray(parsed.inboxItems)) state.inboxItems = parsed.inboxItems;
+          if (Array.isArray(parsed.inboxItems)) {
+            state.inboxItems = parsed.inboxItems.filter(
+              (i) => !DUMMY_INBOX.has(i.text) && !DUMMY_INBOX.has(i.title)
+            );
+          }
           if (Array.isArray(parsed.archivedDumps)) state.archivedDumps = parsed.archivedDumps;
           if (Array.isArray(parsed.swipeHistory)) state.swipeHistory = parsed.swipeHistory;
-          if (Array.isArray(parsed.habits)) state.habits = parsed.habits;
+          if (Array.isArray(parsed.habits)) {
+            state.habits = parsed.habits.filter(
+              (h) => !DUMMY_HABITS.has(h.title) && !DUMMY_HABITS.has(h.name)
+            );
+          }
           if (Array.isArray(parsed.journalDays)) state.journalDays = parsed.journalDays;
           if (Array.isArray(parsed.topics)) state.topics = parsed.topics;
           if (typeof parsed.selectedDay === 'number') state.selectedDay = parsed.selectedDay;
@@ -2409,9 +2448,22 @@
         if (savedHorizon && typeof horizonState !== 'undefined') {
           const parsedH = JSON.parse(savedHorizon);
           if (parsedH && typeof parsedH === 'object') {
-            horizonState.horizonGoals = parsedH;
+            const cleanHorizon = { daily: {}, weekly: {}, monthly: {}, quarterly: {}, vision: {} };
+            ['daily', 'weekly', 'monthly', 'quarterly', 'vision'].forEach((scope) => {
+              if (parsedH[scope] && typeof parsedH[scope] === 'object') {
+                cleanHorizon[scope] = {};
+                Object.keys(parsedH[scope]).forEach((k) => {
+                  const g = parsedH[scope][k];
+                  if (g && g.title && !DUMMY_GOAL_TITLES.has(g.title)) {
+                    cleanHorizon[scope][k] = g;
+                  }
+                });
+              }
+            });
+            horizonState.horizonGoals = cleanHorizon;
           }
         }
+        saveState();
       } catch (err) {
         console.warn('Failed to load state from localStorage:', err);
       }
@@ -2598,19 +2650,25 @@
     const CAL_EXPANDED_H = 284;
 
     function computeSelectedDayRings() {
-      const cell = state.monthCells.find((c) => !c.out && c.d === state.selectedDay);
-      if (!cell) return;
-      const dayTasks = state.tasks || [];
-      const doneTasks = dayTasks.filter((t) => t.done);
-      const totalEnergy = dayTasks.reduce((sum, t) => sum + (t.energy || 1), 0);
-      const doneEnergy = doneTasks.reduce((sum, t) => sum + (t.energy || 1), 0);
-      const physical = Math.min(100, Math.max(12, Math.round(18 + totalEnergy * 4)));
-      const mental = Math.min(100, Math.max(15, Math.round(25 + dayTasks.length * 4)));
-      const gained =
-        dayTasks.length === 0
-          ? 50
-          : Math.min(100, Math.max(20, Math.round(35 + (doneEnergy / Math.max(1, totalEnergy)) * 65)));
-      cell.r = [physical, mental, gained];
+      state.monthCells.forEach((cell) => {
+        if (cell.out) return;
+        const d = cell.d;
+        const dayTasks = (state.tasks || []).filter((t) => {
+          const taskDay = t.day !== undefined && t.day !== null ? Number(t.day) : 22;
+          return taskDay === Number(d);
+        });
+        if (dayTasks.length === 0) {
+          cell.r = [0, 0, 0];
+          return;
+        }
+        const doneTasks = dayTasks.filter((t) => t.done);
+        const totalEnergy = dayTasks.reduce((sum, t) => sum + (t.energy || 1), 0);
+        const doneEnergy = doneTasks.reduce((sum, t) => sum + (t.energy || 1), 0);
+        const physical = Math.min(100, Math.max(12, Math.round(18 + totalEnergy * 4)));
+        const mental = Math.min(100, Math.max(15, Math.round(25 + dayTasks.length * 4)));
+        const gained = Math.min(100, Math.max(20, Math.round(35 + (doneEnergy / Math.max(1, totalEnergy)) * 65)));
+        cell.r = [physical, mental, gained];
+      });
     }
 
     function applyCalendarProgress(progress, immediate = false) {
@@ -2667,7 +2725,7 @@
                 cell.out
                   ? 'opacity-30 cursor-default'
                   : isSelected
-                    ? 'bg-cardbg ring-1 ring-coral/60'
+                    ? 'bg-cardbg ring-2 ring-coral scale-105 z-10'
                     : 'hover:bg-cardbg/50'
               }"
             >
@@ -3055,13 +3113,19 @@
     }
 
     function getFilteredTasks() {
+      const currentDay = state.selectedDay;
+      const isForSelectedDay = (t) => {
+        const taskDay = t.day !== undefined && t.day !== null ? Number(t.day) : 22;
+        return taskDay === Number(currentDay);
+      };
+
       if (state.compartmentFilter === 'completed') {
         return [...state.tasks]
-          .filter((t) => t.done)
+          .filter((t) => t.done && isForSelectedDay(t))
           .sort((a, b) => (b.completedAt || b.id) - (a.completedAt || a.id));
       }
       return [...state.tasks]
-        .filter((t) => !t.done && (state.compartmentFilter === 'all' || t.compartment === state.compartmentFilter))
+        .filter((t) => !t.done && isForSelectedDay(t) && (state.compartmentFilter === 'all' || t.compartment === state.compartmentFilter))
         .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || a.startMin - b.startMin || a.id - b.id);
     }
 
@@ -8556,22 +8620,10 @@
       horizonOffset: 0,
       editingHorizonTarget: null,
       horizonGoals: {
-        daily: {
-          [String(HORIZON_ALT_SEED_DAY)]: { id: `hd-${HORIZON_ALT_SEED_DAY}`, title: 'Open the sidebar and navigate to the roadmap', badge: `${HORIZON_MONTH_CODES[HORIZON_TODAY_MONTH]} ${HORIZON_ALT_SEED_DAY}`, done: false },
-          [String(HORIZON_TODAY_DAY)]: { id: `hd-${HORIZON_TODAY_DAY}`, title: 'Complete Vulkan frame pacing benchmark', badge: `${HORIZON_MONTH_CODES[HORIZON_TODAY_MONTH]} ${HORIZON_TODAY_DAY}`, done: false },
-        },
-        weekly: {
-          [String(HORIZON_TODAY_WEEK)]: { id: `hw-${HORIZON_TODAY_WEEK}`, title: 'Ship core JNI audio buffer module', badge: `WEEK ${HORIZON_TODAY_WEEK}`, done: false },
-        },
-        quarterly: {
-          [String(HORIZON_TODAY_QUARTER)]: { id: `hq-${HORIZON_TODAY_QUARTER}`, title: 'Launch v2.0 Structured Visual Timeline engine', badge: `Q${HORIZON_TODAY_QUARTER}`, done: false },
-        },
-        monthly: {
-          [String(HORIZON_TODAY_MONTH)]: { id: `hm-${HORIZON_TODAY_MONTH}`, title: `Zero-missed-day ${HORIZON_MONTH_NAMES[HORIZON_TODAY_MONTH].charAt(0) + HORIZON_MONTH_NAMES[HORIZON_TODAY_MONTH].slice(1).toLowerCase()} habit streak`, badge: HORIZON_MONTH_CODES[HORIZON_TODAY_MONTH], done: false },
-        },
-        vision: {
-          '1y': { id: 'hv-1y', title: 'Build an independent creative tools studio', badge: '1-YR', done: false },
-        },
+        daily: {},
+        monthly: {},
+        quarterly: {},
+        vision: {},
       },
     };
 
