@@ -1540,13 +1540,24 @@
         </form>
       </div>
 
-      <button
-        type="button"
-        onclick="document.getElementById('task-modal-form').requestSubmit()"
-        class="tactile-btn w-full py-3.5 rounded-2xl bg-coral text-appbg font-semibold text-sm flex-shrink-0"
-      >
-        Create Task
-      </button>
+      <div id="modal-actions-container" class="space-y-2 flex-shrink-0">
+        <button
+          type="button"
+          id="modal-submit-btn"
+          onclick="document.getElementById('task-modal-form').requestSubmit()"
+          class="tactile-btn w-full py-3.5 rounded-2xl bg-coral text-appbg font-semibold text-sm"
+        >
+          Create Task
+        </button>
+        <button
+          type="button"
+          id="modal-delete-btn"
+          onclick="handleDeleteCurrentTask()"
+          class="hidden tactile-btn w-full py-2.5 rounded-xl border border-red-500/40 text-red-400 hover:bg-red-500/10 font-semibold text-xs transition"
+        >
+          Delete Task
+        </button>
+      </div>
     </div>
 
     <!-- Structured-Style Full-Height "New Habit" Screen -->
@@ -1885,6 +1896,7 @@
       modalAlertStart: true,
       modalAlertEnd: false,
       modalPinned: false,
+      editingTaskId: null,
       newlyCompletedTaskId: null,
       inspectedMemoTaskId: null,
       memoSpikeJustEntered: false,
@@ -2343,6 +2355,69 @@
     };
 
     // =========================================================================
+    // LOCAL STORAGE PERSISTENCE (BULLETPROOF AUTOSAVE & RESTORE)
+    // =========================================================================
+    const STORAGE_KEY_STATE = 'structured_timeline_state_v1';
+    const STORAGE_KEY_HORIZON = 'structured_timeline_horizon_v1';
+
+    function saveState() {
+      try {
+        const payload = {
+          tasks: state.tasks,
+          unscheduledQueue: state.unscheduledQueue,
+          scheduledFromQueueCount: state.scheduledFromQueueCount,
+          inboxItems: state.inboxItems,
+          archivedDumps: state.archivedDumps,
+          swipeHistory: state.swipeHistory,
+          habits: state.habits,
+          journalDays: state.journalDays,
+          topics: state.topics,
+          selectedDay: state.selectedDay,
+          themeId: state.themeId,
+          accentKey: state.accentKey,
+          karmaAxes: state.karmaAxes,
+        };
+        localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(payload));
+        if (typeof horizonState !== 'undefined' && horizonState.horizonGoals) {
+          localStorage.setItem(STORAGE_KEY_HORIZON, JSON.stringify(horizonState.horizonGoals));
+        }
+      } catch (err) {
+        console.warn('Failed to save state to localStorage:', err);
+      }
+    }
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY_STATE);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed.tasks)) state.tasks = parsed.tasks;
+          if (Array.isArray(parsed.unscheduledQueue)) state.unscheduledQueue = parsed.unscheduledQueue;
+          if (typeof parsed.scheduledFromQueueCount === 'number') state.scheduledFromQueueCount = parsed.scheduledFromQueueCount;
+          if (Array.isArray(parsed.inboxItems)) state.inboxItems = parsed.inboxItems;
+          if (Array.isArray(parsed.archivedDumps)) state.archivedDumps = parsed.archivedDumps;
+          if (Array.isArray(parsed.swipeHistory)) state.swipeHistory = parsed.swipeHistory;
+          if (Array.isArray(parsed.habits)) state.habits = parsed.habits;
+          if (Array.isArray(parsed.journalDays)) state.journalDays = parsed.journalDays;
+          if (Array.isArray(parsed.topics)) state.topics = parsed.topics;
+          if (typeof parsed.selectedDay === 'number') state.selectedDay = parsed.selectedDay;
+          if (parsed.themeId && typeof parsed.themeId === 'string') state.themeId = parsed.themeId;
+          if (parsed.accentKey && typeof parsed.accentKey === 'string') state.accentKey = parsed.accentKey;
+          if (Array.isArray(parsed.karmaAxes)) state.karmaAxes = parsed.karmaAxes;
+        }
+        const savedHorizon = localStorage.getItem(STORAGE_KEY_HORIZON);
+        if (savedHorizon && typeof horizonState !== 'undefined') {
+          const parsedH = JSON.parse(savedHorizon);
+          if (parsedH && typeof parsedH === 'object') {
+            horizonState.horizonGoals = parsedH;
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to load state from localStorage:', err);
+      }
+    }
+
+    // =========================================================================
     // THEME & RING PALETTE DEFINITIONS
     // =========================================================================
     const THEMES = {
@@ -2447,6 +2522,7 @@
       renderUnifiedCalendar();
       renderProfileRadar();
       renderProfileEnergyBars();
+      saveState();
     }
 
     function toggleSettingsSection(sectionId) {
@@ -2862,6 +2938,7 @@
       axisLock: null,
       active: false,
       overTrash: false,
+      didMove: false,
     };
 
     const timelineSwipe = {
@@ -3292,7 +3369,7 @@
                 }
               </div>
 
-              <!-- Bottom Actions: Unstab & Restore / Put Back -->
+              <!-- Bottom Actions: Unstab & Restore / Delete / Keep -->
               <div class="pt-1 flex items-center gap-2">
                 <button
                   type="button"
@@ -3301,6 +3378,14 @@
                   class="tactile-btn flex-1 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5"
                 >
                   <span>Unstab &amp; Restore</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="deleteInspectedMemoPaper(${inspectedTask.id})"
+                  class="tactile-btn py-2.5 px-3 rounded-xl text-xs font-semibold border border-red-500/40 text-red-400 hover:bg-red-500/10"
+                  title="Delete permanently"
+                >
+                  Delete
                 </button>
                 <button
                   type="button"
@@ -3511,6 +3596,21 @@
       toggleTaskDone(taskId);
     }
 
+    function deleteInspectedMemoPaper(taskId) {
+      state.inspectedMemoTaskId = null;
+      state.tasks = state.tasks.filter((t) => t.id !== taskId);
+      saveState();
+      computeSelectedDayRings();
+      renderUnifiedCalendar();
+      renderTimeline();
+    }
+
+    function dismissQueueTask(id) {
+      state.unscheduledQueue = state.unscheduledQueue.filter((q) => q.id !== id);
+      saveState();
+      renderTimeline();
+    }
+
     function renderTimeline() {
       const container = document.getElementById('timeline-container');
       if (!container) return;
@@ -3547,13 +3647,23 @@
                       (q) => `
                       <div class="flex items-center justify-between gap-2 bg-pillbg rounded-xl px-2.5 py-2 border border-borderline">
                         <span class="text-xs font-medium text-primarytext truncate">${escapeHtml(q.text)}</span>
-                        <button
-                          type="button"
-                          onclick="openScheduleFromQueue(${q.id})"
-                          class="tactile-btn text-[10.5px] font-semibold px-2.5 py-1 rounded-lg bg-coral text-appbg whitespace-nowrap"
-                        >
-                          Set Time
-                        </button>
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                          <button
+                            type="button"
+                            onclick="openScheduleFromQueue(${q.id})"
+                            class="tactile-btn text-[10.5px] font-semibold px-2.5 py-1 rounded-lg bg-coral text-appbg whitespace-nowrap"
+                          >
+                            Set Time
+                          </button>
+                          <button
+                            type="button"
+                            onclick="dismissQueueTask(${q.id})"
+                            class="tactile-btn p-1 rounded-lg text-mutedtext hover:text-red-400 hover:bg-cardbg transition"
+                            title="Dismiss task"
+                          >
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                          </button>
+                        </div>
                       </div>
                     `
                     )
@@ -3871,6 +3981,7 @@
       timelineDrag.axisLock = null;
       timelineDrag.active = false;
       timelineDrag.overTrash = false;
+      timelineDrag.didMove = false;
 
       try {
         e.currentTarget.setPointerCapture(e.pointerId);
@@ -3947,6 +4058,10 @@
       const dx = e.clientX - timelineDrag.startX;
       const dy = e.clientY - timelineDrag.startY;
 
+      if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+        timelineDrag.didMove = true;
+      }
+
       if (timelineDrag.axisLock === null && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
         timelineDrag.axisLock = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
       }
@@ -3994,14 +4109,22 @@
       if (timelineDrag.taskId !== id) return;
       const axisLock = timelineDrag.axisLock;
       const dx = e.clientX - timelineDrag.startX;
+      const dy = e.clientY - timelineDrag.startY;
       const wasActive = timelineDrag.active;
       const overTrash = timelineDrag.overTrash;
       const finalMin = timelineDrag.liveStartMin;
+      const didMove = timelineDrag.didMove || Math.abs(dx) > 8 || Math.abs(dy) > 8;
 
       timelineDrag.taskId = null;
       timelineDrag.axisLock = null;
       timelineDrag.active = false;
       timelineDrag.overTrash = false;
+      timelineDrag.didMove = false;
+
+      if (!didMove && !wasActive && !axisLock) {
+        openEditTask(id);
+        return;
+      }
 
       if (axisLock === 'x') {
         e.currentTarget.style.transition = 'transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)';
@@ -4026,6 +4149,7 @@
 
         if (overTrash) {
           state.tasks = state.tasks.filter((t) => t.id !== id);
+          saveState();
           computeSelectedDayRings();
           renderUnifiedCalendar();
         } else {
@@ -4033,6 +4157,7 @@
           if (task) {
             task.startMin = finalMin;
             task.compartment = inferCompartment(finalMin);
+            saveState();
           }
         }
         renderTimeline();
@@ -4044,6 +4169,7 @@
       timelineDrag.taskId = null;
       timelineDrag.axisLock = null;
       timelineDrag.active = false;
+      timelineDrag.didMove = false;
       e.currentTarget.style.transform = '';
       setFabTrashMode(false, false);
       exitDeeperHourlyTimeline();
@@ -4106,6 +4232,7 @@
         task.done = false;
         delete task.completedAt;
         if (state.newlyCompletedTaskId === id) state.newlyCompletedTaskId = null;
+        saveState();
         computeSelectedDayRings();
         renderUnifiedCalendar();
         renderTimeline();
@@ -4121,6 +4248,7 @@
         task.completedAt = Date.now();
         state.newlyCompletedTaskId = id;
         playBubblePopSfx();
+        saveState();
         computeSelectedDayRings();
         renderUnifiedCalendar();
         renderTimeline();
@@ -4166,6 +4294,7 @@
         state.newlyCompletedTaskId = id;
         const karmaAxis = state.karmaAxes.find((a) => a.label === 'Karma');
         if (karmaAxis) karmaAxis.value = Math.min(100, karmaAxis.value + 3);
+        saveState();
         computeSelectedDayRings();
         renderUnifiedCalendar();
         renderTimeline();
@@ -4240,6 +4369,7 @@
 
     function openTaskModal() {
       state.schedulingQueueItemId = null;
+      state.editingTaskId = null;
       const modal = document.getElementById('task-modal');
       const titleInput = document.getElementById('modal-task-title');
       const noteInput = document.getElementById('modal-task-note');
@@ -4271,10 +4401,81 @@
       if (modalTitleEl) {
         modalTitleEl.innerHTML = `<span class="text-primarytext">New</span><span class="text-coral ml-1">Task</span>`;
       }
+      const submitBtn = document.getElementById('modal-submit-btn');
+      if (submitBtn) {
+        submitBtn.textContent = 'Create Task';
+      }
+      const deleteBtn = document.getElementById('modal-delete-btn');
+      if (deleteBtn) {
+        deleteBtn.classList.add('hidden');
+      }
 
       syncModalControls();
       modal?.classList.remove('hidden');
       setTimeout(() => titleInput?.focus(), 40);
+    }
+
+    function openEditTask(taskId) {
+      const task = state.tasks.find((t) => t.id === taskId);
+      if (!task) return;
+      state.editingTaskId = taskId;
+      state.schedulingQueueItemId = null;
+
+      const modal = document.getElementById('task-modal');
+      const titleInput = document.getElementById('modal-task-title');
+      const noteInput = document.getElementById('modal-task-note');
+      const locInput = document.getElementById('modal-task-location');
+      const preInput = document.getElementById('modal-pre-prompts');
+      const intraInput = document.getElementById('modal-intra-prompts');
+      const postInput = document.getElementById('modal-post-prompts');
+
+      if (titleInput) titleInput.value = task.title || '';
+      if (noteInput) noteInput.value = task.note || '';
+      if (locInput) locInput.value = task.location || '';
+      if (preInput) preInput.value = task.prePrompts || '';
+      if (intraInput) intraInput.value = task.intraPrompts || '';
+      if (postInput) postInput.value = task.postPrompts || '';
+
+      state.modalColor = task.color || 'coral';
+      state.modalIcon = task.icon || 'at';
+      state.modalAllDay = task.durationMin === 0;
+      state.modalStartMin = task.startMin;
+      state.modalDurationMin = task.durationMin || 30;
+      state.modalEnergyTier = task.energy !== undefined ? task.energy : 1;
+      state.modalPriority = task.priority !== undefined ? task.priority : 2;
+      state.modalRepeat = task.repeat || (task.recurring ? 'daily' : 'once');
+      state.modalAlertStart = Boolean(task.alertStart);
+      state.modalAlertEnd = Boolean(task.alertEnd);
+      state.modalPinned = Boolean(task.pinned);
+
+      const modalTitleEl = document.getElementById('modal-title');
+      if (modalTitleEl) {
+        modalTitleEl.innerHTML = `<span class="text-primarytext">Edit</span><span class="text-coral ml-1">Task</span>`;
+      }
+      const submitBtn = document.getElementById('modal-submit-btn');
+      if (submitBtn) {
+        submitBtn.textContent = 'Save Changes';
+      }
+      const deleteBtn = document.getElementById('modal-delete-btn');
+      if (deleteBtn) {
+        deleteBtn.classList.remove('hidden');
+      }
+
+      syncModalControls();
+      modal?.classList.remove('hidden');
+      setTimeout(() => titleInput?.focus(), 40);
+    }
+
+    function handleDeleteCurrentTask() {
+      if (!state.editingTaskId) return;
+      const id = state.editingTaskId;
+      state.tasks = state.tasks.filter((t) => t.id !== id);
+      state.editingTaskId = null;
+      saveState();
+      computeSelectedDayRings();
+      renderUnifiedCalendar();
+      renderTimeline();
+      closeTaskModal();
     }
 
     function openScheduleFromQueue(queueId) {
@@ -4291,6 +4492,8 @@
     }
 
     function closeTaskModal() {
+      state.editingTaskId = null;
+      state.schedulingQueueItemId = null;
       document.getElementById('task-modal')?.classList.add('hidden');
       toggleModalIconPicker(false);
     }
@@ -4586,38 +4789,64 @@
       const intraPrompts = document.getElementById('modal-intra-prompts')?.value.trim() || '';
       const postPrompts = document.getElementById('modal-post-prompts')?.value.trim() || '';
 
-      const newTask = {
-        id: Date.now(),
-        title,
-        startMin: state.modalStartMin,
-        durationMin: state.modalAllDay ? 0 : state.modalDurationMin,
-        color: state.modalColor,
-        icon: state.modalIcon,
-        recurring: state.modalRepeat !== 'once',
-        repeat: state.modalRepeat,
-        energy: state.modalEnergyTier,
-        priority: state.modalPriority,
-        alertStart: state.modalAlertStart,
-        alertEnd: state.modalAlertEnd,
-        pinned: state.modalPinned,
-        location,
-        note,
-        prePrompts,
-        intraPrompts,
-        postPrompts,
-        subtasks: null,
-        done: false,
-        compartment: inferCompartment(state.modalStartMin),
-      };
+      if (state.editingTaskId !== null) {
+        const existingTask = state.tasks.find((t) => t.id === state.editingTaskId);
+        if (existingTask) {
+          existingTask.title = title;
+          existingTask.startMin = state.modalStartMin;
+          existingTask.durationMin = state.modalAllDay ? 0 : state.modalDurationMin;
+          existingTask.color = state.modalColor;
+          existingTask.icon = state.modalIcon;
+          existingTask.recurring = state.modalRepeat !== 'once';
+          existingTask.repeat = state.modalRepeat;
+          existingTask.energy = state.modalEnergyTier;
+          existingTask.priority = state.modalPriority;
+          existingTask.alertStart = state.modalAlertStart;
+          existingTask.alertEnd = state.modalAlertEnd;
+          existingTask.pinned = state.modalPinned;
+          existingTask.location = location;
+          existingTask.note = note;
+          existingTask.prePrompts = prePrompts;
+          existingTask.intraPrompts = intraPrompts;
+          existingTask.postPrompts = postPrompts;
+          existingTask.compartment = inferCompartment(state.modalStartMin);
+        }
+        state.editingTaskId = null;
+      } else {
+        const newTask = {
+          id: Date.now(),
+          title,
+          startMin: state.modalStartMin,
+          durationMin: state.modalAllDay ? 0 : state.modalDurationMin,
+          color: state.modalColor,
+          icon: state.modalIcon,
+          recurring: state.modalRepeat !== 'once',
+          repeat: state.modalRepeat,
+          energy: state.modalEnergyTier,
+          priority: state.modalPriority,
+          alertStart: state.modalAlertStart,
+          alertEnd: state.modalAlertEnd,
+          pinned: state.modalPinned,
+          location,
+          note,
+          prePrompts,
+          intraPrompts,
+          postPrompts,
+          subtasks: null,
+          done: false,
+          compartment: inferCompartment(state.modalStartMin),
+        };
 
-      state.tasks.push(newTask);
+        state.tasks.push(newTask);
 
-      if (state.schedulingQueueItemId !== null) {
-        state.unscheduledQueue = state.unscheduledQueue.filter((q) => q.id !== state.schedulingQueueItemId);
-        state.scheduledFromQueueCount += 1;
-        state.schedulingQueueItemId = null;
+        if (state.schedulingQueueItemId !== null) {
+          state.unscheduledQueue = state.unscheduledQueue.filter((q) => q.id !== state.schedulingQueueItemId);
+          state.scheduledFromQueueCount += 1;
+          state.schedulingQueueItemId = null;
+        }
       }
 
+      saveState();
       computeSelectedDayRings();
       renderUnifiedCalendar();
       renderTimeline();
@@ -4647,6 +4876,7 @@
         added: 'Just now',
       });
       input.value = '';
+      saveState();
       renderInboxDeck();
     }
 
@@ -4660,6 +4890,7 @@
       } else {
         state.archivedDumps.unshift({ ...topItem, archivedAt: 'Just now' });
       }
+      saveState();
       renderInboxDeck();
     }
 
@@ -4675,6 +4906,7 @@
         state.archivedDumps = state.archivedDumps.filter((a) => a.id !== last.item.id);
       }
       state.inboxItems.unshift(last.item);
+      saveState();
       renderInboxDeck();
     }
 
@@ -4683,6 +4915,7 @@
       if (idx < 0) return;
       const [item] = state.archivedDumps.splice(idx, 1);
       state.inboxItems.unshift(item);
+      saveState();
       renderInboxDeck();
     }
 
@@ -4930,6 +5163,7 @@
         habit.completedDays = Math.max(0, habit.completedDays - 1);
         if (habit.history && habit.history.length > 0) habit.history[habit.history.length - 1] = 0;
       }
+      saveState();
       renderHabits();
     }
 
@@ -5086,6 +5320,7 @@
         history: new Array(HEATMAP_ACTIVE_SLOTS).fill(0),
       });
 
+      saveState();
       closeHabitModal();
       renderHabits();
     }
@@ -5123,6 +5358,7 @@
       const wasDone = Boolean(habit.history[idx]);
       habit.history[idx] = wasDone ? 0 : 1;
       habit.completedDays = Math.max(0, Math.min(habit.masteryDays, habit.completedDays + (wasDone ? -1 : 1)));
+      saveState();
       renderHabitHistoryCalendar();
     }
 
@@ -8407,6 +8643,7 @@
       if (!title) {
         delete horizonState.horizonGoals[scope][slotKey];
         horizonState.editingHorizonTarget = null;
+        saveState();
         renderHorizonView();
         return;
       }
@@ -8435,6 +8672,7 @@
       };
 
       horizonState.editingHorizonTarget = null;
+      saveState();
       renderHorizonView();
     }
 
@@ -8447,6 +8685,7 @@
         return;
       }
       goal.done = !goal.done;
+      saveState();
       renderHorizonView();
     }
 
@@ -8657,9 +8896,10 @@
         }
       } catch (_) {}
 
+      loadState();
       syncTaskCompartments();
       computeSelectedDayRings();
-      applyThemeAndAccent('charcoal', 'coral');
+      applyThemeAndAccent(state.themeId || 'charcoal', state.accentKey || 'coral');
       renderCompartmentEditors();
       renderCompartmentBar();
       renderUnifiedCalendar();
