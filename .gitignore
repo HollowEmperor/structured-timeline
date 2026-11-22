@@ -1,0 +1,14 @@
+# Android Build Artifacts & Binaries
+*.apk
+Timeline.apk
+android/
+dist/
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build Caches & Logs
+.gradle/
+*.log
+scratch/
