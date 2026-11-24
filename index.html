@@ -759,17 +759,6 @@
             <span id="header-month-label" class="text-primarytext">November</span>
             <span id="header-year-label" class="text-coral">2026</span>
           </h1>
-          <div id="calendar-month-nav" onpointerdown="event.stopPropagation()" class="flex items-center gap-1 flex-shrink-0">
-            <button
-              type="button"
-              id="header-today-btn"
-              onclick="jumpCalendarToToday()"
-              title="Jump to today"
-              class="hidden tactile-btn px-2 py-0.5 rounded-full bg-coral/15 border border-coral/40 text-coral text-[10px] font-semibold"
-            >
-              Today
-            </button>
-          </div>
         </div>
 
         <div class="flex items-center gap-1.5 flex-shrink-0">
@@ -1825,7 +1814,7 @@
           </div>
         </button>
 
-        <button onclick="switchBottomTab('timeline')" id="nav-timeline" title="Timeline" aria-label="Timeline" class="tactile-btn flex items-center justify-center text-coral">
+        <button onclick="handleTimelineNavTap()" id="nav-timeline" title="Timeline (Tap to jump to today)" aria-label="Timeline" class="tactile-btn flex items-center justify-center text-coral">
           <div id="nav-pill-timeline" class="px-3.5 py-2 rounded-full bg-coral/20">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
           </div>
@@ -3649,6 +3638,249 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         return { action: 'none', axis: 'y' };
       }
 
+      function getMondayDateKey(dateKey) {
+        const d = parseDateKey(dateKey);
+        const mondayOffset = (d.getDay() + 6) % 7;
+        const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() - mondayOffset);
+        return formatDateKey(monday);
+      }
+
+      function getProjectWeekSpanCount(startDate, endDate) {
+        const sKey = isValidDateKey(startDate) ? startDate : formatDateKey(new Date());
+        const eKey = isValidDateKey(endDate) ? endDate : sKey;
+        const [firstKey, lastKey] = compareDateKeys(sKey, eKey) <= 0 ? [sKey, eKey] : [eKey, sKey];
+        const startMon = parseDateKey(getMondayDateKey(firstKey));
+        const endMon = parseDateKey(getMondayDateKey(lastKey));
+        const diffDays = Math.round((endMon.getTime() - startMon.getTime()) / 86400000);
+        return Math.max(1, Math.floor(diffDays / 7) + 1);
+      }
+
+      function computeCalendarTimeframeWindow(monthCells, projects, selectedDate, options = {}) {
+        const cells = Array.isArray(monthCells) ? monthCells : [];
+        const totalRows = Math.max(1, Math.floor(cells.length / 7) || 6);
+        const maxWeeks = Number(options.maxWeeks) || 5;
+        const rowHeight = Number(options.rowHeight) || 52;
+        const rowStride = Number(options.rowStride) || 56;
+
+        const selIdx = cells.findIndex((c) => c && c.dateKey === selectedDate);
+        const selectedRow = selIdx >= 0 ? Math.floor(selIdx / 7) : 0;
+
+        if (cells.length < 7) {
+          return {
+            mode: 'full-month',
+            canExpand: true,
+            selectedRow: 0,
+            expandedStartRow: 0,
+            expandedEndRow: totalRows - 1,
+            expandedRowCount: totalRows,
+            expandedHeight: rowHeight + (totalRows - 1) * rowStride,
+          };
+        }
+
+        const gridStartKey = cells[0].dateKey;
+        const gridEndKey = cells[cells.length - 1].dateKey;
+        const projectList = Array.isArray(projects) ? projects : [];
+
+        const overlapping = [];
+        for (const p of projectList) {
+          if (!p) continue;
+          const range = getProjectEffectiveRange(p, selectedDate);
+          if (compareDateKeys(range.endDate, gridStartKey) < 0 || compareDateKeys(range.startDate, gridEndKey) > 0) {
+            continue;
+          }
+
+          let firstRow = -1;
+          let lastRow = -1;
+          for (let r = 0; r < totalRows; r++) {
+            const rowStart = cells[r * 7]?.dateKey;
+            const rowEnd = cells[r * 7 + 6]?.dateKey;
+            if (!rowStart || !rowEnd) continue;
+            if (compareDateKeys(range.endDate, rowStart) >= 0 && compareDateKeys(range.startDate, rowEnd) <= 0) {
+              if (firstRow === -1) firstRow = r;
+              lastRow = r;
+            }
+          }
+
+          if (firstRow === -1 || lastRow === -1) continue;
+          const totalWeeks = getProjectWeekSpanCount(range.startDate, range.endDate);
+          const gridRowSpan = lastRow - firstRow + 1;
+          const exceedsMaxWeeks = totalWeeks > maxWeeks || gridRowSpan > maxWeeks;
+          const containsSelectedDate =
+            isValidDateKey(selectedDate) &&
+            compareDateKeys(selectedDate, range.startDate) >= 0 &&
+            compareDateKeys(selectedDate, range.endDate) <= 0;
+          const containsSelectedRow = selectedRow >= firstRow && selectedRow <= lastRow;
+
+          overlapping.push({
+            project: p,
+            startDate: range.startDate,
+            endDate: range.endDate,
+            firstRow,
+            lastRow,
+            gridRowSpan,
+            totalWeeks,
+            exceedsMaxWeeks,
+            containsSelectedDate,
+            containsSelectedRow,
+          });
+        }
+
+        if (overlapping.length === 0) {
+          return {
+            mode: 'full-month',
+            canExpand: true,
+            selectedRow,
+            expandedStartRow: 0,
+            expandedEndRow: totalRows - 1,
+            expandedRowCount: totalRows,
+            expandedHeight: rowHeight + (totalRows - 1) * rowStride,
+          };
+        }
+
+        const eligible = overlapping.filter((item) => !item.exceedsMaxWeeks);
+
+        if (eligible.length === 0) {
+          return {
+            mode: 'exceeds-max-weeks',
+            canExpand: false,
+            selectedRow,
+            expandedStartRow: selectedRow,
+            expandedEndRow: selectedRow,
+            expandedRowCount: 1,
+            expandedHeight: rowHeight,
+          };
+        }
+
+        let targetGroup = eligible;
+        let minRow = Math.min(...targetGroup.map((item) => item.firstRow));
+        let maxRow = Math.max(...targetGroup.map((item) => item.lastRow));
+
+        if (maxRow - minRow + 1 > maxWeeks) {
+          const onDate = eligible.filter((item) => item.containsSelectedDate || item.containsSelectedRow);
+          if (onDate.length > 0) {
+            targetGroup = onDate;
+            minRow = Math.min(...targetGroup.map((item) => item.firstRow));
+            maxRow = Math.max(...targetGroup.map((item) => item.lastRow));
+          }
+          if (maxRow - minRow + 1 > maxWeeks) {
+            const closest = [...eligible].sort(
+              (a, b) =>
+                Math.min(Math.abs(a.firstRow - selectedRow), Math.abs(a.lastRow - selectedRow)) -
+                Math.min(Math.abs(b.firstRow - selectedRow), Math.abs(b.lastRow - selectedRow))
+            )[0];
+            minRow = closest.firstRow;
+            maxRow = closest.lastRow;
+          }
+        }
+
+        const expandedRowCount = Math.max(1, maxRow - minRow + 1);
+        const canExpand = expandedRowCount > 1 || minRow !== selectedRow;
+
+        return {
+          mode: 'timeframe',
+          canExpand,
+          selectedRow,
+          expandedStartRow: minRow,
+          expandedEndRow: maxRow,
+          expandedRowCount,
+          expandedHeight: rowHeight + (expandedRowCount - 1) * rowStride,
+        };
+      }
+
+      function computeCalendarCellTimeframeBoxes(spans, colIndex) {
+        const list = Array.isArray(spans) ? spans : [];
+        const col = Math.max(0, Math.min(6, Number(colIndex) || 0));
+
+        return list.slice(0, 3).map((sp, idx) => {
+          const continuesLeft = !sp.isStart && col > 0;
+          const continuesRight = !sp.isEnd && col < 6;
+          const insetPx = idx * 3;
+
+          return {
+            projectId: sp.projectId,
+            title: sp.title || 'Project',
+            color: sp.color || 'coral',
+            lane: sp.lane ?? idx,
+            isStart: Boolean(sp.isStart),
+            isEnd: Boolean(sp.isEnd),
+            continuesLeft,
+            continuesRight,
+            insetPx,
+            leftPx: continuesLeft ? -2 : insetPx,
+            rightPx: continuesRight ? -2 : insetPx,
+            topPx: insetPx,
+            bottomPx: insetPx,
+            borderLeftWidth: continuesLeft ? 0 : 2,
+            borderRightWidth: continuesRight ? 0 : 2,
+            borderTopWidth: 2,
+            borderBottomWidth: 2,
+            radiusTopLeft: continuesLeft ? 0 : Math.max(6, 12 - insetPx),
+            radiusBottomLeft: continuesLeft ? 0 : Math.max(6, 12 - insetPx),
+            radiusTopRight: continuesRight ? 0 : Math.max(6, 12 - insetPx),
+            radiusBottomRight: continuesRight ? 0 : Math.max(6, 12 - insetPx),
+          };
+        });
+      }
+
+      function computeCalendarRowTimeframeBoxes(rowCells, projects, todayKey, laneInfo = null) {
+        const cells = Array.isArray(rowCells) ? rowCells : [];
+        const list = Array.isArray(projects) ? projects : [];
+        if (cells.length === 0 || list.length === 0) return [];
+        const info = laneInfo || assignProjectLanes(list, todayKey);
+        const rowFirstKey = cells[0].dateKey;
+        const rowLastKey = cells[cells.length - 1].dateKey;
+
+        const rawSegments = [];
+        for (const p of list) {
+          const meta = info.laneById.get(p.id);
+          if (!meta) continue;
+          const { lane, startDate: startKey, endDate: endKey } = meta;
+          if (endKey < rowFirstKey || startKey > rowLastKey) continue;
+
+          let startCol = -1;
+          let endCol = -1;
+          for (let col = 0; col < cells.length; col++) {
+            const dk = cells[col].dateKey;
+            if (dk >= startKey && dk <= endKey) {
+              if (startCol === -1) startCol = col;
+              endCol = col;
+            }
+          }
+          if (startCol === -1) continue;
+
+          rawSegments.push({
+            projectId: p.id,
+            title: p.title || 'Project',
+            color: p.color || 'coral',
+            lane,
+            startCol,
+            endCol,
+            isStart: cells[startCol].dateKey === startKey,
+            isEnd: cells[endCol].dateKey === endKey,
+          });
+        }
+
+        rawSegments.sort((a, b) => a.lane - b.lane || a.startCol - b.startCol || b.endCol - a.endCol);
+
+        const slotEndCol = [];
+        return rawSegments.map((seg) => {
+          let rowSlot = slotEndCol.findIndex((lastCol) => lastCol < seg.startCol);
+          if (rowSlot === -1) {
+            rowSlot = slotEndCol.length;
+            slotEndCol.push(seg.endCol);
+          } else {
+            slotEndCol[rowSlot] = seg.endCol;
+          }
+          const insetPx = Math.min(2, rowSlot) * 3;
+          return {
+            ...seg,
+            rowSlot,
+            insetPx,
+            radiusPx: Math.max(7, 12 - insetPx),
+          };
+        });
+      }
+
       window.CalendarProjectsLogic = {
         MONTH_NAMES_FULL,
         MONTH_NAMES_SHORT,
@@ -3672,6 +3904,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         getCalendarProjectDecorations,
         buildSharedProjectTimeline,
         resolveCalendarSwipeGesture,
+        getMondayDateKey,
+        getProjectWeekSpanCount,
+        computeCalendarTimeframeWindow,
+        computeCalendarCellTimeframeBoxes,
+        computeCalendarRowTimeframeBoxes,
       };
     })();
   </script>
@@ -5757,14 +5994,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function syncCalendarHeader() {
       const monthLabel = document.getElementById('header-month-label');
       const yearLabel = document.getElementById('header-year-label');
-      const monthNav = document.getElementById('calendar-month-nav');
-      const todayBtn = document.getElementById('header-today-btn');
       const filterBtn = document.getElementById('header-filter-btn');
       const filterIcon = document.getElementById('header-filter-icon');
 
       const tab = state.activeTab || 'timeline';
-      const todayKey = getTodayDateKey();
-      const todayD = CalLogic.parseDateKey(todayKey);
 
       if (monthLabel && yearLabel) {
         if (tab === 'habit') {
@@ -5783,16 +6016,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           monthLabel.textContent = CalLogic.MONTH_NAMES_FULL[state.calendarMonth] || 'November';
           yearLabel.textContent = String(state.calendarYear);
         }
-      }
-
-      const showCalNav = tab === 'timeline' || tab === 'inbox';
-      if (monthNav) monthNav.classList.toggle('hidden', !showCalNav);
-      if (todayBtn) {
-        const isAwayFromToday =
-          state.selectedDate !== todayKey ||
-          state.calendarYear !== todayD.getFullYear() ||
-          state.calendarMonth !== todayD.getMonth();
-        todayBtn.classList.toggle('hidden', !showCalNav || !isAwayFromToday);
       }
 
       if (filterBtn && filterIcon) {
@@ -5859,22 +6082,40 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (state.activeTab === 'profile') renderProfileEnergyBars();
     }
 
+    function getCalendarExpansionWindow() {
+      return CalLogic.computeCalendarTimeframeWindow(
+        state.monthCells,
+        state.projects || [],
+        state.selectedDate,
+        { maxWeeks: 5, rowHeight: CAL_COLLAPSED_H, rowStride: 56 }
+      );
+    }
+
     function applyCalendarProgress(progress, immediate = false) {
       const mask = document.getElementById('calendar-viewport-mask');
       const rows = document.getElementById('unified-calendar-rows');
       if (!mask || !rows) return;
 
-      const p = Math.max(0, Math.min(1, progress));
-      const idx = state.monthCells.findIndex((c) => c.dateKey === state.selectedDate);
-      const selectedRow = idx >= 0 ? Math.floor(idx / 7) : 0;
+      const win = getCalendarExpansionWindow();
+      if (!win.canExpand && state.monthExpanded) {
+        state.monthExpanded = false;
+      }
+
+      const p = win.canExpand ? Math.max(0, Math.min(1, progress)) : 0;
       const rowStride = 56;
 
       mask.style.transition = immediate ? 'none' : 'height 0.34s cubic-bezier(0.22, 1, 0.36, 1)';
       rows.style.transition = immediate ? 'none' : 'transform 0.34s cubic-bezier(0.22, 1, 0.36, 1)';
 
-      const currentH = CAL_COLLAPSED_H + (CAL_EXPANDED_H - CAL_COLLAPSED_H) * p;
-      const offsetY = -selectedRow * rowStride * (1 - p);
+      const currentH = CAL_COLLAPSED_H + (win.expandedHeight - CAL_COLLAPSED_H) * p;
+      const collapsedOffsetY = -win.selectedRow * rowStride;
+      const expandedOffsetY = -win.expandedStartRow * rowStride;
+      const offsetY = collapsedOffsetY * (1 - p) + expandedOffsetY * p;
 
+      mask.dataset.expansionMode = win.mode;
+      mask.dataset.expandedStartRow = String(win.expandedStartRow);
+      mask.dataset.expandedEndRow = String(win.expandedEndRow);
+      mask.dataset.expandedRows = String(win.expandedRowCount);
       mask.style.height = `${currentH.toFixed(1)}px`;
       rows.style.transform = `translate3d(0px, ${offsetY.toFixed(1)}px, 0)`;
     }
@@ -5918,13 +6159,33 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const circ = 2 * Math.PI * r;
       const todayKey = getTodayDateKey();
       const laneInfo = CalLogic.assignProjectLanes(state.projects || [], todayKey);
-      const visibleLanes = Math.min(3, laneInfo.laneCount);
 
       let rowsHtml = '';
       for (let row = 0; row < 6; row++) {
+        const rowCells = state.monthCells.slice(row * 7, row * 7 + 7);
+        const rowSegments = CalLogic.computeCalendarRowTimeframeBoxes(rowCells, state.projects || [], todayKey, laneInfo);
+        const rowBoxesHtml = rowSegments
+          .map((seg) => {
+            const cHex = (CAPSULE_COLORS[seg.color] || CAPSULE_COLORS.coral).hex;
+            const fillAlpha = seg.rowSlot === 0 ? '1A' : '12';
+            const radiusLeft = seg.isStart ? seg.radiusPx : Math.max(6, seg.radiusPx - 2);
+            const radiusRight = seg.isEnd ? seg.radiusPx : Math.max(6, seg.radiusPx - 2);
+            return `<div style="grid-row:1; grid-column:${seg.startCol + 1} / ${seg.endCol + 2}; padding:${seg.insetPx}px;">
+              <div
+                data-timeframe-box="${escapeHtml(seg.projectId)}"
+                data-timeframe-color="${escapeHtml(seg.color)}"
+                data-start-col="${seg.startCol}"
+                data-end-col="${seg.endCol}"
+                class="w-full h-full"
+                style="border:2px solid ${cHex}; border-radius:${radiusLeft}px ${radiusRight}px ${radiusRight}px ${radiusLeft}px; background-color:${cHex}${fillAlpha};"
+              ></div>
+            </div>`;
+          })
+          .join('');
+
         let cellsHtml = '';
         for (let col = 0; col < 7; col++) {
-          const cell = state.monthCells[row * 7 + col];
+          const cell = rowCells[col];
           if (!cell) continue;
           const isSelected = cell.dateKey === state.selectedDate;
           const isToday = cell.dateKey === todayKey;
@@ -5934,32 +6195,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           const seg3 = (Math.min(100, Math.max(0, v3)) / 100) * (circ * 0.30);
 
           const dec = CalLogic.getCalendarProjectDecorations(state.projects || [], cell.dateKey, todayKey, laneInfo);
-          const spanByLane = new Map();
-          dec.spans.forEach((s) => {
-            if (s.lane < 3) spanByLane.set(s.lane, s);
-          });
-
-          let spanBarsHtml = '';
-          if (visibleLanes > 0) {
-            let tracks = '';
-            for (let lane = 0; lane < visibleLanes; lane++) {
-              const sp = spanByLane.get(lane);
-              if (!sp) {
-                tracks += '<span class="block h-[3px] w-full"></span>';
-              } else {
-                const cHex = (CAPSULE_COLORS[sp.color] || CAPSULE_COLORS.coral).hex;
-                const radiusCls = sp.isSingle
-                  ? 'rounded-full mx-1'
-                  : sp.isStart
-                    ? 'rounded-l-full ml-1 -mr-1'
-                    : sp.isEnd
-                      ? 'rounded-r-full -ml-1 mr-1'
-                      : '-mx-1';
-                tracks += `<span class="block h-[3px] ${radiusCls}" style="background-color:${cHex}; opacity:${cell.out ? '0.45' : '0.92'};"></span>`;
-              }
-            }
-            spanBarsHtml = `<div class="absolute inset-x-0 bottom-[2px] flex flex-col gap-[1.5px] pointer-events-none">${tracks}</div>`;
-          }
+          const hasTimeframeBox = dec.spans.length > 0;
+          const primaryBoxColor = hasTimeframeBox
+            ? (CAPSULE_COLORS[dec.spans[0].color] || CAPSULE_COLORS.coral).hex
+            : null;
 
           let dueDotsHtml = '';
           if (dec.dueCheckpoints.length > 0) {
@@ -5968,27 +6207,43 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               const ringStyle = !cp.done ? `box-shadow: 0 0 0 1.5px rgb(var(--color-appbg)), 0 0 6px ${cHex};` : 'opacity:0.45;';
               return `<span class="w-[5px] h-[5px] rounded-full" style="background-color:${cHex}; ${ringStyle}" title="${escapeHtml(cp.projectTitle)}: ${escapeHtml(cp.title)}"></span>`;
             }).join('');
-            dueDotsHtml = `<div class="absolute top-[2px] right-[3px] flex items-center gap-[2px] pointer-events-none">${dots}</div>`;
+            dueDotsHtml = `<div class="absolute top-[4px] right-[5px] z-20 flex items-center gap-[2px] pointer-events-none">${dots}</div>`;
           }
 
-          const ringWrapperOffset = visibleLanes > 0 ? '-translate-y-[3px]' : '';
+          const selectedInBoxHighlightHtml = hasTimeframeBox && isSelected
+            ? `<span class="pointer-events-none absolute w-[38px] h-[38px] rounded-full z-0" style="background-color:${primaryBoxColor}2E; box-shadow: 0 0 0 1.5px ${primaryBoxColor}B3;"></span>`
+            : '';
+
+          const cellBoxClasses = hasTimeframeBox
+            ? isSelected
+              ? 'z-10'
+              : cell.out
+                ? 'opacity-50 hover:opacity-80'
+                : ''
+            : isSelected
+              ? 'bg-cardbg ring-2 ring-coral z-10'
+              : isToday
+                ? 'bg-cardbg/70 ring-1 ring-coral/60 hover:bg-cardbg'
+                : cell.out
+                  ? 'opacity-40 hover:opacity-75 hover:bg-cardbg/40'
+                  : 'hover:bg-cardbg/50';
+
+          const dayNumColorStyle = hasTimeframeBox && (isSelected || isToday) ? `style="color:${primaryBoxColor};"` : '';
+          const dayNumColorCls = hasTimeframeBox && (isSelected || isToday)
+            ? ''
+            : isSelected || isToday
+              ? 'text-coral'
+              : 'text-primarytext';
 
           cellsHtml += `
             <button
               type="button"
               data-cal-date="${cell.dateKey}"
               onclick="selectCalendarDate('${cell.dateKey}')"
-              class="h-[52px] rounded-xl flex items-center justify-center relative transition overflow-visible ${
-                isSelected
-                  ? 'bg-cardbg ring-2 ring-coral z-10'
-                  : isToday
-                    ? 'bg-cardbg/70 ring-1 ring-coral/60 hover:bg-cardbg'
-                    : cell.out
-                      ? 'opacity-40 hover:opacity-75 hover:bg-cardbg/40'
-                      : 'hover:bg-cardbg/50'
-              }"
+              class="h-[52px] rounded-xl flex items-center justify-center relative transition overflow-visible ${cellBoxClasses}"
             >
-              <div class="relative flex items-center justify-center ${ringWrapperOffset}">
+              ${selectedInBoxHighlightHtml}
+              <div class="relative z-10 flex items-center justify-center">
                 <svg class="w-[34px] h-[34px] -rotate-90" viewBox="0 0 34 34">
                   <circle cx="17" cy="17" r="${r}" fill="none" stroke="rgb(var(--color-pillbg))" stroke-width="2.9" />
                   <circle cx="17" cy="17" r="${r}" fill="none" stroke="var(--color-ring-physical)" stroke-width="2.9" stroke-linecap="round"
@@ -5998,14 +6253,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   <circle cx="17" cy="17" r="${r}" fill="none" stroke="var(--color-ring-gained)" stroke-width="2.9" stroke-linecap="round"
                     stroke-dasharray="${seg3.toFixed(1)} ${circ.toFixed(1)}" stroke-dashoffset="${(-(circ * 0.666)).toFixed(1)}" />
                 </svg>
-                <span class="absolute text-[10px] font-bold ${isSelected || isToday ? 'text-coral' : 'text-primarytext'}">${cell.d}</span>
+                <span class="absolute text-[10px] font-bold ${dayNumColorCls}" ${dayNumColorStyle}>${cell.d}</span>
               </div>
               ${dueDotsHtml}
-              ${spanBarsHtml}
             </button>
           `;
         }
-        rowsHtml += `<div class="grid grid-cols-7 gap-1">${cellsHtml}</div>`;
+        rowsHtml += `<div class="relative"><div class="pointer-events-none absolute inset-0 grid grid-cols-7 gap-1 z-0">${rowBoxesHtml}</div><div class="relative z-10 grid grid-cols-7 gap-1">${cellsHtml}</div></div>`;
       }
 
       rowsEl.innerHTML = rowsHtml;
@@ -6198,6 +6452,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function toggleMonthCalendar(forceState) {
+      const win = getCalendarExpansionWindow();
+      if (!win.canExpand) {
+        state.monthExpanded = false;
+        applyCalendarProgress(0, false);
+        return;
+      }
       state.monthExpanded = typeof forceState === 'boolean' ? forceState : !state.monthExpanded;
       const hint = document.getElementById('calendar-drag-hint');
       applyCalendarProgress(state.monthExpanded ? 1 : 0, false);
@@ -6254,13 +6514,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         }
       }
 
+      const win = getCalendarExpansionWindow();
+
       if (calDrag.axis === 'x') {
         const rows = document.getElementById('unified-calendar-rows');
         if (rows) {
-          const p = state.monthExpanded ? 1 : 0;
-          const idx = state.monthCells.findIndex((c) => c.dateKey === state.selectedDate);
-          const selectedRow = idx >= 0 ? Math.floor(idx / 7) : 0;
-          const offsetY = -selectedRow * 56 * (1 - p);
+          const p = win.canExpand && state.monthExpanded ? 1 : 0;
+          const offsetY = -win.selectedRow * 56 * (1 - p) - win.expandedStartRow * 56 * p;
           const clampedDx = Math.max(-72, Math.min(72, dx * 0.55));
           rows.style.transition = 'none';
           rows.style.transform = `translate3d(${clampedDx.toFixed(1)}px, ${offsetY.toFixed(1)}px, 0)`;
@@ -6268,7 +6528,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         return;
       }
 
-      const travel = CAL_EXPANDED_H - CAL_COLLAPSED_H;
+      if (!win.canExpand) {
+        applyCalendarProgress(0, true);
+        return;
+      }
+
+      const travel = Math.max(56, win.expandedHeight - CAL_COLLAPSED_H);
       const progress = state.monthExpanded
         ? Math.max(0, Math.min(1, 1 + dy / travel))
         : Math.max(0, Math.min(1, dy / travel));
@@ -7080,50 +7345,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const colMinWidth = timeline.projects.length === 1 ? 'minmax(240px, 1fr)' : 'minmax(146px, 1fr)';
       const gridColsStyle = `grid-template-columns: 52px repeat(${timeline.projects.length}, ${colMinWidth});`;
 
-      const focusChipsHtml =
-        timeline.todayFocusItems.length > 0
-          ? timeline.todayFocusItems
-              .map((item) => {
-                const c = CAPSULE_COLORS[item.color] || CAPSULE_COLORS.coral;
-                const cp = item.checkpoint;
-                const isDue = item.relation === 'due-today' || item.relation === 'overdue';
-                const statusTag =
-                  item.relation === 'due-today'
-                    ? 'DUE TODAY'
-                    : item.relation === 'overdue'
-                      ? 'OVERDUE'
-                      : item.relation === 'done-today'
-                        ? 'DONE'
-                        : CalLogic.formatHumanDate(cp.date, 'compact');
-                return `
-                  <button
-                    type="button"
-                    data-focus-cp="${escapeHtml(cp.id)}"
-                    onclick="toggleProjectCheckpointDone('${escapeHtml(item.projectId)}', '${escapeHtml(cp.id)}')"
-                    style="border-color: ${isDue ? c.hex : 'rgb(var(--color-borderline))'}; background-color: rgb(var(--color-cardbg)); ${isDue ? `box-shadow: inset 0 0 0 999px ${c.hex}18;` : ''}"
-                    class="tactile-btn flex items-center gap-2 px-2.5 py-1.5 rounded-xl border text-left flex-shrink-0 max-w-[205px] transition"
-                    title="Tap to toggle checkpoint"
-                  >
-                    <span
-                      style="${cp.done ? `background-color:${c.hex}; color:${c.text}; border-color:${c.hex};` : `border-color:${c.hex}; color:${c.hex};`}"
-                      class="w-5 h-5 rounded-full border-2 text-[10px] font-bold flex items-center justify-center flex-shrink-0"
-                    >
-                      ${cp.done ? '✓' : cp.number}
-                    </span>
-                    <span class="min-w-0 flex-1">
-                      <span class="block text-[9px] font-bold uppercase tracking-wider truncate" style="color:${c.hex};">
-                        ${escapeHtml(item.projectTitle)} • ${statusTag}
-                      </span>
-                      <span class="block text-[11px] font-semibold truncate ${cp.done ? 'line-through text-secondarytext' : 'text-primarytext'}">
-                        ${escapeHtml(cp.title)}
-                      </span>
-                    </span>
-                  </button>
-                `;
-              })
-              .join('')
-          : `<span class="text-[11px] text-secondarytext">All checkpoints completed across active projects.</span>`;
-
       const headerCellsHtml = timeline.projects
         .map((p) => {
           const c = CAPSULE_COLORS[p.color] || CAPSULE_COLORS.coral;
@@ -7325,37 +7546,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         .join('');
 
       container.innerHTML = `
-        <div class="space-y-2 pb-6">
-          <!-- Sticky Current Day Checkpoint Focus Bar -->
-          <div id="projects-today-sticky-bar" class="sticky top-0 z-30 -mx-3 px-3 pt-1 pb-2 bg-sheetbg/95 backdrop-blur-md border-b border-borderline/70 space-y-1.5">
-            <div class="flex items-center justify-between gap-2">
-              <div class="flex items-center gap-1.5 min-w-0">
-                <span class="w-2 h-2 rounded-full bg-coral flex-shrink-0"></span>
-                <span class="text-[10px] font-bold uppercase tracking-wider text-coral whitespace-nowrap">Today</span>
-                <span class="text-[10.5px] font-medium text-secondarytext truncate">${CalLogic.formatHumanDate(todayKey, 'weekday-compact')}</span>
-              </div>
-              <div class="flex items-center gap-1.5 flex-shrink-0">
-                <button
-                  type="button"
-                  onclick="scrollProjectsTimelineToToday(true)"
-                  class="tactile-btn px-2 py-0.5 rounded-full bg-cardbg border border-borderline text-[9.5px] font-semibold text-primarytext hover:border-coral"
-                >
-                  Focus Today
-                </button>
-                <button
-                  type="button"
-                  onclick="openProjectModal()"
-                  class="tactile-btn px-2 py-0.5 rounded-full bg-coral/15 border border-coral/40 text-[9.5px] font-bold text-coral"
-                >
-                  + Project
-                </button>
-              </div>
-            </div>
-            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-0.5">
-              ${focusChipsHtml}
-            </div>
-          </div>
-
+        <div class="space-y-2 pb-6 pt-1">
           <!-- Parallel Side-by-Side Projects Timeline Matrix -->
           <div id="projects-matrix-scroll" class="overflow-x-auto no-scrollbar -mx-1 px-1">
             <div class="min-w-full inline-block align-top">
@@ -13087,6 +13278,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
+    }
+
+    function handleTimelineNavTap() {
+      jumpCalendarToToday();
+      switchBottomTab('timeline');
     }
 
     function switchBottomTab(tab) {

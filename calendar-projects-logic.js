@@ -468,6 +468,275 @@ export function resolveCalendarSwipeGesture(dx, dy, options = {}) {
   return { action: 'none', axis: 'y' };
 }
 
+/**
+ * Returns the Monday 'YYYY-MM-DD' dateKey of the Monday-first week containing `dateKey`.
+ */
+export function getMondayDateKey(dateKey) {
+  const d = parseDateKey(dateKey);
+  const mondayOffset = (d.getDay() + 6) % 7;
+  const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() - mondayOffset);
+  return formatDateKey(monday);
+}
+
+/**
+ * Computes how many Monday-first calendar weeks a [startDate, endDate] range spans in total.
+ */
+export function getProjectWeekSpanCount(startDate, endDate) {
+  const sKey = isValidDateKey(startDate) ? startDate : formatDateKey(new Date());
+  const eKey = isValidDateKey(endDate) ? endDate : sKey;
+  const [firstKey, lastKey] = compareDateKeys(sKey, eKey) <= 0 ? [sKey, eKey] : [eKey, sKey];
+  const startMon = parseDateKey(getMondayDateKey(firstKey));
+  const endMon = parseDateKey(getMondayDateKey(lastKey));
+  const diffDays = Math.round((endMon.getTime() - startMon.getTime()) / 86400000);
+  return Math.max(1, Math.floor(diffDays / 7) + 1);
+}
+
+/**
+ * Computes which week rows (0..5) of the 42-cell month grid should open when expanding the top calendar.
+ * - If no project timeframes overlap the displayed month grid, expands the full 6-row month (rows 0..5).
+ * - If project timeframe(s) exist and span <= maxWeeks (default 5), opens ONLY the week row(s) covering
+ *   that timeframe instead of the whole month.
+ * - If project timeframe(s) span > maxWeeks (more than 5 weeks) and no <=5-week timeframe applies,
+ *   does not expand the calendar (stays compact on the selected week row).
+ */
+export function computeCalendarTimeframeWindow(monthCells, projects, selectedDate, options = {}) {
+  const cells = Array.isArray(monthCells) ? monthCells : [];
+  const totalRows = Math.max(1, Math.floor(cells.length / 7) || 6);
+  const maxWeeks = Number(options.maxWeeks) || 5;
+  const rowHeight = Number(options.rowHeight) || 52;
+  const rowStride = Number(options.rowStride) || 56;
+
+  const selIdx = cells.findIndex((c) => c && c.dateKey === selectedDate);
+  const selectedRow = selIdx >= 0 ? Math.floor(selIdx / 7) : 0;
+
+  if (cells.length < 7) {
+    return {
+      mode: 'full-month',
+      canExpand: true,
+      selectedRow: 0,
+      expandedStartRow: 0,
+      expandedEndRow: totalRows - 1,
+      expandedRowCount: totalRows,
+      expandedHeight: rowHeight + (totalRows - 1) * rowStride,
+    };
+  }
+
+  const gridStartKey = cells[0].dateKey;
+  const gridEndKey = cells[cells.length - 1].dateKey;
+  const projectList = Array.isArray(projects) ? projects : [];
+
+  const overlapping = [];
+  for (const p of projectList) {
+    if (!p) continue;
+    const range = getProjectEffectiveRange(p, selectedDate);
+    if (compareDateKeys(range.endDate, gridStartKey) < 0 || compareDateKeys(range.startDate, gridEndKey) > 0) {
+      continue;
+    }
+
+    let firstRow = -1;
+    let lastRow = -1;
+    for (let r = 0; r < totalRows; r++) {
+      const rowStart = cells[r * 7]?.dateKey;
+      const rowEnd = cells[r * 7 + 6]?.dateKey;
+      if (!rowStart || !rowEnd) continue;
+      if (compareDateKeys(range.endDate, rowStart) >= 0 && compareDateKeys(range.startDate, rowEnd) <= 0) {
+        if (firstRow === -1) firstRow = r;
+        lastRow = r;
+      }
+    }
+
+    if (firstRow === -1 || lastRow === -1) continue;
+    const totalWeeks = getProjectWeekSpanCount(range.startDate, range.endDate);
+    const gridRowSpan = lastRow - firstRow + 1;
+    const exceedsMaxWeeks = totalWeeks > maxWeeks || gridRowSpan > maxWeeks;
+    const containsSelectedDate =
+      isValidDateKey(selectedDate) &&
+      compareDateKeys(selectedDate, range.startDate) >= 0 &&
+      compareDateKeys(selectedDate, range.endDate) <= 0;
+    const containsSelectedRow = selectedRow >= firstRow && selectedRow <= lastRow;
+
+    overlapping.push({
+      project: p,
+      startDate: range.startDate,
+      endDate: range.endDate,
+      firstRow,
+      lastRow,
+      gridRowSpan,
+      totalWeeks,
+      exceedsMaxWeeks,
+      containsSelectedDate,
+      containsSelectedRow,
+    });
+  }
+
+  if (overlapping.length === 0) {
+    return {
+      mode: 'full-month',
+      canExpand: true,
+      selectedRow,
+      expandedStartRow: 0,
+      expandedEndRow: totalRows - 1,
+      expandedRowCount: totalRows,
+      expandedHeight: rowHeight + (totalRows - 1) * rowStride,
+    };
+  }
+
+  const eligible = overlapping.filter((item) => !item.exceedsMaxWeeks);
+
+  if (eligible.length === 0) {
+    // All overlapping projects span more than 5 weeks -> do not expand the whole calendar
+    return {
+      mode: 'exceeds-max-weeks',
+      canExpand: false,
+      selectedRow,
+      expandedStartRow: selectedRow,
+      expandedEndRow: selectedRow,
+      expandedRowCount: 1,
+      expandedHeight: rowHeight,
+    };
+  }
+
+  // Prefer eligible timeframes covering the selected date/row if the union of all eligible projects would exceed maxWeeks
+  let targetGroup = eligible;
+  let minRow = Math.min(...targetGroup.map((item) => item.firstRow));
+  let maxRow = Math.max(...targetGroup.map((item) => item.lastRow));
+
+  if (maxRow - minRow + 1 > maxWeeks) {
+    const onDate = eligible.filter((item) => item.containsSelectedDate || item.containsSelectedRow);
+    if (onDate.length > 0) {
+      targetGroup = onDate;
+      minRow = Math.min(...targetGroup.map((item) => item.firstRow));
+      maxRow = Math.max(...targetGroup.map((item) => item.lastRow));
+    }
+    if (maxRow - minRow + 1 > maxWeeks) {
+      const closest = [...eligible].sort(
+        (a, b) =>
+          Math.min(Math.abs(a.firstRow - selectedRow), Math.abs(a.lastRow - selectedRow)) -
+          Math.min(Math.abs(b.firstRow - selectedRow), Math.abs(b.lastRow - selectedRow))
+      )[0];
+      minRow = closest.firstRow;
+      maxRow = closest.lastRow;
+    }
+  }
+
+  const expandedRowCount = Math.max(1, maxRow - minRow + 1);
+  const canExpand = expandedRowCount > 1 || minRow !== selectedRow;
+
+  return {
+    mode: 'timeframe',
+    canExpand,
+    selectedRow,
+    expandedStartRow: minRow,
+    expandedEndRow: maxRow,
+    expandedRowCount,
+    expandedHeight: rowHeight + (expandedRowCount - 1) * rowStride,
+  };
+}
+
+/**
+ * Computes stretched selection-box descriptors for a calendar cell (`colIndex` 0..6)
+ * so each project timeframe renders as a continuous colored selection box stretching
+ * across its entire [startDate, endDate] span instead of a bottom underline.
+ */
+export function computeCalendarCellTimeframeBoxes(spans, colIndex) {
+  const list = Array.isArray(spans) ? spans : [];
+  const col = Math.max(0, Math.min(6, Number(colIndex) || 0));
+
+  return list.slice(0, 3).map((sp, idx) => {
+    const continuesLeft = !sp.isStart && col > 0;
+    const continuesRight = !sp.isEnd && col < 6;
+    const insetPx = idx * 3;
+
+    return {
+      projectId: sp.projectId,
+      title: sp.title || 'Project',
+      color: sp.color || 'coral',
+      lane: sp.lane ?? idx,
+      isStart: Boolean(sp.isStart),
+      isEnd: Boolean(sp.isEnd),
+      continuesLeft,
+      continuesRight,
+      insetPx,
+      leftPx: continuesLeft ? -2 : insetPx,
+      rightPx: continuesRight ? -2 : insetPx,
+      topPx: insetPx,
+      bottomPx: insetPx,
+      borderLeftWidth: continuesLeft ? 0 : 2,
+      borderRightWidth: continuesRight ? 0 : 2,
+      borderTopWidth: 2,
+      borderBottomWidth: 2,
+      radiusTopLeft: continuesLeft ? 0 : Math.max(6, 12 - insetPx),
+      radiusBottomLeft: continuesLeft ? 0 : Math.max(6, 12 - insetPx),
+      radiusTopRight: continuesRight ? 0 : Math.max(6, 12 - insetPx),
+      radiusBottomRight: continuesRight ? 0 : Math.max(6, 12 - insetPx),
+    };
+  });
+}
+
+/**
+ * Computes seamless, single-element row-level stretched selection box segments
+ * for a 7-day calendar week row so each project timeframe renders with zero
+ * inter-cell seams and a uniform inset across its entire row span.
+ */
+export function computeCalendarRowTimeframeBoxes(rowCells, projects, todayKey, laneInfo = null) {
+  const cells = Array.isArray(rowCells) ? rowCells : [];
+  const list = Array.isArray(projects) ? projects : [];
+  if (cells.length === 0 || list.length === 0) return [];
+  const info = laneInfo || assignProjectLanes(list, todayKey);
+  const rowFirstKey = cells[0].dateKey;
+  const rowLastKey = cells[cells.length - 1].dateKey;
+
+  const rawSegments = [];
+  for (const p of list) {
+    const meta = info.laneById.get(p.id);
+    if (!meta) continue;
+    const { lane, startDate: startKey, endDate: endKey } = meta;
+    if (endKey < rowFirstKey || startKey > rowLastKey) continue;
+
+    let startCol = -1;
+    let endCol = -1;
+    for (let col = 0; col < cells.length; col++) {
+      const dk = cells[col].dateKey;
+      if (dk >= startKey && dk <= endKey) {
+        if (startCol === -1) startCol = col;
+        endCol = col;
+      }
+    }
+    if (startCol === -1) continue;
+
+    rawSegments.push({
+      projectId: p.id,
+      title: p.title || 'Project',
+      color: p.color || 'coral',
+      lane,
+      startCol,
+      endCol,
+      isStart: cells[startCol].dateKey === startKey,
+      isEnd: cells[endCol].dateKey === endKey,
+    });
+  }
+
+  rawSegments.sort((a, b) => a.lane - b.lane || a.startCol - b.startCol || b.endCol - a.endCol);
+
+  const slotEndCol = [];
+  return rawSegments.map((seg) => {
+    let rowSlot = slotEndCol.findIndex((lastCol) => lastCol < seg.startCol);
+    if (rowSlot === -1) {
+      rowSlot = slotEndCol.length;
+      slotEndCol.push(seg.endCol);
+    } else {
+      slotEndCol[rowSlot] = seg.endCol;
+    }
+    const insetPx = Math.min(2, rowSlot) * 3;
+    return {
+      ...seg,
+      rowSlot,
+      insetPx,
+      radiusPx: Math.max(7, 12 - insetPx),
+    };
+  });
+}
+
 if (typeof window !== 'undefined') {
   window.CalendarProjectsLogic = {
     MONTH_NAMES_FULL,
@@ -492,5 +761,10 @@ if (typeof window !== 'undefined') {
     getCalendarProjectDecorations,
     buildSharedProjectTimeline,
     resolveCalendarSwipeGesture,
+    getMondayDateKey,
+    getProjectWeekSpanCount,
+    computeCalendarTimeframeWindow,
+    computeCalendarCellTimeframeBoxes,
+    computeCalendarRowTimeframeBoxes,
   };
 }

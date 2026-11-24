@@ -9,6 +9,10 @@ import {
   buildSharedProjectTimeline,
   addDaysToDateKey,
   resolveCalendarSwipeGesture,
+  getProjectWeekSpanCount,
+  computeCalendarTimeframeWindow,
+  computeCalendarCellTimeframeBoxes,
+  computeCalendarRowTimeframeBoxes,
 } from './calendar-projects-logic.js';
 
 test('buildMonthGrid produces 42 real Monday-first cells for any month/year including leap years', () => {
@@ -156,3 +160,122 @@ test('resolveCalendarSwipeGesture distinguishes left/right month swipes, vertica
   assert.deepEqual(resolveCalendarSwipeGesture(-6, -52, { isExpanded: true }), { action: 'vertical-collapse', axis: 'y' });
   assert.deepEqual(resolveCalendarSwipeGesture(0, 55, { isExpanded: true }), { action: 'none', axis: 'y' });
 });
+
+test('computeCalendarTimeframeWindow opens only timeframe week rows (<= 5 weeks) and refuses full expansion for > 5 weeks', () => {
+  const nov2026 = buildMonthGrid(2026, 10); // Row 0: Oct 26..Nov 1, Row 1: Nov 2..8, Row 2: Nov 9..15, Row 3: Nov 16..22, Row 4: Nov 23..29, Row 5: Nov 30..Dec 6
+
+  // 1) No projects -> full 6-row month expansion
+  const emptyWin = computeCalendarTimeframeWindow(nov2026, [], '2026-11-24');
+  assert.equal(emptyWin.mode, 'full-month');
+  assert.equal(emptyWin.canExpand, true);
+  assert.equal(emptyWin.selectedRow, 4);
+  assert.equal(emptyWin.expandedStartRow, 0);
+  assert.equal(emptyWin.expandedEndRow, 5);
+  assert.equal(emptyWin.expandedRowCount, 6);
+  assert.equal(emptyWin.expandedHeight, 332);
+
+  // 2) 2-week project timeframe (Nov 16 -> Nov 26, rows 3..4) -> opens ONLY rows 3..4 (108px)
+  const twoWeekProjects = [
+    { id: 'p2w', title: 'Sprint', startDate: '2026-11-16', endDate: '2026-11-26', checkpoints: [] },
+  ];
+  assert.equal(getProjectWeekSpanCount('2026-11-16', '2026-11-26'), 2);
+  const twoWeekWin = computeCalendarTimeframeWindow(nov2026, twoWeekProjects, '2026-11-24');
+  assert.equal(twoWeekWin.mode, 'timeframe');
+  assert.equal(twoWeekWin.canExpand, true);
+  assert.equal(twoWeekWin.expandedStartRow, 3);
+  assert.equal(twoWeekWin.expandedEndRow, 4);
+  assert.equal(twoWeekWin.expandedRowCount, 2);
+  assert.equal(twoWeekWin.expandedHeight, 108);
+
+  // 3) 5-week project timeframe (Nov 2 -> Dec 4, rows 1..5) -> opens rows 1..5 (276px)
+  const fiveWeekProjects = [
+    { id: 'p5w', title: 'Release', startDate: '2026-11-02', endDate: '2026-12-04', checkpoints: [] },
+  ];
+  assert.equal(getProjectWeekSpanCount('2026-11-02', '2026-12-04'), 5);
+  const fiveWeekWin = computeCalendarTimeframeWindow(nov2026, fiveWeekProjects, '2026-11-24');
+  assert.equal(fiveWeekWin.mode, 'timeframe');
+  assert.equal(fiveWeekWin.canExpand, true);
+  assert.equal(fiveWeekWin.expandedStartRow, 1);
+  assert.equal(fiveWeekWin.expandedEndRow, 5);
+  assert.equal(fiveWeekWin.expandedRowCount, 5);
+  assert.equal(fiveWeekWin.expandedHeight, 276);
+
+  // 4) > 5-week project timeframe (Nov 1 -> Dec 20, 8 weeks total) -> does NOT expand the calendar
+  const overFiveWeekProjects = [
+    { id: 'p8w', title: 'Quarter Initiative', startDate: '2026-11-01', endDate: '2026-12-20', checkpoints: [] },
+  ];
+  assert.ok(getProjectWeekSpanCount('2026-11-01', '2026-12-20') > 5);
+  const cappedWin = computeCalendarTimeframeWindow(nov2026, overFiveWeekProjects, '2026-11-24');
+  assert.equal(cappedWin.mode, 'exceeds-max-weeks');
+  assert.equal(cappedWin.canExpand, false);
+  assert.equal(cappedWin.expandedStartRow, 4);
+  assert.equal(cappedWin.expandedEndRow, 4);
+  assert.equal(cappedWin.expandedRowCount, 1);
+  assert.equal(cappedWin.expandedHeight, 52);
+});
+
+test('computeCalendarCellTimeframeBoxes stretches continuous colored selection boxes across start, middle, and end days', () => {
+  const startSpan = [{ projectId: 'p1', title: 'Launch', color: 'sky', lane: 0, isStart: true, isEnd: false }];
+  const midSpan = [{ projectId: 'p1', title: 'Launch', color: 'sky', lane: 0, isStart: false, isEnd: false }];
+  const endSpan = [{ projectId: 'p1', title: 'Launch', color: 'sky', lane: 0, isStart: false, isEnd: true }];
+
+  // Start cell on Tue (col 1): rounded left, open/stretched right
+  const [boxStart] = computeCalendarCellTimeframeBoxes(startSpan, 1);
+  assert.equal(boxStart.color, 'sky');
+  assert.equal(boxStart.continuesLeft, false);
+  assert.equal(boxStart.continuesRight, true);
+  assert.equal(boxStart.borderLeftWidth, 2);
+  assert.equal(boxStart.borderRightWidth, 0);
+  assert.equal(boxStart.radiusTopLeft, 12);
+  assert.equal(boxStart.radiusTopRight, 0);
+
+  // Middle cell on Wed (col 2): stretched seamlessly on both left & right
+  const [boxMid] = computeCalendarCellTimeframeBoxes(midSpan, 2);
+  assert.equal(boxMid.continuesLeft, true);
+  assert.equal(boxMid.continuesRight, true);
+  assert.equal(boxMid.borderLeftWidth, 0);
+  assert.equal(boxMid.borderRightWidth, 0);
+
+  // End cell on Thu (col 3): stretched left, rounded right cap
+  const [boxEnd] = computeCalendarCellTimeframeBoxes(endSpan, 3);
+  assert.equal(boxEnd.continuesLeft, true);
+  assert.equal(boxEnd.continuesRight, false);
+  assert.equal(boxEnd.borderRightWidth, 2);
+  assert.equal(boxEnd.radiusTopRight, 12);
+
+  // Overlapping second project insets cleanly so both project colors stay visible
+  const multi = computeCalendarCellTimeframeBoxes(
+    [
+      { projectId: 'p1', title: 'A', color: 'coral', lane: 0, isStart: false, isEnd: false },
+      { projectId: 'p2', title: 'B', color: 'lime', lane: 1, isStart: true, isEnd: false },
+    ],
+    2
+  );
+  assert.equal(multi.length, 2);
+  assert.equal(multi[0].insetPx, 0);
+  assert.equal(multi[1].insetPx, 3);
+  assert.equal(multi[1].color, 'lime');
+});
+
+test('computeCalendarRowTimeframeBoxes builds single seamless row spans with uniform inset on overlaps', () => {
+  const nov2026 = buildMonthGrid(2026, 10);
+  const week4 = nov2026.slice(28, 35); // Mon 2026-11-23 .. Sun 2026-11-29
+  const projects = [
+    { id: 'p1', title: 'Launch', color: 'coral', startDate: '2026-11-18', endDate: '2026-11-25' },
+    { id: 'p2', title: 'Growth', color: 'sky', startDate: '2026-11-24', endDate: '2026-11-28' },
+  ];
+  const segments = computeCalendarRowTimeframeBoxes(week4, projects, '2026-11-24');
+  assert.equal(segments.length, 2);
+
+  const coral = segments.find((s) => s.projectId === 'p1');
+  const sky = segments.find((s) => s.projectId === 'p2');
+  assert.deepEqual(
+    { startCol: coral.startCol, endCol: coral.endCol, isStart: coral.isStart, isEnd: coral.isEnd, rowSlot: coral.rowSlot, insetPx: coral.insetPx },
+    { startCol: 0, endCol: 2, isStart: false, isEnd: true, rowSlot: 0, insetPx: 0 }
+  );
+  assert.deepEqual(
+    { startCol: sky.startCol, endCol: sky.endCol, isStart: sky.isStart, isEnd: sky.isEnd, rowSlot: sky.rowSlot, insetPx: sky.insetPx },
+    { startCol: 1, endCol: 5, isStart: true, isEnd: true, rowSlot: 1, insetPx: 3 }
+  );
+});
+
