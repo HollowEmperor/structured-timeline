@@ -14,6 +14,8 @@ const BLOCKED_FILES = new Set([
   '/package-lock.json',
   '/metadata.json',
   '/memo-spike-physics.test.mjs',
+  '/calendar-projects-logic.test.mjs',
+  '/progress-system-logic.test.mjs',
 ]);
 
 export function createApp() {
