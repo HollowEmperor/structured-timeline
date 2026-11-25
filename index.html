@@ -1137,7 +1137,7 @@
                       <option value="Portfolio">Portfolio</option>
                       <option value="Aesthetic">Aesthetic</option>
                     </select>
-                    <span id="topic-detail-subtopic-badge" class="hidden px-2 py-0.5 rounded-full bg-coral/15 border border-coral/35 text-[10px] font-bold uppercase tracking-wider text-coral">Subtopic</span>
+                    <span id="topic-detail-subtopic-badge" class="hidden px-2 py-0.5 rounded-full bg-coral/15 border border-coral/35 text-[10px] font-bold uppercase tracking-wider text-coral">Skill</span>
                   </div>
                   <h3 id="topic-detail-title" class="font-display text-base font-bold text-primarytext truncate">Architectural Drafting</h3>
                 </div>
@@ -1147,9 +1147,8 @@
               <div id="topic-detail-progress-track" class="pt-1 pb-0.5"></div>
             </div>
 
-            <div class="bg-cardbg border border-borderline rounded-2xl p-1 grid grid-cols-4 gap-1">
-              <button type="button" onclick="setTopicDetailTab('subtopics')" id="topic-tab-subtopics" class="tactile-btn py-1.5 px-1.5 rounded-xl text-[11px] font-semibold bg-coral text-appbg truncate">Subtopics</button>
-              <button type="button" onclick="setTopicDetailTab('branches')" id="topic-tab-branches" class="tactile-btn py-1.5 px-1.5 rounded-xl text-[11px] font-medium text-secondarytext hover:text-primarytext truncate">Skills</button>
+            <div class="bg-cardbg border border-borderline rounded-2xl p-1 grid grid-cols-3 gap-1">
+              <button type="button" onclick="setTopicDetailTab('branches')" id="topic-tab-branches" class="tactile-btn py-1.5 px-1.5 rounded-xl text-[11px] font-semibold bg-coral text-appbg truncate">Skills</button>
               <button type="button" onclick="setTopicDetailTab('drills')" id="topic-tab-drills" class="tactile-btn py-1.5 px-1.5 rounded-xl text-[11px] font-medium text-secondarytext hover:text-primarytext truncate">Drills</button>
               <button type="button" onclick="setTopicDetailTab('resources')" id="topic-tab-resources" class="tactile-btn py-1.5 px-1.5 rounded-xl text-[11px] font-medium text-secondarytext hover:text-primarytext truncate">Resources</button>
             </div>
@@ -1800,7 +1799,7 @@
           </div>
           <div class="space-y-1.5">
             <p class="text-[10.5px] font-semibold uppercase tracking-wider text-secondarytext">Choose Category</p>
-            <div id="topic-add-category-grid" class="grid grid-cols-3 gap-1.5"></div>
+            <div id="topic-add-category-grid" class="grid grid-cols-5 gap-1.5"></div>
           </div>
           <form id="topic-add-modal-form" onsubmit="handleSubmitTopicAddModal(event)" class="space-y-3"></form>
         </div>
@@ -4022,13 +4021,29 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           }
         }
 
-        const subtopics = Array.isArray(node.subtopics) ? node.subtopics : [];
+        const childNodes = [];
+        const seenChildIds = new Set();
+        const branches = Array.isArray(node.branches) ? node.branches : [];
+        for (const b of branches) {
+          if (!b || typeof b !== 'object') continue;
+          const key = b.id != null ? String(b.id) : null;
+          if (key) seenChildIds.add(key);
+          childNodes.push(b);
+        }
+        const legacySubs = Array.isArray(node.subtopics) ? node.subtopics : [];
+        for (const sub of legacySubs) {
+          if (!sub || typeof sub !== 'object') continue;
+          const key = sub.id != null ? String(sub.id) : null;
+          if (key && seenChildIds.has(key)) continue;
+          childNodes.push(sub);
+        }
+
         let subDone = 0;
         let subTotal = 0;
-        let descendantSubtopicCount = subtopics.length;
+        let descendantSubtopicCount = childNodes.length;
 
-        for (const sub of subtopics) {
-          const childCounts = collectTopicMilestones(sub);
+        for (const child of childNodes) {
+          const childCounts = collectTopicMilestones(child);
           subDone += childCounts.done;
           subTotal += childCounts.total;
           descendantSubtopicCount += childCounts.descendantSubtopicCount;
@@ -4039,7 +4054,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           total: directTotal + subTotal,
           directDone,
           directTotal,
-          subtopicCount: subtopics.length,
+          skillCount: childNodes.length,
+          subtopicCount: childNodes.length,
+          descendantSkillCount: descendantSubtopicCount,
           descendantSubtopicCount,
         };
       }
@@ -4054,7 +4071,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           totalMilestones: counts.total,
           directDoneMilestones: counts.directDone,
           directTotalMilestones: counts.directTotal,
+          skillCount: counts.skillCount,
           subtopicCount: counts.subtopicCount,
+          descendantSkillCount: counts.descendantSkillCount,
           descendantSubtopicCount: counts.descendantSubtopicCount,
           ratio,
           rawCompletionPct: levelInfo.rawCompletionPct,
@@ -4077,8 +4096,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         const chain = [rootTopic];
         let current = rootTopic;
         for (let i = 1; i < pathIds.length; i++) {
-          const subs = Array.isArray(current.subtopics) ? current.subtopics : [];
-          const next = subs.find((s) => String(s.id) === String(pathIds[i]));
+          const branches = Array.isArray(current.branches) ? current.branches : [];
+          const legacySubs = Array.isArray(current.subtopics) ? current.subtopics : [];
+          const next =
+            branches.find((b) => String(b.id) === String(pathIds[i])) ||
+            legacySubs.find((s) => String(s.id) === String(pathIds[i]));
           if (!next) break;
           chain.push(next);
           current = next;
@@ -4095,7 +4117,47 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         if (!node || typeof node !== 'object') return node;
         node.lifeArea = normalizeLifeArea(node.lifeArea || node.category || fallbackArea, lifeAreas);
         if (!Array.isArray(node.branches)) node.branches = [];
+
+        if (Array.isArray(node.subtopics) && node.subtopics.length > 0) {
+          const existingIds = new Set(node.branches.map((b) => String(b.id)));
+          node.subtopics.forEach((sub, idx) => {
+            if (!sub || typeof sub !== 'object') return;
+            if (sub.id != null && existingIds.has(String(sub.id))) return;
+            node.branches.push({
+              ...sub,
+              tier: Number(sub.tier || 1),
+              status: sub.status || 'unlocked',
+              xp: Number(sub.xp || 100),
+              drills: Array.isArray(sub.drills)
+                ? sub.drills
+                : [
+                    {
+                      id: `d-${sub.id || idx}-init`,
+                      title: `${sub.title || 'Core'} Practice Drill`,
+                      reps: '15m session',
+                      count: 0,
+                      done: false,
+                    },
+                  ],
+            });
+          });
+          delete node.subtopics;
+        }
+
+        if (!Array.isArray(node.milestones)) node.milestones = [];
+        node.milestones.forEach((m, idx) => {
+          if (!Array.isArray(m.lessons)) {
+            m.lessons = [{ id: `l-${m.id || idx}-1`, title: m.title || 'Content Item', done: Boolean(m.done) }];
+          }
+          m.done = m.lessons.length > 0 && m.lessons.every((l) => l.done);
+        });
+        if (!Array.isArray(node.achievements)) node.achievements = [];
+        if (!Array.isArray(node.resources)) node.resources = [];
+
         node.branches.forEach((b, idx) => {
+          if (!b || typeof b !== 'object') return;
+          if (b.tier == null) b.tier = 1;
+          if (!b.status) b.status = 'unlocked';
           if (!Array.isArray(b.drills)) {
             b.drills = [
               {
@@ -4107,18 +4169,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               },
             ];
           }
+          ensureTopicTreeSchema(b, node.lifeArea, lifeAreas);
         });
-        if (!Array.isArray(node.milestones)) node.milestones = [];
-        node.milestones.forEach((m, idx) => {
-          if (!Array.isArray(m.lessons)) {
-            m.lessons = [{ id: `l-${m.id || idx}-1`, title: m.title || 'Content Item', done: Boolean(m.done) }];
-          }
-          m.done = m.lessons.length > 0 && m.lessons.every((l) => l.done);
-        });
-        if (!Array.isArray(node.achievements)) node.achievements = [];
-        if (!Array.isArray(node.resources)) node.resources = [];
-        if (!Array.isArray(node.subtopics)) node.subtopics = [];
-        node.subtopics.forEach((sub) => ensureTopicTreeSchema(sub, node.lifeArea, lifeAreas));
         return node;
       }
 
@@ -4228,6 +4280,190 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         };
       }
 
+      function buildTopicSkillGraph(rootNode, rootPath = [], options = {}) {
+        const width = Number(options.width) || 320;
+        const height = Number(options.height) || 268;
+        const cx = width / 2;
+        const cy = height / 2;
+
+        if (!rootNode || typeof rootNode !== 'object') {
+          return { width, height, nodes: [], edges: [] };
+        }
+
+        const basePath = Array.isArray(rootPath) && rootPath.length > 0 ? rootPath.map((id) => id) : [rootNode.id];
+        const nodes = [];
+        const edges = [];
+        const nodeByKey = new Map();
+
+        function countSubtreeLeaves(n) {
+          const kids = Array.isArray(n.branches) ? n.branches : [];
+          if (kids.length === 0) return 1;
+          let sum = 0;
+          for (const k of kids) sum += countSubtreeLeaves(k);
+          return Math.max(1, sum);
+        }
+
+        function walk(node, depth, pathIds, parentKey, angleStart, angleEnd) {
+          const key = pathIds.map((p) => String(p)).join('>');
+          const stats = computeTopicProgress(node);
+          const children = Array.isArray(node.branches) ? node.branches : [];
+          const midAngle = (angleStart + angleEnd) / 2;
+
+          let x = cx;
+          let y = cy;
+          if (depth > 0) {
+            const parent = nodeByKey.get(parentKey);
+            const dist = depth === 1 ? Math.min(width, height) * 0.28 : Math.min(width, height) * 0.21;
+            const baseX = parent ? parent.x : cx;
+            const baseY = parent ? parent.y : cy;
+            x = baseX + Math.cos(midAngle) * dist;
+            y = baseY + Math.sin(midAngle) * dist;
+          }
+
+          const isMastered = stats.isMaxLevel || node.status === 'mastered';
+          const isUnlocked = depth === 0 || isMastered || node.status === 'unlocked' || stats.doneMilestones > 0;
+
+          const gNode = {
+            key,
+            id: node.id,
+            title: node.title || 'Untitled',
+            depth,
+            isRoot: depth === 0,
+            parentKey,
+            pathIds: [...pathIds],
+            status: isMastered ? 'mastered' : isUnlocked ? 'unlocked' : 'locked',
+            tier: Number(node.tier || 1),
+            level: stats.level,
+            isMaxLevel: stats.isMaxLevel,
+            rawCompletionPct: stats.rawCompletionPct,
+            doneMilestones: stats.doneMilestones,
+            totalMilestones: stats.totalMilestones,
+            childCount: children.length,
+            degree: (parentKey ? 1 : 0) + children.length,
+            x,
+            y,
+            vx: 0,
+            vy: 0,
+            radius: depth === 0 ? 11 : Math.max(5.5, Math.min(9.5, 6.2 + Math.min(3, children.length) * 1.1)),
+          };
+
+          nodes.push(gNode);
+          nodeByKey.set(key, gNode);
+
+          if (parentKey) {
+            const parent = nodeByKey.get(parentKey);
+            edges.push({
+              id: `${parentKey}->${key}`,
+              source: parentKey,
+              target: key,
+              sourceDepth: parent ? parent.depth : depth - 1,
+              targetDepth: depth,
+              mastered: isMastered && Boolean(parent && parent.status === 'mastered'),
+              active: isUnlocked,
+            });
+          }
+
+          if (children.length > 0) {
+            const totalWeight = children.reduce((acc, ch) => acc + countSubtreeLeaves(ch), 0);
+            let cursor = depth === 0 ? -Math.PI / 3 : angleStart;
+            const fullSpan = depth === 0 ? Math.PI * 2 : Math.max(0.75, Math.min(Math.PI * 1.35, angleEnd - angleStart));
+            if (depth > 0) {
+              cursor = midAngle - fullSpan / 2;
+            }
+
+            for (const ch of children) {
+              const w = countSubtreeLeaves(ch);
+              const span = (w / totalWeight) * fullSpan;
+              walk(ch, depth + 1, [...pathIds, ch.id], key, cursor, cursor + span);
+              cursor += span;
+            }
+          }
+        }
+
+        walk(rootNode, 0, basePath, null, -Math.PI / 3, Math.PI * 2 - Math.PI / 3);
+
+        const padX = 36;
+        const padY = 28;
+        const iterations = nodes.length > 1 ? 72 : 0;
+
+        for (let step = 0; step < iterations; step++) {
+          const cooling = 1 - step / (iterations + 12);
+
+          for (let i = 0; i < nodes.length; i++) {
+            for (let j = i + 1; j < nodes.length; j++) {
+              const a = nodes[i];
+              const b = nodes[j];
+              let dx = b.x - a.x;
+              let dy = b.y - a.y;
+              let distSq = dx * dx + dy * dy;
+              if (distSq < 1) {
+                dx = (i + 1) * 0.5;
+                dy = (j + 1) * 0.5;
+                distSq = dx * dx + dy * dy;
+              }
+              const dist = Math.sqrt(distSq);
+              const repulse = 1650 / distSq;
+              const fx = (dx / dist) * repulse;
+              const fy = (dy / dist) * repulse;
+              if (!a.isRoot) {
+                a.vx -= fx;
+                a.vy -= fy;
+              }
+              if (!b.isRoot) {
+                b.vx += fx;
+                b.vy += fy;
+              }
+            }
+          }
+
+          for (const edge of edges) {
+            const src = nodeByKey.get(edge.source);
+            const dst = nodeByKey.get(edge.target);
+            if (!src || !dst) continue;
+            const dx = dst.x - src.x;
+            const dy = dst.y - src.y;
+            const dist = Math.max(1, Math.hypot(dx, dy));
+            const idealLen = edge.targetDepth === 1 ? (nodes.length <= 4 ? 86 : 70) : 56;
+            const pull = (dist - idealLen) * 0.085;
+            const fx = (dx / dist) * pull;
+            const fy = (dy / dist) * pull;
+            if (!src.isRoot) {
+              src.vx += fx;
+              src.vy += fy;
+            }
+            if (!dst.isRoot) {
+              dst.vx -= fx;
+              dst.vy -= fy;
+            }
+          }
+
+          for (const n of nodes) {
+            if (n.isRoot) {
+              n.x = cx;
+              n.y = cy;
+              continue;
+            }
+            n.vx += (cx - n.x) * 0.012;
+            n.vy += (cy - n.y) * 0.012;
+            n.vx *= 0.72;
+            n.vy *= 0.72;
+            n.x = Math.max(padX, Math.min(width - padX, n.x + n.vx * cooling));
+            n.y = Math.max(padY, Math.min(height - padY - 12, n.y + n.vy * cooling));
+          }
+        }
+
+        return {
+          width,
+          height,
+          nodes: nodes.map(({ vx, vy, ...rest }) => ({
+            ...rest,
+            x: Math.round(rest.x * 10) / 10,
+            y: Math.round(rest.y * 10) / 10,
+          })),
+          edges,
+        };
+      }
+
       window.ProgressSystemLogic = {
         LEVEL_MIN,
         LEVEL_MAX,
@@ -4247,6 +4483,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         recordDailyProgressChange,
         getPreviousDateKey,
         computeYesterdayProgressDelta,
+        buildTopicSkillGraph,
       };
     })();
   </script>
@@ -4971,6 +5208,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       calendarMonth: INITIAL_TODAY_DATE.getMonth(),
       monthExpanded: false,
       timelineViewMode: 'daily',
+      focusedProjectId: null,
       timelineFabMenuOpen: false,
       compartmentFilter: 'all',
       compartments: [
@@ -5074,7 +5312,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       activeTopicAreaFilter: 'All',
       activeTopicId: null,
       topicNavPath: [],
-      activeTopicTab: 'subtopics',
+      activeTopicTab: 'branches',
       selectedBranchId: null,
       subTopicVideoPlaying: false,
       activeResourceCategory: 'All',
@@ -5111,6 +5349,51 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               xp: 120,
               drills: [
                 { id: 'd-101', title: 'Freehand Straight Line & Hatching Warmup', reps: '3 sets × 10m', count: 6, done: true },
+              ],
+              branches: [
+                {
+                  id: 'b-101a',
+                  title: '30°/60° Isometric Axes',
+                  summary: 'Aligns vertical and receding axes for distortion-free cutaway assemblies.',
+                  videoDuration: '01:30',
+                  tier: 1,
+                  status: 'unlocked',
+                  xp: 100,
+                  drills: [
+                    { id: 'd-101a', title: 'Exploded Cube Axis Rep', reps: '3 plates', count: 1, done: false },
+                  ],
+                  milestones: [
+                    {
+                      id: 'm-101a',
+                      title: 'Isometric Fundamentals',
+                      lessons: [
+                        { id: 'l-101a-1', title: 'True-Scale Vertical Projection', done: true },
+                        { id: 'l-101a-2', title: 'Exploded Assembly Callouts', done: false },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  id: 'b-101b',
+                  title: 'Section Line Hierarchy',
+                  summary: 'Distinguishes cut-plane poche, background depth, and hidden construction lines.',
+                  videoDuration: '01:12',
+                  tier: 2,
+                  status: 'unlocked',
+                  xp: 90,
+                  drills: [
+                    { id: 'd-101b', title: '4-Weight Pen Calibration Sheet', reps: '2 sheets', count: 2, done: true },
+                  ],
+                  milestones: [
+                    {
+                      id: 'm-101b',
+                      title: 'Line-Weight Control',
+                      lessons: [
+                        { id: 'l-101b-1', title: 'Cut-Plane Poche Contrast', done: true },
+                      ],
+                    },
+                  ],
+                },
               ],
             },
             {
@@ -5179,41 +5462,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             { id: 'r-102', title: 'Concepts App & Morpholio Trace', kind: 'Apps', note: 'Infinite vector scale & isometric grids', done: true },
             { id: 'r-103', title: 'Perspective Grid Construction Sheet', kind: 'Documents', note: '30° / 60° isometric template & line-weight PDF', done: false },
             { id: 'r-104', title: 'Sectional Lighting & Shadow Breakdown', kind: 'Media', note: '45m visual lecture series on elevation depth', done: false },
-          ],
-          subtopics: [
-            {
-              id: 'sub-101',
-              title: 'Axonometric Projection',
-              lifeArea: 'Aesthetic',
-              pinned: false,
-              branches: [
-                {
-                  id: 'b-sub-101',
-                  title: '30°/60° Isometric Axes',
-                  summary: 'Aligns vertical and receding axes for distortion-free cutaway assemblies.',
-                  videoDuration: '01:30',
-                  tier: 1,
-                  status: 'unlocked',
-                  xp: 100,
-                  drills: [
-                    { id: 'd-sub-101', title: 'Exploded Cube Axis Rep', reps: '3 plates', count: 1, done: false },
-                  ],
-                },
-              ],
-              milestones: [
-                {
-                  id: 'm-sub-101',
-                  title: 'Module 01 • Isometric Fundamentals',
-                  lessons: [
-                    { id: 'l-sub-101a', title: '1.1 True-Scale Vertical Projection', done: true },
-                    { id: 'l-sub-101b', title: '1.2 Exploded Assembly Callouts', done: false },
-                  ],
-                },
-              ],
-              achievements: [],
-              resources: [],
-              subtopics: [],
-            },
           ],
         },
         {
@@ -6082,10 +6330,20 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (state.activeTab === 'profile') renderProfileEnergyBars();
     }
 
+    function getFocusedProjectsForCalendar() {
+      if (state.activeTab !== 'timeline' || state.timelineViewMode !== 'projects') return [];
+      if (!state.focusedProjectId) return [];
+      return (state.projects || []).filter((p) => String(p.id) === String(state.focusedProjectId));
+    }
+
     function getCalendarExpansionWindow() {
+      const targetProjects =
+        state.activeTab === 'timeline' && state.timelineViewMode === 'projects'
+          ? getFocusedProjectsForCalendar()
+          : state.projects || [];
       return CalLogic.computeCalendarTimeframeWindow(
         state.monthCells,
-        state.projects || [],
+        targetProjects,
         state.selectedDate,
         { maxWeeks: 5, rowHeight: CAL_COLLAPSED_H, rowStride: 56 }
       );
@@ -6158,12 +6416,17 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const r = 14;
       const circ = 2 * Math.PI * r;
       const todayKey = getTodayDateKey();
-      const laneInfo = CalLogic.assignProjectLanes(state.projects || [], todayKey);
+      const focusedProjects = getFocusedProjectsForCalendar();
+      const showProjectTimeframes = focusedProjects.length > 0;
+      const laneInfo = CalLogic.assignProjectLanes(focusedProjects, todayKey);
+      const allProjectsLaneInfo = CalLogic.assignProjectLanes(state.projects || [], todayKey);
 
       let rowsHtml = '';
       for (let row = 0; row < 6; row++) {
         const rowCells = state.monthCells.slice(row * 7, row * 7 + 7);
-        const rowSegments = CalLogic.computeCalendarRowTimeframeBoxes(rowCells, state.projects || [], todayKey, laneInfo);
+        const rowSegments = showProjectTimeframes
+          ? CalLogic.computeCalendarRowTimeframeBoxes(rowCells, focusedProjects, todayKey, laneInfo)
+          : [];
         const rowBoxesHtml = rowSegments
           .map((seg) => {
             const cHex = (CAPSULE_COLORS[seg.color] || CAPSULE_COLORS.coral).hex;
@@ -6194,10 +6457,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           const seg2 = (Math.min(100, Math.max(0, v2)) / 100) * (circ * 0.30);
           const seg3 = (Math.min(100, Math.max(0, v3)) / 100) * (circ * 0.30);
 
-          const dec = CalLogic.getCalendarProjectDecorations(state.projects || [], cell.dateKey, todayKey, laneInfo);
-          const hasTimeframeBox = dec.spans.length > 0;
+          const dec = CalLogic.getCalendarProjectDecorations(state.projects || [], cell.dateKey, todayKey, allProjectsLaneInfo);
+          const focusedDec = showProjectTimeframes
+            ? CalLogic.getCalendarProjectDecorations(focusedProjects, cell.dateKey, todayKey, laneInfo)
+            : { spans: [] };
+          const hasTimeframeBox = showProjectTimeframes && focusedDec.spans.length > 0;
           const primaryBoxColor = hasTimeframeBox
-            ? (CAPSULE_COLORS[dec.spans[0].color] || CAPSULE_COLORS.coral).hex
+            ? (CAPSULE_COLORS[focusedDec.spans[0].color] || CAPSULE_COLORS.coral).hex
             : null;
 
           let dueDotsHtml = '';
@@ -6703,15 +6969,91 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function setTimelineViewMode(mode, shouldScrollToday = true) {
       const next = mode === 'projects' ? 'projects' : 'daily';
       state.timelineViewMode = next;
+      if (next !== 'projects') {
+        state.focusedProjectId = null;
+      }
       toggleTimelineFabMenu(false);
       saveState();
       syncCalendarHeader();
+      renderUnifiedCalendar();
       const compBar = document.getElementById('compartment-bar');
       if (compBar) compBar.classList.toggle('hidden', state.activeTab !== 'timeline' || next === 'projects');
       renderTimeline();
       if (next === 'projects' && shouldScrollToday) {
         requestAnimationFrame(() => scrollProjectsTimelineToToday(false));
       }
+    }
+
+    let projectHeaderClickTimer = null;
+    let projectHeaderPendingId = null;
+
+    function toggleProjectHeaderHighlight(projectId) {
+      const targetId = String(projectId || '');
+      if (!targetId) return;
+
+      // Clicking the already-highlighted project stops the highlight
+      if (state.focusedProjectId && String(state.focusedProjectId) === targetId) {
+        state.focusedProjectId = null;
+        renderUnifiedCalendar();
+        if (state.monthExpanded) {
+          toggleMonthCalendar(false);
+        } else {
+          applyCalendarProgress(0, false);
+        }
+        renderTimeline();
+        return;
+      }
+
+      // Otherwise highlight ONLY this project's timeframe on the top calendar
+      state.focusedProjectId = projectId;
+      const proj = (state.projects || []).find((p) => String(p.id) === targetId);
+      if (proj) {
+        const todayKey = getTodayDateKey();
+        const range = CalLogic.getProjectEffectiveRange(proj, todayKey);
+        const firstCellKey = state.monthCells[0]?.dateKey || '';
+        const lastCellKey = state.monthCells[state.monthCells.length - 1]?.dateKey || '';
+        const overlapsCurrentGrid = range.startDate <= lastCellKey && range.endDate >= firstCellKey;
+        if (!overlapsCurrentGrid && CalLogic.isValidDateKey(range.startDate)) {
+          const parsed = CalLogic.parseDateKey(range.startDate);
+          state.calendarYear = parsed.getFullYear();
+          state.calendarMonth = parsed.getMonth();
+          state.monthCells = CalLogic.buildMonthGrid(state.calendarYear, state.calendarMonth);
+          computeSelectedDayRings();
+        }
+      }
+
+      renderUnifiedCalendar();
+      const win = getCalendarExpansionWindow();
+      if (win.canExpand && !state.monthExpanded) {
+        toggleMonthCalendar(true);
+      } else {
+        applyCalendarProgress(state.monthExpanded && win.canExpand ? 1 : 0, false);
+      }
+      renderTimeline();
+    }
+
+    function handleProjectHeaderClick(projectId) {
+      const targetId = String(projectId || '');
+      if (!targetId) return;
+
+      // Double-click (2 rapid clicks within 260ms) opens the project edit modal without toggling highlight
+      if (projectHeaderClickTimer && projectHeaderPendingId === targetId) {
+        clearTimeout(projectHeaderClickTimer);
+        projectHeaderClickTimer = null;
+        projectHeaderPendingId = null;
+        openProjectModal(projectId);
+        return;
+      }
+
+      if (projectHeaderClickTimer) {
+        clearTimeout(projectHeaderClickTimer);
+      }
+      projectHeaderPendingId = targetId;
+      projectHeaderClickTimer = setTimeout(() => {
+        projectHeaderClickTimer = null;
+        projectHeaderPendingId = null;
+        toggleProjectHeaderHighlight(projectId);
+      }, 260);
     }
 
     function cycleHeaderCompartmentFilter() {
@@ -7349,14 +7691,20 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         .map((p) => {
           const c = CAPSULE_COLORS[p.color] || CAPSULE_COLORS.coral;
           const pct = p.totalCount > 0 ? Math.round((p.doneCount / p.totalCount) * 100) : 0;
+          const isFocused = state.focusedProjectId != null && String(state.focusedProjectId) === String(p.id);
+          const cardStyle = isFocused
+            ? `border-top: 3px solid ${c.hex}; border-color: ${c.hex}; box-shadow: 0 0 0 1px ${c.hex}66, 0 8px 20px -10px ${c.hex}88;`
+            : `border-top: 3px solid ${c.hex};`;
           return `
             <div class="px-1 pb-1.5">
               <button
                 type="button"
-                onclick="openProjectModal('${escapeHtml(p.id)}')"
-                style="border-top: 3px solid ${c.hex};"
+                data-project-header-id="${escapeHtml(p.id)}"
+                data-project-focused="${isFocused ? 'true' : 'false'}"
+                onclick="handleProjectHeaderClick('${escapeHtml(p.id)}')"
+                style="${cardStyle}"
                 class="tactile-btn w-full bg-cardbg border border-borderline rounded-2xl p-2 text-left space-y-1 hover:border-coral/60 transition"
-                title="Edit project & checkpoints"
+                title="${isFocused ? 'Click to stop highlight • Double-click to edit project' : 'Click to highlight timeframe • Double-click to edit project'}"
               >
                 <div class="flex items-start justify-between gap-1">
                   <p class="font-display text-[11.5px] font-bold text-primarytext leading-tight truncate">${escapeHtml(p.title)}</p>
@@ -7485,7 +7833,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                           return `
                             <button
                               type="button"
-                              onclick="openEditTask(${t.id})"
+                              onclick="handleTaskDoubleClickTap(${t.id})"
+                              title="Double-click to edit task"
                               style="border-left: 2.5px solid ${c.hex}; background-color: rgb(var(--color-pillbg));"
                               class="tactile-btn w-full border border-borderline rounded-lg px-2 py-1 text-left text-[10px] font-medium truncate ${
                                 doneT ? 'line-through text-mutedtext' : 'text-primarytext'
@@ -8156,7 +8505,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       timelineDrag.didMove = false;
 
       if (!didMove && !wasActive && !axisLock) {
-        openEditTask(id);
+        handleTaskDoubleClickTap(id);
         return;
       }
 
@@ -8693,6 +9042,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       (state.tasks || []).forEach((t) => {
         if (t.projectId === targetId) t.projectId = null;
       });
+      if (state.focusedProjectId && String(state.focusedProjectId) === String(targetId)) {
+        state.focusedProjectId = null;
+      }
       state.editingProjectId = null;
       saveState();
       closeProjectModal();
@@ -8751,6 +9103,20 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       syncModalControls();
       modal?.classList.remove('hidden');
       setTimeout(() => titleInput?.focus(), 40);
+    }
+
+    let lastTaskDoubleTap = { id: null, time: 0 };
+
+    function handleTaskDoubleClickTap(taskId) {
+      const now = Date.now();
+      const targetId = String(taskId);
+      if (lastTaskDoubleTap.id === targetId && now - lastTaskDoubleTap.time <= 320) {
+        lastTaskDoubleTap = { id: null, time: 0 };
+        openEditTask(taskId);
+        return true;
+      }
+      lastTaskDoubleTap = { id: targetId, time: now };
+      return false;
     }
 
     function openEditTask(taskId) {
@@ -11127,9 +11493,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     const TOPIC_ADD_CATEGORIES = [
-      { key: 'subtopics', label: 'Subtopic', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25zM7.125 10.5v4.125c0 .621.504 1.125 1.125 1.125h5.25"/></svg>' },
-      { key: 'milestone', label: 'Milestone', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0l2.77-.693a9 9 0 016.208.682l.108.054a9 9 0 006.086.71l3.114-.732a48.524 48.524 0 01-.005-10.499l-3.11.732a9 9 0 01-6.085-.711l-.108-.054a9 9 0 00-6.208-.682L3 4.5M3 15V4.5"/></svg>' },
       { key: 'branches', label: 'Skill', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg>' },
+      { key: 'milestone', label: 'Milestone', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0l2.77-.693a9 9 0 016.208.682l.108.054a9 9 0 006.086.71l3.114-.732a48.524 48.524 0 01-.005-10.499l-3.11.732a9 9 0 01-6.085-.711l-.108-.054a9 9 0 00-6.208-.682L3 4.5M3 15V4.5"/></svg>' },
       { key: 'drills', label: 'Drill', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>' },
       { key: 'achievement', label: 'Proof', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0"/></svg>' },
       { key: 'resources', label: 'Resource', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>' },
@@ -11153,7 +11518,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function openTopicAddModal(defaultCategory = null) {
       const ctx = getActiveTopicContext();
       if (!ctx) return;
-      state.topicAddCategory = defaultCategory || state.activeTopicTab || 'subtopics';
+      const fallback = state.activeTopicTab && state.activeTopicTab !== 'subtopics' ? state.activeTopicTab : 'branches';
+      state.topicAddCategory = defaultCategory || fallback || 'branches';
       state.topicAddModalOpen = true;
       syncTopicDetailFabVisibility();
       renderTopicAddModal();
@@ -11178,7 +11544,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (!topic || !catGridEl || !formEl) return;
 
       if (subtitleEl) subtitleEl.textContent = `Add to ${topic.title}`;
-      const activeCat = state.topicAddCategory || 'subtopics';
+      const activeCat = state.topicAddCategory && state.topicAddCategory !== 'subtopics' ? state.topicAddCategory : 'branches';
 
       catGridEl.innerHTML = TOPIC_ADD_CATEGORIES.map((cat) => {
         const isSelected = activeCat === cat.key;
@@ -11193,26 +11559,16 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         `;
       }).join('');
 
-      if (activeCat === 'subtopics') {
+      if (activeCat === 'branches') {
         formEl.innerHTML = `
           <div class="bg-cardbg border border-borderline rounded-2xl p-3.5 space-y-3">
             <div class="space-y-1">
-              <label for="modal-subtopic-title" class="text-[10.5px] font-semibold uppercase tracking-wider text-secondarytext">Subtopic Title</label>
-              <input id="modal-subtopic-title" type="text" required placeholder="e.g. Perspective Drawing" class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3.5 py-2.5 rounded-xl border border-borderline focus:border-coral focus:outline-none" />
+              <label for="modal-branch-title" class="text-[10.5px] font-semibold uppercase tracking-wider text-secondarytext">Skill Title</label>
+              <input id="modal-branch-title" type="text" required placeholder="e.g. Perspective Drawing" class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3.5 py-2.5 rounded-xl border border-borderline focus:border-coral focus:outline-none" />
             </div>
             <div class="space-y-1">
-              <label for="modal-subtopic-contents" class="text-[10.5px] font-semibold uppercase tracking-wider text-secondarytext">Starter Learning Contents (Optional, comma-separated)</label>
-              <input id="modal-subtopic-contents" type="text" placeholder="e.g. Horizon line, 1-point grid, 2-point massing" class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3.5 py-2.5 rounded-xl border border-borderline focus:border-coral focus:outline-none" />
-            </div>
-          </div>
-          <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-appbg font-bold text-xs">Create Subtopic</button>
-        `;
-      } else if (activeCat === 'branches') {
-        formEl.innerHTML = `
-          <div class="bg-cardbg border border-borderline rounded-2xl p-3.5 space-y-3">
-            <div class="space-y-1">
-              <label for="modal-branch-title" class="text-[10.5px] font-semibold uppercase tracking-wider text-secondarytext">Skill Node Title</label>
-              <input id="modal-branch-title" type="text" required placeholder="e.g. Isometric Grids" class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3.5 py-2.5 rounded-xl border border-borderline focus:border-coral focus:outline-none" />
+              <label for="modal-branch-contents" class="text-[10.5px] font-semibold uppercase tracking-wider text-secondarytext">Starter Milestones (Optional, comma-separated)</label>
+              <input id="modal-branch-contents" type="text" placeholder="e.g. Horizon line, 1-point grid, 2-point massing" class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3.5 py-2.5 rounded-xl border border-borderline focus:border-coral focus:outline-none" />
             </div>
             <div class="grid grid-cols-3 gap-2">
               <div class="space-y-1">
@@ -11224,12 +11580,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 </select>
               </div>
               <div class="col-span-2 space-y-1">
-                <label for="modal-branch-drill" class="text-[10.5px] font-semibold uppercase tracking-wider text-secondarytext">Starter Drill</label>
-                <input id="modal-branch-drill" type="text" placeholder="e.g. 15m focused rep" class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3 py-2.5 rounded-xl border border-borderline focus:border-coral focus:outline-none" />
+                <label for="modal-branch-drill" class="text-[10.5px] font-semibold uppercase tracking-wider text-secondarytext">Starter Drill (Optional)</label>
+                <input id="modal-branch-drill" type="text" placeholder="e.g. 15m focused rep" class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3.5 py-2.5 rounded-xl border border-borderline focus:border-coral focus:outline-none" />
               </div>
             </div>
           </div>
-          <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-appbg font-bold text-xs">Create Skill Node</button>
+          <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-appbg font-bold text-xs">Create Skill</button>
         `;
       } else if (activeCat === 'drills') {
         const hasBranches = topic.branches.length > 0;
@@ -11324,29 +11680,25 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const cat = state.topicAddCategory;
 
       recordProgressMutation(() => {
-        if (cat === 'subtopics') {
-          const title = document.getElementById('modal-subtopic-title')?.value.trim() || '';
-          const rawContents = document.getElementById('modal-subtopic-contents')?.value.trim() || '';
+        if (cat === 'branches') {
+          const title = document.getElementById('modal-branch-title')?.value.trim() || '';
           if (!title) return;
           const now = Date.now();
+          const tier = Number(document.getElementById('modal-branch-tier')?.value || 1);
+          const drillTitle = document.getElementById('modal-branch-drill')?.value.trim() || '';
+          const rawContents = document.getElementById('modal-branch-contents')?.value.trim() || '';
           const contentItems = rawContents
             ? rawContents.split(',').map((s) => s.trim()).filter(Boolean)
             : [];
-          const newSubtopic = {
-            id: `sub-${now}`,
+          const branchId = `b-${now}`;
+          topic.branches.push({
+            id: branchId,
             title,
             lifeArea: ctx.rootTopic.lifeArea,
-            pinned: false,
-            branches: [
-              {
-                id: `b-${now}`,
-                title: `${title} Core`,
-                tier: 1,
-                status: 'unlocked',
-                xp: 100,
-                drills: [{ id: `d-${now}`, title: `${title} Practice Drill`, reps: '15m session', count: 0, done: false }],
-              },
-            ],
+            tier,
+            status: 'unlocked',
+            xp: tier * 75,
+            drills: [{ id: `d-${now}`, title: drillTitle || `${title} Practice Drill`, reps: '15m session', count: 0, done: false }],
             milestones: contentItems.length > 0
               ? [
                   {
@@ -11361,27 +11713,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   },
                 ]
               : [],
+            branches: [],
             achievements: [],
             resources: [],
-            subtopics: [],
-          };
-          topic.subtopics.push(newSubtopic);
-          state.activeTopicTab = 'subtopics';
-        } else if (cat === 'branches') {
-          const title = document.getElementById('modal-branch-title')?.value.trim() || '';
-          if (!title) return;
-          const tier = Number(document.getElementById('modal-branch-tier')?.value || 2);
-          const drillTitle = document.getElementById('modal-branch-drill')?.value.trim() || '';
-          const branchId = `b-${Date.now()}`;
-          topic.branches.push({
-            id: branchId,
-            title,
-            tier,
-            status: tier === 1 ? 'unlocked' : 'locked',
-            xp: tier * 75,
-            drills: [{ id: `d-${Date.now()}`, title: drillTitle || `${title} Practice Drill`, reps: '15m session', count: 0, done: false }],
           });
           state.selectedBranchId = branchId;
+          state.selectedGraphPath = [...ctx.chain.map((n) => n.id), branchId];
           state.activeTopicTab = 'branches';
         } else if (cat === 'drills') {
           const branchId = document.getElementById('modal-drill-branch')?.value || state.selectedBranchId;
@@ -11465,38 +11802,258 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       renderProfileTopics();
     }
 
-    function openSubtopicDetail(subtopicId) {
+    function openSkillTopicDetail(skillIdOrPath) {
       const ctx = getActiveTopicContext();
       if (!ctx) return;
-      const targetSub = (ctx.activeNode.subtopics || []).find((s) => String(s.id) === String(subtopicId));
-      if (!targetSub) return;
-      ensureTopicSkillData(targetSub);
-      state.topicNavPath = [...ctx.chain.map((n) => n.id), targetSub.id];
-      state.activeTopicTab = 'subtopics';
-      state.selectedBranchId = targetSub.branches?.[0]?.id || null;
+
+      let nextPath = null;
+      if (Array.isArray(skillIdOrPath) && skillIdOrPath.length > 0) {
+        nextPath = [...skillIdOrPath];
+      } else if (typeof skillIdOrPath === 'string' && skillIdOrPath.includes('>')) {
+        nextPath = skillIdOrPath.split('>').filter(Boolean);
+      } else if (skillIdOrPath != null) {
+        nextPath = [...ctx.chain.map((n) => n.id), skillIdOrPath];
+      }
+      if (!nextPath) return;
+
+      const resolved = ProgLogic.findTopicNodeByPath(state.topics, nextPath);
+      if (!resolved || !resolved.activeNode) return;
+      ensureTopicSkillData(resolved.activeNode);
+
+      state.topicNavPath = resolved.chain.map((n) => n.id);
+      state.activeTopicTab = 'branches';
+      state.selectedBranchId = null;
+      state.selectedGraphPath = null;
       state.activeResourceCategory = 'All';
       state.topicAddModalOpen = false;
+      window.__topicGraphRuntime = null;
       renderProfileTopics();
+    }
+
+    function openSubtopicDetail(subtopicId) {
+      openSkillTopicDetail(subtopicId);
     }
 
     function navigateTopicBreadcrumb(depthIndex) {
       if (!Array.isArray(state.topicNavPath) || depthIndex < 0) return;
       state.topicNavPath = state.topicNavPath.slice(0, depthIndex + 1);
       state.topicAddModalOpen = false;
+      state.selectedBranchId = null;
+      state.selectedGraphPath = null;
+      window.__topicGraphRuntime = null;
       const ctx = getActiveTopicContext();
       if (ctx) {
-        state.selectedBranchId = ctx.activeNode.branches?.[0]?.id || null;
         renderTopicDetailView(ctx.activeNode, ctx.chain);
       }
     }
 
-    function removeSubtopic(subtopicId) {
-      const ctx = getActiveTopicContext();
-      if (!ctx) return;
+    function removeSkillByPath(pathKey) {
+      const ids = typeof pathKey === 'string' ? pathKey.split('>').filter(Boolean) : Array.isArray(pathKey) ? pathKey : [];
+      if (ids.length < 2) return;
+      const parentPath = ids.slice(0, -1);
+      const targetId = String(ids[ids.length - 1]);
+      const parentCtx = ProgLogic.findTopicNodeByPath(state.topics, parentPath);
+      if (!parentCtx || !Array.isArray(parentCtx.activeNode.branches)) return;
       recordProgressMutation(() => {
-        ctx.activeNode.subtopics = (ctx.activeNode.subtopics || []).filter((s) => String(s.id) !== String(subtopicId));
+        parentCtx.activeNode.branches = parentCtx.activeNode.branches.filter((b) => String(b.id) !== targetId);
       });
-      renderTopicDetailView(ctx.activeNode, ctx.chain);
+      state.selectedGraphPath = null;
+      window.__topicGraphRuntime = null;
+      const ctx = getActiveTopicContext();
+      if (ctx) renderTopicDetailView(ctx.activeNode, ctx.chain);
+    }
+
+    function cycleSkillStatusByPath(pathKey) {
+      const ids = typeof pathKey === 'string' ? pathKey.split('>').filter(Boolean) : Array.isArray(pathKey) ? pathKey : [];
+      const resolved = ProgLogic.findTopicNodeByPath(state.topics, ids);
+      if (!resolved || !resolved.activeNode || resolved.chain.length < 2) return;
+      const node = resolved.activeNode;
+      const order = ['locked', 'unlocked', 'mastered'];
+      const idx = order.indexOf(node.status || 'unlocked');
+      node.status = order[(idx + 1) % order.length];
+      saveState();
+      const ctx = getActiveTopicContext();
+      if (ctx) renderTopicDetailView(ctx.activeNode, ctx.chain);
+    }
+
+    function applyTopicGraphViewportTransform() {
+      const rt = window.__topicGraphRuntime;
+      const viewport = document.getElementById('topic-obsidian-graph-viewport');
+      if (!rt || !viewport) return;
+      const cx = rt.graph.width / 2;
+      const cy = rt.graph.height / 2;
+      viewport.setAttribute(
+        'transform',
+        `translate(${(cx + rt.panX).toFixed(1)}, ${(cy + rt.panY).toFixed(1)}) scale(${rt.zoom.toFixed(3)}) translate(${(-cx).toFixed(1)}, ${(-cy).toFixed(1)})`
+      );
+    }
+
+    function adjustTopicGraphZoom(delta) {
+      const rt = window.__topicGraphRuntime;
+      if (!rt) return;
+      rt.zoom = Math.max(0.55, Math.min(2.2, Number((rt.zoom + delta).toFixed(2))));
+      applyTopicGraphViewportTransform();
+    }
+
+    function resetTopicGraphView() {
+      const rt = window.__topicGraphRuntime;
+      if (!rt) return;
+      rt.zoom = 1;
+      rt.panX = 0;
+      rt.panY = 0;
+      applyTopicGraphViewportTransform();
+    }
+
+    function initTopicObsidianGraphInteractions() {
+      const svg = document.getElementById('topic-obsidian-graph-svg');
+      const rt = window.__topicGraphRuntime;
+      if (!svg || !rt) return;
+
+      const nodeByKey = {};
+      rt.graph.nodes.forEach((n) => {
+        nodeByKey[n.key] = n;
+      });
+
+      const adjacency = {};
+      rt.graph.nodes.forEach((n) => {
+        adjacency[n.key] = [];
+      });
+      rt.graph.edges.forEach((e) => {
+        if (adjacency[e.source]) adjacency[e.source].push(e.target);
+        if (adjacency[e.target]) adjacency[e.target].push(e.source);
+      });
+
+      let dragState = null;
+
+      function updateDomNodeAndEdges(key) {
+        const pos = rt.posByKey[key];
+        if (!pos) return;
+        const g = svg.querySelector(`[data-graph-node="${CSS.escape(key)}"]`);
+        if (g) g.setAttribute('transform', `translate(${pos.x.toFixed(1)}, ${pos.y.toFixed(1)})`);
+        svg.querySelectorAll(`[data-source="${CSS.escape(key)}"]`).forEach((line) => {
+          line.setAttribute('x1', pos.x.toFixed(1));
+          line.setAttribute('y1', pos.y.toFixed(1));
+        });
+        svg.querySelectorAll(`[data-target="${CSS.escape(key)}"]`).forEach((line) => {
+          line.setAttribute('x2', pos.x.toFixed(1));
+          line.setAttribute('y2', pos.y.toFixed(1));
+        });
+      }
+
+      svg.onpointerdown = (e) => {
+        const nodeEl = e.target.closest ? e.target.closest('[data-graph-node]') : null;
+        if (svg.setPointerCapture && e.pointerId != null) {
+          try { svg.setPointerCapture(e.pointerId); } catch (_) {}
+        }
+        if (nodeEl) {
+          const key = nodeEl.getAttribute('data-graph-node');
+          const pos = rt.posByKey[key];
+          if (!pos) return;
+          nodeEl.style.cursor = 'grabbing';
+          dragState = {
+            mode: 'node',
+            key,
+            pointerId: e.pointerId,
+            startClientX: e.clientX,
+            startClientY: e.clientY,
+            lastClientX: e.clientX,
+            lastClientY: e.clientY,
+            moved: false,
+          };
+        } else {
+          dragState = {
+            mode: 'pan',
+            pointerId: e.pointerId,
+            startClientX: e.clientX,
+            startClientY: e.clientY,
+            startPanX: rt.panX,
+            startPanY: rt.panY,
+            moved: false,
+          };
+        }
+      };
+
+      svg.onpointermove = (e) => {
+        if (!dragState) return;
+        const rect = svg.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const totalDist = Math.hypot(e.clientX - dragState.startClientX, e.clientY - dragState.startClientY);
+        if (totalDist >= 5) dragState.moved = true;
+
+        const scaleX = rt.graph.width / rect.width;
+        const scaleY = rt.graph.height / rect.height;
+
+        if (dragState.mode === 'node') {
+          const dxSvg = ((e.clientX - dragState.lastClientX) * scaleX) / rt.zoom;
+          const dySvg = ((e.clientY - dragState.lastClientY) * scaleY) / rt.zoom;
+          dragState.lastClientX = e.clientX;
+          dragState.lastClientY = e.clientY;
+
+          const pos = rt.posByKey[dragState.key];
+          if (!pos) return;
+          pos.x = Math.max(16, Math.min(rt.graph.width - 16, pos.x + dxSvg));
+          pos.y = Math.max(16, Math.min(rt.graph.height - 16, pos.y + dySvg));
+          updateDomNodeAndEdges(dragState.key);
+
+          // Gentle Obsidian elastic tug on directly connected neighbors
+          const neighbors = adjacency[dragState.key] || [];
+          neighbors.forEach((nKey) => {
+            const nPos = rt.posByKey[nKey];
+            if (!nPos) return;
+            nPos.x = Math.max(16, Math.min(rt.graph.width - 16, nPos.x + dxSvg * 0.16));
+            nPos.y = Math.max(16, Math.min(rt.graph.height - 16, nPos.y + dySvg * 0.16));
+            updateDomNodeAndEdges(nKey);
+          });
+        } else if (dragState.mode === 'pan') {
+          rt.panX = dragState.startPanX + (e.clientX - dragState.startClientX) * scaleX;
+          rt.panY = dragState.startPanY + (e.clientY - dragState.startClientY) * scaleY;
+          applyTopicGraphViewportTransform();
+        }
+      };
+
+      const finishPointer = (e) => {
+        if (!dragState) return;
+        const finished = dragState;
+        dragState = null;
+        if (svg.releasePointerCapture && finished.pointerId != null) {
+          try { svg.releasePointerCapture(finished.pointerId); } catch (_) {}
+        }
+
+        if (finished.mode === 'node') {
+          const nodeEl = svg.querySelector(`[data-graph-node="${CSS.escape(finished.key)}"]`);
+          if (nodeEl) nodeEl.style.cursor = 'grab';
+          if (!finished.moved) {
+            const node = nodeByKey[finished.key];
+            if (!node) return;
+            if (node.isRoot) {
+              state.selectedGraphPath = null;
+              state.selectedBranchId = null;
+              const ctx = getActiveTopicContext();
+              if (ctx) renderTopicDetailView(ctx.activeNode, ctx.chain);
+            } else if (rt.focusedKey === node.key) {
+              openSkillTopicDetail(node.pathIds);
+            } else {
+              state.selectedGraphPath = node.pathIds.slice();
+              state.selectedBranchId = node.id;
+              const ctx = getActiveTopicContext();
+              if (ctx) renderTopicDetailView(ctx.activeNode, ctx.chain);
+            }
+          }
+        } else if (finished.mode === 'pan' && !finished.moved && rt.focusedKey) {
+          // Tapping empty graph canvas clears spotlight to show the full graph evenly
+          state.selectedGraphPath = null;
+          state.selectedBranchId = null;
+          const ctx = getActiveTopicContext();
+          if (ctx) renderTopicDetailView(ctx.activeNode, ctx.chain);
+        }
+      };
+
+      svg.onpointerup = finishPointer;
+      svg.onpointercancel = finishPointer;
+      svg.onwheel = (e) => {
+        e.preventDefault();
+        adjustTopicGraphZoom(e.deltaY < 0 ? 0.14 : -0.14);
+      };
     }
 
     function normalizeLifeArea(area) {
@@ -11788,10 +12345,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       ensureTopicSkillData(topic);
       state.activeTopicId = topic.id;
       state.topicNavPath = [topic.id];
-      state.activeTopicTab = 'subtopics';
-      state.selectedBranchId = topic.branches?.[0]?.id || null;
+      state.activeTopicTab = 'branches';
+      state.selectedBranchId = null;
+      state.selectedGraphPath = null;
       state.activeResourceCategory = 'All';
       state.topicAddModalOpen = false;
+      window.__topicGraphRuntime = null;
       renderProfileTopics();
     }
 
@@ -11831,10 +12390,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const isSubtopic = chain.length > 1;
       const parentNode = isSubtopic ? chain[chain.length - 2] : null;
       const stats = computeTopicStats(topic);
-
-      if (!topic.branches.some((b) => b.id === state.selectedBranchId)) {
-        state.selectedBranchId = topic.branches[0]?.id || null;
-      }
 
       const backLabelEl = document.getElementById('topic-detail-back-label');
       const breadcrumbsEl = document.getElementById('topic-detail-breadcrumbs');
@@ -11888,7 +12443,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
       if (subtopicBadgeEl) {
         subtopicBadgeEl.classList.toggle('hidden', !isSubtopic);
-        subtopicBadgeEl.textContent = `Subtopic · ${rootTopic.lifeArea}`;
+        subtopicBadgeEl.textContent = `Skill · ${rootTopic.lifeArea}`;
       }
 
       if (titleEl) titleEl.textContent = topic.title;
@@ -11949,7 +12504,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         `;
       }
 
-      ['subtopics', 'branches', 'drills', 'resources'].forEach((t) => {
+      ['branches', 'drills', 'resources'].forEach((t) => {
         const btn = document.getElementById(`topic-tab-${t}`);
         if (!btn) return;
         const active = state.activeTopicTab === t;
@@ -11961,386 +12516,257 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       });
 
       if (!bodyEl) return;
-      const tab = state.activeTopicTab;
+      const tab = state.activeTopicTab === 'subtopics' ? 'branches' : state.activeTopicTab;
 
-      if (tab === 'subtopics') {
-        const subs = Array.isArray(topic.subtopics) ? topic.subtopics : [];
-        bodyEl.innerHTML = `
-          <div class="bg-cardbg border border-borderline rounded-[22px] p-3.5 space-y-3">
-            <div class="flex items-center justify-between gap-2">
-              <div>
-                <p class="text-[10.5px] font-bold uppercase tracking-wider text-coral">Subtopics</p>
-                <p class="text-xs font-semibold text-primarytext">${subs.length} ${subs.length === 1 ? 'Subtopic' : 'Subtopics'} inside ${escapeHtml(topic.title)}</p>
-              </div>
-              <button
-                type="button"
-                onclick="openTopicAddModal('subtopics')"
-                class="tactile-btn px-2.5 py-1.5 rounded-full bg-coral/15 border border-coral/40 text-coral text-[10.5px] font-bold whitespace-nowrap"
-              >+ Subtopic</button>
-            </div>
-
-            ${
-              subs.length === 0
-                ? `<p class="text-xs text-mutedtext text-center py-5">No subtopics yet. Each subtopic has the exact same menus, milestones, and Level 1–10 progression.</p>`
-                : `<div class="space-y-2">
-                    ${subs
-                      .map((sub) => {
-                        const subStats = computeTopicStats(sub);
-                        const subBarPct = subStats.isMaxLevel ? 100 : subStats.levelProgressPct;
-                        const subAccent = subStats.isMaxLevel ? 'text-lime' : 'text-coral';
-                        const subBarColor = subStats.isMaxLevel ? 'bg-lime' : 'bg-coral';
-                        return `
-                          <div
-                            data-subtopic-card-id="${escapeHtml(String(sub.id))}"
-                            class="bg-pillbg border border-borderline hover:border-coral/60 rounded-2xl p-3 space-y-2 transition"
-                          >
-                            <div class="flex items-center justify-between gap-2">
-                              <button
-                                type="button"
-                                onclick="openSubtopicDetail('${escapeHtml(String(sub.id))}')"
-                                class="tactile-btn flex items-center gap-2.5 min-w-0 flex-1 text-left"
-                              >
-                                <span class="w-8 h-8 rounded-xl bg-cardbg border border-borderline ${subAccent} text-[11px] font-bold flex items-center justify-center flex-shrink-0">
-                                  L${subStats.level}
-                                </span>
-                                <div class="min-w-0 flex-1">
-                                  <p class="text-xs font-semibold text-primarytext truncate">${escapeHtml(sub.title)}</p>
-                                  <p class="text-[10px] text-secondarytext truncate">${subStats.doneMilestones}/${subStats.totalMilestones} milestones${subStats.subtopicCount > 0 ? ` · ${subStats.subtopicCount} sub` : ''} · LVL ${subStats.level}/${subStats.maxLevel}</p>
-                                </div>
-                              </button>
-                              <div class="flex items-center gap-1 flex-shrink-0">
-                                <button
-                                  type="button"
-                                  onclick="openSubtopicDetail('${escapeHtml(String(sub.id))}')"
-                                  aria-label="Open subtopic ${escapeHtml(sub.title)}"
-                                  class="tactile-btn p-1.5 rounded-full bg-cardbg border border-borderline text-secondarytext hover:text-coral"
-                                >
-                                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-                                </button>
-                                <button
-                                  type="button"
-                                  onclick="removeSubtopic('${escapeHtml(String(sub.id))}')"
-                                  aria-label="Remove subtopic ${escapeHtml(sub.title)}"
-                                  title="Remove subtopic"
-                                  class="tactile-btn p-1.5 rounded-full bg-cardbg border border-borderline text-secondarytext hover:text-coral"
-                                >
-                                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                                </button>
-                              </div>
-                            </div>
-                            <div class="w-full h-1.5 rounded-full bg-cardbg overflow-hidden">
-                              <div class="h-full rounded-full ${subBarColor} transition-all duration-300" style="width: ${subBarPct}%;"></div>
-                            </div>
-                          </div>
-                        `;
-                      })
-                      .join('')}
-                  </div>`
-            }
-          </div>
-        `;
-      } else if (tab === 'branches') {
-        const selectedBranch = topic.branches.find((b) => b.id === state.selectedBranchId) || topic.branches[0] || null;
+      if (tab === 'branches') {
         const accentHex = (ACCENT_RGB[state.accentKey] || ACCENT_RGB.coral).hex;
         const accentRgb = (ACCENT_RGB[state.accentKey] || ACCENT_RGB.coral).rgb.split(' ').join(', ');
+        const rootPathIds = chain.map((n) => n.id);
+        const rootKey = rootPathIds.map((p) => String(p)).join('>');
+        const graph = ProgLogic.buildTopicSkillGraph(topic, rootPathIds, { width: 320, height: 268 });
 
-        const svgW = 320;
-        const centerX = svgW / 2;
-        const tierOrder = [3, 2, 1];
-        const nodesByTier = {
-          3: topic.branches.filter((b) => Number(b.tier || 1) === 3),
-          2: topic.branches.filter((b) => Number(b.tier || 1) === 2),
-          1: topic.branches.filter((b) => Number(b.tier || 1) === 1),
-        };
-
-        const activeTiers = tierOrder.filter((t) => nodesByTier[t].length > 0);
-        const rowSpacing = 98;
-        const topPad = 46;
-        const bottomPad = 44;
-        const svgH = Math.max(210, topPad + Math.max(0, activeTiers.length - 1) * rowSpacing + bottomPad);
-
-        const positionedNodes = [];
-        const tierRows = [];
-
-        activeTiers.forEach((tierNum, rowIdx) => {
-          const rowNodes = nodesByTier[tierNum];
-          const y = topPad + rowIdx * rowSpacing;
-          const count = rowNodes.length;
-          const rowItems = rowNodes.map((node, colIdx) => {
-            let x = centerX;
-            if (count > 1) {
-              const span = Math.min(184, (count - 1) * 108);
-              x = centerX - span / 2 + (colIdx * span) / (count - 1);
-            }
-            const item = { node, tier: tierNum, x, y, isApex: tierNum === 3 && count === 1 };
-            positionedNodes.push(item);
-            return item;
-          });
-          tierRows.push(rowItems);
+        // Reuse live dragged coordinates if we are still viewing the exact same root & node set
+        const prevRt = window.__topicGraphRuntime;
+        const reusePositions =
+          prevRt &&
+          prevRt.rootKey === rootKey &&
+          prevRt.graph &&
+          prevRt.graph.nodes.length === graph.nodes.length &&
+          graph.nodes.every((n) => prevRt.posByKey && prevRt.posByKey[n.key]);
+        const posByKey = {};
+        graph.nodes.forEach((n) => {
+          if (reusePositions) {
+            n.x = prevRt.posByKey[n.key].x;
+            n.y = prevRt.posByKey[n.key].y;
+          }
+          posByKey[n.key] = { x: n.x, y: n.y };
         });
 
-        let conduitsSvg = '';
-        for (let r = 0; r < tierRows.length - 1; r++) {
-          const upperRow = tierRows[r];
-          const lowerRow = tierRows[r + 1];
+        const zoom = reusePositions ? prevRt.zoom : 1;
+        const panX = reusePositions ? prevRt.panX : 0;
+        const panY = reusePositions ? prevRt.panY : 0;
 
-          upperRow.forEach((uItem) => {
-            lowerRow.forEach((lItem) => {
-              const uActive = uItem.node.status === 'mastered' || uItem.node.status === 'unlocked';
-              const lActive = lItem.node.status === 'mastered' || lItem.node.status === 'unlocked';
-              const bothMastered = uItem.node.status === 'mastered' && lItem.node.status === 'mastered';
-              const isLit = uActive && lActive;
+        // Resolve currently focused graph node (if any)
+        const selectedKeyFromPath = Array.isArray(state.selectedGraphPath) && state.selectedGraphPath.length > 0
+          ? state.selectedGraphPath.map((p) => String(p)).join('>')
+          : null;
+        let focusedGraphNode = selectedKeyFromPath
+          ? graph.nodes.find((n) => n.key === selectedKeyFromPath && !n.isRoot) || null
+          : null;
+        if (!focusedGraphNode && state.selectedBranchId != null) {
+          focusedGraphNode = graph.nodes.find((n) => !n.isRoot && String(n.id) === String(state.selectedBranchId)) || null;
+        }
+        const focusedKey = focusedGraphNode ? focusedGraphNode.key : null;
 
-              const strokeColor = bothMastered
-                ? '#81C953'
-                : isLit
-                  ? accentHex
-                  : 'rgb(var(--color-borderline))';
-              const strokeOpacity = isLit ? '0.9' : '0.65';
-              const strokeWidth = isLit ? '2.2' : '1.6';
-
-              let d = '';
-              if (Math.abs(uItem.x - lItem.x) < 2) {
-                d = `M ${uItem.x} ${uItem.y} L ${lItem.x} ${lItem.y}`;
-              } else {
-                const midY = (uItem.y + lItem.y) / 2;
-                const cornerR = 16;
-                const dir = lItem.x > uItem.x ? 1 : -1;
-                d = `M ${uItem.x} ${uItem.y} L ${uItem.x} ${midY - cornerR} Q ${uItem.x} ${midY} ${uItem.x + dir * cornerR} ${midY} L ${lItem.x - dir * cornerR} ${midY} Q ${lItem.x} ${midY} ${lItem.x} ${midY + cornerR} L ${lItem.x} ${lItem.y}`;
-              }
-
-              conduitsSvg += `<path d="${d}" fill="none" stroke="${strokeColor}" stroke-width="${strokeWidth}" stroke-opacity="${strokeOpacity}" stroke-linecap="round" />`;
-              if (isLit) {
-                conduitsSvg += `<path d="${d}" fill="none" stroke="${strokeColor}" stroke-width="5" stroke-opacity="0.16" stroke-linecap="round" />`;
-              }
-            });
+        // Build adjacency map for Obsidian hover/focus spotlight
+        const neighborKeys = new Set();
+        if (focusedKey) {
+          neighborKeys.add(focusedKey);
+          graph.edges.forEach((e) => {
+            if (e.source === focusedKey) neighborKeys.add(e.target);
+            if (e.target === focusedKey) neighborKeys.add(e.source);
           });
         }
 
-        const nodesSvg = positionedNodes
-          .map((item, idx) => {
-            const { node, x, y, isApex, tier } = item;
-            const isSelected = selectedBranch && selectedBranch.id === node.id;
+        const edgesSvg = graph.edges
+          .map((edge) => {
+            const src = posByKey[edge.source];
+            const dst = posByKey[edge.target];
+            if (!src || !dst) return '';
+            const isConnected = !focusedKey || edge.source === focusedKey || edge.target === focusedKey;
+            const strokeColor =
+              focusedKey && isConnected
+                ? accentHex
+                : edge.mastered
+                  ? '#81C953'
+                  : edge.active
+                    ? 'rgba(255,255,255,0.34)'
+                    : 'rgba(255,255,255,0.16)';
+            const strokeWidth = focusedKey && isConnected ? '1.85' : '1.15';
+            const strokeOpacity = focusedKey ? (isConnected ? '0.92' : '0.14') : '0.68';
+            return `<line
+              data-graph-edge="${escapeHtml(edge.id)}"
+              data-source="${escapeHtml(edge.source)}"
+              data-target="${escapeHtml(edge.target)}"
+              x1="${src.x}" y1="${src.y}" x2="${dst.x}" y2="${dst.y}"
+              stroke="${strokeColor}"
+              stroke-width="${strokeWidth}"
+              stroke-opacity="${strokeOpacity}"
+              stroke-linecap="round"
+            />`;
+          })
+          .join('');
+
+        const nodesSvg = graph.nodes
+          .map((node) => {
+            const isFocused = focusedKey === node.key;
+            const isLit = !focusedKey || neighborKeys.has(node.key);
             const isMastered = node.status === 'mastered';
             const isUnlocked = node.status === 'unlocked';
-            const branchPct = computeBranchCompletionPct(node);
-
-            const baseR = isApex ? 28 : 22;
-            const ringR = baseR + 5;
-            const circumference = 2 * Math.PI * ringR;
-            const dashOffset = circumference * (1 - branchPct / 100);
-
-            const fillBg = isMastered
-              ? 'rgba(129, 201, 83, 0.16)'
-              : isUnlocked
-                ? `rgba(${accentRgb}, 0.16)`
-                : 'rgb(var(--color-pillbg))';
-            const borderStroke = isMastered
-              ? '#81C953'
-              : isUnlocked
-                ? accentHex
-                : 'rgb(var(--color-borderline))';
-            const ringStroke = isMastered
-              ? '#81C953'
-              : isUnlocked
-                ? accentHex
-                : 'rgb(var(--color-mutedtext))';
-            const iconColor = isMastered
-              ? '#81C953'
-              : isUnlocked
-                ? accentHex
-                : 'rgb(var(--color-secondarytext))';
-
-            let emblemPath = '';
-            if (isApex || tier === 3) {
-              emblemPath = `
-                <path d="M0 -10 L3 -3 L10 0 L3 3 L0 10 L-3 3 L-10 0 L-3 -3 Z" fill="none" stroke="${iconColor}" stroke-width="1.8" stroke-linejoin="round"/>
-                <circle cx="0" cy="0" r="2.2" fill="${iconColor}"/>
-              `;
-            } else if (idx % 3 === 0) {
-              emblemPath = `
-                <path d="M0 -9 L6 6 L0 3 L-6 6 Z" fill="none" stroke="${iconColor}" stroke-width="1.8" stroke-linejoin="round"/>
-                <line x1="0" y1="-9" x2="0" y2="3" stroke="${iconColor}" stroke-width="1.4"/>
-              `;
-            } else if (idx % 3 === 1) {
-              emblemPath = `
-                <circle cx="0" cy="0" r="6" fill="none" stroke="${iconColor}" stroke-width="1.7"/>
-                <line x1="0" y1="-9" x2="0" y2="9" stroke="${iconColor}" stroke-width="1.5"/>
-                <line x1="-9" y1="0" x2="9" y2="0" stroke="${iconColor}" stroke-width="1.5"/>
-              `;
-            } else {
-              emblemPath = `
-                <polygon points="0,-9 7,0 0,9 -7,0" fill="none" stroke="${iconColor}" stroke-width="1.8" stroke-linejoin="round"/>
-                <circle cx="0" cy="0" r="2" fill="${iconColor}"/>
-              `;
-            }
-
-            const haloColor = isMastered
-              ? 'rgba(129, 201, 83, 0.24)'
-              : isUnlocked
-                ? `rgba(${accentRgb}, 0.24)`
-                : 'rgba(255, 255, 255, 0.08)';
+            const nodeOpacity = isLit ? '1' : '0.24';
+            const fillHex = node.isRoot
+              ? accentHex
+              : isMastered
+                ? '#81C953'
+                : isUnlocked
+                  ? accentHex
+                  : '#6B7280';
+            const ringStroke = isFocused
+              ? '#FFFFFF'
+              : node.isRoot
+                ? `rgba(${accentRgb}, 0.45)`
+                : isMastered
+                  ? 'rgba(129, 201, 83, 0.35)'
+                  : `rgba(${accentRgb}, 0.28)`;
+            const shortLabel = node.title.length > 18 ? `${node.title.slice(0, 17)}…` : node.title;
+            const labelY = node.radius + (node.isRoot ? 13 : 11);
 
             return `
               <g
-                transform="translate(${x.toFixed(1)}, ${y.toFixed(1)})"
-                onclick="selectTopicBranchForDrill('${node.id}')"
-                class="cursor-pointer"
+                data-graph-node="${escapeHtml(node.key)}"
+                data-graph-id="${escapeHtml(String(node.id))}"
+                data-graph-root="${node.isRoot ? 'true' : 'false'}"
+                transform="translate(${node.x}, ${node.y})"
+                style="opacity:${nodeOpacity}; cursor:grab;"
               >
-                ${isSelected ? `<circle r="${ringR + 6}" fill="${haloColor}" />` : ''}
-                ${isUnlocked || isMastered ? `<circle r="${ringR + 3}" fill="none" stroke="${borderStroke}" stroke-opacity="0.22" stroke-width="3" />` : ''}
-                <polygon points="0,${-ringR - 4} 3,${-ringR} -3,${-ringR}" fill="${borderStroke}" opacity="${isUnlocked || isMastered ? '0.9' : '0.45'}" />
-                <polygon points="0,${ringR + 4} 3,${ringR} -3,${ringR}" fill="${borderStroke}" opacity="${isUnlocked || isMastered ? '0.9' : '0.45'}" />
-                <polygon points="${-ringR - 4},0 ${-ringR},-3 ${-ringR},3" fill="${borderStroke}" opacity="${isUnlocked || isMastered ? '0.9' : '0.45'}" />
-                <polygon points="${ringR + 4},0 ${ringR},-3 ${ringR},3" fill="${borderStroke}" opacity="${isUnlocked || isMastered ? '0.9' : '0.45'}" />
-                <circle r="${ringR}" fill="none" stroke="rgb(var(--color-borderline))" stroke-width="2.4" />
                 ${
-                  branchPct > 0
-                    ? `<circle r="${ringR}" fill="none" stroke="${ringStroke}" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="${circumference.toFixed(2)}" stroke-dashoffset="${dashOffset.toFixed(2)}" transform="rotate(-90)" />`
+                  isFocused || node.isRoot
+                    ? `<circle r="${(node.radius + (isFocused ? 7 : 5)).toFixed(1)}" fill="${fillHex}" fill-opacity="${isFocused ? '0.22' : '0.14'}" />`
                     : ''
                 }
-                <circle r="${baseR}" fill="${fillBg}" stroke="${borderStroke}" stroke-width="${isSelected ? '2.2' : '1.6'}" />
-                ${emblemPath}
+                <circle
+                  r="${(node.radius + 2.2).toFixed(1)}"
+                  fill="none"
+                  stroke="${ringStroke}"
+                  stroke-width="${isFocused ? '1.8' : '1.1'}"
+                />
+                <circle
+                  r="${node.radius.toFixed(1)}"
+                  fill="${fillHex}"
+                  stroke="#141416"
+                  stroke-width="1.4"
+                />
+                <text
+                  y="${labelY.toFixed(1)}"
+                  text-anchor="middle"
+                  fill="${isFocused || node.isRoot ? '#F5F5F7' : '#C2C2C9'}"
+                  font-size="${node.isRoot ? '9.8' : isFocused ? '9.4' : '8.5'}"
+                  font-weight="${node.isRoot || isFocused ? '700' : '500'}"
+                  style="paint-order:stroke; stroke:#141416; stroke-width:3px; stroke-linejoin:round; user-select:none; pointer-events:none;"
+                >${escapeHtml(shortLabel)}</text>
               </g>
             `;
           })
           .join('');
 
+        const scopeLabel = isSubtopic ? `Scoped · ${escapeHtml(topic.title)}` : 'Full Topic Web';
+        const linkWord = graph.edges.length === 1 ? 'link' : 'links';
+
         let treeHtml = `
-          <div class="bg-cardbg border border-borderline rounded-[24px] p-4 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] font-semibold uppercase tracking-wider text-secondarytext">Sub Topics</span>
-              ${selectedBranch ? `<span class="text-[10px] font-bold uppercase tracking-wider text-coral">Tier ${selectedBranch.tier}</span>` : ''}
+          <div class="bg-[#141416] border border-borderline rounded-[24px] overflow-hidden relative">
+            <div class="flex items-center justify-between gap-2 px-3.5 pt-3 pb-1.5 relative z-10">
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <span class="w-1.5 h-1.5 rounded-full bg-coral flex-shrink-0"></span>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-secondarytext whitespace-nowrap flex-shrink-0">Graph View</span>
+                  <span class="text-[10px] text-mutedtext flex-shrink-0">·</span>
+                  <span class="text-[10px] font-semibold text-coral truncate">${scopeLabel}</span>
+                </div>
+                <p class="text-[10px] text-mutedtext mt-0.5 truncate">${graph.nodes.length} nodes · ${graph.edges.length} ${linkWord} · Drag or tap twice to open</p>
+              </div>
+              <button
+                type="button"
+                onclick="openTopicAddModal('branches')"
+                class="tactile-btn px-2.5 py-1 rounded-full bg-coral/15 border border-coral/40 text-coral text-[10.5px] font-bold whitespace-nowrap flex-shrink-0"
+              >+ Skill</button>
             </div>
 
-            ${
-              selectedBranch
-                ? (() => {
-                    const isPlaying = Boolean(state.subTopicVideoPlaying);
-                    const subSummary =
-                      selectedBranch.summary ||
-                      `Interactive visual breakdown of ${selectedBranch.title} and its practical workflow.`;
-                    const vidDur = selectedBranch.videoDuration || '01:40';
+            <div class="relative w-full h-[268px] touch-none select-none overflow-hidden">
+              <svg
+                id="topic-obsidian-graph-svg"
+                class="w-full h-full block"
+                viewBox="0 0 ${graph.width} ${graph.height}"
+                preserveAspectRatio="xMidYMid meet"
+              >
+                <defs>
+                  <pattern id="obsidian-dot-grid" width="18" height="18" patternUnits="userSpaceOnUse">
+                    <circle cx="2" cy="2" r="0.85" fill="rgba(255,255,255,0.08)" />
+                  </pattern>
+                </defs>
+                <rect width="${graph.width}" height="${graph.height}" fill="url(#obsidian-dot-grid)" />
+                <g
+                  id="topic-obsidian-graph-viewport"
+                  transform="translate(${(graph.width / 2 + panX).toFixed(1)}, ${(graph.height / 2 + panY).toFixed(1)}) scale(${zoom.toFixed(3)}) translate(${(-graph.width / 2).toFixed(1)}, ${(-graph.height / 2).toFixed(1)})"
+                >
+                  <g id="topic-obsidian-graph-edges">${edgesSvg}</g>
+                  <g id="topic-obsidian-graph-nodes">${nodesSvg}</g>
+                </g>
+              </svg>
 
-                    return `
-                      <div class="rounded-2xl overflow-hidden border border-borderline bg-appbg">
-                        <div
-                          onclick="toggleSubTopicVideoPlay()"
-                          class="relative aspect-video w-full cursor-pointer select-none flex flex-col justify-between p-3 overflow-hidden"
-                          style="background: radial-gradient(circle at 50% 42%, rgba(${accentRgb}, ${isPlaying ? '0.24' : '0.14'}), rgba(20, 20, 20, 0.96) 76%);"
-                        >
-                          <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 320 180">
-                            <defs>
-                              <pattern id="subtopic-grid-${selectedBranch.id}" width="24" height="24" patternUnits="userSpaceOnUse">
-                                <path d="M 24 0 L 0 0 0 24" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
-                              </pattern>
-                            </defs>
-                            <rect width="320" height="180" fill="url(#subtopic-grid-${selectedBranch.id})" />
-                            <g transform="translate(160, 86)">
-                              <circle r="44" fill="none" stroke="${accentHex}" stroke-opacity="0.22" stroke-width="1.2" />
-                              <polygon
-                                points="0,-32 28,-16 28,16 0,32 -28,16 -28,-16"
-                                fill="rgba(${accentRgb}, 0.12)"
-                                stroke="${accentHex}"
-                                stroke-width="1.6"
-                                class="${isPlaying ? 'skill-node-pulse' : ''}"
-                              />
-                              <line x1="0" y1="-32" x2="0" y2="32" stroke="${accentHex}" stroke-opacity="0.55" stroke-width="1.2" />
-                              <line x1="-28" y1="-16" x2="28" y2="16" stroke="${accentHex}" stroke-opacity="0.55" stroke-width="1.2" />
-                              <line x1="28" y1="-16" x2="-28" y2="16" stroke="${accentHex}" stroke-opacity="0.55" stroke-width="1.2" />
-                            </g>
-                          </svg>
-
-                          <div class="relative z-10 flex items-center justify-between">
-                            <span class="px-2 py-0.5 rounded-full bg-black/55 border border-white/10 text-[9.5px] font-semibold text-white/90 flex items-center gap-1.5">
-                              <span class="w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-lime animate-pulse' : 'bg-coral'}"></span>
-                              <span>${isPlaying ? 'Playing Demo' : 'Overview Demo'}</span>
-                            </span>
-                            <span class="px-2 py-0.5 rounded-full bg-black/55 text-[9.5px] font-mono text-white/80">${escapeHtml(vidDur)}</span>
-                          </div>
-
-                          <div class="relative z-10 flex items-center justify-center my-auto">
-                            <button
-                              type="button"
-                              onclick="event.stopPropagation(); toggleSubTopicVideoPlay()"
-                              title="${isPlaying ? 'Pause preview' : 'Play preview'}"
-                              class="tactile-btn w-11 h-11 rounded-full bg-coral text-appbg shadow-lg shadow-black/50 flex items-center justify-center border border-white/20"
-                            >
-                              ${
-                                isPlaying
-                                  ? '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 5h4v14H6V5zm8 0h4v14h-4V5z"/></svg>'
-                                  : '<svg class="w-4 h-4 translate-x-[1px]" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'
-                              }
-                            </button>
-                          </div>
-
-                          <div class="relative z-10 space-y-1">
-                            <div class="w-full h-1 rounded-full bg-white/15 overflow-hidden">
-                              <div class="h-full rounded-full bg-coral transition-all duration-500" style="width: ${isPlaying ? '64%' : '22%'};"></div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div class="px-0.5 space-y-1">
-                        <h4 class="font-display text-sm font-bold text-primarytext leading-snug">${escapeHtml(selectedBranch.title)}</h4>
-                        <p class="text-[11px] text-secondarytext leading-relaxed">${escapeHtml(subSummary)}</p>
-                      </div>
-
-                      <div class="border-t border-borderline/80 pt-1"></div>
-                    `;
-                  })()
-                : ''
-            }
-
-            ${
-              topic.branches.length === 0
-                ? `<div class="rounded-2xl border border-borderline px-4 py-8 text-center text-xs text-mutedtext">No skill nodes yet. Tap + to forge your first branch.</div>`
-                : `<div class="relative pt-1">
-                    <svg class="w-full h-auto block select-none overflow-visible" viewBox="0 0 ${svgW} ${svgH}">
-                      ${conduitsSvg}
-                      ${nodesSvg}
-                    </svg>
-                  </div>`
-            }
+              <div class="absolute left-2.5 bottom-2.5 flex items-center gap-1 bg-black/55 backdrop-blur-sm p-1 rounded-full border border-white/10">
+                <button type="button" onclick="adjustTopicGraphZoom(-0.2)" aria-label="Zoom out graph" class="tactile-btn w-6 h-6 rounded-full text-secondarytext hover:text-primarytext text-xs font-bold flex items-center justify-center">−</button>
+                <button type="button" onclick="resetTopicGraphView()" aria-label="Reset graph view" class="tactile-btn px-1.5 h-6 rounded-full text-[9.5px] font-bold text-secondarytext hover:text-coral flex items-center justify-center">Fit</button>
+                <button type="button" onclick="adjustTopicGraphZoom(0.2)" aria-label="Zoom in graph" class="tactile-btn w-6 h-6 rounded-full text-secondarytext hover:text-primarytext text-xs font-bold flex items-center justify-center">+</button>
+              </div>
+            </div>
           </div>
         `;
 
-        if (selectedBranch) {
-          const isMastered = selectedBranch.status === 'mastered';
-          const isUnlocked = selectedBranch.status === 'unlocked';
+        // Resolve full skill node object for the selected skill preview card (works at ANY graph depth)
+        const selectedCtx = focusedGraphNode ? ProgLogic.findTopicNodeByPath(state.topics, focusedGraphNode.pathIds) : null;
+        const selectedBranch = selectedCtx ? selectedCtx.activeNode : null;
+
+        if (selectedBranch && focusedGraphNode) {
+          const skillStats = computeTopicStats(selectedBranch);
+          const isMastered = selectedBranch.status === 'mastered' || skillStats.isMaxLevel;
+          const isUnlocked = selectedBranch.status === 'unlocked' || skillStats.doneMilestones > 0;
           const statusLabel = isMastered ? 'Mastered' : isUnlocked ? 'Unlocked' : 'Locked';
           const statusPillClass = isMastered
             ? 'bg-lime/20 border-lime/50 text-lime'
             : isUnlocked
               ? 'bg-coral/20 border-coral/50 text-coral'
               : 'bg-pillbg border-borderline text-secondarytext';
-          const branchPct = computeBranchCompletionPct(selectedBranch);
+          const skillBarPct = skillStats.totalMilestones > 0 ? skillStats.rawCompletionPct : computeBranchCompletionPct(selectedBranch);
+          const pathKeyEsc = escapeHtml(focusedGraphNode.key);
+          const nestedCount = Array.isArray(selectedBranch.branches) ? selectedBranch.branches.length : 0;
 
           treeHtml += `
-            <div class="bg-cardbg border border-coral/45 rounded-[24px] p-4 space-y-3">
+            <div class="bg-cardbg border border-coral/45 rounded-[24px] p-4 space-y-3" data-selected-skill-card="${pathKeyEsc}">
               <div class="flex items-start justify-between gap-2">
-                <div class="min-w-0 flex-1">
-                  <div class="flex items-center gap-1.5">
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-coral">Tier ${selectedBranch.tier} Node</span>
-                    <span class="text-[10px] text-mutedtext">•</span>
-                    <span class="text-[10px] font-semibold text-secondarytext">${branchPct}% complete</span>
+                <button
+                  type="button"
+                  onclick="openSkillTopicDetail('${pathKeyEsc}')"
+                  class="min-w-0 flex-1 text-left group"
+                  title="Open ${escapeHtml(selectedBranch.title)} as a full topic"
+                >
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="px-1.5 py-0.5 rounded-md bg-coral/15 border border-coral/35 text-[9.5px] font-bold text-coral">LVL ${skillStats.level}/${skillStats.maxLevel}</span>
+                    <span class="text-[10px] font-semibold text-secondarytext">${skillStats.doneMilestones}/${skillStats.totalMilestones} milestones</span>
+                    ${nestedCount > 0 ? `<span class="text-[10px] text-mutedtext">· ${nestedCount} ${nestedCount === 1 ? 'skill' : 'skills'}</span>` : ''}
                   </div>
-                  <h4 class="text-sm font-bold text-primarytext truncate mt-0.5">${escapeHtml(selectedBranch.title)}</h4>
-                </div>
+                  <h4 class="text-sm font-bold text-primarytext group-hover:text-coral transition truncate mt-1">${escapeHtml(selectedBranch.title)}</h4>
+                </button>
                 <div class="flex items-center gap-1.5 flex-shrink-0">
                   <button
                     type="button"
-                    onclick="cycleTopicBranchStatus('${selectedBranch.id}')"
-                    title="Cycle node state"
-                    class="tactile-btn px-2.5 py-1 rounded-full border text-[10.5px] font-bold ${statusPillClass}"
+                    data-open-skill-btn="${pathKeyEsc}"
+                    onclick="openSkillTopicDetail('${pathKeyEsc}')"
+                    class="tactile-btn px-2.5 py-1 rounded-full bg-coral text-appbg text-[10.5px] font-bold whitespace-nowrap"
+                  >
+                    Open →
+                  </button>
+                  <button
+                    type="button"
+                    onclick="cycleSkillStatusByPath('${pathKeyEsc}')"
+                    title="Cycle skill status"
+                    class="tactile-btn px-2 py-1 rounded-full border text-[10px] font-bold ${statusPillClass}"
                   >
                     ${statusLabel} ↻
                   </button>
                   <button
                     type="button"
-                    onclick="removeTopicSubItem('branches', '${selectedBranch.id}')"
-                    title="Remove branch"
+                    onclick="removeSkillByPath('${pathKeyEsc}')"
+                    title="Remove skill"
                     class="tactile-btn p-1.5 rounded-full bg-pillbg border border-borderline text-secondarytext hover:text-coral"
                   >
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -12349,13 +12775,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               </div>
 
               <div class="w-full h-1.5 rounded-full bg-pillbg overflow-hidden">
-                <div class="h-full rounded-full ${branchPct === 100 || isMastered ? 'bg-lime' : 'bg-coral'} transition-all duration-300" style="width: ${branchPct}%;"></div>
+                <div class="h-full rounded-full ${skillBarPct === 100 || isMastered ? 'bg-lime' : 'bg-coral'} transition-all duration-300" style="width: ${skillBarPct}%;"></div>
               </div>
 
               <div class="space-y-2 pt-0.5">
                 ${
-                  selectedBranch.drills.length === 0
-                    ? `<p class="text-xs text-mutedtext text-center py-3">No drills on this node yet. Tap + to add one.</p>`
+                  !Array.isArray(selectedBranch.drills) || selectedBranch.drills.length === 0
+                    ? `<p class="text-xs text-mutedtext text-center py-2">Open this skill to add milestones, nested skills, drills, or resources.</p>`
                     : selectedBranch.drills
                         .map(
                           (d) => `
@@ -12402,9 +12828,58 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               </div>
             </div>
           `;
+        } else if (topic.branches.length === 0) {
+          treeHtml += `
+            <div class="bg-cardbg border border-borderline rounded-2xl px-4 py-5 text-center text-xs text-mutedtext">
+              No connected skills inside <span class="text-primarytext font-semibold">${escapeHtml(topic.title)}</span> yet. Tap <span class="text-coral font-semibold">+ Skill</span> to grow this graph.
+            </div>
+          `;
+        } else {
+          treeHtml += `
+            <div class="space-y-2">
+              <div class="flex items-center justify-between px-1">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-secondarytext">Connected Skills (${topic.branches.length})</span>
+                <span class="text-[10px] text-mutedtext">Tap graph node to spotlight</span>
+              </div>
+              ${topic.branches
+                .map((b) => {
+                  const bStats = computeTopicStats(b);
+                  const bPathKey = escapeHtml([...rootPathIds, b.id].map((p) => String(p)).join('>'));
+                  const nested = Array.isArray(b.branches) ? b.branches.length : 0;
+                  const dotColor = b.status === 'mastered' || bStats.isMaxLevel ? 'bg-lime' : b.status === 'unlocked' ? 'bg-coral' : 'bg-mutedtext';
+                  return `
+                    <button
+                      type="button"
+                      onclick="openSkillTopicDetail('${bPathKey}')"
+                      class="tactile-btn w-full bg-cardbg border border-borderline hover:border-coral/45 rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-2.5 text-left transition"
+                    >
+                      <div class="flex items-center gap-2.5 min-w-0">
+                        <span class="w-2.5 h-2.5 rounded-full ${dotColor} flex-shrink-0"></span>
+                        <div class="min-w-0">
+                          <p class="text-xs font-bold text-primarytext truncate">${escapeHtml(b.title)}</p>
+                          <p class="text-[10px] text-secondarytext">LVL ${bStats.level}/${bStats.maxLevel} · ${bStats.doneMilestones}/${bStats.totalMilestones} milestones${nested > 0 ? ` · ${nested} ${nested === 1 ? 'sub-skill' : 'sub-skills'}` : ''}</p>
+                        </div>
+                      </div>
+                      <span class="text-[10.5px] font-bold text-coral flex-shrink-0">Open →</span>
+                    </button>
+                  `;
+                })
+                .join('')}
+            </div>
+          `;
         }
 
         bodyEl.innerHTML = treeHtml;
+        window.__topicGraphRuntime = {
+          rootKey,
+          graph,
+          posByKey,
+          zoom,
+          panX,
+          panY,
+          focusedKey,
+        };
+        initTopicObsidianGraphInteractions();
       } else if (tab === 'drills') {
         bodyEl.innerHTML = `
           <div class="space-y-3">
@@ -12489,7 +12964,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             <div class="flex items-center justify-between gap-2">
               <div class="min-w-0">
                 <p class="text-[10.5px] font-bold uppercase tracking-wider text-coral">Learning Milestones</p>
-                <p class="text-xs font-semibold text-primarytext">${stats.doneMilestones}/${stats.totalMilestones} contents completed${subRolledTotal > 0 ? ` (${subRolledDone}/${subRolledTotal} from subtopics)` : ''}</p>
+                <p class="text-xs font-semibold text-primarytext">${stats.doneMilestones}/${stats.totalMilestones} contents completed${subRolledTotal > 0 ? ` (${subRolledDone}/${subRolledTotal} from skills)` : ''}</p>
               </div>
               <button
                 type="button"
@@ -12782,10 +13257,21 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       renderTopicDetailView(topic, ctx.chain);
     }
 
+    function findBranchRecursively(node, branchId) {
+      if (!node || !Array.isArray(node.branches)) return null;
+      const target = String(branchId);
+      for (const b of node.branches) {
+        if (String(b.id) === target) return b;
+        const deeper = findBranchRecursively(b, target);
+        if (deeper) return deeper;
+      }
+      return null;
+    }
+
     function toggleTopicDrillDone(branchId, drillId) {
       const ctx = getActiveTopicContext();
       const topic = ctx ? ctx.activeNode : null;
-      const branch = topic?.branches.find((b) => b.id === branchId);
+      const branch = findBranchRecursively(topic, branchId);
       const drill = branch?.drills.find((d) => d.id === drillId);
       if (!drill) return;
       drill.done = !drill.done;
@@ -12800,7 +13286,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function incrementTopicDrillCount(branchId, drillId) {
       const ctx = getActiveTopicContext();
       const topic = ctx ? ctx.activeNode : null;
-      const branch = topic?.branches.find((b) => b.id === branchId);
+      const branch = findBranchRecursively(topic, branchId);
       const drill = branch?.drills.find((d) => d.id === drillId);
       if (!drill) return;
       drill.count = (drill.count || 0) + 1;
@@ -12812,7 +13298,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function removeBranchDrill(branchId, drillId) {
       const ctx = getActiveTopicContext();
       const topic = ctx ? ctx.activeNode : null;
-      const branch = topic?.branches.find((b) => b.id === branchId);
+      const branch = findBranchRecursively(topic, branchId);
       if (!branch) return;
       branch.drills = branch.drills.filter((d) => d.id !== drillId);
       saveState();
@@ -12884,7 +13370,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const ctx = getActiveTopicContext();
       const topic = ctx ? ctx.activeNode : null;
       if (!topic || !Array.isArray(topic[collectionKey])) return;
-      if (collectionKey === 'milestones' || collectionKey === 'subtopics') {
+      if (collectionKey === 'milestones' || collectionKey === 'branches') {
         recordProgressMutation(() => {
           topic[collectionKey] = topic[collectionKey].filter((item) => item.id !== itemId);
         });
@@ -13325,6 +13811,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (dragHandle) dragHandle.classList.toggle('hidden', hideCalendar);
 
       syncCalendarHeader();
+      if (!hideCalendar) renderUnifiedCalendar();
 
       const statsBtn = document.getElementById('header-stats-btn');
       const filterBtn = document.getElementById('header-filter-btn');

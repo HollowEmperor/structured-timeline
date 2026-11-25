@@ -125,13 +125,29 @@ export function collectTopicMilestones(node) {
     }
   }
 
-  const subtopics = Array.isArray(node.subtopics) ? node.subtopics : [];
+  const childNodes = [];
+  const seenChildIds = new Set();
+  const branches = Array.isArray(node.branches) ? node.branches : [];
+  for (const b of branches) {
+    if (!b || typeof b !== 'object') continue;
+    const key = b.id != null ? String(b.id) : null;
+    if (key) seenChildIds.add(key);
+    childNodes.push(b);
+  }
+  const legacySubs = Array.isArray(node.subtopics) ? node.subtopics : [];
+  for (const sub of legacySubs) {
+    if (!sub || typeof sub !== 'object') continue;
+    const key = sub.id != null ? String(sub.id) : null;
+    if (key && seenChildIds.has(key)) continue;
+    childNodes.push(sub);
+  }
+
   let subDone = 0;
   let subTotal = 0;
-  let descendantSubtopicCount = subtopics.length;
+  let descendantSubtopicCount = childNodes.length;
 
-  for (const sub of subtopics) {
-    const childCounts = collectTopicMilestones(sub);
+  for (const child of childNodes) {
+    const childCounts = collectTopicMilestones(child);
     subDone += childCounts.done;
     subTotal += childCounts.total;
     descendantSubtopicCount += childCounts.descendantSubtopicCount;
@@ -142,13 +158,15 @@ export function collectTopicMilestones(node) {
     total: directTotal + subTotal,
     directDone,
     directTotal,
-    subtopicCount: subtopics.length,
+    skillCount: childNodes.length,
+    subtopicCount: childNodes.length,
+    descendantSkillCount: descendantSubtopicCount,
     descendantSubtopicCount,
   };
 }
 
 /**
- * Computes complete progress stats for a topic or subtopic node.
+ * Computes complete progress stats for a topic or skill node.
  */
 export function computeTopicProgress(node) {
   const counts = collectTopicMilestones(node);
@@ -160,7 +178,9 @@ export function computeTopicProgress(node) {
     totalMilestones: counts.total,
     directDoneMilestones: counts.directDone,
     directTotalMilestones: counts.directTotal,
+    skillCount: counts.skillCount,
     subtopicCount: counts.subtopicCount,
+    descendantSkillCount: counts.descendantSkillCount,
     descendantSubtopicCount: counts.descendantSubtopicCount,
     ratio,
     rawCompletionPct: levelInfo.rawCompletionPct,
@@ -174,7 +194,7 @@ export function computeTopicProgress(node) {
 }
 
 /**
- * Resolves a navigation path [rootId, subId, ...] through nested topics & subtopics.
+ * Resolves a navigation path [rootId, skillId, ...] through nested topics & skills.
  * Returns { rootTopic, activeNode, chain } or null if not found.
  */
 export function findTopicNodeByPath(topics, pathIds) {
@@ -188,8 +208,11 @@ export function findTopicNodeByPath(topics, pathIds) {
   const chain = [rootTopic];
   let current = rootTopic;
   for (let i = 1; i < pathIds.length; i++) {
-    const subs = Array.isArray(current.subtopics) ? current.subtopics : [];
-    const next = subs.find((s) => String(s.id) === String(pathIds[i]));
+    const branches = Array.isArray(current.branches) ? current.branches : [];
+    const legacySubs = Array.isArray(current.subtopics) ? current.subtopics : [];
+    const next =
+      branches.find((b) => String(b.id) === String(pathIds[i])) ||
+      legacySubs.find((s) => String(s.id) === String(pathIds[i]));
     if (!next) break;
     chain.push(next);
     current = next;
@@ -203,13 +226,54 @@ export function findTopicNodeByPath(topics, pathIds) {
 }
 
 /**
- * Ensures a topic or subtopic node has the full identical Topic schema recursively.
+ * Ensures a topic or skill node has the full identical Topic schema recursively.
+ * Any legacy `subtopics` entries are migrated seamlessly into `branches` (Skills).
  */
 export function ensureTopicTreeSchema(node, fallbackArea = 'Knowledge', lifeAreas = DEFAULT_LIFE_AREAS) {
   if (!node || typeof node !== 'object') return node;
   node.lifeArea = normalizeLifeArea(node.lifeArea || node.category || fallbackArea, lifeAreas);
   if (!Array.isArray(node.branches)) node.branches = [];
+
+  if (Array.isArray(node.subtopics) && node.subtopics.length > 0) {
+    const existingIds = new Set(node.branches.map((b) => String(b.id)));
+    node.subtopics.forEach((sub, idx) => {
+      if (!sub || typeof sub !== 'object') return;
+      if (sub.id != null && existingIds.has(String(sub.id))) return;
+      node.branches.push({
+        ...sub,
+        tier: Number(sub.tier || 1),
+        status: sub.status || 'unlocked',
+        xp: Number(sub.xp || 100),
+        drills: Array.isArray(sub.drills)
+          ? sub.drills
+          : [
+              {
+                id: `d-${sub.id || idx}-init`,
+                title: `${sub.title || 'Core'} Practice Drill`,
+                reps: '15m session',
+                count: 0,
+                done: false,
+              },
+            ],
+      });
+    });
+    delete node.subtopics;
+  }
+
+  if (!Array.isArray(node.milestones)) node.milestones = [];
+  node.milestones.forEach((m, idx) => {
+    if (!Array.isArray(m.lessons)) {
+      m.lessons = [{ id: `l-${m.id || idx}-1`, title: m.title || 'Content Item', done: Boolean(m.done) }];
+    }
+    m.done = m.lessons.length > 0 && m.lessons.every((l) => l.done);
+  });
+  if (!Array.isArray(node.achievements)) node.achievements = [];
+  if (!Array.isArray(node.resources)) node.resources = [];
+
   node.branches.forEach((b, idx) => {
+    if (!b || typeof b !== 'object') return;
+    if (b.tier == null) b.tier = 1;
+    if (!b.status) b.status = 'unlocked';
     if (!Array.isArray(b.drills)) {
       b.drills = [
         {
@@ -221,18 +285,8 @@ export function ensureTopicTreeSchema(node, fallbackArea = 'Knowledge', lifeArea
         },
       ];
     }
+    ensureTopicTreeSchema(b, node.lifeArea, lifeAreas);
   });
-  if (!Array.isArray(node.milestones)) node.milestones = [];
-  node.milestones.forEach((m, idx) => {
-    if (!Array.isArray(m.lessons)) {
-      m.lessons = [{ id: `l-${m.id || idx}-1`, title: m.title || 'Content Item', done: Boolean(m.done) }];
-    }
-    m.done = m.lessons.length > 0 && m.lessons.every((l) => l.done);
-  });
-  if (!Array.isArray(node.achievements)) node.achievements = [];
-  if (!Array.isArray(node.resources)) node.resources = [];
-  if (!Array.isArray(node.subtopics)) node.subtopics = [];
-  node.subtopics.forEach((sub) => ensureTopicTreeSchema(sub, node.lifeArea, lifeAreas));
   return node;
 }
 
@@ -363,3 +417,198 @@ export function computeYesterdayProgressDelta(dailyProgressLog, todayKey) {
     label: `${sign}${rounded}% yesterday`,
   };
 }
+
+/**
+ * Builds a scoped Obsidian-style force-directed graph ({ width, height, nodes, edges })
+ * rooted at `rootNode`.
+ * - On a main Topic page, traverses all nested Skills (`branches`) recursively so
+ *   every skill and sub-skill connection is visible.
+ * - On a Skill (subtopic) page, starts from that Skill so only its own descendant
+ *   connections appear.
+ */
+export function buildTopicSkillGraph(rootNode, rootPath = [], options = {}) {
+  const width = Number(options.width) || 320;
+  const height = Number(options.height) || 268;
+  const cx = width / 2;
+  const cy = height / 2;
+
+  if (!rootNode || typeof rootNode !== 'object') {
+    return { width, height, nodes: [], edges: [] };
+  }
+
+  const basePath = Array.isArray(rootPath) && rootPath.length > 0 ? rootPath.map((id) => id) : [rootNode.id];
+  const nodes = [];
+  const edges = [];
+  const nodeByKey = new Map();
+
+  function countSubtreeLeaves(n) {
+    const kids = Array.isArray(n.branches) ? n.branches : [];
+    if (kids.length === 0) return 1;
+    let sum = 0;
+    for (const k of kids) sum += countSubtreeLeaves(k);
+    return Math.max(1, sum);
+  }
+
+  function walk(node, depth, pathIds, parentKey, angleStart, angleEnd) {
+    const key = pathIds.map((p) => String(p)).join('>');
+    const stats = computeTopicProgress(node);
+    const children = Array.isArray(node.branches) ? node.branches : [];
+    const midAngle = (angleStart + angleEnd) / 2;
+
+    let x = cx;
+    let y = cy;
+    if (depth > 0) {
+      const parent = nodeByKey.get(parentKey);
+      const dist = depth === 1 ? Math.min(width, height) * 0.28 : Math.min(width, height) * 0.21;
+      const baseX = parent ? parent.x : cx;
+      const baseY = parent ? parent.y : cy;
+      x = baseX + Math.cos(midAngle) * dist;
+      y = baseY + Math.sin(midAngle) * dist;
+    }
+
+    const isMastered = stats.isMaxLevel || node.status === 'mastered';
+    const isUnlocked = depth === 0 || isMastered || node.status === 'unlocked' || stats.doneMilestones > 0;
+
+    const gNode = {
+      key,
+      id: node.id,
+      title: node.title || 'Untitled',
+      depth,
+      isRoot: depth === 0,
+      parentKey,
+      pathIds: [...pathIds],
+      status: isMastered ? 'mastered' : isUnlocked ? 'unlocked' : 'locked',
+      tier: Number(node.tier || 1),
+      level: stats.level,
+      isMaxLevel: stats.isMaxLevel,
+      rawCompletionPct: stats.rawCompletionPct,
+      doneMilestones: stats.doneMilestones,
+      totalMilestones: stats.totalMilestones,
+      childCount: children.length,
+      degree: (parentKey ? 1 : 0) + children.length,
+      x,
+      y,
+      vx: 0,
+      vy: 0,
+      radius: depth === 0 ? 11 : Math.max(5.5, Math.min(9.5, 6.2 + Math.min(3, children.length) * 1.1)),
+    };
+
+    nodes.push(gNode);
+    nodeByKey.set(key, gNode);
+
+    if (parentKey) {
+      const parent = nodeByKey.get(parentKey);
+      edges.push({
+        id: `${parentKey}->${key}`,
+        source: parentKey,
+        target: key,
+        sourceDepth: parent ? parent.depth : depth - 1,
+        targetDepth: depth,
+        mastered: isMastered && Boolean(parent && parent.status === 'mastered'),
+        active: isUnlocked,
+      });
+    }
+
+    if (children.length > 0) {
+      const totalWeight = children.reduce((acc, ch) => acc + countSubtreeLeaves(ch), 0);
+      let cursor = depth === 0 ? -Math.PI / 3 : angleStart;
+      const fullSpan = depth === 0 ? Math.PI * 2 : Math.max(0.75, Math.min(Math.PI * 1.35, angleEnd - angleStart));
+      if (depth > 0) {
+        cursor = midAngle - fullSpan / 2;
+      }
+
+      for (const ch of children) {
+        const w = countSubtreeLeaves(ch);
+        const span = (w / totalWeight) * fullSpan;
+        walk(ch, depth + 1, [...pathIds, ch.id], key, cursor, cursor + span);
+        cursor += span;
+      }
+    }
+  }
+
+  walk(rootNode, 0, basePath, null, -Math.PI / 3, Math.PI * 2 - Math.PI / 3);
+
+  // Deterministic force-directed relaxation for authentic Obsidian spacing
+  const padX = 36;
+  const padY = 28;
+  const iterations = nodes.length > 1 ? 72 : 0;
+
+  for (let step = 0; step < iterations; step++) {
+    const cooling = 1 - step / (iterations + 12);
+
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i];
+        const b = nodes[j];
+        let dx = b.x - a.x;
+        let dy = b.y - a.y;
+        let distSq = dx * dx + dy * dy;
+        if (distSq < 1) {
+          dx = (i + 1) * 0.5;
+          dy = (j + 1) * 0.5;
+          distSq = dx * dx + dy * dy;
+        }
+        const dist = Math.sqrt(distSq);
+        const repulse = 1650 / distSq;
+        const fx = (dx / dist) * repulse;
+        const fy = (dy / dist) * repulse;
+        if (!a.isRoot) {
+          a.vx -= fx;
+          a.vy -= fy;
+        }
+        if (!b.isRoot) {
+          b.vx += fx;
+          b.vy += fy;
+        }
+      }
+    }
+
+    for (const edge of edges) {
+      const src = nodeByKey.get(edge.source);
+      const dst = nodeByKey.get(edge.target);
+      if (!src || !dst) continue;
+      const dx = dst.x - src.x;
+      const dy = dst.y - src.y;
+      const dist = Math.max(1, Math.hypot(dx, dy));
+      const idealLen = edge.targetDepth === 1 ? (nodes.length <= 4 ? 86 : 70) : 56;
+      const pull = (dist - idealLen) * 0.085;
+      const fx = (dx / dist) * pull;
+      const fy = (dy / dist) * pull;
+      if (!src.isRoot) {
+        src.vx += fx;
+        src.vy += fy;
+      }
+      if (!dst.isRoot) {
+        dst.vx -= fx;
+        dst.vy -= fy;
+      }
+    }
+
+    for (const n of nodes) {
+      if (n.isRoot) {
+        n.x = cx;
+        n.y = cy;
+        continue;
+      }
+      // Gentle center gravity keeps outer constellations compact
+      n.vx += (cx - n.x) * 0.012;
+      n.vy += (cy - n.y) * 0.012;
+      n.vx *= 0.72;
+      n.vy *= 0.72;
+      n.x = Math.max(padX, Math.min(width - padX, n.x + n.vx * cooling));
+      n.y = Math.max(padY, Math.min(height - padY - 12, n.y + n.vy * cooling));
+    }
+  }
+
+  return {
+    width,
+    height,
+    nodes: nodes.map(({ vx, vy, ...rest }) => ({
+      ...rest,
+      x: Math.round(rest.x * 10) / 10,
+      y: Math.round(rest.y * 10) / 10,
+    })),
+    edges,
+  };
+}
+

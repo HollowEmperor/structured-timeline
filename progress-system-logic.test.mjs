@@ -16,6 +16,7 @@ import {
   recordDailyProgressChange,
   getPreviousDateKey,
   computeYesterdayProgressDelta,
+  buildTopicSkillGraph,
 } from './progress-system-logic.js';
 
 test('slow-start curve: Level 1->2 requires strictly more progress than every higher level, capping at Level 10', () => {
@@ -104,7 +105,7 @@ test('10-content topic progresses slowly at start and accelerates to Level 10', 
   assert.equal(levelsAtEachCount[10], 10);
 });
 
-test('recursive subtopics roll up content milestones to parent topic and resolve arbitrary nesting paths', () => {
+test('recursive skills (branches) act as full topics, roll up milestones to parent topic, and migrate legacy subtopics', () => {
   const topics = [
     {
       id: 10,
@@ -120,13 +121,15 @@ test('recursive subtopics roll up content milestones to parent topic and resolve
           ],
         },
       ],
-      subtopics: [
+      branches: [
         {
-          id: 'sub-1',
+          id: 'skill-1',
           title: 'Perspective',
+          tier: 1,
+          status: 'unlocked',
           milestones: [
             {
-              id: 'm-sub-1',
+              id: 'm-skill-1',
               title: 'Vanishing Points',
               lessons: [
                 { id: 'l-3', title: '1-Point', done: true },
@@ -134,19 +137,29 @@ test('recursive subtopics roll up content milestones to parent topic and resolve
               ],
             },
           ],
-          subtopics: [
+          branches: [
             {
-              id: 'sub-1a',
+              id: 'skill-1a',
               title: '3-Point Aerial',
+              tier: 2,
+              status: 'unlocked',
               milestones: [
                 {
-                  id: 'm-sub-1a',
+                  id: 'm-skill-1a',
                   title: 'Skyline Plate',
                   lessons: [{ id: 'l-5', title: 'Bird Eye Grid', done: false }],
                 },
               ],
-              subtopics: [],
             },
+          ],
+        },
+      ],
+      subtopics: [
+        {
+          id: 'legacy-sub',
+          title: 'Legacy Axonometric',
+          milestones: [
+            { id: 'm-leg', title: 'Iso', lessons: [{ id: 'l-6', title: 'Iso Grid', done: true }] },
           ],
         },
       ],
@@ -154,17 +167,20 @@ test('recursive subtopics roll up content milestones to parent topic and resolve
   ];
 
   ensureTopicTreeSchema(topics[0]);
+  assert.equal(topics[0].subtopics, undefined);
+  assert.equal(topics[0].branches.length, 2);
+  assert.equal(topics[0].branches[1].id, 'legacy-sub');
 
   const counts = collectTopicMilestones(topics[0]);
   assert.equal(counts.directDone, 1);
   assert.equal(counts.directTotal, 2);
-  assert.equal(counts.done, 3);
-  assert.equal(counts.total, 5);
-  assert.equal(counts.subtopicCount, 1);
-  assert.equal(counts.descendantSubtopicCount, 2);
+  assert.equal(counts.done, 4);
+  assert.equal(counts.total, 6);
+  assert.equal(counts.skillCount, 2);
+  assert.equal(counts.descendantSkillCount, 3);
 
   // Deep path resolution: Architecture -> Perspective -> 3-Point Aerial
-  const deep = findTopicNodeByPath(topics, [10, 'sub-1', 'sub-1a']);
+  const deep = findTopicNodeByPath(topics, [10, 'skill-1', 'skill-1a']);
   assert.ok(deep);
   assert.equal(deep.rootTopic.title, 'Architecture');
   assert.equal(deep.activeNode.title, '3-Point Aerial');
@@ -174,11 +190,11 @@ test('recursive subtopics roll up content milestones to parent topic and resolve
     ['Architecture', 'Perspective', '3-Point Aerial']
   );
 
-  // Subtopic has its own independent progress stats
-  const subStats = computeTopicProgress(deep.chain[1]);
-  assert.equal(subStats.doneMilestones, 2);
-  assert.equal(subStats.totalMilestones, 3);
-  assert.equal(subStats.rawCompletionPct, 67);
+  // Skill has its own independent progress stats
+  const skillStats = computeTopicProgress(deep.chain[1]);
+  assert.equal(skillStats.doneMilestones, 2);
+  assert.equal(skillStats.totalMilestones, 3);
+  assert.equal(skillStats.rawCompletionPct, 67);
 });
 
 test('Areas of Life linearly sum associated topics (no levels), include Karma, and move up/down on add/remove/toggle', () => {
@@ -304,3 +320,69 @@ test('daily progress log tracks today delta and computes yesterday progress perc
   ]);
   assert.equal(overall, 75);
 });
+
+test('buildTopicSkillGraph shows all multi-depth connections on main topic and only subtree connections on a skill page', () => {
+  const mainTopic = {
+    id: 1,
+    title: 'Architectural Drafting',
+    lifeArea: 'Aesthetic',
+    milestones: [],
+    branches: [
+      {
+        id: 'sk-1',
+        title: 'Orthographic',
+        tier: 1,
+        status: 'mastered',
+        milestones: [{ id: 'm1', lessons: [{ id: 'l1', title: 'Plans', done: true }] }],
+        branches: [
+          {
+            id: 'sk-1a',
+            title: 'Section Cuts',
+            tier: 2,
+            status: 'unlocked',
+            milestones: [],
+            branches: [],
+          },
+          {
+            id: 'sk-1b',
+            title: 'Elevation Scale',
+            tier: 2,
+            status: 'locked',
+            milestones: [],
+            branches: [],
+          },
+        ],
+      },
+      {
+        id: 'sk-2',
+        title: 'Lighting',
+        tier: 1,
+        status: 'unlocked',
+        milestones: [],
+        branches: [],
+      },
+    ],
+  };
+
+  ensureTopicTreeSchema(mainTopic);
+
+  // Main topic graph includes root + both direct skills + both nested sub-skills = 5 nodes, 4 edges
+  const fullGraph = buildTopicSkillGraph(mainTopic, [1]);
+  assert.equal(fullGraph.nodes.length, 5);
+  assert.equal(fullGraph.edges.length, 4);
+  const deepNode = fullGraph.nodes.find((n) => n.id === 'sk-1a');
+  assert.ok(deepNode);
+  assert.equal(deepNode.depth, 2);
+  assert.deepEqual(deepNode.pathIds, [1, 'sk-1', 'sk-1a']);
+
+  // Subtopic/Skill page graph for sk-1 shows ONLY sk-1 + sk-1a + sk-1b = 3 nodes, 2 edges (no main topic or sk-2!)
+  const subGraph = buildTopicSkillGraph(mainTopic.branches[0], [1, 'sk-1']);
+  assert.equal(subGraph.nodes.length, 3);
+  assert.equal(subGraph.edges.length, 2);
+  assert.equal(subGraph.nodes[0].id, 'sk-1');
+  assert.equal(subGraph.nodes[0].isRoot, true);
+  assert.equal(subGraph.nodes.some((n) => n.id === 'sk-2' || n.id === 1), false);
+  const subChild = subGraph.nodes.find((n) => n.id === 'sk-1a');
+  assert.deepEqual(subChild.pathIds, [1, 'sk-1', 'sk-1a']);
+});
+
