@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" fill="none">
+  <defs>
+    <!-- Soft ambient depth gradient for the squircle app icon container -->
+    <linearGradient id="intent-bg-grad" x1="64" y1="48" x2="448" y2="464" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#27272A" />
+      <stop offset="55%" stop-color="#1B1B1E" />
+      <stop offset="100%" stop-color="#121214" />
+    </linearGradient>
+
+    <!-- Warm Coral gradient for the active intention block & flexible timeline -->
+    <linearGradient id="intent-coral-grad" x1="130" y1="120" x2="380" y2="390" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F5A69E" />
+      <stop offset="50%" stop-color="#F28B82" />
+      <stop offset="100%" stop-color="#E57368" />
+    </linearGradient>
+
+    <!-- Subtle ambient glow behind the active focal habit -->
+    <radialGradient id="intent-active-glow" cx="272" cy="256" r="145" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F28B82" stop-opacity="0.20" />
+      <stop offset="100%" stop-color="#F28B82" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- 1. Squircle App Icon Base (Matte Charcoal) -->
+  <rect x="24" y="24" width="464" height="464" rx="116" fill="url(#intent-bg-grad)" stroke="#3A3A3F" stroke-width="4" />
+  <rect x="36" y="36" width="440" height="440" rx="104" stroke="#F5F5F7" stroke-opacity="0.06" stroke-width="2" />
+
+  <!-- Ambient center glow -->
+  <circle cx="256" cy="256" r="150" fill="url(#intent-active-glow)" />
+
+  <!-- 2. MINDFULNESS: Open concentric breath/focus arc framing the daily flow -->
+  <path
+    d="M 128 192 A 144 144 0 0 1 384 192"
+    stroke="#F5F5F7"
+    stroke-opacity="0.14"
+    stroke-width="10"
+    stroke-linecap="round"
+  />
+  <path
+    d="M 384 320 A 144 144 0 0 1 128 320"
+    stroke="#F5F5F7"
+    stroke-opacity="0.14"
+    stroke-width="10"
+    stroke-linecap="round"
+  />
+
+  <!-- 3. FLEXIBILITY: Fluid, adaptive S-curve timeline weaving through the daily habits -->
+  <path
+    d="M 164 152 C 164 204, 212 204, 212 256 C 212 308, 164 308, 164 360"
+    stroke="url(#intent-coral-grad)"
+    stroke-width="10"
+    stroke-linecap="round"
+  />
+
+  <!-- 4. DAILY PRODUCTIVITY & FUNCTIONALITY: Three Habit / Time-Block Capsules -->
+  <!-- Row 1 (Completed Morning Habit — Lime Checkmark + Capsule Bar) -->
+  <g transform="translate(0, 0)">
+    <circle cx="164" cy="152" r="24" fill="#81C953" />
+    <path
+      d="M 154 152.5 L 161 159.5 L 175 144.5"
+      stroke="#141414"
+      stroke-width="5.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <rect x="206" y="138" width="144" height="28" rx="14" fill="#2B2B2E" stroke="#3A3A3F" stroke-width="2.5" />
+    <rect x="220" y="148" width="84" height="8" rx="4" fill="#F5F5F7" fill-opacity="0.65" />
+  </g>
+
+  <!-- Row 2 (Active Present Intention — Coral Focal Ring + Highlighted Capsule) -->
+  <g transform="translate(0, 0)">
+    <!-- Mindful halo around the active daily task -->
+    <circle cx="212" cy="256" r="32" stroke="#F28B82" stroke-opacity="0.35" stroke-width="3.5" />
+    <circle cx="212" cy="256" r="24" fill="url(#intent-coral-grad)" />
+    <!-- Crisp present-moment spark/dot inside active node -->
+    <circle cx="212" cy="256" r="8" fill="#141414" />
+
+    <rect x="256" y="240" width="128" height="32" rx="16" fill="url(#intent-coral-grad)" />
+    <rect x="272" y="252" width="76" height="8" rx="4" fill="#141414" fill-opacity="0.85" />
+  </g>
+
+  <!-- Row 3 (Upcoming Flexible Block — Soft Sky/Muted Capsule) -->
+  <g transform="translate(0, 0)">
+    <circle cx="164" cy="360" r="22" fill="#2B2B2E" stroke="#6EA8D8" stroke-width="4.5" />
+    <circle cx="164" cy="360" r="6" fill="#6EA8D8" />
+
+    <rect x="206" y="346" width="136" height="28" rx="14" fill="#2B2B2E" stroke="#3A3A3F" stroke-width="2.5" />
+    <rect x="220" y="356" width="68" height="8" rx="4" fill="#9A9AA0" fill-opacity="0.6" />
+  </g>
+</svg>

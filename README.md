@@ -1,3 +1,7 @@
+<p align="left">
+  <img src="logo.svg" alt="Structured App Logo" width="84" height="84" />
+</p>
+
 # Structured • Visual Day Timeline
 
 A sleek, dark-themed visual day planner and timeline application with conflict detection, energy tagging, daily progress rings, spatial edge panel, mascot bot, and habit completion tracking.
