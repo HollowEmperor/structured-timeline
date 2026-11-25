@@ -239,10 +239,60 @@
     .memo-paper-btn:active {
       filter: brightness(0.95);
     }
+    /* Smooth Calendar Drawer & Timeframe Highlight Spread Animations */
+    #calendar-viewport-mask {
+      will-change: height;
+    }
+    #unified-calendar-rows {
+      will-change: transform;
+    }
+    .cal-week-row {
+      transition: opacity 0.36s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity;
+    }
+    @keyframes timeframeSpreadIn {
+      0% {
+        clip-path: inset(0 100% 0 0 round var(--tf-radius, 14px));
+        opacity: 0.45;
+        box-shadow: 0 0 0 0 transparent;
+      }
+      58% {
+        opacity: 1;
+        box-shadow: 0 0 14px -2px var(--tf-glow, rgba(242, 139, 130, 0.5));
+      }
+      100% {
+        clip-path: inset(0 0% 0 0 round var(--tf-radius, 14px));
+        opacity: 1;
+        box-shadow: 0 0 0 0 transparent;
+      }
+    }
+    @keyframes timeframeSpreadOut {
+      0% {
+        clip-path: inset(0 0% 0 0 round var(--tf-radius, 14px));
+        opacity: 1;
+      }
+      100% {
+        clip-path: inset(0 100% 0 0 round var(--tf-radius, 14px));
+        opacity: 0;
+      }
+    }
+    .timeframe-spread-in {
+      animation: timeframeSpreadIn var(--tf-dur, 360ms) cubic-bezier(0.22, 1, 0.36, 1) var(--tf-delay, 0ms) both;
+      will-change: clip-path, opacity, box-shadow;
+    }
+    .timeframe-spread-out {
+      animation: timeframeSpreadOut 190ms cubic-bezier(0.4, 0, 1, 1) var(--tf-out-delay, 0ms) forwards;
+      will-change: clip-path, opacity;
+    }
     @media (prefers-reduced-motion: reduce) {
       .memo-note-stab,
-      .memo-stack-absorb {
+      .memo-stack-absorb,
+      .timeframe-spread-in,
+      .timeframe-spread-out {
         animation: none !important;
+      }
+      .cal-week-row {
+        transition: none !important;
       }
     }
 
@@ -6361,9 +6411,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       const p = win.canExpand ? Math.max(0, Math.min(1, progress)) : 0;
       const rowStride = 56;
+      const easeCurve = '0.44s cubic-bezier(0.16, 1, 0.3, 1)';
 
-      mask.style.transition = immediate ? 'none' : 'height 0.34s cubic-bezier(0.22, 1, 0.36, 1)';
-      rows.style.transition = immediate ? 'none' : 'transform 0.34s cubic-bezier(0.22, 1, 0.36, 1)';
+      mask.style.transition = immediate ? 'none' : `height ${easeCurve}`;
+      rows.style.transition = immediate ? 'none' : `transform ${easeCurve}`;
 
       const currentH = CAL_COLLAPSED_H + (win.expandedHeight - CAL_COLLAPSED_H) * p;
       const collapsedOffsetY = -win.selectedRow * rowStride;
@@ -6376,6 +6427,16 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       mask.dataset.expandedRows = String(win.expandedRowCount);
       mask.style.height = `${currentH.toFixed(1)}px`;
       rows.style.transform = `translate3d(0px, ${offsetY.toFixed(1)}px, 0)`;
+
+      // Subtle fade on newly revealed week rows as the calendar glides open/shut
+      const rowNodes = rows.querySelectorAll('[data-cal-week-row]');
+      rowNodes.forEach((rowEl) => {
+        const idx = Number(rowEl.getAttribute('data-cal-week-row'));
+        const isCollapsedVisible = idx === win.selectedRow;
+        const isExpandedVisible = idx >= win.expandedStartRow && idx <= win.expandedEndRow;
+        const targetOpacity = p > 0.08 ? (isExpandedVisible ? 1 : 0.25) : (isCollapsedVisible ? 1 : 0.28);
+        rowEl.style.opacity = String(targetOpacity);
+      });
     }
 
     function selectCalendarDate(dateKey) {
@@ -6407,9 +6468,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       selectCalendarDate(dk);
     }
 
-    function renderUnifiedCalendar() {
+    function renderUnifiedCalendar(options = {}) {
       const rowsEl = document.getElementById('unified-calendar-rows');
       if (!rowsEl) return;
+
+      const animateLayout = Boolean(options && options.animateLayout);
+      const animateTimeframeSpread = Boolean(options && options.animateTimeframeSpread);
+      const spreadStartDelayMs = Number(options && options.spreadStartDelayMs) || 0;
 
       syncCalendarHeader();
 
@@ -6422,6 +6487,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const allProjectsLaneInfo = CalLogic.assignProjectLanes(state.projects || [], todayKey);
 
       let rowsHtml = '';
+      let cumulativeSpreadDelayMs = spreadStartDelayMs;
       for (let row = 0; row < 6; row++) {
         const rowCells = state.monthCells.slice(row * 7, row * 7 + 7);
         const rowSegments = showProjectTimeframes
@@ -6433,14 +6499,22 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             const fillAlpha = seg.rowSlot === 0 ? '1A' : '12';
             const radiusLeft = seg.isStart ? seg.radiusPx : Math.max(6, seg.radiusPx - 2);
             const radiusRight = seg.isEnd ? seg.radiusPx : Math.max(6, seg.radiusPx - 2);
+            const spanCols = Math.max(1, seg.endCol - seg.startCol + 1);
+            const durMs = Math.round(190 + spanCols * 36);
+            const delayMs = cumulativeSpreadDelayMs;
+            cumulativeSpreadDelayMs += Math.max(90, durMs - 75);
+            const spreadClass = animateTimeframeSpread ? 'timeframe-spread-in' : '';
+            const spreadVars = animateTimeframeSpread
+              ? `--tf-delay:${delayMs}ms; --tf-dur:${durMs}ms; --tf-radius:${Math.max(radiusLeft, radiusRight)}px; --tf-glow:${cHex}77;`
+              : `--tf-radius:${Math.max(radiusLeft, radiusRight)}px;`;
             return `<div style="grid-row:1; grid-column:${seg.startCol + 1} / ${seg.endCol + 2}; padding:${seg.insetPx}px;">
               <div
                 data-timeframe-box="${escapeHtml(seg.projectId)}"
                 data-timeframe-color="${escapeHtml(seg.color)}"
                 data-start-col="${seg.startCol}"
                 data-end-col="${seg.endCol}"
-                class="w-full h-full"
-                style="border:2px solid ${cHex}; border-radius:${radiusLeft}px ${radiusRight}px ${radiusRight}px ${radiusLeft}px; background-color:${cHex}${fillAlpha};"
+                class="w-full h-full ${spreadClass}"
+                style="border:2px solid ${cHex}; border-radius:${radiusLeft}px ${radiusRight}px ${radiusRight}px ${radiusLeft}px; background-color:${cHex}${fillAlpha}; ${spreadVars}"
               ></div>
             </div>`;
           })
@@ -6525,11 +6599,17 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             </button>
           `;
         }
-        rowsHtml += `<div class="relative"><div class="pointer-events-none absolute inset-0 grid grid-cols-7 gap-1 z-0">${rowBoxesHtml}</div><div class="relative z-10 grid grid-cols-7 gap-1">${cellsHtml}</div></div>`;
+        rowsHtml += `<div data-cal-week-row="${row}" class="cal-week-row relative"><div class="pointer-events-none absolute inset-0 grid grid-cols-7 gap-1 z-0">${rowBoxesHtml}</div><div class="relative z-10 grid grid-cols-7 gap-1">${cellsHtml}</div></div>`;
       }
 
       rowsEl.innerHTML = rowsHtml;
-      applyCalendarProgress(state.monthExpanded ? 1 : 0, true);
+      if (animateLayout) {
+        const mask = document.getElementById('calendar-viewport-mask');
+        if (mask) void mask.offsetHeight;
+        applyCalendarProgress(state.monthExpanded ? 1 : 0, false);
+      } else {
+        applyCalendarProgress(state.monthExpanded ? 1 : 0, true);
+      }
     }
 
     function renderCompartmentEditors() {
@@ -6986,25 +7066,48 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
     let projectHeaderClickTimer = null;
     let projectHeaderPendingId = null;
+    let projectHighlightRetractTimer = null;
 
     function toggleProjectHeaderHighlight(projectId) {
       const targetId = String(projectId || '');
       if (!targetId) return;
 
-      // Clicking the already-highlighted project stops the highlight
+      if (projectHighlightRetractTimer) {
+        clearTimeout(projectHighlightRetractTimer);
+        projectHighlightRetractTimer = null;
+      }
+
+      // Clicking the already-highlighted project smoothly retracts highlight & glides calendar shut
       if (state.focusedProjectId && String(state.focusedProjectId) === targetId) {
         state.focusedProjectId = null;
-        renderUnifiedCalendar();
+        const boxes = [...document.querySelectorAll('#unified-calendar-rows [data-timeframe-box]')];
+        if (boxes.length > 0) {
+          boxes.reverse().forEach((el, idx) => {
+            el.classList.remove('timeframe-spread-in');
+            el.style.setProperty('--tf-out-delay', `${idx * 45}ms`);
+            void el.offsetWidth;
+            el.classList.add('timeframe-spread-out');
+          });
+        }
+
         if (state.monthExpanded) {
           toggleMonthCalendar(false);
         } else {
           applyCalendarProgress(0, false);
         }
         renderTimeline();
+
+        projectHighlightRetractTimer = setTimeout(() => {
+          projectHighlightRetractTimer = null;
+          if (!state.focusedProjectId) {
+            renderUnifiedCalendar({ animateLayout: false });
+          }
+        }, 460);
         return;
       }
 
-      // Otherwise highlight ONLY this project's timeframe on the top calendar
+      // Otherwise highlight ONLY this project's timeframe with smooth calendar open + left-to-right spread
+      const wasCollapsed = !state.monthExpanded;
       state.focusedProjectId = projectId;
       const proj = (state.projects || []).find((p) => String(p.id) === targetId);
       if (proj) {
@@ -7022,13 +7125,21 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         }
       }
 
-      renderUnifiedCalendar();
       const win = getCalendarExpansionWindow();
-      if (win.canExpand && !state.monthExpanded) {
-        toggleMonthCalendar(true);
-      } else {
-        applyCalendarProgress(state.monthExpanded && win.canExpand ? 1 : 0, false);
+      const willExpand = win.canExpand;
+      state.monthExpanded = willExpand;
+      const hint = document.getElementById('calendar-drag-hint');
+      if (hint) {
+        hint.textContent = state.monthExpanded ? 'Pull up to collapse' : 'Pull down for month';
       }
+
+      // Render with animateLayout=true (preserves starting height -> smooth CSS transition)
+      // and animateTimeframeSpread=true (staggered left-to-right sweep across week rows)
+      renderUnifiedCalendar({
+        animateLayout: true,
+        animateTimeframeSpread: true,
+        spreadStartDelayMs: wasCollapsed && willExpand ? 90 : 20,
+      });
       renderTimeline();
     }
 
