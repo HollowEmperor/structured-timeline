@@ -258,16 +258,10 @@
       0% {
         clip-path: inset(0 100% 0 0 round var(--tf-radius, 14px));
         opacity: 0.45;
-        box-shadow: 0 0 0 0 transparent;
-      }
-      58% {
-        opacity: 1;
-        box-shadow: 0 0 14px -2px var(--tf-glow, rgba(242, 139, 130, 0.5));
       }
       100% {
         clip-path: inset(0 0% 0 0 round var(--tf-radius, 14px));
         opacity: 1;
-        box-shadow: 0 0 0 0 transparent;
       }
     }
     @keyframes timeframeSpreadOut {
@@ -282,20 +276,166 @@
     }
     .timeframe-spread-in {
       animation: timeframeSpreadIn var(--tf-dur, 360ms) cubic-bezier(0.22, 1, 0.36, 1) var(--tf-delay, 0ms) both;
-      will-change: clip-path, opacity, box-shadow;
+      will-change: clip-path, opacity;
     }
     .timeframe-spread-out {
       animation: timeframeSpreadOut 190ms cubic-bezier(0.4, 0, 1, 1) var(--tf-out-delay, 0ms) forwards;
       will-change: clip-path, opacity;
     }
+
+    /* Matte Cardstock Habit Punch Cards & Mechanical Hole-Puncher Overlay */
+    :root {
+      --punch-hole-shadow-top: rgba(0, 0, 0, 0.56);
+      --punch-hole-shadow-mid: rgba(0, 0, 0, 0.34);
+      --punch-hole-rim-light: rgba(255, 255, 255, 0.06);
+      --punch-overlay-scrim: rgba(8, 8, 10, 0.62);
+    }
+    html[data-theme="paper"] {
+      --punch-hole-shadow-top: rgba(28, 25, 23, 0.24);
+      --punch-hole-shadow-mid: rgba(28, 25, 23, 0.14);
+      --punch-hole-rim-light: rgba(255, 255, 255, 0.72);
+      --punch-overlay-scrim: rgba(24, 22, 20, 0.42);
+    }
+    .punch-hole-cutout {
+      background-color: rgb(var(--color-appbg));
+      border: 1px solid rgb(var(--color-borderline) / 0.72);
+      box-shadow:
+        inset 0 2.5px 4.5px var(--punch-hole-shadow-top),
+        inset 0 1px 1.5px var(--punch-hole-shadow-mid),
+        0 1px 0 var(--punch-hole-rim-light);
+    }
+    @keyframes punchHoleImpact {
+      0% {
+        transform: scale(0.84);
+      }
+      55% {
+        transform: scale(1.06);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+    .punch-hole-just-punched {
+      animation: punchHoleImpact 190ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    @keyframes punchCardMicroRecoil {
+      0% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      32% {
+        transform: translate3d(0, 3.5px, 0) scale(0.991);
+      }
+      72% {
+        transform: translate3d(0, -0.8px, 0) scale(1.002);
+      }
+      100% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+    }
+    .punch-card-recoil {
+      animation: punchCardMicroRecoil 190ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    @keyframes punchChadDrop {
+      0% {
+        opacity: 1;
+        transform: translate3d(-50%, -50%, 0) scale(1) rotateX(0deg) rotateZ(0deg);
+      }
+      22% {
+        opacity: 1;
+        transform: translate3d(calc(-50% + var(--chad-dx-mid, 4px)), calc(-50% + 14px), 0) scale(0.96) rotateX(65deg) rotateZ(var(--chad-rot-mid, 18deg));
+      }
+      78% {
+        opacity: 0.92;
+      }
+      100% {
+        opacity: 0;
+        transform: translate3d(calc(-50% + var(--chad-dx, 14px)), calc(-50% + 92px), 0) scale(0.74) rotateX(320deg) rotateZ(var(--chad-rot, 62deg));
+      }
+    }
+    .punch-chad-disc {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-radius: 9999px;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      background-color: rgb(var(--color-cardbg));
+      color: rgb(var(--color-secondarytext));
+      border: 1px solid rgb(var(--color-borderline));
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.38);
+      will-change: transform, opacity;
+      animation: punchChadDrop 560ms cubic-bezier(0.25, 0.12, 0.3, 1) forwards;
+    }
+    #habit-punch-overlay {
+      perspective: 640px;
+    }
+    #habit-punch-backdrop {
+      background-color: var(--punch-overlay-scrim);
+      opacity: 0;
+      transition: opacity 250ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    #habit-punch-backdrop.is-visible {
+      opacity: 1;
+    }
+    #habit-punch-tool-anchor {
+      position: absolute;
+      width: 264px;
+      height: 116px;
+      pointer-events: none;
+      will-change: transform, opacity;
+      transition: transform 270ms cubic-bezier(0.22, 1, 0.36, 1), opacity 210ms ease;
+    }
+    #habit-punch-tool-anchor.is-retracting {
+      transition: transform 230ms cubic-bezier(0.4, 0, 0.85, 0.4), opacity 190ms ease;
+    }
+    #habit-punch-tool-svg {
+      width: 264px;
+      height: 116px;
+      overflow: visible;
+      filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.44));
+      transition: filter 110ms ease;
+    }
+    #habit-punch-tool-svg.is-clamped {
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.54));
+    }
+    #puncher-upper-jaw {
+      transform-box: view-box;
+      transform-origin: 118px 61px;
+      transform: rotate(12deg);
+      transition: transform 155ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    #habit-punch-tool-svg.is-clamped #puncher-upper-jaw {
+      transform: rotate(-1.6deg);
+      transition: transform 88ms cubic-bezier(0.32, 0, 0.16, 1);
+    }
+    #puncher-ram-pin {
+      transform: translateY(0px);
+      transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    #habit-punch-tool-svg.is-clamped #puncher-ram-pin {
+      transform: translateY(5.5px);
+      transition: transform 82ms cubic-bezier(0.32, 0, 0.16, 1);
+    }
     @media (prefers-reduced-motion: reduce) {
       .memo-note-stab,
       .memo-stack-absorb,
       .timeframe-spread-in,
-      .timeframe-spread-out {
+      .timeframe-spread-out,
+      .punch-hole-just-punched,
+      .punch-card-recoil,
+      .punch-chad-disc {
         animation: none !important;
       }
-      .cal-week-row {
+      .cal-week-row,
+      #habit-punch-backdrop,
+      #habit-punch-tool-anchor,
+      #puncher-upper-jaw,
+      #puncher-ram-pin {
         transition: none !important;
       }
     }
@@ -2675,6 +2815,118 @@
       </button>
     </div>
 
+    <!-- Habit Punch-Card Pop-Out Focus Overlay & Mechanical Hole-Puncher -->
+    <div id="habit-punch-overlay" class="hidden absolute inset-0 z-[75] overflow-hidden pointer-events-none" aria-hidden="true">
+      <div id="habit-punch-backdrop" class="absolute inset-0"></div>
+      <div id="habit-punch-card-stage" class="absolute inset-0 flex items-center justify-center px-5 pointer-events-none"></div>
+      <div id="habit-punch-chad-layer" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+      <div id="habit-punch-tool-anchor" class="opacity-0">
+        <div id="habit-punch-tool-mirror" class="w-full h-full">
+          <svg id="habit-punch-tool-svg" viewBox="0 0 264 116" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="punch-steel-upper" x1="20" y1="22" x2="180" y2="70" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#D2D6DC" />
+                <stop offset="48%" stop-color="#9CA2AA" />
+                <stop offset="100%" stop-color="#70767F" />
+              </linearGradient>
+              <linearGradient id="punch-steel-lower" x1="18" y1="62" x2="145" y2="86" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#8A9098" />
+                <stop offset="55%" stop-color="#696F78" />
+                <stop offset="100%" stop-color="#4D525A" />
+              </linearGradient>
+              <linearGradient id="punch-steel-ram" x1="29" y1="40" x2="43" y2="40" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#686D75" />
+                <stop offset="35%" stop-color="#DCDFE4" />
+                <stop offset="72%" stop-color="#8B9098" />
+                <stop offset="100%" stop-color="#4E535B" />
+              </linearGradient>
+              <linearGradient id="punch-charcoal-grip" x1="130" y1="18" x2="256" y2="42" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#35373D" />
+                <stop offset="50%" stop-color="#25272B" />
+                <stop offset="100%" stop-color="#1A1B1E" />
+              </linearGradient>
+            </defs>
+
+            <!-- Lower Anvil Jaw & Lower Charcoal Grip -->
+            <g id="puncher-lower-jaw">
+              <!-- Internal tension spring -->
+              <path d="M148 56 L154 63 L147 68 L155 74 L149 79" stroke="#7A8088" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.8" />
+              <!-- Lower steel anvil frame -->
+              <path
+                d="M16 66 C16 63.5 18 61.5 20.5 61.5 H114 L132 69 L126 80 L98 76 H22 C18.5 76 16 73.2 16 69.5 Z"
+                fill="url(#punch-steel-lower)"
+                stroke="#18191C"
+                stroke-width="1.4"
+                stroke-linejoin="round"
+              />
+              <!-- Die recess aligned directly under (36, 58) -->
+              <ellipse cx="36" cy="64" rx="9" ry="2.6" fill="#1A1B1E" stroke="#A6ACB4" stroke-width="0.9" />
+              <!-- Lower charcoal ergonomic grip -->
+              <path
+                d="M124 68 L244 89 C252 90.5 256 96.2 254.5 102.5 C253 108.5 247 111.5 240.5 110 L118 82 C115 81.2 113.5 78.5 114.5 75.5 L117.5 69.5 C118.8 67.5 121.5 67.4 124 68 Z"
+                fill="url(#punch-charcoal-grip)"
+                stroke="#141517"
+                stroke-width="1.4"
+              />
+              <!-- Subtle matte grip ribs (lower) -->
+              <g stroke="#3F4249" stroke-width="1.4" stroke-linecap="round" opacity="0.85">
+                <line x1="154" y1="77" x2="152" y2="85" />
+                <line x1="164" y1="79" x2="162" y2="87.5" />
+                <line x1="174" y1="81" x2="172" y2="89.5" />
+                <line x1="184" y1="83" x2="182" y2="91.8" />
+                <line x1="194" y1="85" x2="192" y2="94" />
+                <line x1="204" y1="87" x2="202" y2="96.2" />
+              </g>
+            </g>
+
+            <!-- Upper Hinged Jaw, Cylindrical Steel Ram & Upper Charcoal Grip -->
+            <g id="puncher-upper-jaw">
+              <!-- Machined steel cylindrical punch ram centered at x=36 -->
+              <g id="puncher-ram-pin">
+                <rect x="30" y="42" width="12" height="17" rx="1.8" fill="url(#punch-steel-ram)" stroke="#18191C" stroke-width="1.2" />
+                <path d="M30.5 57.5 H41.5 L40 60 H32 Z" fill="#464A52" stroke="#18191C" stroke-width="1" />
+              </g>
+              <!-- Brushed steel upper jaw arm -->
+              <path
+                d="M19 42 C19 35.5 24.5 31 31.5 31 H52 C68 31 86 35 114 45 L134 44 L126 65 L106 62 C85 52 67 48.5 50 48.5 H24.5 C21 48.5 19 46 19 42 Z"
+                fill="url(#punch-steel-upper)"
+                stroke="#18191C"
+                stroke-width="1.4"
+                stroke-linejoin="round"
+              />
+              <!-- Machined punch-head guide collar -->
+              <rect x="27" y="27.5" width="18" height="6.5" rx="2.5" fill="#B8BDC5" stroke="#18191C" stroke-width="1.2" />
+              <!-- Brushed steel top specular hairline -->
+              <path d="M28 34.5 H52 C68 34.5 85 38.2 108 46.5" stroke="#E5E8ED" stroke-width="1.1" stroke-linecap="round" opacity="0.65" />
+              <!-- Upper matte charcoal ergonomic grip -->
+              <path
+                d="M123 44.5 L242 15.5 C249.5 13.8 256 18.2 257.2 24.8 C258.4 31.5 254.2 37.5 247 39.2 L129 61.5 C125.5 62.2 122 59.8 121.2 56.2 L119.5 49.5 C119 47 120.5 45.2 123 44.5 Z"
+                fill="url(#punch-charcoal-grip)"
+                stroke="#141517"
+                stroke-width="1.4"
+              />
+              <!-- Subtle matte grip ribs (upper) -->
+              <g stroke="#42454D" stroke-width="1.4" stroke-linecap="round" opacity="0.88">
+                <line x1="156" y1="40" x2="158" y2="50" />
+                <line x1="166" y1="37.8" x2="168" y2="48" />
+                <line x1="176" y1="35.6" x2="178" y2="46" />
+                <line x1="186" y1="33.4" x2="188" y2="44" />
+                <line x1="196" y1="31.2" x2="198" y2="42" />
+                <line x1="206" y1="29" x2="208" y2="40" />
+              </g>
+            </g>
+
+            <!-- Central Stainless Pivot Rivet -->
+            <g id="puncher-pivot-rivet">
+              <circle cx="118" cy="61" r="7" fill="#AEB4BC" stroke="#18191C" stroke-width="1.4" />
+              <circle cx="118" cy="61" r="3.2" fill="#2A2C30" stroke="#5A5F68" stroke-width="0.9" />
+              <line x1="116" y1="59.8" x2="120" y2="62.2" stroke="#7A8089" stroke-width="0.9" stroke-linecap="round" />
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+
   <!-- Horizon Goals Timeline Screen (Connected via Top-Right Calendar Icon) -->
     <div id="horizon-goals-screen" class="hidden absolute inset-0 z-40 bg-appbg flex flex-col justify-between overflow-hidden">
       <header class="px-5 pt-2 pb-3 flex-shrink-0">
@@ -4693,14 +4945,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     (() => {
       const SFX_CUES = [
         'tick', 'select', 'drawerOpen', 'drawerClose', 'sweepOn', 'sweepOff',
-        'complete', 'uncheck', 'create', 'levelUp', 'paperStab', 'swipeKeep',
+        'complete', 'uncheck', 'create', 'levelUp', 'paperStab', 'holePunch', 'swipeKeep',
         'swipeArchive', 'delete', 'graphOpen', 'mascotOpen', 'mascotBye',
         'alert', 'recStart', 'recStop',
       ];
       const CUE_COOLDOWN_MS = {
         tick: 45, select: 55, drawerOpen: 110, drawerClose: 110,
         sweepOn: 120, sweepOff: 120, complete: 65, uncheck: 55,
-        create: 80, levelUp: 240, paperStab: 55, swipeKeep: 70,
+        create: 80, levelUp: 240, paperStab: 55, holePunch: 90, swipeKeep: 70,
         swipeArchive: 70, delete: 80, graphOpen: 90, mascotOpen: 100,
         mascotBye: 180, alert: 180, recStart: 90, recStop: 90,
       };
@@ -4886,6 +5138,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               case 'paperStab':
                 playFilteredNoise(audioCtx, { filterType: 'highpass', freq: 1400, endFreq: 900, q: 0.9, duration: 0.055, gain: 0.095 });
                 playTone(audioCtx, { type: 'sine', freq: 210, endFreq: 96, delay: 0.02, duration: 0.075, gain: 0.22, attack: 0.004, filterFreq: 800 });
+                break;
+              case 'holePunch':
+                playTone(audioCtx, { type: 'triangle', freq: 1380, endFreq: 760, duration: 0.022, gain: 0.14, attack: 0.002, filterFreq: 2800 });
+                playFilteredNoise(audioCtx, { filterType: 'bandpass', freq: 2100, endFreq: 780, q: 1.35, delay: 0.01, duration: 0.046, gain: 0.2 });
+                playTone(audioCtx, { type: 'sine', freq: 235, endFreq: 74, delay: 0.012, duration: 0.068, gain: 0.3, attack: 0.003, filterFreq: 720 });
+                playTone(audioCtx, { type: 'sine', freq: 640, endFreq: 450, delay: 0.072, duration: 0.026, gain: 0.065, attack: 0.004, filterFreq: 1600 });
                 break;
               case 'swipeKeep':
                 playFilteredNoise(audioCtx, { filterType: 'bandpass', freq: 500, endFreq: 1100, q: 1.5, duration: 0.085, gain: 0.09 });
@@ -6469,6 +6727,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const theme = THEMES[state.themeId];
       const accent = ACCENT_RGB[state.accentKey];
       const root = document.documentElement;
+      root.dataset.theme = state.themeId;
 
       Object.entries(theme.vars).forEach(([k, v]) => {
         root.style.setProperty(k, v);
@@ -6957,7 +7216,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         const rowBoxesHtml = rowSegments
           .map((seg) => {
             const cHex = (CAPSULE_COLORS[seg.color] || CAPSULE_COLORS.coral).hex;
-            const fillAlpha = seg.rowSlot === 0 ? '1A' : '12';
             const radiusLeft = seg.isStart ? seg.radiusPx : Math.max(6, seg.radiusPx - 2);
             const radiusRight = seg.isEnd ? seg.radiusPx : Math.max(6, seg.radiusPx - 2);
             const spanCols = Math.max(1, seg.endCol - seg.startCol + 1);
@@ -6966,7 +7224,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             cumulativeSpreadDelayMs += Math.max(90, durMs - 75);
             const spreadClass = animateTimeframeSpread ? 'timeframe-spread-in' : '';
             const spreadVars = animateTimeframeSpread
-              ? `--tf-delay:${delayMs}ms; --tf-dur:${durMs}ms; --tf-radius:${Math.max(radiusLeft, radiusRight)}px; --tf-glow:${cHex}77;`
+              ? `--tf-delay:${delayMs}ms; --tf-dur:${durMs}ms; --tf-radius:${Math.max(radiusLeft, radiusRight)}px;`
               : `--tf-radius:${Math.max(radiusLeft, radiusRight)}px;`;
             return `<div style="grid-row:1; grid-column:${seg.startCol + 1} / ${seg.endCol + 2}; padding:${seg.insetPx}px;">
               <div
@@ -6975,7 +7233,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 data-start-col="${seg.startCol}"
                 data-end-col="${seg.endCol}"
                 class="w-full h-full ${spreadClass}"
-                style="border:2px solid ${cHex}; border-radius:${radiusLeft}px ${radiusRight}px ${radiusRight}px ${radiusLeft}px; background-color:${cHex}${fillAlpha}; ${spreadVars}"
+                style="border:1.5px solid ${cHex}; border-radius:${radiusLeft}px ${radiusRight}px ${radiusRight}px ${radiusLeft}px; background-color:transparent; ${spreadVars}"
               ></div>
             </div>`;
           })
@@ -7005,14 +7263,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           if (dec.dueCheckpoints.length > 0) {
             const dots = dec.dueCheckpoints.slice(0, 3).map((cp) => {
               const cHex = (CAPSULE_COLORS[cp.color] || CAPSULE_COLORS.coral).hex;
-              const ringStyle = !cp.done ? `box-shadow: 0 0 0 1.5px rgb(var(--color-appbg)), 0 0 6px ${cHex};` : 'opacity:0.45;';
+              const ringStyle = !cp.done ? `box-shadow: 0 0 0 1.5px rgb(var(--color-appbg));` : 'opacity:0.45;';
               return `<span class="w-[5px] h-[5px] rounded-full" style="background-color:${cHex}; ${ringStyle}" title="${escapeHtml(cp.projectTitle)}: ${escapeHtml(cp.title)}"></span>`;
             }).join('');
             dueDotsHtml = `<div class="absolute top-[4px] right-[5px] z-20 flex items-center gap-[2px] pointer-events-none">${dots}</div>`;
           }
 
           const selectedInBoxHighlightHtml = hasTimeframeBox && isSelected
-            ? `<span class="pointer-events-none absolute w-[38px] h-[38px] rounded-full z-0" style="background-color:${primaryBoxColor}2E; box-shadow: 0 0 0 1.5px ${primaryBoxColor}B3;"></span>`
+            ? `<span class="pointer-events-none absolute w-[38px] h-[38px] rounded-full z-0 bg-cardbg" style="border: 1.5px solid ${primaryBoxColor};"></span>`
             : '';
 
           const cellBoxClasses = hasTimeframeBox
@@ -8289,7 +8547,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           const pct = p.totalCount > 0 ? Math.round((p.doneCount / p.totalCount) * 100) : 0;
           const isFocused = state.focusedProjectId != null && String(state.focusedProjectId) === String(p.id);
           const cardStyle = isFocused
-            ? `border-top: 3px solid ${c.hex}; border-color: ${c.hex}; box-shadow: 0 0 0 1px ${c.hex}66, 0 8px 20px -10px ${c.hex}88;`
+            ? `border: 1.5px solid ${c.hex}; border-top: 3px solid ${c.hex};`
             : `border-top: 3px solid ${c.hex};`;
           return `
             <div class="px-1 pb-1.5">
@@ -8305,8 +8563,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 <div class="flex items-start justify-between gap-1">
                   <p class="font-display text-[11.5px] font-bold text-primarytext leading-tight truncate">${escapeHtml(p.title)}</p>
                   <span
-                    style="background-color:${c.hex}22; color:${c.hex};"
-                    class="text-[9px] font-bold px-1.5 py-0.5 rounded-md whitespace-nowrap flex-shrink-0"
+                    style="color:${c.hex};"
+                    class="text-[9.5px] font-bold tabular-nums whitespace-nowrap flex-shrink-0"
                   >
                     ${p.doneCount}/${p.totalCount}
                   </span>
@@ -8356,10 +8614,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                     const nodeStyle = isDone
                       ? `background-color:${c.hex}; border-color:${c.hex}; color:${c.text}; opacity:0.75;`
                       : isDue
-                        ? `background-color:${c.hex}; border-color:${c.hex}; color:${c.text}; box-shadow: 0 0 0 3px ${c.hex}30, 0 0 10px ${c.hex}55;`
+                        ? `background-color:${c.hex}; border-color:${c.hex}; color:${c.text};`
                         : `background-color:rgb(var(--color-sheetbg)); border-color:${c.hex}; color:${c.hex};`;
                     const cardStyle = isDue
-                      ? `border-color:${c.hex}; background-color:rgb(var(--color-cardbg)); box-shadow: inset 0 0 0 999px ${c.hex}18;`
+                      ? `border: 1.5px solid ${c.hex}; background-color:rgb(var(--color-cardbg));`
                       : `border-color:rgb(var(--color-borderline)); background-color:rgb(var(--color-cardbg));`;
                     const statusBadge = isDone
                       ? `<span class="text-[8.5px] font-bold uppercase tracking-wider text-mutedtext">Done</span>`
@@ -8376,7 +8634,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                         data-cp-status="${cp.status}"
                         onclick="toggleProjectCheckpointDone('${escapeHtml(proj.id)}', '${escapeHtml(cp.id)}')"
                         style="${cardStyle}"
-                        class="tactile-btn relative z-10 w-full rounded-2xl border px-2 py-2 text-left transition flex items-start gap-2 shadow-sm"
+                        class="tactile-btn relative z-10 w-full rounded-2xl border px-2 py-2 text-left transition flex items-start gap-2"
                         title="Tap to mark checkpoint complete"
                       >
                         <span
@@ -8459,11 +8717,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               ${row.isToday ? 'id="projects-today-row"' : ''}
               data-projects-date-row="${row.dateKey}"
               style="${gridColsStyle}"
-              class="grid items-stretch relative ${row.isToday ? 'bg-coral/[0.04]' : ''}"
+              class="grid items-stretch relative"
             >
               ${
                 row.isToday
-                  ? `<div class="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-coral/90 z-20" style="box-shadow: 0 0 8px rgba(242,139,130,0.5);"></div>`
+                  ? `<div class="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-coral z-20"></div>`
                   : ''
               }
               <button
@@ -8546,7 +8804,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               <button
                 type="button"
                 onclick="toggleProjectCheckpointDone('${escapeHtml(cp.projectId)}', '${escapeHtml(cp.checkpointId)}')"
-                style="border-color: ${c.hex}; background-color: ${cp.done ? 'rgb(var(--color-cardbg))' : `${c.hex}1C`};"
+                style="border-color: ${c.hex}; background-color: rgb(var(--color-cardbg));"
                 class="tactile-btn flex items-center justify-between gap-2.5 w-full px-3 py-2 rounded-2xl border text-left transition ${cp.done ? 'opacity-65' : ''}"
               >
                 <span class="flex items-center gap-2.5 min-w-0">
@@ -8567,8 +8825,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 </span>
                 <span
                   onclick="event.stopPropagation(); setTimelineViewMode('projects', true)"
-                  style="background-color:${c.hex}24; color:${c.hex};"
-                  class="text-[9.5px] font-bold px-2 py-0.5 rounded-full flex-shrink-0"
+                  style="color:${c.hex};"
+                  class="bg-pillbg border border-borderline text-[9.5px] font-bold px-2 py-0.5 rounded-md flex-shrink-0"
                 >
                   Timeline
                 </span>
@@ -10418,8 +10676,230 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     // =========================================================================
-    // HABITS & HEATMAP + HISTORY MODAL
+    // HABITS & MATTE CARDSTOCK PUNCH CARDS + MECHANICAL HOLE-PUNCHER ANIMATION
     // =========================================================================
+    let habitPunchAnimActive = false;
+
+    function computeHabitPunchSlots(h) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const masteryDays = Math.max(1, Number(h.masteryDays) || 21);
+      const completedDays = Math.max(0, Math.min(masteryDays, Number(h.completedDays) || 0));
+      const doneToday = Boolean(h.done);
+      const hist = Array.isArray(h.history) ? h.history : [];
+
+      const slotCount = masteryDays <= 28 ? masteryDays : 21;
+      const futureNeeded = Math.max(0, masteryDays - completedDays - (doneToday ? 0 : 1));
+
+      let futureSlots;
+      if (masteryDays <= 28) {
+        futureSlots = Math.min(slotCount - 1, futureNeeded);
+      } else if (futureNeeded <= 6) {
+        futureSlots = futureNeeded;
+      } else {
+        const effectiveDoneExcludingToday = Math.max(0, completedDays - (doneToday ? 1 : 0));
+        futureSlots = Math.min(futureNeeded, Math.max(1, slotCount - 1 - Math.min(14, effectiveDoneExcludingToday)));
+      }
+      const todaySlotIdx = Math.max(0, Math.min(slotCount - 1, slotCount - 1 - futureSlots));
+
+      const slots = [];
+      for (let i = 0; i < slotCount; i++) {
+        const dayOffset = i - todaySlotIdx;
+        const slotDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + dayOffset);
+        const dayNum = slotDate.getDate();
+        const isToday = dayOffset === 0;
+        const isMasterySlot = i === slotCount - 1;
+        const isFuture = dayOffset > 0;
+
+        let punched = false;
+        if (isToday) {
+          punched = doneToday;
+        } else if (dayOffset < 0) {
+          const histIdx = hist.length - 1 + dayOffset;
+          if (histIdx >= 0 && histIdx < hist.length) {
+            punched = Boolean(hist[histIdx]);
+          }
+        }
+
+        slots.push({
+          index: i,
+          dayOffset,
+          dayNum,
+          isToday,
+          isMasterySlot,
+          isFuture,
+          punched,
+        });
+      }
+
+      return { slots, todaySlotIdx, slotCount, masteryDays, completedDays };
+    }
+
+    function renderHabitPunchSlotHtml(h, slot, c, options = {}) {
+      const interactive = options.interactive !== false;
+      const justPunched = Boolean(options.justPunched && slot.isToday && slot.punched);
+
+      if (slot.punched) {
+        const stampSymbol = slot.isMasterySlot
+          ? `<span class="text-[9px] leading-none font-bold" style="color:${c.hex};">★</span>`
+          : `<svg class="w-2.5 h-2.5" style="color:${c.hex};" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
+
+        const commonAttrs = slot.isToday
+          ? `data-habit-today-slot="${h.id}" data-punch-state="punched"`
+          : `data-punch-state="punched"`;
+
+        if (interactive && slot.isToday) {
+          return `
+            <button
+              type="button"
+              ${commonAttrs}
+              onclick="toggleHabitToday(${h.id})"
+              title="Today (${slot.dayNum}) • Tap to unpunch"
+              class="tactile-btn punch-hole-cutout ${justPunched ? 'punch-hole-just-punched' : ''} w-9 h-9 mx-auto rounded-full flex flex-col items-center justify-center gap-[1px] select-none"
+            >
+              <span class="text-[9px] font-bold tabular-nums leading-none text-secondarytext/85">${slot.dayNum}</span>
+              ${stampSymbol}
+            </button>
+          `;
+        }
+
+        return `
+          <div
+            ${commonAttrs}
+            title="${slot.isMasterySlot ? `Mastery Day (${slot.dayNum}) • Punched` : `Day ${slot.dayNum} • Punched`}"
+            class="punch-hole-cutout ${justPunched ? 'punch-hole-just-punched' : ''} w-9 h-9 mx-auto rounded-full flex flex-col items-center justify-center gap-[1px] select-none"
+          >
+            <span class="text-[9px] font-bold tabular-nums leading-none text-secondarytext/85">${slot.dayNum}</span>
+            ${stampSymbol}
+          </div>
+        `;
+      }
+
+      if (slot.isToday) {
+        const labelHtml = slot.isMasterySlot
+          ? `<span class="text-[11px] leading-none font-bold" style="color:${c.hex};">★</span><span class="text-[8.5px] font-bold tabular-nums leading-none" style="color:${c.hex};">${slot.dayNum}</span>`
+          : `<span class="text-[11.5px] font-bold tabular-nums leading-none" style="color:${c.hex};">${slot.dayNum}</span>`;
+
+        if (interactive) {
+          return `
+            <button
+              type="button"
+              data-habit-today-slot="${h.id}"
+              data-punch-state="unpunched"
+              onclick="toggleHabitToday(${h.id})"
+              style="border: 2px solid ${c.hex};"
+              title="Today (${slot.dayNum}) • Tap to punch"
+              class="tactile-btn w-9 h-9 mx-auto rounded-full bg-cardbg flex flex-col items-center justify-center select-none hover:bg-sheetbg/60 transition-colors"
+            >
+              ${labelHtml}
+            </button>
+          `;
+        }
+
+        return `
+          <div
+            data-habit-today-slot="${h.id}"
+            data-punch-state="unpunched"
+            style="border: 2px solid ${c.hex};"
+            class="w-9 h-9 mx-auto rounded-full bg-cardbg flex flex-col items-center justify-center select-none"
+          >
+            ${labelHtml}
+          </div>
+        `;
+      }
+
+      // Unpunched past or future slot
+      const labelHtml = slot.isMasterySlot
+        ? `<span class="text-[12px] leading-none text-secondarytext" title="Mastery Target (Day ${slot.dayNum})">★</span>`
+        : `<span class="text-[11px] font-medium tabular-nums leading-none ${slot.isFuture ? 'text-mutedtext' : 'text-secondarytext'}">${slot.dayNum}</span>`;
+
+      return `
+        <div
+          data-punch-state="unpunched"
+          title="${slot.isMasterySlot ? `Mastery Target • Day ${slot.dayNum}` : `Day ${slot.dayNum}`}"
+          class="w-9 h-9 mx-auto rounded-full border border-borderline bg-transparent flex items-center justify-center select-none"
+        >
+          ${labelHtml}
+        </div>
+      `;
+    }
+
+    function renderHabitPunchCardMarkup(h, options = {}) {
+      const c = CAPSULE_COLORS[h.color] || CAPSULE_COLORS.coral;
+      const interactive = options.interactive !== false;
+      const { slots, masteryDays, completedDays } = computeHabitPunchSlots(h);
+      const pct = Math.min(100, Math.round((completedDays / Math.max(1, masteryDays)) * 100));
+      const daysLeft = Math.max(0, masteryDays - completedDays);
+
+      const slotsHtml = slots
+        .map((slot) => renderHabitPunchSlotHtml(h, slot, c, options))
+        .join('');
+
+      const punchBtnHtml = h.done
+        ? `<button
+            type="button"
+            ${interactive ? `onclick="toggleHabitToday(${h.id})"` : 'tabindex="-1"'}
+            data-habit-punch-btn="${h.id}"
+            class="tactile-btn px-3 py-1.5 rounded-xl bg-pillbg border border-borderline text-[11px] font-semibold text-secondarytext hover:text-primarytext whitespace-nowrap shrink-0 flex items-center gap-1"
+            title="Tap to uncheck today"
+          >
+            <svg class="w-3 h-3" style="color:${c.hex};" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <span>Punched</span>
+          </button>`
+        : `<button
+            type="button"
+            ${interactive ? `onclick="toggleHabitToday(${h.id})"` : 'tabindex="-1"'}
+            data-habit-punch-btn="${h.id}"
+            style="background-color:${c.hex}; color:${c.text};"
+            class="tactile-btn px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap shrink-0 flex items-center gap-1.5"
+            title="Punch today's habit slot"
+          >
+            <span>Punch Today</span>
+          </button>`;
+
+      const cardAttr = interactive ? `data-habit-card-id="${h.id}"` : `data-habit-clone-id="${h.id}"`;
+
+      return `
+        <article ${cardAttr} class="bg-cardbg rounded-[22px] p-[6px]">
+          <div class="rounded-[16px] border border-borderline/85 p-3.5 space-y-3">
+            <div class="flex items-center justify-between gap-2.5">
+              <button
+                type="button"
+                ${interactive ? `onclick="openHabitHistoryModal(${h.id})"` : 'tabindex="-1"'}
+                class="tactile-btn flex items-center gap-2.5 min-w-0 flex-1 text-left"
+              >
+                <span style="background-color:${c.hex}; color:${c.text};" class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  ${ICONS[h.icon] || ICONS.spark}
+                </span>
+                <div class="min-w-0">
+                  <p class="font-display text-[15px] font-bold tracking-tight text-primarytext truncate leading-snug">${escapeHtml(h.title)}</p>
+                  <p class="text-[11.5px] text-secondarytext tabular-nums truncate">
+                    <span>${escapeHtml(h.timeLabel)}</span>
+                    <span aria-hidden="true"> · </span>
+                    <span class="font-semibold text-primarytext/90">${completedDays} / ${masteryDays}d</span>
+                    ${daysLeft === 0 ? '<span aria-hidden="true"> · </span><span style="color:' + c.hex + ';" class="font-semibold">Mastered ★</span>' : ''}
+                  </p>
+                </div>
+              </button>
+
+              ${punchBtnHtml}
+            </div>
+
+            <div class="grid grid-cols-7 gap-y-2 gap-x-1 pt-1 pb-0.5">
+              ${slotsHtml}
+            </div>
+
+            <div class="pt-2 border-t border-borderline/70 flex items-center justify-between gap-3">
+              <div class="flex-1 h-1.5 rounded-full bg-pillbg overflow-hidden">
+                <div class="h-full rounded-full transition-all duration-300" style="width:${pct}%; background-color:${c.hex};"></div>
+              </div>
+              <span class="text-[11px] font-bold tabular-nums text-secondarytext shrink-0">${pct}%</span>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
     function renderHabits() {
       const container = document.getElementById('habit-list-container');
       if (!container) return;
@@ -10437,85 +10917,229 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
 
       container.innerHTML = list
-        .map((h) => {
-          const c = CAPSULE_COLORS[h.color] || CAPSULE_COLORS.coral;
-          const pct = Math.min(100, Math.round((h.completedDays / Math.max(1, h.masteryDays)) * 100));
-          const daysLeft = Math.max(0, h.masteryDays - h.completedDays);
-          const recentSlots = (h.history || []).slice(-28);
-
-          const cellsHtml = recentSlots
-            .map(
-              (val) => `
-              <span
-                style="${val ? `background-color:${c.hex};` : ''}"
-                class="h-2.5 rounded-[3px] ${val ? '' : 'bg-pillbg'}"
-              ></span>
-            `
-            )
-            .join('');
-
-          return `
-            <div class="bg-cardbg border border-borderline rounded-[24px] p-4 space-y-3">
-              <div class="flex items-center justify-between gap-2.5">
-                <button
-                  type="button"
-                  onclick="openHabitHistoryModal(${h.id})"
-                  class="tactile-btn flex items-center gap-3 min-w-0 flex-1 text-left"
-                >
-                  <span style="background-color:${c.hex}; color:${c.text};" class="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0">
-                    ${ICONS[h.icon] || ICONS.spark}
-                  </span>
-                  <div class="min-w-0">
-                    <p class="text-[15px] font-bold text-primarytext truncate">${escapeHtml(h.title)}</p>
-                    <p class="text-xs text-secondarytext">${escapeHtml(h.timeLabel)} • ${h.completedDays}/${h.masteryDays}d (${daysLeft}d left)</p>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onclick="toggleHabitToday(${h.id})"
-                  style="${h.done ? `background-color:${c.hex}; border-color:${c.hex}; color:${c.text};` : `border-color:${c.hex};`}"
-                  class="tactile-btn w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition"
-                  title="Toggle today"
-                >
-                  ${h.done ? '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
-                </button>
-              </div>
-
-              <div class="grid grid-cols-14 gap-1" style="grid-template-columns: repeat(14, minmax(0, 1fr));">
-                ${cellsHtml}
-              </div>
-
-              <div class="space-y-1">
-                <div class="flex items-center justify-between text-xs">
-                  <span class="text-secondarytext">Mastery Progress</span>
-                  <span class="font-bold" style="color:${c.hex};">${pct}%</span>
-                </div>
-                <div class="w-full h-1.5 rounded-full bg-pillbg overflow-hidden">
-                  <div class="h-full rounded-full transition-all duration-300" style="width:${pct}%; background-color:${c.hex};"></div>
-                </div>
-              </div>
-            </div>
-          `;
-        })
+        .map((h) => renderHabitPunchCardMarkup(h, { interactive: true }))
         .join('');
+    }
+
+    function commitHabitToggleState(habit, nextDone) {
+      habit.done = Boolean(nextDone);
+      if (habit.done) {
+        habit.completedDays = Math.min(habit.masteryDays, habit.completedDays + 1);
+        if (habit.history && habit.history.length > 0) habit.history[habit.history.length - 1] = 1;
+      } else {
+        habit.completedDays = Math.max(0, habit.completedDays - 1);
+        if (habit.history && habit.history.length > 0) habit.history[habit.history.length - 1] = 0;
+      }
+      saveState();
+    }
+
+    function spawnFallingPunchChad(chadLayer, x, y, dayNum) {
+      if (!chadLayer) return;
+      const chad = document.createElement('div');
+      chad.className = 'punch-chad-disc';
+      const dx = (Math.random() > 0.5 ? 1 : -1) * (10 + Math.round(Math.random() * 14));
+      const rot = (dx >= 0 ? 1 : -1) * (48 + Math.round(Math.random() * 38));
+      chad.style.left = `${x}px`;
+      chad.style.top = `${y}px`;
+      chad.style.setProperty('--chad-dx-mid', `${Math.round(dx * 0.35)}px`);
+      chad.style.setProperty('--chad-dx', `${dx}px`);
+      chad.style.setProperty('--chad-rot-mid', `${Math.round(rot * 0.32)}deg`);
+      chad.style.setProperty('--chad-rot', `${rot}deg`);
+      chad.textContent = String(dayNum);
+      chadLayer.appendChild(chad);
+      setTimeout(() => chad.remove(), 600);
     }
 
     function toggleHabitToday(habitId) {
       const habit = state.habits.find((h) => h.id === habitId);
       if (!habit) return;
-      habit.done = !habit.done;
+      if (habitPunchAnimActive) return;
+
+      // Quietly restore unpunched circle with soft uncheck SFX
       if (habit.done) {
-        habit.completedDays = Math.min(habit.masteryDays, habit.completedDays + 1);
-        if (habit.history && habit.history.length > 0) habit.history[habit.history.length - 1] = 1;
-        playBubblePopSfx();
-      } else {
-        habit.completedDays = Math.max(0, habit.completedDays - 1);
-        if (habit.history && habit.history.length > 0) habit.history[habit.history.length - 1] = 0;
+        commitHabitToggleState(habit, false);
         playSfx('uncheck');
+        renderHabits();
+        return;
       }
-      saveState();
-      renderHabits();
+
+      const prefersReducedMotion =
+        typeof window !== 'undefined' &&
+        window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const overlay = document.getElementById('habit-punch-overlay');
+      const backdrop = document.getElementById('habit-punch-backdrop');
+      const stage = document.getElementById('habit-punch-card-stage');
+      const chadLayer = document.getElementById('habit-punch-chad-layer');
+      const toolAnchor = document.getElementById('habit-punch-tool-anchor');
+      const toolMirror = document.getElementById('habit-punch-tool-mirror');
+      const toolSvg = document.getElementById('habit-punch-tool-svg');
+      const sourceCard = document.querySelector(`[data-habit-card-id="${habitId}"]`);
+
+      if (prefersReducedMotion || !overlay || !backdrop || !stage || !toolAnchor || !toolMirror || !toolSvg || !sourceCard) {
+        commitHabitToggleState(habit, true);
+        playSfx('holePunch', { bypassCooldown: true });
+        renderHabits();
+        return;
+      }
+
+      habitPunchAnimActive = true;
+
+      const sourceRect = sourceCard.getBoundingClientRect();
+      const overlayRect = overlay.parentElement.getBoundingClientRect();
+
+      // Prepare overlay and mount the unpunched card clone at center stage
+      overlay.classList.remove('hidden');
+      overlay.classList.remove('pointer-events-none');
+      overlay.classList.add('pointer-events-auto');
+      backdrop.classList.remove('is-visible');
+      chadLayer.innerHTML = '';
+
+      toolAnchor.classList.remove('is-retracting');
+      toolSvg.classList.remove('is-clamped');
+      toolAnchor.style.opacity = '0';
+
+      stage.innerHTML = `
+        <div id="habit-punch-elevated-wrap" class="w-full" style="will-change: transform;">
+          <div id="habit-punch-recoil-wrap">
+            ${renderHabitPunchCardMarkup(habit, { interactive: false })}
+          </div>
+        </div>
+      `;
+
+      const elevatedWrap = document.getElementById('habit-punch-elevated-wrap');
+      const recoilWrap = document.getElementById('habit-punch-recoil-wrap');
+      const cardClone = elevatedWrap.querySelector('article');
+      if (cardClone) {
+        cardClone.style.boxShadow = '0 22px 46px rgba(0, 0, 0, 0.55)';
+      }
+
+      // Measure resting centered rect BEFORE applying FLIP start transform
+      const targetRect = elevatedWrap.getBoundingClientRect();
+      const startDx = sourceRect.left - targetRect.left + (sourceRect.width - targetRect.width) / 2;
+      const startDy = sourceRect.top - targetRect.top + (sourceRect.height - targetRect.height) / 2;
+      const startScaleX = sourceRect.width / Math.max(1, targetRect.width);
+      const startScaleY = sourceRect.height / Math.max(1, targetRect.height);
+
+      // Compute exact target punch slot coordinates at centered scale(1.03)
+      const FOCUS_SCALE = 1.03;
+      const todaySlotEl = elevatedWrap.querySelector(`[data-habit-today-slot="${habit.id}"]`);
+      const slotRect = todaySlotEl ? todaySlotEl.getBoundingClientRect() : targetRect;
+      const cardCenterX = targetRect.left - overlayRect.left + targetRect.width / 2;
+      const cardCenterY = targetRect.top - overlayRect.top + targetRect.height / 2;
+      const slotRelX = slotRect.left - overlayRect.left + slotRect.width / 2;
+      const slotRelY = slotRect.top - overlayRect.top + slotRect.height / 2;
+      const scaledSlotX = cardCenterX + (slotRelX - cardCenterX) * FOCUS_SCALE;
+      const scaledSlotY = cardCenterY + (slotRelY - cardCenterY) * FOCUS_SCALE;
+
+      // Determine side approach so puncher handle stays framed cleanly inside the shell
+      const enterFromLeft = scaledSlotX < overlayRect.width * 0.42;
+      const tipX = enterFromLeft ? 264 - 36 : 36;
+      const tipY = 58;
+      const slideOffsetX = enterFromLeft ? -190 : 190;
+
+      toolMirror.style.transform = enterFromLeft ? 'scaleX(-1)' : 'none';
+      toolAnchor.style.left = `${Math.round(scaledSlotX - tipX)}px`;
+      toolAnchor.style.top = `${Math.round(scaledSlotY - tipY)}px`;
+      toolAnchor.style.transform = `translate3d(${slideOffsetX}px, 0, 0)`;
+
+      // Start FLIP at source card rect and hide original list card
+      sourceCard.style.opacity = '0';
+      elevatedWrap.style.transition = 'none';
+      elevatedWrap.style.transform = `translate3d(${startDx}px, ${startDy}px, 0) scale(${startScaleX}, ${startScaleY})`;
+      void elevatedWrap.offsetHeight;
+
+      // Phase 1 (0ms): Pop card smoothly to center focus over matte dim backdrop
+      requestAnimationFrame(() => {
+        backdrop.classList.add('is-visible');
+        elevatedWrap.style.transition = 'transform 280ms cubic-bezier(0.22, 1, 0.36, 1)';
+        elevatedWrap.style.transform = `translate3d(0, 0, 0) scale(${FOCUS_SCALE})`;
+      });
+
+      // Phase 2 (250ms): Brushed-steel & charcoal handheld hole-puncher slides in over today's circle
+      setTimeout(() => {
+        toolAnchor.style.opacity = '1';
+        toolAnchor.style.transform = 'translate3d(0px, 0, 0)';
+      }, 250);
+
+      // Phase 3 (560ms): Mechanical jaw clamps down onto today's slot
+      setTimeout(() => {
+        toolSvg.classList.add('is-clamped');
+      }, 560);
+
+      // Phase 4 (635ms): Exact punch-through impact — card micro-recoil, SFX, dark recessed hole, falling chad
+      setTimeout(() => {
+        const { slots } = computeHabitPunchSlots(habit);
+        const todaySlot = slots.find((s) => s.isToday);
+        const todayDayNum = todaySlot ? todaySlot.dayNum : new Date().getDate();
+
+        commitHabitToggleState(habit, true);
+        playSfx('holePunch', { bypassCooldown: true });
+
+        if (recoilWrap) {
+          recoilWrap.innerHTML = renderHabitPunchCardMarkup(habit, { interactive: false, justPunched: true });
+          const updatedClone = recoilWrap.querySelector('article');
+          if (updatedClone) {
+            updatedClone.style.boxShadow = '0 22px 46px rgba(0, 0, 0, 0.55)';
+          }
+          recoilWrap.classList.remove('punch-card-recoil');
+          void recoilWrap.offsetWidth;
+          recoilWrap.classList.add('punch-card-recoil');
+        }
+
+        spawnFallingPunchChad(chadLayer, scaledSlotX, scaledSlotY, todayDayNum);
+      }, 635);
+
+      // Phase 5 (790ms): Jaw releases open
+      setTimeout(() => {
+        toolSvg.classList.remove('is-clamped');
+      }, 790);
+
+      // Phase 6 (880ms): Puncher smoothly retracts off-edge to reveal the freshly punched hole
+      setTimeout(() => {
+        toolAnchor.classList.add('is-retracting');
+        toolAnchor.style.transform = `translate3d(${slideOffsetX}px, 0, 0)`;
+        toolAnchor.style.opacity = '0';
+      }, 880);
+
+      // Phase 7 (1200ms): Re-render list silently and glide the punched card smoothly back into its list slot
+      setTimeout(() => {
+        renderHabits();
+        const destCard = document.querySelector(`[data-habit-card-id="${habitId}"]`);
+        if (destCard) {
+          destCard.style.opacity = '0';
+          const destRect = destCard.getBoundingClientRect();
+          const endDx = destRect.left - targetRect.left + (destRect.width - targetRect.width) / 2;
+          const endDy = destRect.top - targetRect.top + (destRect.height - targetRect.height) / 2;
+          const endScaleX = destRect.width / Math.max(1, targetRect.width);
+          const endScaleY = destRect.height / Math.max(1, targetRect.height);
+
+          backdrop.classList.remove('is-visible');
+          elevatedWrap.style.transition = 'transform 280ms cubic-bezier(0.22, 1, 0.36, 1)';
+          elevatedWrap.style.transform = `translate3d(${endDx}px, ${endDy}px, 0) scale(${endScaleX}, ${endScaleY})`;
+          const finalClone = recoilWrap ? recoilWrap.querySelector('article') : null;
+          if (finalClone) {
+            finalClone.style.transition = 'box-shadow 260ms ease';
+            finalClone.style.boxShadow = 'none';
+          }
+        } else {
+          backdrop.classList.remove('is-visible');
+        }
+      }, 1200);
+
+      // Phase 8 (1500ms): Clean up overlay and reveal the list card
+      setTimeout(() => {
+        const destCard = document.querySelector(`[data-habit-card-id="${habitId}"]`);
+        if (destCard) destCard.style.opacity = '';
+        overlay.classList.add('hidden');
+        overlay.classList.remove('pointer-events-auto');
+        overlay.classList.add('pointer-events-none');
+        stage.innerHTML = '';
+        chadLayer.innerHTML = '';
+        toolAnchor.classList.remove('is-retracting');
+        habitPunchAnimActive = false;
+      }, 1500);
     }
 
     function openHabitModal() {

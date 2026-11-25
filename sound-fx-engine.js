@@ -16,6 +16,7 @@ export const SFX_CUES = [
   'create',
   'levelUp',
   'paperStab',
+  'holePunch',
   'swipeKeep',
   'swipeArchive',
   'delete',
@@ -39,6 +40,7 @@ const CUE_COOLDOWN_MS = {
   create: 80,
   levelUp: 240,
   paperStab: 55,
+  holePunch: 90,
   swipeKeep: 70,
   swipeArchive: 70,
   delete: 80,
@@ -246,6 +248,14 @@ export function createSoundFXEngine(options = {}) {
         case 'paperStab':
           playFilteredNoise(audioCtx, { filterType: 'highpass', freq: 1400, endFreq: 900, q: 0.9, duration: 0.055, gain: 0.095 });
           playTone(audioCtx, { type: 'sine', freq: 210, endFreq: 96, delay: 0.02, duration: 0.075, gain: 0.22, attack: 0.004, filterFreq: 800 });
+          break;
+
+        case 'holePunch':
+          // Mechanical steel jaw click + crisp cardstock punch-through shear + solid anvil thud + subtle spring return
+          playTone(audioCtx, { type: 'triangle', freq: 1380, endFreq: 760, duration: 0.022, gain: 0.14, attack: 0.002, filterFreq: 2800 });
+          playFilteredNoise(audioCtx, { filterType: 'bandpass', freq: 2100, endFreq: 780, q: 1.35, delay: 0.01, duration: 0.046, gain: 0.2 });
+          playTone(audioCtx, { type: 'sine', freq: 235, endFreq: 74, delay: 0.012, duration: 0.068, gain: 0.3, attack: 0.003, filterFreq: 720 });
+          playTone(audioCtx, { type: 'sine', freq: 640, endFreq: 450, delay: 0.072, duration: 0.026, gain: 0.065, attack: 0.004, filterFreq: 1600 });
           break;
 
         case 'swipeKeep':
