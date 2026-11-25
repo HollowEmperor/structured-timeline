@@ -784,6 +784,129 @@
       touch-action: none;
       cursor: crosshair;
     }
+
+    /* Mascot "Bye bye!" Speech Bubble */
+    @keyframes mascotByeBubblePop {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, 8px) scale(0.58);
+      }
+      22% {
+        opacity: 1;
+        transform: translate(-50%, -2px) scale(1.05);
+      }
+      34% {
+        opacity: 1;
+        transform: translate(-50%, 0px) scale(1);
+      }
+      78% {
+        opacity: 1;
+        transform: translate(-50%, -2px) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -12px) scale(0.9);
+      }
+    }
+    @keyframes mascotByeBubblePopLeft {
+      0% {
+        opacity: 0;
+        transform: translate(10px, -50%) scale(0.58);
+      }
+      22% {
+        opacity: 1;
+        transform: translate(-3px, -50%) scale(1.05);
+      }
+      34% {
+        opacity: 1;
+        transform: translate(0px, -50%) scale(1);
+      }
+      78% {
+        opacity: 1;
+        transform: translate(-2px, -50%) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-8px, -62%) scale(0.9);
+      }
+    }
+    @keyframes mascotByeWave {
+      0%, 100% {
+        transform: rotate(0deg) scale(1);
+      }
+      25% {
+        transform: rotate(-13deg) scale(1.06);
+      }
+      55% {
+        transform: rotate(12deg) scale(1.05);
+      }
+      80% {
+        transform: rotate(-6deg) scale(1.02);
+      }
+    }
+    .spatial-bubble-core.saying-bye {
+      animation: mascotByeWave 0.48s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .mascot-bye-bubble {
+      position: fixed;
+      z-index: 95;
+      pointer-events: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #F5F5F7;
+      color: #141416;
+      border: 1.5px solid #141416;
+      font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+      white-space: nowrap;
+      box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(242, 139, 130, 0.35);
+      will-change: transform, opacity;
+    }
+    .mascot-bye-bubble.tail-bottom {
+      animation: mascotByeBubblePop 1.05s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .mascot-bye-bubble.tail-bottom::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: -5px;
+      width: 8px;
+      height: 8px;
+      background: #F5F5F7;
+      border-right: 1.5px solid #141416;
+      border-bottom: 1.5px solid #141416;
+      transform: translateX(-50%) rotate(45deg);
+      border-bottom-right-radius: 2px;
+    }
+    .mascot-bye-bubble.tail-right {
+      animation: mascotByeBubblePopLeft 1.05s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .mascot-bye-bubble.tail-right::after {
+      content: '';
+      position: absolute;
+      right: -5px;
+      top: 50%;
+      width: 8px;
+      height: 8px;
+      background: #F5F5F7;
+      border-top: 1.5px solid #141416;
+      border-right: 1.5px solid #141416;
+      transform: translateY(-50%) rotate(45deg);
+      border-top-right-radius: 2px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .spatial-bubble-core.saying-bye,
+      .mascot-bye-bubble.tail-bottom,
+      .mascot-bye-bubble.tail-right {
+        animation-duration: 0.25s;
+      }
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center sm:py-4 selection:bg-coral/25 selection:text-white">
@@ -1422,6 +1545,28 @@
               class="tactile-btn w-11 h-6 rounded-full bg-coral border border-coral p-0.5 flex items-center transition-colors flex-shrink-0"
             >
               <span id="settings-spatial-knob" style="transform: translateX(20px);" class="w-4 h-4 rounded-full bg-appbg transition-transform"></span>
+            </button>
+          </div>
+
+          <!-- Sound Effects Toggle -->
+          <div class="bg-cardbg border border-borderline rounded-2xl px-4 py-3.5 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="w-8 h-8 rounded-xl bg-pillbg border border-borderline text-coral flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z"/></svg>
+              </span>
+              <div class="min-w-0">
+                <p class="text-xs font-semibold text-primarytext">Sound Effects</p>
+                <p id="settings-sfx-summary" class="text-[11px] text-secondarytext truncate">On • Calm focus acoustics</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              id="settings-sfx-toggle"
+              onclick="toggleSfxEnabled()"
+              aria-label="Toggle Sound Effects"
+              class="tactile-btn w-11 h-6 rounded-full bg-coral border border-coral p-0.5 flex items-center transition-colors flex-shrink-0"
+            >
+              <span id="settings-sfx-knob" style="transform: translateX(20px);" class="w-4 h-4 rounded-full bg-appbg transition-transform"></span>
             </button>
           </div>
 
@@ -4543,6 +4688,270 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
   </script>
   <script>
     // =========================================================================
+    // FOCUS-FIRST PROCEDURAL WEB AUDIO SFX ENGINE (Inlined from sound-fx-engine.js)
+    // =========================================================================
+    (() => {
+      const SFX_CUES = [
+        'tick', 'select', 'drawerOpen', 'drawerClose', 'sweepOn', 'sweepOff',
+        'complete', 'uncheck', 'create', 'levelUp', 'paperStab', 'swipeKeep',
+        'swipeArchive', 'delete', 'graphOpen', 'mascotOpen', 'mascotBye',
+        'alert', 'recStart', 'recStop',
+      ];
+      const CUE_COOLDOWN_MS = {
+        tick: 45, select: 55, drawerOpen: 110, drawerClose: 110,
+        sweepOn: 120, sweepOff: 120, complete: 65, uncheck: 55,
+        create: 80, levelUp: 240, paperStab: 55, swipeKeep: 70,
+        swipeArchive: 70, delete: 80, graphOpen: 90, mascotOpen: 100,
+        mascotBye: 180, alert: 180, recStart: 90, recStop: 90,
+      };
+
+      function createSoundFXEngine(options = {}) {
+        const getAudioContextCtor =
+          options.getAudioContextCtor ||
+          (() => (typeof window !== 'undefined' ? window.AudioContext || window.webkitAudioContext : null));
+        const nowMsFn = options.nowMs || (() => Date.now());
+
+        let enabled = options.enabled !== false;
+        let masterVolume = typeof options.masterVolume === 'number' ? options.masterVolume : 0.42;
+        let ctx = null;
+        let masterGain = null;
+        let noiseBuffer = null;
+        const lastPlayedAt = Object.create(null);
+
+        function ensureContext() {
+          if (!enabled) return null;
+          const Ctor = getAudioContextCtor();
+          if (!Ctor) return null;
+          if (!ctx) {
+            ctx = new Ctor();
+            masterGain = ctx.createGain();
+            masterGain.gain.setValueAtTime(masterVolume, ctx.currentTime);
+            masterGain.connect(ctx.destination);
+          }
+          if (ctx.state === 'suspended' && typeof ctx.resume === 'function') {
+            try { ctx.resume(); } catch (_) {}
+          }
+          return ctx;
+        }
+
+        function ensureNoiseBuffer(audioCtx) {
+          if (noiseBuffer && noiseBuffer.sampleRate === audioCtx.sampleRate) return noiseBuffer;
+          const length = Math.floor(audioCtx.sampleRate * 0.18);
+          const buffer = audioCtx.createBuffer(1, length, audioCtx.sampleRate);
+          const data = buffer.getChannelData(0);
+          let b0 = 0;
+          let b1 = 0;
+          for (let i = 0; i < length; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.92 * b0 + white * 0.08;
+            b1 = 0.72 * b1 + white * 0.28;
+            data[i] = (b0 + b1) * 0.6;
+          }
+          noiseBuffer = buffer;
+          return buffer;
+        }
+
+        function playTone(audioCtx, cfg) {
+          const startAt = audioCtx.currentTime + (cfg.delay || 0);
+          const dur = cfg.duration || 0.09;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          let dest = masterGain;
+
+          if (cfg.filterFreq) {
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = cfg.filterType || 'lowpass';
+            filter.frequency.setValueAtTime(cfg.filterFreq, startAt);
+            if (cfg.filterEndFreq) {
+              filter.frequency.exponentialRampToValueAtTime(Math.max(40, cfg.filterEndFreq), startAt + dur);
+            }
+            filter.connect(masterGain);
+            dest = filter;
+          }
+
+          osc.type = cfg.type || 'sine';
+          osc.frequency.setValueAtTime(Math.max(40, cfg.freq), startAt);
+          if (cfg.endFreq) {
+            osc.frequency.exponentialRampToValueAtTime(Math.max(40, cfg.endFreq), startAt + dur);
+          }
+          if (cfg.midFreq && cfg.midTime) {
+            osc.frequency.exponentialRampToValueAtTime(Math.max(40, cfg.midFreq), startAt + cfg.midTime);
+            if (cfg.endFreq) {
+              osc.frequency.exponentialRampToValueAtTime(Math.max(40, cfg.endFreq), startAt + dur);
+            }
+          }
+
+          const peak = Math.max(0.001, cfg.gain || 0.12);
+          const attack = Math.min(dur * 0.35, cfg.attack || 0.008);
+          gain.gain.setValueAtTime(0.0008, startAt);
+          gain.gain.linearRampToValueAtTime(peak, startAt + attack);
+          gain.gain.exponentialRampToValueAtTime(0.0008, startAt + dur);
+
+          osc.connect(gain);
+          gain.connect(dest);
+          osc.start(startAt);
+          osc.stop(startAt + dur + 0.012);
+        }
+
+        function playFilteredNoise(audioCtx, cfg) {
+          const startAt = audioCtx.currentTime + (cfg.delay || 0);
+          const dur = cfg.duration || 0.08;
+          const src = audioCtx.createBufferSource();
+          src.buffer = ensureNoiseBuffer(audioCtx);
+
+          const filter = audioCtx.createBiquadFilter();
+          filter.type = cfg.filterType || 'bandpass';
+          filter.Q.setValueAtTime(cfg.q || 1.4, startAt);
+          filter.frequency.setValueAtTime(Math.max(80, cfg.freq || 700), startAt);
+          if (cfg.endFreq) {
+            filter.frequency.exponentialRampToValueAtTime(Math.max(80, cfg.endFreq), startAt + dur);
+          }
+
+          const gain = audioCtx.createGain();
+          const peak = Math.max(0.001, cfg.gain || 0.06);
+          gain.gain.setValueAtTime(0.0008, startAt);
+          gain.gain.linearRampToValueAtTime(peak, startAt + Math.min(0.02, dur * 0.35));
+          gain.gain.exponentialRampToValueAtTime(0.0008, startAt + dur);
+
+          src.connect(filter);
+          filter.connect(gain);
+          gain.connect(masterGain);
+          src.start(startAt);
+          src.stop(startAt + dur + 0.015);
+        }
+
+        function play(cue, opts = {}) {
+          if (!enabled) return false;
+          if (!SFX_CUES.includes(cue)) return false;
+
+          const nowMs = nowMsFn();
+          const cooldown = CUE_COOLDOWN_MS[cue] || 50;
+          if (!opts.bypassCooldown && lastPlayedAt[cue] && nowMs - lastPlayedAt[cue] < cooldown) {
+            return false;
+          }
+          lastPlayedAt[cue] = nowMs;
+
+          try {
+            const audioCtx = ensureContext();
+            if (!audioCtx) return false;
+
+            switch (cue) {
+              case 'tick':
+                playTone(audioCtx, { type: 'sine', freq: 310, endFreq: 185, duration: 0.028, gain: 0.14, attack: 0.004, filterFreq: 1100 });
+                break;
+              case 'select':
+                playTone(audioCtx, { type: 'triangle', freq: 523.25, endFreq: 554.37, duration: 0.055, gain: 0.16, attack: 0.005, filterFreq: 1650 });
+                break;
+              case 'drawerOpen':
+                playFilteredNoise(audioCtx, { filterType: 'bandpass', freq: 340, endFreq: 760, q: 1.6, duration: 0.15, gain: 0.11 });
+                playTone(audioCtx, { type: 'sine', freq: 261.63, endFreq: 392.0, duration: 0.13, gain: 0.075, attack: 0.02, filterFreq: 1200 });
+                break;
+              case 'drawerClose':
+                playFilteredNoise(audioCtx, { filterType: 'bandpass', freq: 620, endFreq: 280, q: 1.5, duration: 0.13, gain: 0.095 });
+                playTone(audioCtx, { type: 'sine', freq: 349.23, endFreq: 233.08, duration: 0.11, gain: 0.065, attack: 0.015, filterFreq: 1000 });
+                break;
+              case 'sweepOn':
+                playFilteredNoise(audioCtx, { filterType: 'bandpass', freq: 420, endFreq: 1150, q: 2.0, duration: 0.22, gain: 0.09 });
+                playTone(audioCtx, { type: 'sine', freq: 523.25, duration: 0.18, gain: 0.12, attack: 0.025, filterFreq: 1900 });
+                playTone(audioCtx, { type: 'triangle', freq: 783.99, delay: 0.075, duration: 0.22, gain: 0.1, attack: 0.02, filterFreq: 2100 });
+                break;
+              case 'sweepOff':
+                playTone(audioCtx, { type: 'sine', freq: 659.25, endFreq: 440.0, duration: 0.14, gain: 0.095, attack: 0.012, filterFreq: 1500 });
+                break;
+              case 'complete':
+                playTone(audioCtx, { type: 'sine', freq: 330, midFreq: 920, midTime: 0.058, endFreq: 165, duration: 0.125, gain: 0.34, attack: 0.008 });
+                playTone(audioCtx, { type: 'triangle', freq: 659.25, delay: 0.04, duration: 0.21, gain: 0.16, attack: 0.012, filterFreq: 2400 });
+                playTone(audioCtx, { type: 'triangle', freq: 987.77, delay: 0.082, duration: 0.24, gain: 0.13, attack: 0.012, filterFreq: 2600 });
+                break;
+              case 'uncheck':
+                playTone(audioCtx, { type: 'sine', freq: 260, endFreq: 175, duration: 0.06, gain: 0.13, attack: 0.006, filterFreq: 900 });
+                break;
+              case 'create':
+                playTone(audioCtx, { type: 'triangle', freq: 523.25, duration: 0.11, gain: 0.16, attack: 0.008, filterFreq: 2000 });
+                playTone(audioCtx, { type: 'triangle', freq: 783.99, delay: 0.055, duration: 0.16, gain: 0.15, attack: 0.008, filterFreq: 2300 });
+                break;
+              case 'levelUp':
+                [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+                  playTone(audioCtx, {
+                    type: 'triangle',
+                    freq,
+                    delay: idx * 0.068,
+                    duration: idx === 3 ? 0.34 : 0.2,
+                    gain: idx === 3 ? 0.17 : 0.14,
+                    attack: 0.01,
+                    filterFreq: 2600,
+                  });
+                });
+                break;
+              case 'paperStab':
+                playFilteredNoise(audioCtx, { filterType: 'highpass', freq: 1400, endFreq: 900, q: 0.9, duration: 0.055, gain: 0.095 });
+                playTone(audioCtx, { type: 'sine', freq: 210, endFreq: 96, delay: 0.02, duration: 0.075, gain: 0.22, attack: 0.004, filterFreq: 800 });
+                break;
+              case 'swipeKeep':
+                playFilteredNoise(audioCtx, { filterType: 'bandpass', freq: 500, endFreq: 1100, q: 1.5, duration: 0.085, gain: 0.09 });
+                playTone(audioCtx, { type: 'sine', freq: 587.33, endFreq: 783.99, delay: 0.015, duration: 0.09, gain: 0.12, attack: 0.008, filterFreq: 2000 });
+                break;
+              case 'swipeArchive':
+                playFilteredNoise(audioCtx, { filterType: 'bandpass', freq: 650, endFreq: 300, q: 1.4, duration: 0.085, gain: 0.08 });
+                playTone(audioCtx, { type: 'sine', freq: 330, endFreq: 240, duration: 0.075, gain: 0.1, attack: 0.008, filterFreq: 1100 });
+                break;
+              case 'delete':
+                playTone(audioCtx, { type: 'sine', freq: 220, endFreq: 118, duration: 0.11, gain: 0.19, attack: 0.006, filterFreq: 750 });
+                break;
+              case 'graphOpen':
+                playTone(audioCtx, { type: 'sine', freq: 587.33, duration: 0.12, gain: 0.14, attack: 0.008, filterFreq: 2100 });
+                playTone(audioCtx, { type: 'triangle', freq: 880.0, delay: 0.05, duration: 0.19, gain: 0.12, attack: 0.01, filterFreq: 2400 });
+                break;
+              case 'mascotOpen':
+                playTone(audioCtx, { type: 'sine', freq: 587.33, endFreq: 659.25, duration: 0.09, gain: 0.13, attack: 0.008, filterFreq: 1900 });
+                playTone(audioCtx, { type: 'sine', freq: 783.99, delay: 0.05, duration: 0.12, gain: 0.11, attack: 0.01, filterFreq: 2100 });
+                break;
+              case 'mascotBye':
+                playTone(audioCtx, { type: 'sine', freq: 783.99, endFreq: 740, duration: 0.11, gain: 0.14, attack: 0.01, filterFreq: 2000 });
+                playTone(audioCtx, { type: 'sine', freq: 659.25, endFreq: 587.33, delay: 0.105, duration: 0.18, gain: 0.12, attack: 0.012, filterFreq: 1800 });
+                break;
+              case 'alert':
+                playTone(audioCtx, { type: 'sine', freq: 880.0, duration: 0.18, gain: 0.11, attack: 0.01, filterFreq: 2400 });
+                playTone(audioCtx, { type: 'sine', freq: 1318.5, delay: 0.06, duration: 0.22, gain: 0.08, attack: 0.012, filterFreq: 2600 });
+                break;
+              case 'recStart':
+                playTone(audioCtx, { type: 'sine', freq: 659.25, endFreq: 783.99, duration: 0.095, gain: 0.14, attack: 0.008, filterFreq: 2000 });
+                break;
+              case 'recStop':
+                playTone(audioCtx, { type: 'sine', freq: 659.25, endFreq: 523.25, duration: 0.1, gain: 0.13, attack: 0.008, filterFreq: 1800 });
+                break;
+            }
+            return true;
+          } catch (_) {
+            return false;
+          }
+        }
+
+        return {
+          cues: SFX_CUES.slice(),
+          play,
+          isEnabled: () => enabled,
+          setEnabled(next) {
+            enabled = Boolean(next);
+            return enabled;
+          },
+          setMasterVolume(vol) {
+            masterVolume = Math.max(0, Math.min(1, Number(vol) || 0));
+            if (masterGain && ctx) {
+              masterGain.gain.setValueAtTime(masterVolume, ctx.currentTime);
+            }
+          },
+          unlock() {
+            return Boolean(ensureContext());
+          },
+        };
+      }
+
+      window.SoundFX = createSoundFXEngine({ enabled: true, masterVolume: 0.42 });
+    })();
+  </script>
+  <script>
+    // =========================================================================
     // STRUCTURED NOTIFICATION ENGINE (Inlined for Gemini Canvas)
     // =========================================================================
     /**
@@ -5251,6 +5660,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
     const CalLogic = window.CalendarProjectsLogic;
     const ProgLogic = window.ProgressSystemLogic;
+    let appBootReady = false;
+    function playSfx(cue, opts) {
+      if (!appBootReady) return false;
+      if (window.SoundFX && typeof window.SoundFX.play === 'function') {
+        return window.SoundFX.play(cue, opts);
+      }
+      return false;
+    }
     const INITIAL_TODAY_DATE = new Date();
     const INITIAL_TODAY_KEY = CalLogic.formatDateKey(INITIAL_TODAY_DATE);
 
@@ -5384,6 +5801,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       profileSettingsOpen: false,
       openSettingsSection: null,
       spatialPanelEnabled: true,
+      sfxEnabled: true,
       notificationsEnabled: true,
       notificationTone: 'sweet',
       topics: [
@@ -5806,6 +6224,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           compartments: state.compartments,
           journalPrompts: state.journalPrompts,
           spatialPanelEnabled: state.spatialPanelEnabled,
+          sfxEnabled: state.sfxEnabled,
           notificationsEnabled: state.notificationsEnabled,
           notificationTone: state.notificationTone,
         };
@@ -5926,6 +6345,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           if (Array.isArray(parsed.compartments) && parsed.compartments.length > 0) state.compartments = parsed.compartments;
           if (Array.isArray(parsed.journalPrompts)) state.journalPrompts = parsed.journalPrompts;
           if (typeof parsed.spatialPanelEnabled === 'boolean') state.spatialPanelEnabled = parsed.spatialPanelEnabled;
+          if (typeof parsed.sfxEnabled === 'boolean') state.sfxEnabled = parsed.sfxEnabled;
           if (typeof parsed.notificationsEnabled === 'boolean') state.notificationsEnabled = parsed.notificationsEnabled;
           if (typeof parsed.notificationTone === 'string') state.notificationTone = parsed.notificationTone;
         }
@@ -6157,6 +6577,40 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function toggleSpatialPanelEnabled(force) {
       state.spatialPanelEnabled = typeof force === 'boolean' ? force : !state.spatialPanelEnabled;
       applySpatialPanelPreference();
+      playSfx('tick');
+      saveState();
+    }
+
+    function applySfxPreference() {
+      const enabled = state.sfxEnabled !== false;
+      if (window.SoundFX && typeof window.SoundFX.setEnabled === 'function') {
+        window.SoundFX.setEnabled(enabled);
+      }
+
+      const toggleBtn = document.getElementById('settings-sfx-toggle');
+      const knob = document.getElementById('settings-sfx-knob');
+      const summary = document.getElementById('settings-sfx-summary');
+
+      if (toggleBtn && knob) {
+        toggleBtn.classList.toggle('bg-coral', enabled);
+        toggleBtn.classList.toggle('border-coral', enabled);
+        toggleBtn.classList.toggle('bg-pillbg', !enabled);
+        toggleBtn.classList.toggle('border-borderline', !enabled);
+        knob.style.transform = enabled ? 'translateX(20px)' : 'translateX(0px)';
+        knob.classList.toggle('bg-appbg', enabled);
+        knob.classList.toggle('bg-secondarytext', !enabled);
+      }
+      if (summary) {
+        summary.textContent = enabled ? 'On • Calm focus acoustics' : 'Off • Silent mode';
+      }
+    }
+
+    function toggleSfxEnabled(force) {
+      state.sfxEnabled = typeof force === 'boolean' ? force : !state.sfxEnabled;
+      applySfxPreference();
+      if (state.sfxEnabled) {
+        playSfx('select', { bypassCooldown: true });
+      }
       saveState();
     }
 
@@ -6357,6 +6811,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       state.selectedDate = CalLogic.formatDateKey(new Date(nextYear, nextMonth, clampedDay));
 
       saveState();
+      playSfx('tick');
       computeSelectedDayRings();
       syncCalendarHeader();
       renderUnifiedCalendar();
@@ -6449,6 +6904,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         return;
       }
       if (!CalLogic.isValidDateKey(dateKey)) return;
+      const changed = state.selectedDate !== dateKey;
       const parsed = CalLogic.parseDateKey(dateKey);
       state.selectedDate = dateKey;
       state.selectedDay = parsed.getDate();
@@ -6460,6 +6916,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         computeSelectedDayRings();
       }
 
+      if (changed) playSfx('tick');
       saveState();
       syncCalendarHeader();
       renderUnifiedCalendar();
@@ -6801,14 +7258,18 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
     }
 
-    function toggleMonthCalendar(forceState) {
+    function toggleMonthCalendar(forceState, opts = {}) {
       const win = getCalendarExpansionWindow();
       if (!win.canExpand) {
         state.monthExpanded = false;
         applyCalendarProgress(0, false);
         return;
       }
+      const prevExpanded = state.monthExpanded;
       state.monthExpanded = typeof forceState === 'boolean' ? forceState : !state.monthExpanded;
+      if (!opts.silent && state.monthExpanded !== prevExpanded) {
+        playSfx(state.monthExpanded ? 'drawerOpen' : 'drawerClose');
+      }
       const hint = document.getElementById('calendar-drag-hint');
       applyCalendarProgress(state.monthExpanded ? 1 : 0, false);
       if (hint) {
@@ -7043,19 +7504,23 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function setCompartmentFilter(filter) {
+      const changed = state.compartmentFilter !== filter;
       const enteringCompleted = filter === 'completed' && state.compartmentFilter !== 'completed';
       state.compartmentFilter = filter;
       state.memoSpikeJustEntered = enteringCompleted;
+      if (changed) playSfx('tick');
       renderCompartmentBar();
       renderTimeline();
     }
 
     function setTimelineViewMode(mode, shouldScrollToday = true) {
       const next = mode === 'projects' ? 'projects' : 'daily';
+      const changed = state.timelineViewMode !== next;
       state.timelineViewMode = next;
       if (next !== 'projects') {
         state.focusedProjectId = null;
       }
+      if (changed) playSfx('tick');
       toggleTimelineFabMenu(false);
       saveState();
       syncCalendarHeader();
@@ -7084,6 +7549,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       // Clicking the already-highlighted project smoothly retracts highlight & glides calendar shut
       if (state.focusedProjectId && String(state.focusedProjectId) === targetId) {
         state.focusedProjectId = null;
+        playSfx('sweepOff');
         const boxes = [...document.querySelectorAll('#unified-calendar-rows [data-timeframe-box]')];
         if (boxes.length > 0) {
           boxes.reverse().forEach((el, idx) => {
@@ -7095,7 +7561,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         }
 
         if (state.monthExpanded) {
-          toggleMonthCalendar(false);
+          toggleMonthCalendar(false, { silent: true });
         } else {
           applyCalendarProgress(0, false);
         }
@@ -7113,6 +7579,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       // Otherwise highlight ONLY this project's timeframe with smooth calendar open + left-to-right spread
       const wasCollapsed = !state.monthExpanded;
       state.focusedProjectId = projectId;
+      playSfx('sweepOn');
       const proj = (state.projects || []).find((p) => String(p.id) === targetId);
       if (proj) {
         const todayKey = getTodayDateKey();
@@ -7223,6 +7690,15 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const cascadeAll = Boolean(state.memoSpikeJustEntered && sheets.length > 0);
       const hasSingleNew = !cascadeAll && state.newlyCompletedTaskId !== null;
       state.memoSpikeJustEntered = false;
+
+      if (cascadeAll) {
+        const stabCount = Math.min(2, sheets.length);
+        for (let i = 0; i < stabCount; i++) {
+          setTimeout(() => playSfx('paperStab'), 140 + i * 115);
+        }
+      } else if (hasSingleNew) {
+        setTimeout(() => playSfx('paperStab'), 160);
+      }
 
       const rodWidth = 4.6;
       const rodLeft = (centerX - rodWidth / 2).toFixed(2);
@@ -7716,11 +8192,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
     function openInspectedMemoPaper(taskId) {
       state.inspectedMemoTaskId = taskId;
+      playSfx('select');
       renderTimeline();
     }
 
     function closeInspectedMemoPaper() {
       state.inspectedMemoTaskId = null;
+      playSfx('tick');
       renderTimeline();
     }
 
@@ -7732,6 +8210,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function deleteInspectedMemoPaper(taskId) {
       state.inspectedMemoTaskId = null;
       state.tasks = state.tasks.filter((t) => t.id !== taskId);
+      playSfx('delete');
       saveState();
       computeSelectedDayRings();
       renderUnifiedCalendar();
@@ -7764,6 +8243,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       cp.done = !cp.done;
       if (cp.done) {
         playBubblePopSfx();
+      } else {
+        playSfx('uncheck');
       }
       saveState();
       renderUnifiedCalendar();
@@ -8647,6 +9128,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
         if (overTrash) {
           state.tasks = state.tasks.filter((t) => t.id !== id);
+          playSfx('delete');
           saveState();
           computeSelectedDayRings();
           renderUnifiedCalendar();
@@ -8677,49 +9159,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     // =========================================================================
     // BUBBLE POP + CONFETTI + SFX + VANISH COMPLETION ANIMATION
     // =========================================================================
-    let sharedAudioCtx = null;
     function playBubblePopSfx() {
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        if (!sharedAudioCtx) sharedAudioCtx = new AudioCtx();
-        if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume();
-
-        const now = sharedAudioCtx.currentTime;
-
-        const popOsc = sharedAudioCtx.createOscillator();
-        const popGain = sharedAudioCtx.createGain();
-        popOsc.type = 'sine';
-        popOsc.frequency.setValueAtTime(320, now);
-        popOsc.frequency.exponentialRampToValueAtTime(980, now + 0.065);
-        popOsc.frequency.exponentialRampToValueAtTime(140, now + 0.13);
-
-        popGain.gain.setValueAtTime(0.001, now);
-        popGain.gain.linearRampToValueAtTime(0.28, now + 0.012);
-        popGain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
-
-        popOsc.connect(popGain);
-        popGain.connect(sharedAudioCtx.destination);
-        popOsc.start(now);
-        popOsc.stop(now + 0.15);
-
-        [659.25, 987.77].forEach((freq, idx) => {
-          const chimeOsc = sharedAudioCtx.createOscillator();
-          const chimeGain = sharedAudioCtx.createGain();
-          const startAt = now + 0.045 + idx * 0.045;
-          chimeOsc.type = 'triangle';
-          chimeOsc.frequency.setValueAtTime(freq, startAt);
-
-          chimeGain.gain.setValueAtTime(0.001, startAt);
-          chimeGain.gain.linearRampToValueAtTime(0.11, startAt + 0.015);
-          chimeGain.gain.exponentialRampToValueAtTime(0.001, startAt + 0.24);
-
-          chimeOsc.connect(chimeGain);
-          chimeGain.connect(sharedAudioCtx.destination);
-          chimeOsc.start(startAt);
-          chimeOsc.stop(startAt + 0.25);
-        });
-      } catch (_) {}
+      playSfx('complete');
     }
 
     function toggleTaskDone(id) {
@@ -8753,6 +9194,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (currentlyDone) {
         applyDoneFlag(false);
         if (state.newlyCompletedTaskId === id) state.newlyCompletedTaskId = null;
+        playSfx('uncheck');
         saveState();
         computeSelectedDayRings();
         renderUnifiedCalendar();
@@ -9145,6 +9587,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
 
       saveState();
+      playSfx('create');
       closeProjectModal();
       renderUnifiedCalendar();
       setTimelineViewMode('projects', true);
@@ -9161,6 +9604,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         state.focusedProjectId = null;
       }
       state.editingProjectId = null;
+      playSfx('delete');
       saveState();
       closeProjectModal();
       renderUnifiedCalendar();
@@ -9747,6 +10191,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
 
       saveState();
+      playSfx('create');
       computeSelectedDayRings();
       renderUnifiedCalendar();
       renderTimeline();
@@ -9776,6 +10221,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         added: 'Just now',
       });
       input.value = '';
+      playSfx('create');
       saveState();
       renderInboxDeck();
     }
@@ -9787,8 +10233,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       if (direction === 'right') {
         state.unscheduledQueue.unshift({ id: Date.now(), text: topItem.text });
+        playSfx('swipeKeep');
       } else {
         state.archivedDumps.unshift({ ...topItem, archivedAt: 'Just now' });
+        playSfx('swipeArchive');
       }
       saveState();
       renderInboxDeck();
@@ -9806,6 +10254,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         state.archivedDumps = state.archivedDumps.filter((a) => a.id !== last.item.id);
       }
       state.inboxItems.unshift(last.item);
+      playSfx('select');
       saveState();
       renderInboxDeck();
     }
@@ -9815,6 +10264,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (idx < 0) return;
       const [item] = state.archivedDumps.splice(idx, 1);
       state.inboxItems.unshift(item);
+      playSfx('select');
       saveState();
       renderInboxDeck();
     }
@@ -10062,6 +10512,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       } else {
         habit.completedDays = Math.max(0, habit.completedDays - 1);
         if (habit.history && habit.history.length > 0) habit.history[habit.history.length - 1] = 0;
+        playSfx('uncheck');
       }
       saveState();
       renderHabits();
@@ -10221,6 +10672,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       });
 
       saveState();
+      playSfx('create');
       closeHabitModal();
       renderHabits();
     }
@@ -10598,6 +11050,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       });
 
       mt.note = '';
+      playSfx('create');
       closeJournalToolModal('mood');
       renderJournalView();
     }
@@ -10741,6 +11194,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       renderProfileEnergyBars();
 
       et.note = '';
+      playSfx('create');
       closeJournalToolModal('energy');
       renderJournalView();
     }
@@ -11022,6 +11476,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         ex.act.committedAction = '';
       }
 
+      playSfx('create');
       closeJournalToolModal('exercise');
       renderJournalView();
     }
@@ -11334,8 +11789,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function openProfileSubView(viewName) {
+      const changed = state.profileSubView !== viewName;
       state.profileSubView = viewName;
       state.profileSettingsOpen = viewName === 'settings';
+      if (changed) playSfx('tick');
       if (viewName !== 'topics') {
         state.activeTopicId = null;
         state.topicNavPath = [];
@@ -11370,6 +11827,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         renderSettingsThemeControls();
         renderCompartmentEditors();
         applySpatialPanelPreference();
+        applySfxPreference();
         renderNotificationSettingsControls();
       }
       if (viewName === 'main') {
@@ -11602,6 +12060,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         routine.expanded = true;
       }
       state.routineAddModalOpen = false;
+      playSfx('create');
       syncRoutinesFabVisibility();
       syncProfileActionCounts();
       renderProfileRoutines();
@@ -11890,19 +12349,23 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       });
 
       state.topicAddModalOpen = false;
+      playSfx(cat === 'achievement' ? 'levelUp' : 'create');
       syncTopicDetailFabVisibility();
       const updatedCtx = getActiveTopicContext();
       if (updatedCtx) renderTopicDetailView(updatedCtx.activeNode, updatedCtx.chain);
     }
 
     function setTopicDetailTab(tabName) {
+      const changed = state.activeTopicTab !== tabName;
       state.activeTopicTab = tabName;
+      if (changed) playSfx('tick');
       const ctx = getActiveTopicContext();
       if (ctx) renderTopicDetailView(ctx.activeNode, ctx.chain);
     }
 
     function closeTopicDetail() {
       state.topicAddModalOpen = false;
+      playSfx('tick');
       if (Array.isArray(state.topicNavPath) && state.topicNavPath.length > 1) {
         state.topicNavPath = state.topicNavPath.slice(0, -1);
         const ctx = getActiveTopicContext();
@@ -11942,6 +12405,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       state.activeResourceCategory = 'All';
       state.topicAddModalOpen = false;
       window.__topicGraphRuntime = null;
+      playSfx('graphOpen');
       renderProfileTopics();
     }
 
@@ -11956,6 +12420,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       state.selectedBranchId = null;
       state.selectedGraphPath = null;
       window.__topicGraphRuntime = null;
+      playSfx('tick');
       const ctx = getActiveTopicContext();
       if (ctx) {
         renderTopicDetailView(ctx.activeNode, ctx.chain);
@@ -11974,6 +12439,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       });
       state.selectedGraphPath = null;
       window.__topicGraphRuntime = null;
+      playSfx('delete');
       const ctx = getActiveTopicContext();
       if (ctx) renderTopicDetailView(ctx.activeNode, ctx.chain);
     }
@@ -11986,6 +12452,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const order = ['locked', 'unlocked', 'mastered'];
       const idx = order.indexOf(node.status || 'unlocked');
       node.status = order[(idx + 1) % order.length];
+      playSfx(node.status === 'mastered' ? 'complete' : 'select');
       saveState();
       const ctx = getActiveTopicContext();
       if (ctx) renderTopicDetailView(ctx.activeNode, ctx.chain);
@@ -12007,6 +12474,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const rt = window.__topicGraphRuntime;
       if (!rt) return;
       rt.zoom = Math.max(0.55, Math.min(2.2, Number((rt.zoom + delta).toFixed(2))));
+      playSfx('tick');
       applyTopicGraphViewportTransform();
     }
 
@@ -12016,6 +12484,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       rt.zoom = 1;
       rt.panX = 0;
       rt.panY = 0;
+      playSfx('tick');
       applyTopicGraphViewportTransform();
     }
 
@@ -12150,6 +12619,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             } else {
               state.selectedGraphPath = node.pathIds.slice();
               state.selectedBranchId = node.id;
+              playSfx('select');
               const ctx = getActiveTopicContext();
               if (ctx) renderTopicDetailView(ctx.activeNode, ctx.chain);
             }
@@ -13389,11 +13859,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const branch = findBranchRecursively(topic, branchId);
       const drill = branch?.drills.find((d) => d.id === drillId);
       if (!drill) return;
+      const beforeLvl = ProgLogic.computeTopicProgress(ctx.rootTopic).level;
       drill.done = !drill.done;
       if (drill.done) drill.count = (drill.count || 0) + 1;
       if (branch && branch.drills.length > 0 && branch.drills.every((d) => d.done)) {
         branch.status = 'mastered';
       }
+      const afterLvl = ProgLogic.computeTopicProgress(ctx.rootTopic).level;
+      playSfx(afterLvl > beforeLvl ? 'levelUp' : drill.done ? 'complete' : 'uncheck');
       saveState();
       renderTopicDetailView(topic, ctx.chain);
     }
@@ -13404,8 +13877,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const branch = findBranchRecursively(topic, branchId);
       const drill = branch?.drills.find((d) => d.id === drillId);
       if (!drill) return;
+      const beforeLvl = ProgLogic.computeTopicProgress(ctx.rootTopic).level;
       drill.count = (drill.count || 0) + 1;
       drill.done = true;
+      const afterLvl = ProgLogic.computeTopicProgress(ctx.rootTopic).level;
+      playSfx(afterLvl > beforeLvl ? 'levelUp' : 'complete');
       saveState();
       renderTopicDetailView(topic, ctx.chain);
     }
@@ -13416,6 +13892,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const branch = findBranchRecursively(topic, branchId);
       if (!branch) return;
       branch.drills = branch.drills.filter((d) => d.id !== drillId);
+      playSfx('delete');
       saveState();
       renderTopicDetailView(topic, ctx.chain);
     }
@@ -13426,10 +13903,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const mod = topic?.milestones.find((m) => m.id === moduleId);
       const les = mod?.lessons.find((l) => l.id === lessonId);
       if (!les) return;
+      const beforeLvl = ProgLogic.computeTopicProgress(ctx.rootTopic).level;
       recordProgressMutation(() => {
         les.done = !les.done;
         mod.done = mod.lessons.length > 0 && mod.lessons.every((l) => l.done);
       });
+      const afterLvl = ProgLogic.computeTopicProgress(ctx.rootTopic).level;
+      playSfx(afterLvl > beforeLvl ? 'levelUp' : les.done ? 'complete' : 'uncheck');
       renderTopicDetailView(topic, ctx.chain);
     }
 
@@ -13446,6 +13926,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         mod.lessons.push({ id: `l-${Date.now()}`, title, done: false });
         mod.done = mod.lessons.length > 0 && mod.lessons.every((l) => l.done);
       });
+      playSfx('create');
       renderTopicDetailView(topic, ctx.chain);
     }
 
@@ -13458,6 +13939,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         mod.lessons = mod.lessons.filter((l) => l.id !== lessonId);
         mod.done = mod.lessons.length > 0 && mod.lessons.every((l) => l.done);
       });
+      playSfx('delete');
       renderTopicDetailView(topic, ctx.chain);
     }
 
@@ -13467,6 +13949,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const ach = topic?.achievements.find((item) => item.id === achId);
       if (!ach) return;
       ach.unlocked = !ach.unlocked;
+      playSfx(ach.unlocked ? 'levelUp' : 'uncheck');
       saveState();
       renderTopicDetailView(topic, ctx.chain);
     }
@@ -13477,6 +13960,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const res = topic?.resources.find((item) => item.id === resId);
       if (!res) return;
       res.done = !res.done;
+      playSfx(res.done ? 'complete' : 'uncheck');
       saveState();
       renderTopicDetailView(topic, ctx.chain);
     }
@@ -13493,6 +13977,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         topic[collectionKey] = topic[collectionKey].filter((item) => item.id !== itemId);
         saveState();
       }
+      playSfx('delete');
       renderTopicDetailView(topic, ctx.chain);
     }
 
@@ -13532,6 +14017,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       });
       input.value = '';
       state.newTopicModalOpen = false;
+      playSfx('create');
       openTopicDetail(newTopic.id);
     }
 
@@ -13539,6 +14025,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const topic = state.topics.find((t) => t.id === id);
       if (!topic) return;
       topic.pinned = !topic.pinned;
+      playSfx('tick');
       saveState();
       renderProfileTopics();
     }
@@ -13552,6 +14039,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           state.topicAddModalOpen = false;
         }
       });
+      playSfx('delete');
       renderProfileTopics();
     }
 
@@ -13612,6 +14100,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         ready: true,
       });
       saveState();
+      playSfx('create');
       input.value = '';
       if (catInput) catInput.value = '';
       state.inventoryAddModalOpen = false;
@@ -13624,12 +14113,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const item = state.inventoryItems.find((i) => i.id === id);
       if (!item) return;
       item.ready = !item.ready;
+      playSfx(item.ready ? 'select' : 'uncheck');
       renderProfileInventory();
       saveState();
     }
 
     function removeInventoryItem(id) {
       state.inventoryItems = state.inventoryItems.filter((i) => i.id !== id);
+      playSfx('delete');
       syncProfileActionCounts();
       renderProfileInventory();
       saveState();
@@ -13752,11 +14243,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const r = state.routines.find((item) => item.id === id);
       if (!r) return;
       r.expanded = !r.expanded;
+      playSfx('tick');
       renderProfileRoutines();
     }
 
     function removeRoutine(id) {
       state.routines = state.routines.filter((item) => item.id !== id);
+      playSfx('delete');
       syncProfileActionCounts();
       renderProfileRoutines();
       saveState();
@@ -13771,6 +14264,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       r.steps.push({ id: `rs-${Date.now()}`, title, duration: '', done: false });
       input.value = '';
+      playSfx('create');
       renderProfileRoutines();
       saveState();
     }
@@ -13780,6 +14274,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const step = r?.steps.find((s) => s.id === stepId);
       if (!step) return;
       step.done = !step.done;
+      const allDone = step.done && Array.isArray(r.steps) && r.steps.length > 0 && r.steps.every((s) => s.done);
+      playSfx(allDone ? 'levelUp' : step.done ? 'complete' : 'uncheck');
       renderProfileRoutines();
       saveState();
     }
@@ -13788,6 +14284,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const r = state.routines.find((item) => item.id === routineId);
       if (!r) return;
       r.steps = r.steps.filter((s) => s.id !== stepId);
+      playSfx('delete');
       renderProfileRoutines();
       saveState();
     }
@@ -13887,7 +14384,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function switchBottomTab(tab) {
+      const changed = state.activeTab !== tab;
       state.activeTab = tab;
+      if (changed) playSfx('tick');
       toggleJournalFabMenu(false);
       toggleTimelineFabMenu(false);
 
@@ -14356,7 +14855,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       renderHorizonView();
       switchBottomTab('timeline');
       applySpatialPanelPreference();
+      applySfxPreference();
       renderNotificationSettingsControls();
+      appBootReady = true;
 
       if (state.notificationsEnabled && window.StructuredNotificationEngine) {
         window.StructuredNotificationEngine.requestPermissions().then(() => {
@@ -14486,8 +14987,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         bubbleWrap.style.transform = `translate3d(${sp.bubbleX}px, ${sp.bubbleY}px, 0)`;
       }
 
-      function setMode(mode, coords = null) {
+      function setMode(mode, coords = null, opts = {}) {
+        const prevMode = sp.mode;
         sp.mode = mode;
+        if (!opts.silent && prevMode !== mode && (mode === 'drawer' || mode === 'bubble')) {
+          playSfx('mascotOpen');
+        }
         sp.wheelOpen = false;
         bubbleWrap.classList.remove('wheel-active');
         bubbleCore.classList.remove('wheel-open');
@@ -14535,12 +15040,16 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         collapseIsland();
         toggleWheel(false);
         closePopover();
-        setMode('docked');
+        setMode('docked', null, { silent: true });
       };
 
       function toggleWheel(force = null) {
+        const prevOpen = sp.wheelOpen;
         const next = force !== null ? force : !sp.wheelOpen;
         sp.wheelOpen = next;
+        if (next !== prevOpen) {
+          playSfx(next ? 'select' : 'tick');
+        }
         if (next) {
           collapseIsland();
           clearTextHighlight();
@@ -14561,8 +15070,45 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         }
       }
 
+      let byeBubbleTimer = null;
+      let dismissByeTimer = null;
+
+      function showMascotByeBubble(anchorRect, placement = 'top') {
+        if (!anchorRect || (anchorRect.width === 0 && anchorRect.height === 0)) return;
+        playSfx('mascotBye');
+        const existing = document.getElementById('spatial-mascot-bye-bubble');
+        if (existing) existing.remove();
+        if (byeBubbleTimer) clearTimeout(byeBubbleTimer);
+
+        const el = document.createElement('div');
+        el.id = 'spatial-mascot-bye-bubble';
+        el.setAttribute('role', 'status');
+        el.setAttribute('aria-live', 'polite');
+        el.className = `mascot-bye-bubble ${placement === 'left' ? 'tail-right' : 'tail-bottom'}`;
+        el.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-[#F28B82] shrink-0"></span><span>Bye bye!</span>`;
+
+        if (placement === 'left') {
+          const left = clampVal(anchorRect.left - 82, 12, window.innerWidth - 96);
+          const top = clampVal(anchorRect.top + anchorRect.height / 2, 26, window.innerHeight - 26);
+          el.style.left = `${left.toFixed(1)}px`;
+          el.style.top = `${top.toFixed(1)}px`;
+        } else {
+          const cx = clampVal(anchorRect.left + anchorRect.width / 2, 52, window.innerWidth - 52);
+          const top = clampVal(anchorRect.top - 36, 14, window.innerHeight - 54);
+          el.style.left = `${cx.toFixed(1)}px`;
+          el.style.top = `${top.toFixed(1)}px`;
+        }
+
+        document.body.appendChild(el);
+        byeBubbleTimer = setTimeout(() => {
+          byeBubbleTimer = null;
+          el.remove();
+        }, 1100);
+      }
+
       function dismissBubble() {
-        if (sp.mode !== 'bubble') return;
+        if (sp.mode !== 'bubble' || sp.isDismissing) return;
+        sp.isDismissing = true;
         if (wispr.active) stopHoldVoice(true);
         collapseIsland();
         toggleWheel(false);
@@ -14570,8 +15116,22 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         clearTextHighlight();
         dismissTarget.classList.remove('visible', 'over-target');
         bubbleCore.classList.remove('over-dismiss');
-        bubbleWrap.classList.add('dismissing');
-        setTimeout(() => setMode('docked'), 230);
+
+        const rect = bubbleCore.getBoundingClientRect();
+        showMascotByeBubble(rect, 'top');
+        bubbleCore.classList.remove('saying-bye');
+        void bubbleCore.offsetWidth;
+        bubbleCore.classList.add('saying-bye');
+
+        clearTimeout(dismissByeTimer);
+        dismissByeTimer = setTimeout(() => {
+          bubbleCore.classList.remove('saying-bye');
+          bubbleWrap.classList.add('dismissing');
+          dismissByeTimer = setTimeout(() => {
+            sp.isDismissing = false;
+            setMode('docked');
+          }, 230);
+        }, 620);
       }
 
       /* Dynamic Island Rectangular Card */
@@ -14590,9 +15150,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
         if (sp.mode !== 'bubble') {
           const anchorY = (sp.handleTopPct / 100) * window.innerHeight;
-          setMode('bubble', { x: window.innerWidth - 190, y: anchorY });
+          setMode('bubble', { x: window.innerWidth - 190, y: anchorY }, { silent: true });
         }
         if (sp.wheelOpen) toggleWheel(false);
+        playSfx('alert');
 
         sp.islandActive = true;
         sp.islandHandler = onAction;
@@ -14691,7 +15252,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       let handleDrag = null;
       edgeHandle.addEventListener('pointerdown', (e) => {
         e.preventDefault();
-        edgeHandle.setPointerCapture(e.pointerId);
+        try { edgeHandle.setPointerCapture(e.pointerId); } catch (_) {}
         const rect = edgeHandle.getBoundingClientRect();
         handleDrag = { id: e.pointerId, startX: e.clientX, startY: e.clientY, origTop: rect.top, mode: null, inward: 0 };
       });
@@ -14757,7 +15318,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
       edgeHandle.addEventListener('pointerup', endHandleDrag);
       edgeHandle.addEventListener('pointercancel', endHandleDrag);
-      edgeBackdrop?.addEventListener('click', () => setMode('docked'));
+      edgeBackdrop?.addEventListener('click', () => {
+        if (sp.mode === 'drawer' && mascotStage) {
+          showMascotByeBubble(mascotStage.getBoundingClientRect(), 'left');
+        }
+        setMode('docked');
+      });
       edgePopoutBtn?.addEventListener('click', (e) => {
         e.stopPropagation();
         const r = edgePopoutBtn.getBoundingClientRect();
@@ -14784,6 +15350,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       function startHoldVoice() {
         if (wispr.active) return;
         wispr.active = true;
+        playSfx('recStart');
         wispr.start = Date.now();
         wispr.transcript = '';
         if (sp.wheelOpen) toggleWheel(false);
@@ -14816,6 +15383,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       function stopHoldVoice(cancelled = false) {
         if (!wispr.active) return;
         wispr.active = false;
+        playSfx('recStop');
         cancelAnimationFrame(wispr.raf);
         clearInterval(wispr.timer);
         if (wispr.rec) { try { wispr.rec.stop(); } catch (_) {} wispr.rec = null; }
@@ -14851,7 +15419,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       bubbleCore.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        bubbleCore.setPointerCapture(e.pointerId);
+        try { bubbleCore.setPointerCapture(e.pointerId); } catch (_) {}
         const obj = { id: e.pointerId, startX: e.clientX, startY: e.clientY, origX: sp.bubbleX, origY: sp.bubbleY, moved: false, overDismiss: false, holdTimer: null, startedRec: false };
         if (!wispr.active) {
           obj.holdTimer = setTimeout(() => {
