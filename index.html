@@ -11975,8 +11975,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         `
         : '';
 
+      const hiddenStyle = options.hidden ? ' opacity: 0;' : '';
+
       return `
-        <article ${cardAttr} ${isStale ? 'data-habit-stale="true"' : ''} class="relative rounded-[22px] p-[2.5px] transition-all duration-300 ${staleCardCls}" style="${borderProgressStyle}">
+        <article ${cardAttr} ${isStale ? 'data-habit-stale="true"' : ''} class="relative rounded-[22px] p-[2.5px] ${staleCardCls}" style="${borderProgressStyle}${hiddenStyle}">
           ${divisionTicksHtml}
           <div class="rounded-[19.5px] bg-cardbg p-3.5 space-y-3">
             <div class="flex items-center justify-between gap-2.5">
@@ -11985,15 +11987,15 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 ${interactive ? `onclick="openHabitHistoryModal(${h.id})"` : 'tabindex="-1"'}
                 class="tactile-btn flex items-center gap-2.5 min-w-0 flex-1 text-left"
               >
-                <span class="w-10 h-10 rounded-xl ${isStale ? 'bg-pillbg text-mutedtext border border-borderline' : 'bg-coral text-onaccent'} flex items-center justify-center flex-shrink-0">
+                <span data-habit-icon-box="${h.id}" class="w-10 h-10 rounded-xl ${isStale ? 'bg-pillbg text-mutedtext border border-borderline' : 'bg-coral text-onaccent'} flex items-center justify-center flex-shrink-0">
                   ${ICONS[h.icon] || ICONS.spark}
                 </span>
                 <div class="min-w-0">
-                  <p class="font-display text-[15px] font-bold tracking-tight ${isStale ? 'text-secondarytext' : 'text-primarytext'} truncate leading-snug">${escapeHtml(h.title)}</p>
+                  <p data-habit-title="${h.id}" class="font-display text-[15px] font-bold tracking-tight ${isStale ? 'text-secondarytext' : 'text-primarytext'} truncate leading-snug">${escapeHtml(h.title)}</p>
                   <p class="text-[11.5px] text-secondarytext tabular-nums truncate">
                     <span>${escapeHtml(h.timeLabel)}</span>
                     <span aria-hidden="true"> · </span>
-                    ${progressSummaryHtml}
+                    <span data-habit-summary="${h.id}">${progressSummaryHtml}</span>
                   </p>
                 </div>
               </button>
@@ -12001,7 +12003,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               ${punchBtnHtml}
             </div>
 
-            <div class="grid grid-cols-7 gap-y-2 gap-x-1 pt-0.5 pb-0.5">
+            <div data-habit-slots-grid="${h.id}" class="grid grid-cols-7 gap-y-2 gap-x-1 pt-0.5 pb-0.5">
               ${slotsHtml}
             </div>
           </div>
@@ -12009,7 +12011,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       `;
     }
 
-    function renderHabits() {
+    function renderHabits(hiddenHabitId = null) {
       const container = document.getElementById('habit-list-container');
       if (!container) return;
 
@@ -12036,7 +12038,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       });
 
       container.innerHTML = indexed
-        .map(({ habit }) => renderHabitPunchCardMarkup(habit, { interactive: true }))
+        .map(({ habit }) =>
+          renderHabitPunchCardMarkup(habit, {
+            interactive: true,
+            hidden: hiddenHabitId !== null && habit.id === hiddenHabitId,
+          })
+        )
         .join('');
     }
 
@@ -12575,7 +12582,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       toolAnchor.style.top = `${Math.round(scaledSlotY - tipY)}px`;
       toolAnchor.style.transform = `translate3d(${slideOffsetX}px, 0, 0)`;
 
-      // Start FLIP at source card rect and hide original list card
+      // Start FLIP at source card rect and hide original list card on frame 0 (no 2-card ghosting)
+      sourceCard.style.transition = 'none';
       sourceCard.style.opacity = '0';
       elevatedWrap.style.transition = 'none';
       elevatedWrap.style.transform = `translate3d(${startDx}px, ${startDy}px, 0) scale(${startScaleX}, ${startScaleY})`;
@@ -12599,19 +12607,49 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         toolSvg.classList.add('is-clamped');
       }, 560);
 
-      // Phase 4 (635ms): Exact punch-through impact — card micro-recoil, SFX, dark recessed hole, falling chad
+      // Phase 4 (635ms): Exact punch-through impact — patch clone in-place (preserves GPU layer, zero DOM rebuild blink)
       setTimeout(() => {
-        const todayDayNum = CalLogic.parseDateKey(todayKey).getDate();
-
         commitHabitToggleState(habit, true);
         playSfx('holePunch', { bypassCooldown: true });
 
         if (recoilWrap) {
-          recoilWrap.innerHTML = renderHabitPunchCardMarkup(habit, { interactive: false, justPunched: true });
-          const updatedClone = recoilWrap.querySelector('article');
-          if (updatedClone) {
-            updatedClone.style.boxShadow = '0 22px 46px rgba(0, 0, 0, 0.55)';
+          const cloneArticle = recoilWrap.querySelector('article');
+          const { slots, masteryDays, completedDays } = computeHabitPunchSlots(habit);
+          const pct = Math.min(100, Math.round((completedDays / Math.max(1, masteryDays)) * 100));
+          const fillColor = 'rgb(var(--color-accent))';
+          const trackColor = 'rgb(var(--color-borderline) / 0.85)';
+
+          if (cloneArticle) {
+            cloneArticle.classList.remove('opacity-60', 'grayscale');
+            cloneArticle.removeAttribute('data-habit-stale');
+            cloneArticle.style.background = `linear-gradient(90deg, ${fillColor} 0%, ${fillColor} ${pct}%, ${trackColor} ${pct}%, ${trackColor} 100%)`;
+
+            const iconBox = cloneArticle.querySelector(`[data-habit-icon-box="${habit.id}"]`);
+            if (iconBox) {
+              iconBox.classList.remove('bg-pillbg', 'text-mutedtext', 'border', 'border-borderline');
+              iconBox.classList.add('bg-coral', 'text-onaccent');
+            }
+            const titleEl = cloneArticle.querySelector(`[data-habit-title="${habit.id}"]`);
+            if (titleEl) {
+              titleEl.classList.remove('text-secondarytext');
+              titleEl.classList.add('text-primarytext');
+            }
+            const summaryEl = cloneArticle.querySelector(`[data-habit-summary="${habit.id}"]`);
+            if (summaryEl) {
+              summaryEl.innerHTML = formatHabitProgressSummaryHtml(completedDays, masteryDays, false);
+            }
+            const btnEl = cloneArticle.querySelector(`[data-habit-punch-btn="${habit.id}"]`);
+            if (btnEl) {
+              btnEl.outerHTML = `<button type="button" tabindex="-1" data-habit-punch-btn="${habit.id}" class="tactile-btn px-3 py-1.5 rounded-xl bg-pillbg border border-borderline text-[11px] font-semibold text-secondarytext whitespace-nowrap shrink-0 flex items-center gap-1"><svg class="w-3 h-3 text-coral" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Punched</span></button>`;
+            }
+            const gridEl = cloneArticle.querySelector(`[data-habit-slots-grid="${habit.id}"]`);
+            if (gridEl) {
+              gridEl.innerHTML = slots
+                .map((slot) => renderHabitPunchSlotHtml(habit, slot, { interactive: false, justPunched: true, isStale: false }))
+                .join('');
+            }
           }
+
           recoilWrap.classList.remove('punch-card-recoil');
           void recoilWrap.offsetWidth;
           recoilWrap.classList.add('punch-card-recoil');
@@ -12632,19 +12670,20 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         toolAnchor.style.opacity = '0';
       }, 880);
 
-      // Phase 7 (1200ms): Re-render list silently and glide the punched card smoothly back into its list slot
+      // Phase 7 (1200ms): Re-render list with destination card born hidden (opacity: 0), then glide clone cleanly into slot
       setTimeout(() => {
-        renderHabits();
+        renderHabits(habitId);
         const destCard = document.querySelector(`[data-habit-card-id="${habitId}"]`);
         if (destCard) {
-          destCard.style.opacity = '0';
           const destRect = destCard.getBoundingClientRect();
           const endDx = destRect.left - targetRect.left + (destRect.width - targetRect.width) / 2;
           const endDy = destRect.top - targetRect.top + (destRect.height - targetRect.height) / 2;
           const endScaleX = destRect.width / Math.max(1, targetRect.width);
           const endScaleY = destRect.height / Math.max(1, targetRect.height);
 
-          backdrop.classList.remove('is-visible');
+          if (!hasHabitMissedDayGap) {
+            backdrop.classList.remove('is-visible');
+          }
           elevatedWrap.style.transition = 'transform 280ms cubic-bezier(0.22, 1, 0.36, 1)';
           elevatedWrap.style.transform = `translate3d(${endDx}px, ${endDy}px, 0) scale(${endScaleX}, ${endScaleY})`;
           const finalClone = recoilWrap ? recoilWrap.querySelector('article') : null;
@@ -12657,29 +12696,34 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         }
       }, 1200);
 
-      // Phase 8 (1500ms): Clean up overlay, reveal list card, then play habit tear-off calendar only if >= 1 day was missed
+      // Phase 8 (1500ms): Reveal real list card underneath and wait two paint frames before clearing overlay (zero blink)
       setTimeout(() => {
         const destCard = document.querySelector(`[data-habit-card-id="${habitId}"]`);
-        if (destCard) destCard.style.opacity = '';
-        overlay.classList.add('hidden');
-        overlay.classList.remove('pointer-events-auto');
-        overlay.classList.add('pointer-events-none');
-        stage.innerHTML = '';
-        chadLayer.innerHTML = '';
-        toolAnchor.classList.remove('is-retracting');
-        habitPunchAnimActive = false;
-
-        if (hasHabitMissedDayGap) {
-          setTimeout(() => {
-            playCalendarTearOffAnimation({
-              mode: 'habit',
-              fromDateKey: prevHabitCompletedKey,
-              toDateKey: todayKey,
-              habitTitle: habit.title,
-              habitIcon: habit.icon,
-            });
-          }, 90);
+        if (destCard) {
+          destCard.style.transition = 'none';
+          destCard.style.opacity = '1';
         }
+        if (hasHabitMissedDayGap) {
+          playCalendarTearOffAnimation({
+            mode: 'habit',
+            fromDateKey: prevHabitCompletedKey,
+            toDateKey: todayKey,
+            habitTitle: habit.title,
+            habitIcon: habit.icon,
+          });
+        }
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            backdrop.classList.remove('is-visible');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('pointer-events-auto');
+            overlay.classList.add('pointer-events-none');
+            stage.innerHTML = '';
+            chadLayer.innerHTML = '';
+            toolAnchor.classList.remove('is-retracting');
+            habitPunchAnimActive = false;
+          });
+        });
       }, 1500);
     }
 
