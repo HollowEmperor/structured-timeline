@@ -318,7 +318,10 @@
       --punch-hole-rim-light: rgba(255, 255, 255, 0.06);
       --punch-overlay-scrim: rgba(8, 8, 10, 0.62);
       --modal-scrim: rgba(8, 8, 10, 0.6);
-      --fab-shadow: 0 12px 26px rgba(0, 0, 0, 0.46);
+      --fab-shadow: 0 3px 10px rgba(0, 0, 0, 0.22);
+      --popover-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+      --surface-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.16);
+      --surface-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.18);
     }
     html[data-theme="paper"] {
       --punch-hole-shadow-top: rgba(28, 25, 23, 0.24);
@@ -326,13 +329,19 @@
       --punch-hole-rim-light: rgba(255, 255, 255, 0.72);
       --punch-overlay-scrim: rgba(24, 22, 20, 0.42);
       --modal-scrim: rgba(28, 25, 23, 0.32);
-      --fab-shadow: 0 10px 22px rgba(28, 25, 23, 0.2);
+      --fab-shadow: 0 3px 10px rgba(28, 25, 23, 0.12);
+      --popover-shadow: 0 6px 16px rgba(28, 25, 23, 0.09);
+      --surface-shadow-sm: 0 2px 8px rgba(28, 25, 23, 0.08);
+      --surface-shadow-md: 0 4px 12px rgba(28, 25, 23, 0.1);
     }
     .theme-modal-scrim {
       background-color: var(--modal-scrim);
     }
     .theme-fab-shadow {
       box-shadow: var(--fab-shadow);
+    }
+    .theme-popover-shadow {
+      box-shadow: var(--popover-shadow);
     }
     select option {
       background-color: rgb(var(--color-cardbg));
@@ -536,37 +545,12 @@
         opacity: 0;
       }
     }
-    @keyframes calPaperSheenSweep {
-      0% {
-        transform: translateX(-115%) skewX(-16deg);
-        opacity: 0;
-      }
-      30% {
-        opacity: 0.45;
-      }
-      75% {
-        opacity: 0.28;
-      }
-      100% {
-        transform: translateX(135%) skewX(-16deg);
-        opacity: 0;
-      }
-    }
     .cal-tear-sheet-ripping {
       transform-origin: 100% 0%;
       transform-style: preserve-3d;
       will-change: transform, opacity;
       pointer-events: none;
       animation: calSheetRipAway var(--tear-dur, 580ms) cubic-bezier(0.24, 0.08, 0.22, 1) forwards;
-    }
-    .cal-tear-sheet-ripping::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 0 0 16px 16px;
-      pointer-events: none;
-      background: linear-gradient(105deg, transparent 22%, rgba(255, 255, 255, 0.22) 48%, rgba(0, 0, 0, 0.14) 56%, transparent 78%);
-      animation: calPaperSheenSweep var(--tear-dur, 580ms) ease-out forwards;
     }
     @keyframes calPadLandingSettle {
       0% { transform: scale(1); }
@@ -611,7 +595,7 @@
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgb(var(--color-borderline));
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.24);
+      box-shadow: var(--popover-shadow);
     }
 
     #spatial-edge-handle {
@@ -685,7 +669,7 @@
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1.5px solid rgb(var(--color-borderline));
-      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.24);
+      box-shadow: var(--surface-shadow-md);
       transform: translate(120%, -50%) scale(0.92);
       transition: transform 0.34s var(--spring-ease), opacity 0.22s ease;
       pointer-events: none;
@@ -724,7 +708,7 @@
       border-radius: 9999px;
       background: rgb(var(--color-cardbg));
       border: 1.5px solid rgb(var(--color-borderline));
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+      box-shadow: var(--surface-shadow-sm);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -760,7 +744,7 @@
       border-radius: 9999px;
       background: rgb(var(--color-cardbg));
       border: 1px solid rgb(var(--color-borderline));
-      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.14);
+      box-shadow: var(--surface-shadow-sm);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -808,7 +792,7 @@
       color: rgb(var(--color-primarytext));
       background: rgb(var(--color-cardbg));
       border: 1px solid rgb(var(--color-borderline));
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.32);
+      box-shadow: var(--popover-shadow);
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.16s ease, transform 0.16s ease;
@@ -838,7 +822,7 @@
       border-radius: 9999px;
       background: rgb(var(--color-cardbg));
       border: 1.5px solid rgb(var(--color-borderline));
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.26);
+      box-shadow: var(--surface-shadow-sm);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -855,7 +839,7 @@
     .spatial-bubble-core.wheel-open {
       background: rgb(var(--color-accent));
       border-color: rgb(var(--color-accent));
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.28);
+      box-shadow: var(--surface-shadow-sm);
     }
 
     .spatial-bubble-core.island-active {
@@ -865,7 +849,7 @@
       border-radius: 20px;
       background: rgb(var(--color-sheetbg));
       border: 1px solid rgb(var(--color-borderline));
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+      box-shadow: var(--surface-shadow-md);
       cursor: pointer;
     }
     .spatial-bubble-core.island-active.island-expanded {
@@ -960,7 +944,7 @@
       transform: translate(0, 0) scale(0.3);
       transition: transform 0.38s var(--spring-ease), opacity 0.22s ease, background 0.18s ease;
       z-index: 3;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.24);
+      box-shadow: var(--surface-shadow-sm);
     }
     .wheel-active .spatial-radial-btn {
       opacity: 1;
@@ -1013,7 +997,7 @@
       justify-content: center;
       background: rgb(var(--color-sheetbg));
       border: 1.5px solid rgb(var(--color-borderline));
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+      box-shadow: var(--surface-shadow-md);
       color: rgb(var(--color-secondarytext));
       pointer-events: none;
       opacity: 0;
@@ -1053,12 +1037,12 @@
     .spatial-bubble-core.scribbling,
     .spatial-bubble-core.reading-text {
       border-color: rgb(var(--color-accent));
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.28), 0 0 0 2px rgb(var(--color-accent) / 0.4);
+      box-shadow: var(--surface-shadow-sm), 0 0 0 2px rgb(var(--color-accent) / 0.4);
     }
 
     @keyframes spatialVoiceAura {
-      0%, 100% { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.28), 0 0 0 2px rgb(var(--color-accent) / 0.35); }
-      50% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28), 0 0 0 4px rgb(var(--color-accent) / 0.22); }
+      0%, 100% { box-shadow: var(--surface-shadow-sm), 0 0 0 2px rgb(var(--color-accent) / 0.35); }
+      50% { box-shadow: var(--surface-shadow-md), 0 0 0 4px rgb(var(--color-accent) / 0.22); }
     }
     .spatial-bubble-core.voice-recording {
       width: 118px;
@@ -1165,7 +1149,7 @@
       letter-spacing: -0.01em;
       line-height: 1.1;
       white-space: nowrap;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.24);
+      box-shadow: var(--surface-shadow-sm);
       will-change: transform, opacity;
     }
     .mascot-bye-bubble.tail-bottom {
@@ -1990,7 +1974,7 @@
       <!-- Floating Journal + Action Menu (Add Journal Entry / Mood / Energy / Exercise) -->
       <div
         id="journal-fab-menu"
-        class="hidden absolute right-5 bottom-[142px] z-40 bg-cardbg border border-borderline rounded-2xl p-1.5 shadow-2xl space-y-1 min-w-[208px]"
+        class="hidden absolute right-5 bottom-[142px] z-40 bg-cardbg border border-borderline rounded-2xl p-1.5 theme-popover-shadow space-y-1 min-w-[208px]"
       >
         <button
           type="button"
@@ -2049,7 +2033,7 @@
       <!-- Floating Tasks + Action Menu (New Task / New Project) -->
       <div
         id="timeline-fab-menu"
-        class="hidden absolute right-5 bottom-[142px] z-40 bg-cardbg border border-borderline rounded-2xl p-1.5 shadow-2xl space-y-1 min-w-[188px]"
+        class="hidden absolute right-5 bottom-[142px] z-40 bg-cardbg border border-borderline rounded-2xl p-1.5 theme-popover-shadow space-y-1 min-w-[188px]"
       >
         <button
           type="button"
@@ -2082,7 +2066,7 @@
         class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
         onclick="if (event.target === this) closeJournalToolModal('mood')"
       >
-        <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 shadow-2xl max-h-[88%] overflow-y-auto no-scrollbar">
+        <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 max-h-[88%] overflow-y-auto no-scrollbar">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-[10.5px] font-bold uppercase tracking-wider text-coral">Journal Check-In</p>
@@ -2102,7 +2086,7 @@
         class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
         onclick="if (event.target === this) closeJournalToolModal('energy')"
       >
-        <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 shadow-2xl max-h-[88%] overflow-y-auto no-scrollbar">
+        <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 max-h-[88%] overflow-y-auto no-scrollbar">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-[10.5px] font-bold uppercase tracking-wider text-coral">Journal Check-In</p>
@@ -2122,7 +2106,7 @@
         class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
         onclick="if (event.target === this) closeJournalToolModal('exercise')"
       >
-        <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 shadow-2xl max-h-[90%] overflow-y-auto no-scrollbar">
+        <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 max-h-[90%] overflow-y-auto no-scrollbar">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-[10.5px] font-bold uppercase tracking-wider text-coral">Therapeutic Reflection</p>
@@ -2165,7 +2149,7 @@
         type="button"
         onclick="if (!state.topicDragDidMove) openNewTopicModal()"
         title="New Skill Tree Topic"
-        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center ring-2 ring-appbg/60 transition-all duration-200"
+        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center transition-all duration-200"
       >
         <svg id="topics-list-fab-plus-icon" class="w-6 h-6 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -2181,7 +2165,7 @@
         type="button"
         onclick="openInventoryAddModal()"
         title="Add Inventory Item"
-        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center ring-2 ring-appbg/60"
+        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center"
       >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -2194,7 +2178,7 @@
         type="button"
         onclick="openTopicAddModal()"
         title="Add to Skill Tree"
-        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center ring-2 ring-appbg/60"
+        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center"
       >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -2207,7 +2191,7 @@
         type="button"
         onclick="openRoutineAddModal()"
         title="Add Routine or Step"
-        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center ring-2 ring-appbg/60"
+        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center"
       >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -2220,7 +2204,7 @@
         type="button"
         onclick="openPromptAddModal()"
         title="Add Prompt"
-        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center ring-2 ring-appbg/60"
+        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center"
       >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -2233,7 +2217,7 @@
         class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
         onclick="if (event.target === this) closeNewTopicModal()"
       >
-        <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 shadow-2xl max-h-[88%] overflow-y-auto no-scrollbar">
+        <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 max-h-[88%] overflow-y-auto no-scrollbar">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-[10.5px] font-bold uppercase tracking-wider text-coral">Skill Trees</p>
@@ -2265,7 +2249,7 @@
         class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
         onclick="if (event.target === this) closeInventoryAddModal()"
       >
-        <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 shadow-2xl max-h-[88%] overflow-y-auto no-scrollbar">
+        <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 max-h-[88%] overflow-y-auto no-scrollbar">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-[10.5px] font-bold uppercase tracking-wider text-coral">Inventory</p>
@@ -2296,7 +2280,7 @@
         class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
         onclick="if (event.target === this) closeRoutineAddModal()"
       >
-        <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 shadow-2xl max-h-[88%] overflow-y-auto no-scrollbar">
+        <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 max-h-[88%] overflow-y-auto no-scrollbar">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-[10.5px] font-bold uppercase tracking-wider text-coral">Routines</p>
@@ -2319,7 +2303,7 @@
         class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
         onclick="if (event.target === this) closePromptAddModal()"
       >
-        <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 shadow-2xl max-h-[88%] overflow-y-auto no-scrollbar">
+        <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 max-h-[88%] overflow-y-auto no-scrollbar">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-[10.5px] font-bold uppercase tracking-wider text-coral">Prompts</p>
@@ -2346,7 +2330,7 @@
         class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
         onclick="if (event.target === this) closeTopicAddModal()"
       >
-        <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 shadow-2xl max-h-[88%] overflow-y-auto no-scrollbar">
+        <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 max-h-[88%] overflow-y-auto no-scrollbar">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-[10.5px] font-bold uppercase tracking-wider text-coral">Create Entry</p>
@@ -2449,12 +2433,22 @@
               />
             </div>
 
-            <div id="modal-icon-picker" class="hidden bg-cardbg border border-borderline rounded-2xl p-3 space-y-2">
-              <div class="flex items-center justify-between">
+            <div id="modal-icon-picker" class="hidden bg-cardbg border border-borderline rounded-2xl p-3 space-y-2.5">
+              <div class="flex items-center justify-between gap-2">
                 <span class="text-[11px] font-semibold uppercase tracking-wider text-secondarytext">Choose Capsule Icon</span>
-                <button type="button" onclick="toggleModalIconPicker(false)" class="text-[11px] text-coral font-medium">Done</button>
+                <button type="button" onclick="toggleModalIconPicker(false)" class="text-[11px] text-coral font-semibold">Done</button>
               </div>
-              <div id="modal-icon-grid" class="grid grid-cols-5 gap-2"></div>
+              <div class="relative">
+                <svg class="w-3.5 h-3.5 text-mutedtext absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M20 20l-3.5-3.5"/></svg>
+                <input
+                  id="modal-icon-search"
+                  type="text"
+                  oninput="setModalIconSearch(this.value)"
+                  placeholder="Search 125+ icons..."
+                  class="w-full bg-pillbg border border-borderline rounded-xl pl-8 pr-3 py-1.5 text-xs text-primarytext placeholder-mutedtext focus:outline-none focus:border-coral"
+                />
+              </div>
+              <div id="modal-icon-grid" class="max-h-64 overflow-y-auto no-scrollbar space-y-3 pr-0.5"></div>
             </div>
           </div>
 
@@ -2890,12 +2884,22 @@
               />
             </div>
 
-            <div id="habit-modal-icon-picker" class="hidden bg-cardbg border border-borderline rounded-2xl p-3 space-y-2">
-              <div class="flex items-center justify-between">
+            <div id="habit-modal-icon-picker" class="hidden bg-cardbg border border-borderline rounded-2xl p-3 space-y-2.5">
+              <div class="flex items-center justify-between gap-2">
                 <span class="text-[11px] font-semibold uppercase tracking-wider text-secondarytext">Choose Habit Icon</span>
-                <button type="button" onclick="toggleHabitIconPicker(false)" class="text-[11px] text-coral font-medium">Done</button>
+                <button type="button" onclick="toggleHabitIconPicker(false)" class="text-[11px] text-coral font-semibold">Done</button>
               </div>
-              <div id="habit-modal-icon-grid" class="grid grid-cols-5 gap-2"></div>
+              <div class="relative">
+                <svg class="w-3.5 h-3.5 text-mutedtext absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M20 20l-3.5-3.5"/></svg>
+                <input
+                  id="habit-modal-icon-search"
+                  type="text"
+                  oninput="setHabitIconSearch(this.value)"
+                  placeholder="Search 125+ icons..."
+                  class="w-full bg-pillbg border border-borderline rounded-xl pl-8 pr-3 py-1.5 text-xs text-primarytext placeholder-mutedtext focus:outline-none focus:border-coral"
+                />
+              </div>
+              <div id="habit-modal-icon-grid" class="max-h-64 overflow-y-auto no-scrollbar space-y-3 pr-0.5"></div>
             </div>
           </div>
 
@@ -3376,7 +3380,7 @@
   </div>
 
   <!-- Live Screen Recording Pill -->
-  <div id="spatial-recording-pill" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[95] spatial-glass-panel rounded-full px-4 py-2 flex items-center gap-3 border border-coral/50 shadow-2xl">
+  <div id="spatial-recording-pill" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[95] spatial-glass-panel rounded-full px-4 py-2 flex items-center gap-3 border border-coral/50">
     <span class="w-2.5 h-2.5 rounded-full bg-coral animate-pulse"></span>
     <span class="text-xs font-bold tracking-wide text-coral uppercase">REC</span>
     <span id="spatial-rec-timer" class="text-sm font-mono font-semibold text-primarytext tabular-nums">00:00</span>
@@ -3388,7 +3392,7 @@
   <!-- Full-Screen On-Screen Sketch Overlay -->
   <div id="spatial-screen-sketch-overlay" class="hidden" aria-label="On-screen sketch canvas">
     <canvas id="spatial-screen-sketch-canvas" class="w-full h-full block"></canvas>
-    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[90] max-w-[calc(100vw-24px)] spatial-glass-panel rounded-full px-3.5 py-2 flex items-center gap-2 border border-amber/50 shadow-2xl">
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[90] max-w-[calc(100vw-24px)] spatial-glass-panel rounded-full px-3.5 py-2 flex items-center gap-2 border border-amber/50">
       <div id="spatial-ss-colors" class="flex items-center gap-1.5">
         <button type="button" data-color="#F28B82" class="w-5 h-5 rounded-full border-2 border-primarytext scale-110 transition cursor-pointer" style="background:#F28B82"></button>
         <button type="button" data-color="#F6C244" class="w-5 h-5 rounded-full border border-borderline transition cursor-pointer" style="background:#F6C244"></button>
@@ -6164,18 +6168,299 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       'Aesthetic',
     ];
 
-    const ICONS = {
-      alarm: '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path stroke-linecap="round" d="M12 9v4l2.5 2.5M5 3L2 6m20 0l-3-3"/></svg>',
-      users: '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>',
-      at: '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M16 8v5a3 3 0 006 0v-1a10 10 0 10-3.92 7.94"/></svg>',
-      moon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>',
-      feather: '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.24 12.24a6 6 0 00-8.49-8.49L5 10.5V19h8.5l6.74-6.76z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 8L2 22"/><path stroke-linecap="round" stroke-linejoin="round" d="M17.5 15H9"/></svg>',
-      heart: '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>',
-      coffee: '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zm4-7v3m4-3v3m4-3v3"/></svg>',
-      book: '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>',
-      code: '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>',
-      spark: '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>',
-    };
+    const _mkSvg = (inner, size = 'w-5 h-5', sw = '1.9') =>
+      `<svg class="${size}" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">${inner}</svg>`;
+
+    const ICON_CATEGORIES = [
+      {
+        id: 'essentials',
+        label: 'Essentials',
+        icon: 'spark',
+        items: [
+          { key: 'at', label: 'Mention', kw: 'email general default', svg: _mkSvg('<circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 006 0v-1a10 10 0 10-3.92 7.94"/>', 'w-5 h-5', '2.1') },
+          { key: 'alarm', label: 'Alarm', kw: 'wake morning clock rise shine', svg: _mkSvg('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M5 3L2 6m20 0l-3-3"/>', 'w-5 h-5', '2') },
+          { key: 'spark', label: 'Spark', kw: 'magic focus idea habit', svg: _mkSvg('<path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>', 'w-5 h-5', '2') },
+          { key: 'moon', label: 'Moon', kw: 'sleep night wind down bedtime', svg: _mkSvg('<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>', 'w-5 h-5', '2') },
+          { key: 'sun', label: 'Sun', kw: 'morning daylight energy weather', svg: _mkSvg('<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41"/>') },
+          { key: 'heart', label: 'Heart', kw: 'love health wellness care', svg: _mkSvg('<path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/>', 'w-5 h-5', '2') },
+          { key: 'users', label: 'People', kw: 'meeting team friends family social', svg: _mkSvg('<path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>') },
+          { key: 'star', label: 'Star', kw: 'favorite priority highlight goal', svg: _mkSvg('<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>') },
+          { key: 'check', label: 'Check', kw: 'done complete task todo', svg: _mkSvg('<circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.3 2.3 4.7-5"/>') },
+          { key: 'bell', label: 'Bell', kw: 'alert reminder notify', svg: _mkSvg('<path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>') },
+          { key: 'flag', label: 'Flag', kw: 'milestone deadline checkpoint', svg: _mkSvg('<path d="M5 21V4m0 0h11l-2 4.5L16 13H5"/>') },
+          { key: 'pin', label: 'Pin', kw: 'location pinned save', svg: _mkSvg('<path d="M12 17v5M9 4h6l-1 6 3 3H7l3-3-1-6z"/>') },
+          { key: 'calendar', label: 'Calendar', kw: 'date schedule event plan', svg: _mkSvg('<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4m8-4v4M3 10h18"/>') },
+          { key: 'clock', label: 'Clock', kw: 'time timer focus session', svg: _mkSvg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>') },
+          { key: 'bolt', label: 'Energy', kw: 'power sprint boost quick', svg: _mkSvg('<polygon points="13 2 4 14 12 14 11 22 20 10 12 10 13 2"/>') },
+          { key: 'target', label: 'Target', kw: 'goal aim focus precision', svg: _mkSvg('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>') },
+          { key: 'wallet', label: 'Wallet', kw: 'money finance budget bills pay', svg: _mkSvg('<path d="M3 7a2 2 0 012-2h14v4H5a2 2 0 01-2-2zm0 0v10a2 2 0 002 2h14a2 2 0 002-2v-6h-6a2 2 0 100 4h6"/>') },
+          { key: 'gift', label: 'Gift', kw: 'birthday present celebrate reward', svg: _mkSvg('<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7M12 8H8.5a2.5 2.5 0 110-5C11 3 12 8 12 8zm0 0h3.5a2.5 2.5 0 100-5C13 3 12 8 12 8z"/>') },
+        ],
+      },
+      {
+        id: 'bathroom',
+        label: 'Bathroom & Self-Care',
+        icon: 'shower',
+        items: [
+          { key: 'shower', label: 'Shower', kw: 'wash bathe bathroom hygiene', svg: _mkSvg('<path d="M4 11h16M6 11a6 6 0 0112 0M12 3v2M7 15v2m5-2v3m5-3v2m-7.5 1v2m5-2v2"/>') },
+          { key: 'bath', label: 'Bath', kw: 'tub soak relax spa bathroom', svg: _mkSvg('<path d="M3 12h18v2a5 5 0 01-5 5H8a5 5 0 01-5-5v-2zm3 0V6a2 2 0 012-2h1a2 2 0 012 2M7 19l-1 2m11-2l1 2"/>') },
+          { key: 'toothbrush', label: 'Brush Teeth', kw: 'dental oral hygiene morning night', svg: _mkSvg('<path d="M3 19L17 5l2 2L5 21l-2-2zm11-11l2-2m-4 4l2-2m0 4l2-2"/>') },
+          { key: 'soap', label: 'Skincare', kw: 'wash lotion dispenser pump soap', svg: _mkSvg('<rect x="7" y="9" width="10" height="12" rx="2"/><path d="M10 9V6h4v3M9 4h6m-3 0v2"/>') },
+          { key: 'droplet', label: 'Hydrate', kw: 'water skincare moisture wash face', svg: _mkSvg('<path d="M12 2.5S6 9.5 6 14a6 6 0 0012 0c0-4.5-6-11.5-6-11.5z"/>') },
+          { key: 'razor', label: 'Shave', kw: 'groom razor trim beard bathroom', svg: _mkSvg('<rect x="6" y="3" width="12" height="5" rx="1.5"/><path d="M12 8v13M9 12h6"/>') },
+          { key: 'mirror', label: 'Mirror', kw: 'groom makeup skincare ready', svg: _mkSvg('<ellipse cx="12" cy="9.5" rx="5.5" ry="6.5"/><path d="M12 16v5m-3 0h6m-4-14l2-2"/>') },
+          { key: 'towel', label: 'Towel', kw: 'dry bathroom linen shower', svg: _mkSvg('<path d="M4 5h16M7 5v14a1 1 0 001 1h8a1 1 0 001-1V5M7 16h10"/>') },
+          { key: 'pill', label: 'Medicine', kw: 'vitamin supplement health pills', svg: _mkSvg('<path d="M10.5 20.5l10-10a4.95 4.95 0 10-7-7l-10 10a4.95 4.95 0 107 7zM8.5 8.5l7 7"/>') },
+          { key: 'meditate', label: 'Meditate', kw: 'mindfulness calm zen breathe', svg: _mkSvg('<circle cx="12" cy="5.5" r="2"/><path d="M12 9v5m-5 4c2-1 3.5-2 5-2s3 1 5 2m-9-6l4 2 4-2M5 19h14"/>') },
+          { key: 'bandaid', label: 'First Aid', kw: 'health care doctor clinic bandage', svg: _mkSvg('<rect x="3" y="8" width="18" height="8" rx="4" transform="rotate(-45 12 12)"/><path d="M10 10h.01M14 14h.01M14 10h.01M10 14h.01"/>') },
+          { key: 'comb', label: 'Haircare', kw: 'brush hair comb salon bathroom', svg: _mkSvg('<path d="M6 4v16M6 6h5M6 9h5M6 12h5M6 15h5M6 18h5M16 4c1.5 2 1.5 5 0 7s-1.5 5 0 9"/>') },
+        ],
+      },
+      {
+        id: 'clothes',
+        label: 'Clothes & Gear',
+        icon: 'shirt',
+        items: [
+          { key: 'shirt', label: 'Shirt', kw: 'clothes outfit dress laundry wear', svg: _mkSvg('<path d="M6 4l3-1 3 2 3-2 3 1 3 4-3 2v10H6V10L3 8l3-4z"/>') },
+          { key: 'pants', label: 'Pants', kw: 'jeans trousers clothes outfit', svg: _mkSvg('<path d="M6 3h12l-1 18h-4l-1-10-1 10H7L6 3z"/>') },
+          { key: 'dress', label: 'Dress', kw: 'outfit fashion clothes wear', svg: _mkSvg('<path d="M9 3l3 2 3-2 1 5 3 12H5l3-12 1-5z"/>') },
+          { key: 'jacket', label: 'Coat', kw: 'hoodie sweater outerwear jacket', svg: _mkSvg('<path d="M6 4l4-1 2 3 2-3 4 1 3 6-3 2v9H6v-9l-3-2 3-6zm6 2v15"/>') },
+          { key: 'shoe', label: 'Sneaker', kw: 'shoes walk run footwear outfit', svg: _mkSvg('<path d="M3 15l2-6 4 2 4-1 5 3a3 3 0 013 3v2H3v-3z"/>') },
+          { key: 'hat', label: 'Cap', kw: 'hat beanie sun clothes', svg: _mkSvg('<path d="M4 15a8 8 0 0116 0v1H4v-1zm-1 1h19"/>') },
+          { key: 'glasses', label: 'Glasses', kw: 'reading eyewear focus vision', svg: _mkSvg('<circle cx="7" cy="13" r="3.5"/><circle cx="17" cy="13" r="3.5"/><path d="M10.5 13h3M3.5 12L5 7m15.5 5L19 7"/>') },
+          { key: 'sunglasses', label: 'Shades', kw: 'sunglasses summer outside beach', svg: _mkSvg('<path d="M3 10h18M4 10l1 5a3 3 0 003 2h1a3 3 0 003-2v-5m0 0v5a3 3 0 003 2h1a3 3 0 003-2l1-5"/>') },
+          { key: 'backpack', label: 'Backpack', kw: 'bag school hike pack gear', svg: _mkSvg('<path d="M6 10a6 6 0 0112 0v9a2 2 0 01-2 2H8a2 2 0 01-2-2v-9zM9 4a3 3 0 016 0M6 14h12M9 17h6"/>') },
+          { key: 'briefcase', label: 'Briefcase', kw: 'work bag business office', svg: _mkSvg('<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M3 13h18"/>') },
+          { key: 'bag', label: 'Shopping Bag', kw: 'shop errand store buy tote', svg: _mkSvg('<path d="M6 8h12l1 12a1 1 0 01-1 1H6a1 1 0 01-1-1L6 8zm3 0V6a3 3 0 016 0v2"/>') },
+          { key: 'hanger', label: 'Wardrobe', kw: 'closet hanger laundry clothes', svg: _mkSvg('<path d="M12 6a2 2 0 10-2-2m2 2v2l8 6a1.5 1.5 0 01-.9 2.7H4.9A1.5 1.5 0 014 14l8-6z"/>') },
+        ],
+      },
+      {
+        id: 'household',
+        label: 'Household',
+        icon: 'home',
+        items: [
+          { key: 'home', label: 'Home', kw: 'house chore apartment clean', svg: _mkSvg('<path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1v-9.5z"/>') },
+          { key: 'bed', label: 'Bed', kw: 'nap rest sleep make bed bedroom', svg: _mkSvg('<path d="M3 18v-8m18 8v-5a3 3 0 00-3-3H3m0 5h18M7 10V8a1 1 0 011-1h2a1 1 0 011 1v2"/>') },
+          { key: 'couch', label: 'Lounge', kw: 'sofa relax living room rest', svg: _mkSvg('<path d="M4 11V8a2 2 0 012-2h12a2 2 0 012 2v3m-18 0h2a1 1 0 011 1v3h14v-3a1 1 0 011-1h2v6a1 1 0 01-1 1H3a1 1 0 01-1-1v-6zm3 7v2m14-2v2"/>') },
+          { key: 'broom', label: 'Sweep', kw: 'clean tidy chore floor broom', svg: _mkSvg('<path d="M19 3L11 11m-5 2l5-2 2 5-5 5-5-5 3-3z"/>') },
+          { key: 'laundry', label: 'Laundry', kw: 'wash machine clothes dryer chore', svg: _mkSvg('<rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="13.5" r="4"/><path d="M7 6.5h2m5 0h3"/>') },
+          { key: 'iron', label: 'Iron', kw: 'press clothes laundry chore', svg: _mkSvg('<path d="M4 17h16l-2-7a4 4 0 00-4-3H7m-3 10a3 3 0 013-3h11"/>') },
+          { key: 'trash', label: 'Trash', kw: 'garbage bin clean declutter', svg: _mkSvg('<path d="M4 7h16M10 11v6m4-6v6M6 7l1 13a1 1 0 001 1h8a1 1 0 001-1l1-13M9 7V4h6v3"/>') },
+          { key: 'plant', label: 'Plants', kw: 'garden water pot indoor nature', svg: _mkSvg('<path d="M7 15h10l-1.2 6H8.2L7 15zm5 0V9m0 2c-3 0-5-2-5-5 3 0 5 2 5 5zm0-2c3 0 5-2 5-5-3 0-5 2-5 5z"/>') },
+          { key: 'wrench', label: 'Repair', kw: 'fix tool maintenance diy', svg: _mkSvg('<path d="M14.7 6.3a4.5 4.5 0 01-6.4 6.4L3 18l3 3 5.3-5.3a4.5 4.5 0 006.4-6.4l-2.5 2.5-2.5-2.5 2-2.5z"/>') },
+          { key: 'hammer', label: 'Build', kw: 'diy craft fix wood tool', svg: _mkSvg('<path d="M14 4l6 6-2 2-6-6 2-2zM13 9L4 18l2 2 9-9"/>') },
+          { key: 'lamp', label: 'Lamp', kw: 'desk light study evening home', svg: _mkSvg('<path d="M9 21h6m-3-9v9M6 12h12l-2-7H8l-2 7z"/>') },
+          { key: 'key', label: 'Keys', kw: 'lock house car unlock errand', svg: _mkSvg('<circle cx="7.5" cy="14.5" r="4"/><path d="M10.5 11.5L19 3m-2 2l2 2m-4 0l2 2"/>') },
+          { key: 'cart', label: 'Errands', kw: 'grocery shopping supermarket cart', svg: _mkSvg('<circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/><path d="M3 4h2l2.4 11h10.2l2.4-8H6.5"/>') },
+          { key: 'box', label: 'Package', kw: 'delivery mail box organize storage', svg: _mkSvg('<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3zm0 9l8-4.5M12 12v9m0-9L4 7.5"/>') },
+        ],
+      },
+      {
+        id: 'school',
+        label: 'School & Study',
+        icon: 'book',
+        items: [
+          { key: 'book', label: 'Reading', kw: 'book study read library learn', svg: _mkSvg('<path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>', 'w-5 h-5', '2') },
+          { key: 'notebook', label: 'Notebook', kw: 'notes journal class homework', svg: _mkSvg('<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v18M12 8h4m-4 4h4"/>') },
+          { key: 'pencil', label: 'Write', kw: 'essay draft edit homework study', svg: _mkSvg('<path d="M15.5 4.5l4 4L8 20H4v-4L15.5 4.5z"/>') },
+          { key: 'graduation', label: 'Class', kw: 'school university lecture exam degree', svg: _mkSvg('<path d="M2 9l10-5 10 5-10 5L2 9zm4 2v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5m4-2v6"/>') },
+          { key: 'flask', label: 'Science', kw: 'lab chemistry experiment stem', svg: _mkSvg('<path d="M9 3h6m-5 0v6l-5 9a2 2 0 001.7 3h10.6A2 2 0 0019 18l-5-9V3M7.5 15h9"/>') },
+          { key: 'dna', label: 'Biology', kw: 'science genetics study medicine', svg: _mkSvg('<path d="M7 3c0 5 10 4 10 9s-10 4-10 9M17 3c0 5-10 4-10 9s10 4 10 9M8 6h8M8 18h8"/>') },
+          { key: 'calculator', label: 'Math', kw: 'numbers finance calculate algebra', svg: _mkSvg('<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2m4 0h2M8 16h2m4 0h2"/>') },
+          { key: 'globe', label: 'Languages', kw: 'world geography travel language', svg: _mkSvg('<circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8M3.6 15h16.8M12 3a13 13 0 000 18m0-18a13 13 0 010 18"/>') },
+          { key: 'brain', label: 'Deep Work', kw: 'think focus mind study psychology', svg: _mkSvg('<path d="M9.5 4a3.5 3.5 0 00-3.5 3.5c0 .7.2 1.3.5 1.8A3.5 3.5 0 004 12.5 3.5 3.5 0 007.5 16h.5a3 3 0 004 2.8V4.5A2.5 2.5 0 009.5 4zm5 0A3.5 3.5 0 0118 7.5c0 .7-.2 1.3-.5 1.8a3.5 3.5 0 012.5 3.2 3.5 3.5 0 01-3.5 3.5H16a3 3 0 01-4 2.8V4.5A2.5 2.5 0 0114.5 4z"/>') },
+          { key: 'ruler', label: 'Design', kw: 'architecture geometry measure craft', svg: _mkSvg('<path d="M4 16L16 4l4 4L8 20l-4-4zm5-5l2 2m2-6l2 2m-8 6l2 2"/>') },
+          { key: 'bookmark', label: 'Bookmark', kw: 'save chapter reading study', svg: _mkSvg('<path d="M6 4a1 1 0 011-1h10a1 1 0 011 1v17l-6-4-6 4V4z"/>') },
+          { key: 'lightbulb', label: 'Idea', kw: 'brainstorm creative insight plan', svg: _mkSvg('<path d="M9 18h6m-5 3h4M12 3a6 6 0 00-3.5 10.9c.7.5 1 1.2 1 2.1h5c0-.9.3-1.6 1-2.1A6 6 0 0012 3z"/>') },
+        ],
+      },
+      {
+        id: 'office',
+        label: 'Office & Tech',
+        icon: 'laptop',
+        items: [
+          { key: 'code', label: 'Code', kw: 'programming dev software engineer', svg: _mkSvg('<path d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/>', 'w-5 h-5', '2') },
+          { key: 'laptop', label: 'Laptop', kw: 'computer work remote desk', svg: _mkSvg('<rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19h20"/>') },
+          { key: 'monitor', label: 'Desktop', kw: 'screen monitor office setup', svg: _mkSvg('<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8m-4-4v4"/>') },
+          { key: 'phone', label: 'Call', kw: 'telephone call client family', svg: _mkSvg('<path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8 9.9a16 16 0 006.1 6.1l1.3-1.3a2 2 0 012.1-.5c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/>') },
+          { key: 'mail', label: 'Email', kw: 'inbox message reply letter', svg: _mkSvg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>') },
+          { key: 'chat', label: 'Message', kw: 'slack text chat reply communicate', svg: _mkSvg('<path d="M21 11.5a8.5 8.5 0 01-12.5 7.5L3 20.5l1.5-5A8.5 8.5 0 1121 11.5z"/>') },
+          { key: 'chart', label: 'Analytics', kw: 'metrics report growth stats', svg: _mkSvg('<path d="M4 20V4m0 16h16M8 15l3-4 3 2 4-6"/>') },
+          { key: 'barchart', label: 'Report', kw: 'dashboard stats review kpi', svg: _mkSvg('<path d="M5 20v-6m5 6V9m5 11v-8m5 8V5"/>') },
+          { key: 'clipboard', label: 'Checklist', kw: 'tasks audit review plan form', svg: _mkSvg('<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 11h6m-6 4h4"/>') },
+          { key: 'paperclip', label: 'Attach', kw: 'file document archive admin', svg: _mkSvg('<path d="M21 11.5l-8.8 8.8a5 5 0 01-7.1-7.1l9.2-9.2a3.3 3.3 0 014.7 4.7l-9.2 9.2a1.7 1.7 0 01-2.4-2.4l8.1-8.1"/>') },
+          { key: 'printer', label: 'Print', kw: 'office paper scan document', svg: _mkSvg('<path d="M6 9V4h12v5M6 18H4a1 1 0 01-1-1v-6a2 2 0 012-2h14a2 2 0 012 2v6a1 1 0 01-1 1h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/>') },
+          { key: 'headphones', label: 'Podcast', kw: 'audio listen focus music call', svg: _mkSvg('<path d="M4 15v-3a8 8 0 0116 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/>') },
+          { key: 'mic', label: 'Record', kw: 'voice podcast speak presentation', svg: _mkSvg('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0m-7 7v3m-3 0h6"/>') },
+          { key: 'terminal', label: 'Terminal', kw: 'cli deploy server code', svg: _mkSvg('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3m5 0h5"/>') },
+        ],
+      },
+      {
+        id: 'transport',
+        label: 'Transport',
+        icon: 'car',
+        items: [
+          { key: 'car', label: 'Drive', kw: 'commute car auto road trip', svg: _mkSvg('<path d="M5 11l2-5h10l2 5m-16 0h18v6h-2m-14 0H3v-6m3 6a2 2 0 104 0m6 0a2 2 0 104 0M10 17h4"/>') },
+          { key: 'bus', label: 'Bus', kw: 'transit commute shuttle bus', svg: _mkSvg('<rect x="5" y="3" width="14" height="15" rx="2"/><path d="M5 11h14M8 18v2m8-2v2M8 14.5h.01M16 14.5h.01"/>') },
+          { key: 'train', label: 'Train', kw: 'subway metro rail commute', svg: _mkSvg('<rect x="6" y="3" width="12" height="14" rx="3"/><path d="M6 10h12M9 17l-2 4m8-4l2 4M9.5 13.5h.01M14.5 13.5h.01"/>') },
+          { key: 'bike', label: 'Cycle', kw: 'bicycle ride bike commute exercise', svg: _mkSvg('<circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M6 17l4-8h4l4 8m-8-8l-2-3m6 0h3"/>') },
+          { key: 'walk', label: 'Walk', kw: 'stroll steps commute go out outside', svg: _mkSvg('<circle cx="12" cy="4.5" r="2"/><path d="M12 8.5l-2 5 3 2.5 1 5m-4-7.5l-3 6m5-11l3 2.5 2 1"/>') },
+          { key: 'plane', label: 'Flight', kw: 'airport travel airplane trip', svg: _mkSvg('<path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 00-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>') },
+          { key: 'rocket', label: 'Launch', kw: 'ship release startup space project', svg: _mkSvg('<path d="M12 2c4 2 6 6 6 11l-3 3H9l-3-3c0-5 2-9 6-11zM9 16l-2 4m8-4l2 4"/><circle cx="12" cy="9" r="1.5"/>') },
+          { key: 'ship', label: 'Ferry', kw: 'boat cruise sail travel water', svg: _mkSvg('<path d="M4 15l2 5h12l2-5-8-3-8 3zm8-3V5m0 0h4v4h-4"/>') },
+          { key: 'map', label: 'Route', kw: 'navigation trip explore map', svg: _mkSvg('<path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2V6zm6-2v14m6-12v14"/>') },
+          { key: 'luggage', label: 'Travel', kw: 'suitcase vacation pack trip', svg: _mkSvg('<rect x="6" y="7" width="12" height="14" rx="2"/><path d="M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3M10 11v6m4-6v6"/>') },
+          { key: 'fuel', label: 'Gas', kw: 'fuel station car refill errand', svg: _mkSvg('<path d="M4 20V5a2 2 0 012-2h7a2 2 0 012 2v15M3 20h13M15 8h2a2 2 0 012 2v5a1.5 1.5 0 003 0V9l-2-2M7 7h5v4H7V7z"/>') },
+          { key: 'compass', label: 'Explore', kw: 'adventure direction outside compass', svg: _mkSvg('<circle cx="12" cy="12" r="9"/><polygon points="15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5 15.5 8.5"/>') },
+        ],
+      },
+      {
+        id: 'activities',
+        label: 'Activities & Fitness',
+        icon: 'dumbbell',
+        items: [
+          { key: 'dumbbell', label: 'Gym', kw: 'workout lift strength weights fitness', svg: _mkSvg('<path d="M6 8v8m12-8v8M3 10v4m18-4v4M6 12h12"/>') },
+          { key: 'run', label: 'Run', kw: 'jog cardio sprint track workout', svg: _mkSvg('<circle cx="14" cy="4.5" r="2"/><path d="M7 10l4-1 3 3 4-1m-7 1l-3 5-3 1m6-3l3 2 1 4"/>') },
+          { key: 'swim', label: 'Swim', kw: 'pool laps water workout', svg: _mkSvg('<circle cx="16" cy="6" r="2"/><path d="M6 13l4-3 4 2 3-2M3 18c2 1.5 4 1.5 6 0s4-1.5 6 0 4 1.5 6 0"/>') },
+          { key: 'soccer', label: 'Soccer', kw: 'football sport match ball', svg: _mkSvg('<circle cx="12" cy="12" r="9"/><polygon points="12 7 16 10 14.5 15 9.5 15 8 10 12 7"/><path d="M12 3v4m4 3l4.5-1.5M14.5 15l3 4.5M9.5 15l-3 4.5M8 10L3.5 8.5"/>') },
+          { key: 'basketball', label: 'Basketball', kw: 'hoops court sport ball', svg: _mkSvg('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18M5.5 6a9 9 0 010 12m13-12a9 9 0 000 12"/>') },
+          { key: 'tennis', label: 'Tennis', kw: 'racket paddle pickleball sport', svg: _mkSvg('<circle cx="10" cy="10" r="6"/><path d="M14.5 14.5L20 20M7 7l6 6m0-6l-6 6"/>') },
+          { key: 'trophy', label: 'Achievement', kw: 'win competition prize award', svg: _mkSvg('<path d="M8 21h8m-4-4v4M7 4h10v5a5 5 0 01-10 0V4zM7 6H4v2a3 3 0 003 3m10-5h3v2a3 3 0 01-3 3"/>') },
+          { key: 'gamepad', label: 'Gaming', kw: 'play video game console relax', svg: _mkSvg('<rect x="3" y="8" width="18" height="10" rx="4"/><path d="M7 13h4M9 11v4m6-2h.01M17 11h.01"/>') },
+          { key: 'music', label: 'Music', kw: 'listen song playlist concert', svg: _mkSvg('<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>') },
+          { key: 'camera', label: 'Photo', kw: 'photography vlog shoot creative', svg: _mkSvg('<path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.5"/>') },
+          { key: 'palette', label: 'Art', kw: 'paint draw sketch creative hobby', svg: _mkSvg('<path d="M12 3a9 9 0 100 18h1.5a2.5 2.5 0 000-5H12a2 2 0 01-2-2 2 2 0 012-2h7a2 2 0 002-2 7 7 0 00-9-7z"/>') },
+          { key: 'film', label: 'Movie', kw: 'watch cinema tv show relax', svg: _mkSvg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 5v14M17 5v14M3 10h4m10 0h4M3 14h4m10 0h4"/>') },
+          { key: 'tent', label: 'Camping', kw: 'outdoors hike nature weekend', svg: _mkSvg('<path d="M3 20L12 4l9 16H3zm9-6v6m-3 0l3-6 3 6"/>') },
+          { key: 'flame', label: 'Streak', kw: 'burn calories fire motivation', svg: _mkSvg('<path d="M12 3c2 3 5 5.5 5 10a5 5 0 11-10 0c0-2.2 1-4.3 2.5-6 0 2 1 3 2 3 .5-2.5.5-5 .5-7z"/>') },
+        ],
+      },
+      {
+        id: 'food',
+        label: 'Food & Drink',
+        icon: 'coffee',
+        items: [
+          { key: 'coffee', label: 'Coffee', kw: 'cafe espresso latte morning break', svg: _mkSvg('<path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zm4-7v3m4-3v3m4-3v3"/>', 'w-5 h-5', '2') },
+          { key: 'utensils', label: 'Meal', kw: 'eat lunch dinner breakfast food', svg: _mkSvg('<path d="M6 3v7a2 2 0 004 0V3M8 12v9m8-18v18m0-18a4 4 0 014 4v4h-4"/>') },
+          { key: 'apple', label: 'Snack', kw: 'fruit healthy apple eat nutrition', svg: _mkSvg('<path d="M12 7c-3-1-6 1-6 5 0 4.5 2.5 8 5 8 .8 0 1-.4 1-.4s.2.4 1 .4c2.5 0 5-3.5 5-8 0-4-3-6-6-5zm0 0c0-2 1.5-4 3-4"/>') },
+          { key: 'pizza', label: 'Pizza', kw: 'dinner treat party lunch food', svg: _mkSvg('<path d="M12 3L4 20l16-3L12 3zM9 13h.01M13 15h.01M11 10h.01"/>') },
+          { key: 'cake', label: 'Dessert', kw: 'birthday bakery sweet treat', svg: _mkSvg('<path d="M4 15h16v5H4v-5zm2-4h12v4H6v-4zm6-7v3m-4-1v2m8-2v2"/>') },
+          { key: 'water', label: 'Water', kw: 'drink bottle hydrate glass', svg: _mkSvg('<path d="M6 4h12l-1.5 16a1 1 0 01-1 1h-7a1 1 0 01-1-1L6 4zm1 6h10"/>') },
+          { key: 'wine', label: 'Drinks', kw: 'dinner date social cocktail wine', svg: _mkSvg('<path d="M8 3h8l1 6a5 5 0 01-10 0l1-6zm4 11v7m-4 0h8"/>') },
+          { key: 'cook', label: 'Cook', kw: 'meal prep kitchen chef recipe', svg: _mkSvg('<path d="M4 12h16v6a3 3 0 01-3 3H7a3 3 0 01-3-3v-6zm-2 0h20M8 8V6m4 2V5m4 3V6"/>') },
+          { key: 'bowl', label: 'Breakfast', kw: 'salad oatmeal ramen soup bowl', svg: _mkSvg('<path d="M3 12h18a9 9 0 01-18 0zm4 8h10M15 4l3 8"/>') },
+          { key: 'tea', label: 'Tea', kw: 'matcha herbal warm mug relax', svg: _mkSvg('<path d="M5 9h11v6a4 4 0 01-4 4H9a4 4 0 01-4-4V9zm11 1h2a2.5 2.5 0 010 5h-2M10 9v4"/>') },
+          { key: 'carrot', label: 'Veggies', kw: 'grocery nutrition healthy diet', svg: _mkSvg('<path d="M15 9l-8 8-3 3 3-3 8-8zm0 0a3.5 3.5 0 015 0c0 1.4-1 2.5-2.5 2.5S15 10.4 15 9zm2-6v3m4 1h-3"/>') },
+          { key: 'icecream', label: 'Treat', kw: 'ice cream dessert sweet summer', svg: _mkSvg('<path d="M8 11h8l-4 10-4-10zm0 0a4 4 0 018 0"/>') },
+        ],
+      },
+      {
+        id: 'nature',
+        label: 'Animals & Nature',
+        icon: 'leaf',
+        items: [
+          { key: 'feather', label: 'Journal', kw: 'write feather calm reflection bird', svg: _mkSvg('<path d="M20.24 12.24a6 6 0 00-8.49-8.49L5 10.5V19h8.5l6.74-6.76zM16 8L2 22m15.5-7H9"/>', 'w-4 h-4', '1.9') },
+          { key: 'paw', label: 'Pet Care', kw: 'dog cat walk vet feed animal', svg: _mkSvg('<circle cx="7" cy="9" r="1.5"/><circle cx="11" cy="6.5" r="1.5"/><circle cx="15" cy="7.5" r="1.5"/><circle cx="17.5" cy="11" r="1.5"/><path d="M12 12c-3 0-5 2.2-5 4.5 0 1.5 1.2 2.5 2.7 2.5 1 0 1.6-.4 2.3-.4s1.3.4 2.3.4c1.5 0 2.7-1 2.7-2.5 0-2.3-2-4.5-5-4.5z"/>') },
+          { key: 'cat', label: 'Cat', kw: 'pet kitty animal feed', svg: _mkSvg('<path d="M5 10V5l4 3h6l4-3v5a7 7 0 01-14 0zm4 1h.01M15 11h.01M10.5 14l1.5 1 1.5-1"/>') },
+          { key: 'dog', label: 'Dog', kw: 'pet puppy walk animal feed', svg: _mkSvg('<path d="M6 9L4 6l4-1 2 2h4l2-2 4 1-2 3v4a6 6 0 01-12 0V9zm3 2h.01M15 11h.01M11 14h2"/>') },
+          { key: 'bird', label: 'Bird', kw: 'nature outdoors chirp morning', svg: _mkSvg('<path d="M16 7h.01M3 18l4-4 2-6a4 4 0 017.5-1.5L21 8l-3 2a8 8 0 01-8 8H3z"/>') },
+          { key: 'fish', label: 'Fish', kw: 'aquarium pet sea ocean food', svg: _mkSvg('<path d="M3 12l4-3v6l-4-3zm4 0c2-4 7-5 13 0-6 5-11 4-13 0zm9-1h.01"/>') },
+          { key: 'tree', label: 'Park', kw: 'forest nature walk outdoors', svg: _mkSvg('<path d="M12 3l-6 8h3l-4 6h14l-4-6h3l-6-8zm0 14v4"/>') },
+          { key: 'leaf', label: 'Nature', kw: 'eco outdoor fresh green walk', svg: _mkSvg('<path d="M5 20C5 11 11 4 20 4c0 9-6 16-15 16zm0 0l7-7"/>') },
+          { key: 'flower', label: 'Garden', kw: 'bloom flower spring plant', svg: _mkSvg('<circle cx="12" cy="12" r="2.5"/><path d="M12 5a2.5 2.5 0 110 5m0 4a2.5 2.5 0 110 5M5 12a2.5 2.5 0 115 0m4 0a2.5 2.5 0 115 0"/>') },
+          { key: 'mountain', label: 'Hike', kw: 'trail climb outdoor nature summit', svg: _mkSvg('<path d="M3 19l6-11 4 6 3-4 5 9H3z"/>') },
+          { key: 'cloud', label: 'Weather', kw: 'sky cloud calm outdoors', svg: _mkSvg('<path d="M6.5 18h11a4 4 0 00.7-7.9A5.5 5.5 0 007.4 8.5 4.5 4.5 0 006.5 18z"/>') },
+          { key: 'umbrella', label: 'Rain', kw: 'weather beach shade outdoor', svg: _mkSvg('<path d="M3 13a9 9 0 0118 0H3zm9 0v6a2 2 0 004 0"/>') },
+        ],
+      },
+    ];
+
+    const ICONS = {};
+    ICON_CATEGORIES.forEach((cat) => {
+      cat.items.forEach((item) => {
+        ICONS[item.key] = item.svg;
+      });
+    });
+
+    let modalIconSearchQuery = '';
+    let habitIconSearchQuery = '';
+
+    function renderCategorizedIconPicker(gridEl, selectedKey, onSelectFnName, searchQuery = '') {
+      if (!gridEl) return;
+      const q = String(searchQuery || '').trim().toLowerCase();
+      let sectionsHtml = '';
+
+      ICON_CATEGORIES.forEach((cat) => {
+        const catMatches = q && cat.label.toLowerCase().includes(q);
+        const filtered = q
+          ? cat.items.filter(
+              (item) =>
+                catMatches ||
+                item.key.toLowerCase().includes(q) ||
+                item.label.toLowerCase().includes(q) ||
+                (item.kw && item.kw.toLowerCase().includes(q))
+            )
+          : cat.items;
+        if (filtered.length === 0) return;
+
+        const headerIconSvg = (ICONS[cat.icon] || ICONS.spark).replace('w-5 h-5', 'w-3.5 h-3.5').replace('w-4 h-4', 'w-3.5 h-3.5');
+        sectionsHtml += `
+          <div class="space-y-1.5">
+            <div class="flex items-center gap-1.5 px-0.5 text-[10.5px] font-semibold text-secondarytext">
+              <span class="text-mutedtext flex items-center">${headerIconSvg}</span>
+              <span>${escapeHtml(cat.label)}</span>
+              <span class="text-[9.5px] text-mutedtext font-normal">(${filtered.length})</span>
+            </div>
+            <div class="grid grid-cols-6 gap-1.5">
+              ${filtered
+                .map((item) => {
+                  const active = item.key === selectedKey;
+                  return `
+                    <button
+                      type="button"
+                      onclick="${onSelectFnName}('${item.key}')"
+                      title="${escapeHtml(item.label)}"
+                      aria-label="${escapeHtml(item.label)}"
+                      class="tactile-btn h-10 rounded-xl border flex items-center justify-center transition ${
+                        active
+                          ? 'bg-coral text-onaccent border-coral'
+                          : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext hover:border-coral/50'
+                      }"
+                    >${item.svg}</button>
+                  `;
+                })
+                .join('')}
+            </div>
+          </div>
+        `;
+      });
+
+      if (!sectionsHtml) {
+        sectionsHtml = `<p class="text-center text-xs text-mutedtext py-4">No icons match "${escapeHtml(searchQuery)}"</p>`;
+      }
+      gridEl.innerHTML = sectionsHtml;
+    }
+
+    function setModalIconSearch(val) {
+      modalIconSearchQuery = val || '';
+      renderCategorizedIconPicker(
+        document.getElementById('modal-icon-grid'),
+        state.modalIcon,
+        'selectModalIcon',
+        modalIconSearchQuery
+      );
+    }
+
+    function setHabitIconSearch(val) {
+      habitIconSearchQuery = val || '';
+      renderCategorizedIconPicker(
+        document.getElementById('habit-modal-icon-grid'),
+        state.habitModalIcon,
+        'selectHabitModalIcon',
+        habitIconSearchQuery
+      );
+    }
 
     const BREAK_QUOTES = [
       'A well-spent interval.',
@@ -8540,7 +8825,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             <div
               onclick="event.stopPropagation()"
               style="background-color: ${ic.hex}; color: ${ic.text};"
-              class="relative w-full max-w-[340px] rounded-[6px] p-5 pt-7 border-2 border-black/20 shadow-2xl space-y-4"
+              class="relative w-full max-w-[340px] rounded-[6px] p-5 pt-7 border-2 border-black/20 theme-popover-shadow space-y-4"
             >
               <!-- Punched spindle hole at top center of unfolded memo sheet -->
               <div class="absolute top-2.5 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-appbg border border-black/30"></div>
@@ -8880,8 +9165,71 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       renderTimeline();
     }
 
+    function hexToRgbTriplet(hex) {
+      const clean = String(hex || '#F28B82').replace('#', '').trim();
+      const full = clean.length === 3 ? clean.split('').map((ch) => ch + ch).join('') : clean;
+      const num = parseInt(full, 16);
+      if (Number.isNaN(num)) return '242, 139, 130';
+      return `${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}`;
+    }
+
+    function getLiveNowInfo() {
+      const now = new Date();
+      const hh = now.getHours();
+      const mm = now.getMinutes();
+      const ss = now.getSeconds();
+      const nowMinInt = hh * 60 + mm;
+      const nowMinFloat = nowMinInt + ss / 60;
+      const todayKey = CalLogic.formatDateKey(now);
+      const todayFraction = Math.max(0.03, Math.min(0.97, nowMinFloat / 1440));
+      return {
+        now,
+        nowMinInt,
+        nowMinFloat,
+        todayKey,
+        todayFraction,
+        todayPct: Math.round(todayFraction * 1000) / 10,
+        clockLabel: formatAxisHour(nowMinInt),
+      };
+    }
+
+    function formatRemainingShort(totalMinutes) {
+      const mins = Math.max(1, Math.ceil(totalMinutes));
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      if (h > 0 && m > 0) return `${h}h ${m}m`;
+      if (h > 0) return `${h}h`;
+      return `${m}m`;
+    }
+
+    function computeProjectLiveTimeProgress(startDateKey, endDateKey, todayKey, todayFraction) {
+      const startObj = CalLogic.parseDateKey(startDateKey);
+      const endObj = CalLogic.parseDateKey(endDateKey);
+      const todayObj = CalLogic.parseDateKey(todayKey);
+      const dayMs = 86400000;
+      const totalDays = Math.max(1, Math.round((endObj - startObj) / dayMs) + 1);
+      const diffFromStart = Math.round((todayObj - startObj) / dayMs);
+      const diffToEnd = Math.round((endObj - todayObj) / dayMs);
+
+      if (diffFromStart < 0) {
+        const daysUntil = Math.abs(diffFromStart);
+        return { state: 'upcoming', pct: 0, label: `In ${daysUntil}d` };
+      }
+      if (diffToEnd < 0) {
+        return { state: 'ended', pct: 100, label: 'Elapsed' };
+      }
+      const elapsedDays = diffFromStart + todayFraction;
+      const pct = Math.max(2, Math.min(99, Math.round((elapsedDays / totalDays) * 100)));
+      if (diffToEnd === 0) {
+        const remMins = Math.max(1, Math.round((1 - todayFraction) * 1440));
+        return { state: 'active', pct, label: `${formatRemainingShort(remMins)} left` };
+      }
+      return { state: 'active', pct, label: `${diffToEnd}d left` };
+    }
+
     function renderProjectsTimelineView(container) {
-      const todayKey = getTodayDateKey();
+      const liveNow = getLiveNowInfo();
+      const todayKey = liveNow.todayKey;
       const projects = state.projects || [];
 
       if (projects.length === 0) {
@@ -8916,10 +9264,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         .map((p) => {
           const c = CAPSULE_COLORS[p.color] || CAPSULE_COLORS.coral;
           const pct = p.totalCount > 0 ? Math.round((p.doneCount / p.totalCount) * 100) : 0;
+          const timeProg = computeProjectLiveTimeProgress(p.startDate, p.endDate, todayKey, liveNow.todayFraction);
           const isFocused = state.focusedProjectId != null && String(state.focusedProjectId) === String(p.id);
           const cardStyle = isFocused
             ? `border: 1.5px solid ${c.hex}; border-top: 3px solid ${c.hex};`
             : `border-top: 3px solid ${c.hex};`;
+          const timeStatusColor = timeProg.state === 'active' ? c.hex : 'rgb(var(--color-mutedtext))';
           return `
             <div class="px-1 pb-1.5">
               <button
@@ -8940,17 +9290,33 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                     ${p.doneCount}/${p.totalCount}
                   </span>
                 </div>
-                <p class="text-[9.5px] text-secondarytext font-medium truncate">
-                  ${CalLogic.formatHumanDate(p.startDate, 'compact')} – ${CalLogic.formatHumanDate(p.endDate, 'compact')}
-                </p>
-                <div class="w-full h-1 rounded-full bg-pillbg overflow-hidden">
-                  <div class="h-full rounded-full transition-all" style="width:${pct}%; background-color:${c.hex};"></div>
+                <div class="flex items-center justify-between gap-1 text-[9.5px] font-medium">
+                  <span class="text-secondarytext truncate">
+                    ${CalLogic.formatHumanDate(p.startDate, 'compact')} – ${CalLogic.formatHumanDate(p.endDate, 'compact')}
+                  </span>
+                  <span style="color:${timeStatusColor};" class="font-semibold tabular-nums whitespace-nowrap flex-shrink-0">
+                    ${timeProg.label}
+                  </span>
+                </div>
+                <div class="space-y-1">
+                  <div class="w-full h-1 rounded-full bg-pillbg overflow-hidden relative" title="Time elapsed: ${timeProg.pct}%">
+                    <div class="h-full rounded-full transition-all duration-500" style="width:${timeProg.pct}%; background-color:${c.hex}; opacity:0.9;"></div>
+                  </div>
+                  ${
+                    p.totalCount > 0
+                      ? `<div class="w-full h-[3px] rounded-full bg-pillbg/80 overflow-hidden" title="Checkpoints done: ${pct}%">
+                           <div class="h-full rounded-full transition-all" style="width:${pct}%; background-color:${c.hex}; opacity:0.55;"></div>
+                         </div>`
+                      : ''
+                  }
                 </div>
               </button>
             </div>
           `;
         })
         .join('');
+
+      const mutedDashBg = `repeating-linear-gradient(to bottom, rgb(var(--color-mutedtext) / 0.42) 0px, rgb(var(--color-mutedtext) / 0.42) 5px, transparent 5px, transparent 10px)`;
 
       const rowsHtml = timeline.rows
         .map((row) => {
@@ -8959,11 +9325,15 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           const dayNum = dObj.getDate();
           const weekdayShort = CalLogic.WEEKDAY_NAMES_SHORT[dObj.getDay()];
           const isSelectedDate = row.dateKey === state.selectedDate;
+          const remainingTodayLabel = formatRemainingShort(1440 - liveNow.nowMinFloat);
 
           const cellsHtml = row.cells
             .map((cell, pIdx) => {
               const proj = timeline.projects[pIdx];
               const c = CAPSULE_COLORS[cell.color] || CAPSULE_COLORS.coral;
+              const rgb = hexToRgbTriplet(c.hex);
+              const colorDashBg = `repeating-linear-gradient(to bottom, ${c.hex} 0px, ${c.hex} 5px, transparent 5px, transparent 10px)`;
+
               const spinePosStyle = cell.isStart && cell.isEnd
                 ? 'display:none;'
                 : cell.isStart
@@ -8972,9 +9342,26 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                     ? 'top: -4px; bottom: 50%;'
                     : 'top: -4px; bottom: -4px;';
 
-              const spineHtml = cell.inSpan
-                ? `<div class="pointer-events-none absolute left-1/2 -translate-x-1/2 w-[2.5px] z-0 opacity-75" style="${spinePosStyle} background-image: repeating-linear-gradient(to bottom, ${c.hex} 0px, ${c.hex} 5px, transparent 5px, transparent 10px);"></div>`
-                : '';
+              let spineHtml = '';
+              if (cell.inSpan && !(cell.isStart && cell.isEnd)) {
+                if (row.isPast) {
+                  spineHtml = `<div class="pointer-events-none absolute left-1/2 -translate-x-1/2 w-[3px] z-0" style="${spinePosStyle} background-image: ${colorDashBg};"></div>`;
+                } else if (row.isToday) {
+                  let fillPct = liveNow.todayPct;
+                  if (cell.isStart) {
+                    fillPct = liveNow.todayPct <= 50 ? 0 : Math.min(100, ((liveNow.todayPct - 50) / 50) * 100);
+                  } else if (cell.isEnd) {
+                    fillPct = liveNow.todayPct >= 50 ? 100 : Math.max(0, (liveNow.todayPct / 50) * 100);
+                  }
+                  spineHtml = `
+                    <div class="pointer-events-none absolute left-1/2 -translate-x-1/2 w-[3px] z-0 overflow-hidden" style="${spinePosStyle} background-image: ${mutedDashBg};">
+                      <div class="w-full" style="height:${fillPct.toFixed(1)}%; background-image: ${colorDashBg};"></div>
+                    </div>
+                  `;
+                } else {
+                  spineHtml = `<div class="pointer-events-none absolute left-1/2 -translate-x-1/2 w-[3px] z-0" style="${spinePosStyle} background-image: ${mutedDashBg};"></div>`;
+                }
+              }
 
               let contentHtml = '';
               if (cell.checkpoints.length > 0) {
@@ -8982,18 +9369,39 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   .map((cp) => {
                     const isDue = cp.isDue;
                     const isDone = Boolean(cp.done);
-                    const nodeStyle = isDone
-                      ? `background-color:${c.hex}; border-color:${c.hex}; color:${c.text}; opacity:0.75;`
-                      : isDue
-                        ? `background-color:${c.hex}; border-color:${c.hex}; color:${c.text};`
-                        : `background-color:rgb(var(--color-sheetbg)); border-color:${c.hex}; color:${c.hex};`;
+                    const isTodayActive = row.isToday && !isDone;
+                    const isPastElapsed = row.isPast && !isDone;
+
+                    let nodeInnerHtml = '';
+                    let nodeStyle = '';
+                    if (isDone) {
+                      nodeStyle = `background-color:${c.hex}; border-color:${c.hex}; color:${c.text}; opacity:0.82;`;
+                      nodeInnerHtml = `<span class="relative z-10">✓</span>`;
+                    } else if (isPastElapsed) {
+                      nodeStyle = `background-color:${c.hex}; border-color:${c.hex}; color:${c.text};`;
+                      nodeInnerHtml = `<span class="relative z-10">${cp.number}</span>`;
+                    } else if (isTodayActive) {
+                      const textCol = liveNow.todayPct >= 58 ? c.text : c.hex;
+                      nodeStyle = `background-color:rgb(var(--color-pillbg)); border-color:${c.hex}; color:${textCol};`;
+                      nodeInnerHtml = `
+                        <span
+                          class="pointer-events-none absolute inset-x-0 top-0"
+                          style="height:${liveNow.todayPct}%; background: linear-gradient(to bottom, ${c.hex} 0%, rgba(${rgb}, 0.88) 72%, rgba(${rgb}, 0.42) 100%);"
+                        ></span>
+                        <span class="relative z-10">${cp.number}</span>
+                      `;
+                    } else {
+                      nodeStyle = `background-color:rgb(var(--color-pillbg)); border-color:${c.hex}99; color:${c.hex};`;
+                      nodeInnerHtml = `<span class="relative z-10">${cp.number}</span>`;
+                    }
+
                     const cardStyle = isDue
                       ? `border: 1.5px solid ${c.hex}; background-color:rgb(var(--color-cardbg));`
                       : `border-color:rgb(var(--color-borderline)); background-color:rgb(var(--color-cardbg));`;
                     const statusBadge = isDone
                       ? `<span class="text-[8.5px] font-bold uppercase tracking-wider text-mutedtext">Done</span>`
                       : cp.status === 'due-today'
-                        ? `<span class="text-[8.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded" style="background-color:${c.hex}; color:${c.text};">Due Today</span>`
+                        ? `<span class="inline-flex items-center gap-1"><span class="text-[8.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded" style="background-color:${c.hex}; color:${c.text};">Due Today</span><span class="text-[8.5px] font-semibold tabular-nums" style="color:${c.hex};">${remainingTodayLabel} left</span></span>`
                         : cp.status === 'overdue'
                           ? `<span class="text-[8.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded" style="background-color:${c.hex}; color:${c.text};">Overdue</span>`
                           : '';
@@ -9010,9 +9418,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                       >
                         <span
                           style="${nodeStyle}"
-                          class="w-5 h-5 rounded-full border-2 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5 transition"
+                          class="relative overflow-hidden w-5 h-5 rounded-full border-2 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5 transition"
                         >
-                          ${isDone ? '✓' : cp.number}
+                          ${nodeInnerHtml}
                         </span>
                         <span class="min-w-0 flex-1 space-y-0.5">
                           <span class="block text-[11px] font-semibold leading-snug ${isDone ? 'line-through text-mutedtext' : 'text-primarytext'}">
@@ -9027,23 +9435,28 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   .join('');
               } else if (cell.isStart || cell.isEnd) {
                 const markerLabel = cell.isStart && cell.isEnd ? 'Start / End' : cell.isStart ? 'Start' : 'Target End';
+                const markerElapsed = row.isPast || (row.isToday && cell.isStart);
+                const pillStyle = markerElapsed
+                  ? `background-color:${c.hex}; border-color:${c.hex}; color:${c.text};`
+                  : `border-color:${c.hex}88; color:${c.hex}; background-color:rgb(var(--color-pillbg));`;
+                const dotColor = markerElapsed ? c.text : c.hex;
                 contentHtml = `
                   <div class="relative z-10 flex items-center justify-center py-1">
                     <span
-                      style="border-color:${c.hex}88; color:${c.hex}; background-color:rgb(var(--color-sheetbg));"
+                      style="${pillStyle}"
                       class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-wider"
                     >
-                      <span class="w-1.5 h-1.5 rounded-full" style="background-color:${c.hex};"></span>
+                      <span class="w-1.5 h-1.5 rounded-full" style="background-color:${dotColor};"></span>
                       <span>${markerLabel}</span>
                     </span>
                   </div>
                 `;
               } else if (cell.inSpan && row.isToday) {
                 contentHtml = `
-                  <div class="relative z-10 flex items-center justify-center py-1.5">
+                  <div class="pointer-events-none absolute left-1/2 -translate-x-1/2 -translate-y-1/2 z-20" style="top:${liveNow.todayPct}%;">
                     <span
-                      style="background-color:${c.hex}; box-shadow: 0 0 0 3px rgb(var(--color-sheetbg));"
-                      class="w-2.5 h-2.5 rounded-full"
+                      style="background-color:${c.hex}; box-shadow: 0 0 0 3px rgb(var(--color-sheetbg)), 0 0 8px rgba(${rgb}, 0.55);"
+                      class="block w-2.5 h-2.5 rounded-full"
                     ></span>
                   </div>
                 `;
@@ -9055,17 +9468,20 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                       ${cell.tasks
                         .map((t) => {
                           const doneT = isTaskDoneOnDay(t, row.dateKey);
+                          const tEnd = t.startMin + (t.durationMin || 0);
+                          const tActive = row.isToday && t.durationMin > 0 && liveNow.nowMinFloat >= t.startMin && liveNow.nowMinFloat < tEnd;
                           return `
                             <button
                               type="button"
                               onclick="handleTaskDoubleClickTap(${t.id})"
                               title="Double-click to edit task"
                               style="border-left: 2.5px solid ${c.hex}; background-color: rgb(var(--color-pillbg));"
-                              class="tactile-btn w-full border border-borderline rounded-lg px-2 py-1 text-left text-[10px] font-medium truncate ${
+                              class="tactile-btn w-full border border-borderline rounded-lg px-2 py-1 text-left text-[10px] font-medium flex items-center justify-between gap-1 ${
                                 doneT ? 'line-through text-mutedtext' : 'text-primarytext'
                               }"
                             >
-                              ${escapeHtml(t.title)}
+                              <span class="truncate">${escapeHtml(t.title)}</span>
+                              ${tActive ? `<span style="color:${c.hex};" class="text-[8.5px] font-bold flex-shrink-0">${formatRemainingShort(tEnd - liveNow.nowMinFloat)}</span>` : ''}
                             </button>
                           `;
                         })
@@ -9074,7 +9490,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   : '';
 
               return `
-                <div class="relative px-1 py-2 min-h-[46px] flex flex-col justify-center">
+                <div class="relative px-1 py-2 min-h-[48px] flex flex-col justify-center">
                   ${spineHtml}
                   ${contentHtml}
                   ${linkedTasksHtml}
@@ -9092,13 +9508,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             >
               ${
                 row.isToday
-                  ? `<div class="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-coral z-20"></div>`
+                  ? `<div class="pointer-events-none absolute inset-x-0 h-[1.5px] bg-coral/65 z-10" style="top:${liveNow.todayPct}%;"></div>`
                   : ''
               }
               <button
                 type="button"
                 onclick="selectCalendarDate('${row.dateKey}')"
-                class="relative z-10 pr-1.5 py-2 flex flex-col items-end justify-center text-right group"
+                class="relative z-20 pr-1.5 py-2 flex flex-col items-end justify-center text-right group"
                 title="Jump calendar to ${CalLogic.formatHumanDate(row.dateKey, 'compact-year')}"
               >
                 ${
@@ -9111,7 +9527,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 } group-hover:text-coral transition">
                   ${monthShort} ${dayNum}
                 </span>
-                <span class="text-[9px] font-medium text-mutedtext leading-tight">${weekdayShort}</span>
+                ${
+                  row.isToday
+                    ? `<span class="text-[9.5px] font-bold text-primarytext tabular-nums leading-tight">${liveNow.clockLabel}</span>`
+                    : `<span class="text-[9px] font-medium text-mutedtext leading-tight">${weekdayShort}</span>`
+                }
               </button>
               ${cellsHtml}
             </div>
@@ -9153,8 +9573,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         return;
       }
 
-      const currentDateKey = state.selectedDate || getTodayDateKey();
-      const todayKey = getTodayDateKey();
+      const liveNow = getLiveNowInfo();
+      const todayKey = liveNow.todayKey;
+      const currentDateKey = state.selectedDate || todayKey;
+      const dayRel = CalLogic.compareDateKeys(currentDateKey, todayKey);
       const tasks = getFilteredTasks();
 
       if (state.compartmentFilter === 'completed') {
@@ -9284,10 +9706,38 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
 
       const projectById = new Map((state.projects || []).map((p) => [p.id, p]));
+      const accentHex = (ACCENT_RGB[state.accentKey] || ACCENT_RGB.coral).hex;
+      const mutedDashBg = `repeating-linear-gradient(to bottom, rgb(var(--color-mutedtext) / 0.42) 0px, rgb(var(--color-mutedtext) / 0.42) 5px, transparent 5px, transparent 10px)`;
+
+      // Live "Now" lead-in if viewing today before the first scheduled block
+      if (dayRel === 0 && tasks.length > 0 && liveNow.nowMinFloat < tasks[0].startMin) {
+        const firstColor = (CAPSULE_COLORS[tasks[0].color] || CAPSULE_COLORS.coral).hex;
+        const minsUntilFirst = tasks[0].startMin - liveNow.nowMinFloat;
+        html += `
+          <div class="timeline-capsule grid ${state.showTimes ? 'grid-cols-[44px_64px_1fr]' : 'grid-cols-[64px_1fr]'} items-stretch py-1 pr-2">
+            ${
+              state.showTimes
+                ? `<div class="text-right pr-2 pt-0.5 text-[10px] font-bold text-primarytext tabular-nums">${liveNow.clockLabel}</div>`
+                : ''
+            }
+            <div class="flex flex-col items-center">
+              <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color:${accentHex}; box-shadow: 0 0 0 3px rgb(var(--color-sheetbg));"></span>
+              <div class="w-[3.5px] h-10 rounded-full mt-1" style="background-image: ${mutedDashBg};"></div>
+            </div>
+            <div class="pl-2.5 pb-1 flex flex-col justify-center gap-1.5">
+              <div class="flex items-center gap-1.5 text-[11.5px] text-secondarytext">
+                <svg class="w-3.5 h-3.5 text-mutedtext flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v5l3 2"/></svg>
+                <span>Next block in <span class="font-semibold" style="color:${firstColor};">${formatRemainingShort(minsUntilFirst)}</span></span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
 
       tasks.forEach((task, idx) => {
         const prev = idx > 0 ? tasks[idx - 1] : null;
         const c = CAPSULE_COLORS[task.color] || CAPSULE_COLORS.coral;
+        const rgb = hexToRgbTriplet(c.hex);
         const endMin = task.startMin + task.durationMin;
         const pillHeight = task.durationMin <= 0 ? 54 : Math.max(66, Math.min(144, Math.round(task.durationMin * 1.45)));
         const taskDone = isTaskDoneOnDay(task, currentDateKey);
@@ -9300,32 +9750,126 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         const gapMin = prev !== null ? task.startMin - prevEnd : 0;
 
         if (prev && !isOverlapping) {
+          let gapProgress = 0;
+          if (dayRel < 0) gapProgress = 1;
+          else if (dayRel > 0) gapProgress = 0;
+          else if (liveNow.nowMinFloat >= task.startMin) gapProgress = 1;
+          else if (liveNow.nowMinFloat <= prevEnd) gapProgress = 0;
+          else gapProgress = (liveNow.nowMinFloat - prevEnd) / Math.max(1, task.startMin - prevEnd);
+
+          const isNowInGap = dayRel === 0 && liveNow.nowMinFloat > prevEnd && liveNow.nowMinFloat < task.startMin;
+          const gapPct = Math.round(gapProgress * 1000) / 10;
+          const colorDashBg = `repeating-linear-gradient(to bottom, ${prevColor} 0px, ${prevColor} 5px, transparent 5px, transparent 10px)`;
+
           if (gapMin >= 25) {
+            const spineHeight = gapMin >= 240 ? 96 : gapMin >= 90 ? 74 : 58;
             const quote = BREAK_QUOTES[idx % BREAK_QUOTES.length];
-            html += `
-              <div class="timeline-capsule grid ${state.showTimes ? 'grid-cols-[44px_64px_1fr]' : 'grid-cols-[64px_1fr]'} items-center py-1 pr-2">
-                ${state.showTimes ? `<div class="text-right pr-2 text-[9.5px] font-medium text-mutedtext">${formatAxisHour(prevEnd)}</div>` : ''}
-                <div class="flex justify-center">
-                  <div
-                    class="w-[4px] h-14 rounded-full"
-                    style="background-image: repeating-linear-gradient(to bottom, ${prevColor} 0px, ${prevColor} 5px, transparent 5px, transparent 10px);"
-                  ></div>
-                </div>
+            const midMin = Math.round((prevEnd + task.startMin) / 2);
+            const suggestStartMin = isNowInGap
+              ? Math.min(Math.max(prevEnd, Math.ceil(liveNow.nowMinInt / 5) * 5), Math.max(prevEnd, task.startMin - 5))
+              : prevEnd;
+
+            let leftAxisHtml = '';
+            if (state.showTimes) {
+              if (isNowInGap) {
+                const nowTopPct = Math.max(12, Math.min(86, Math.round(gapPct)));
+                const showRefTick = gapMin >= 90;
+                const refTopPct = nowTopPct < 55 ? 76 : 22;
+                const refMin = nowTopPct < 55 ? Math.round(liveNow.nowMinInt + (task.startMin - liveNow.nowMinInt) * 0.55) : Math.round(prevEnd + (liveNow.nowMinInt - prevEnd) * 0.45);
+                leftAxisHtml = `
+                  <div class="relative self-stretch pr-2 text-right">
+                    <span class="absolute right-2 -translate-y-1/2 text-[10px] font-bold text-primarytext tabular-nums leading-none" style="top:${nowTopPct}%;">${liveNow.clockLabel}</span>
+                    ${showRefTick ? `<span class="absolute right-2 -translate-y-1/2 text-[9.5px] font-medium text-mutedtext tabular-nums leading-none" style="top:${refTopPct}%;">${formatAxisHour(refMin)}</span>` : ''}
+                  </div>
+                `;
+              } else {
+                leftAxisHtml = `<div class="text-right pr-2 text-[9.5px] font-medium text-mutedtext tabular-nums">${formatAxisHour(midMin)}</div>`;
+              }
+            }
+
+            let gapBodyHtml = '';
+            if (gapProgress >= 1) {
+              gapBodyHtml = `
                 <div class="pl-2.5 flex items-center gap-2 text-[11.5px] text-secondarytext">
                   <svg class="w-3.5 h-3.5 text-mutedtext flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 2h12M6 22h12M8 2v4l4 4 4-4V2M8 22v-4l4-4 4 4v4"/></svg>
                   <span>${quote}</span>
                 </div>
+              `;
+            } else if (isNowInGap) {
+              const remGap = formatRemainingShort(task.startMin - liveNow.nowMinFloat);
+              gapBodyHtml = `
+                <div class="pl-2.5 space-y-1.5 py-0.5">
+                  <div class="flex items-center gap-1.5 text-[11.5px] text-secondarytext">
+                    <svg class="w-3.5 h-3.5 text-mutedtext flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v5l3 2"/></svg>
+                    <span>Brief calm for <span class="font-semibold" style="color:${prevColor};">${remGap}</span>, then go!</span>
+                  </div>
+                  <button
+                    type="button"
+                    onclick="openTaskModal(${suggestStartMin})"
+                    class="tactile-btn inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-pillbg border border-borderline text-[10.5px] font-semibold text-coral hover:border-coral/50 transition"
+                  >
+                    <span class="w-3.5 h-3.5 rounded-full bg-coral text-onaccent flex items-center justify-center text-[11px] font-bold leading-none">+</span>
+                    <span>Add Task</span>
+                  </button>
+                </div>
+              `;
+            } else {
+              const gapDurStr = formatRemainingShort(gapMin);
+              gapBodyHtml = `
+                <div class="pl-2.5 space-y-1.5 py-0.5">
+                  <div class="flex items-center gap-1.5 text-[11.5px] text-secondarytext">
+                    <svg class="w-3.5 h-3.5 text-mutedtext flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v5l3 2"/></svg>
+                    <span>Major strides in <span class="font-semibold" style="color:${c.hex};">${gapDurStr}</span>?</span>
+                  </div>
+                  <button
+                    type="button"
+                    onclick="openTaskModal(${suggestStartMin})"
+                    class="tactile-btn inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-pillbg border border-borderline text-[10.5px] font-semibold text-coral hover:border-coral/50 transition"
+                  >
+                    <span class="w-3.5 h-3.5 rounded-full bg-coral text-onaccent flex items-center justify-center text-[11px] font-bold leading-none">+</span>
+                    <span>Add Task</span>
+                  </button>
+                </div>
+              `;
+            }
+
+            html += `
+              <div class="timeline-capsule grid ${state.showTimes ? 'grid-cols-[44px_64px_1fr]' : 'grid-cols-[64px_1fr]'} items-center py-1 pr-2">
+                ${leftAxisHtml}
+                <div class="flex justify-center">
+                  <div
+                    class="relative w-[4px] rounded-full overflow-hidden"
+                    style="height:${spineHeight}px; background-image: ${mutedDashBg};"
+                  >
+                    <div
+                      class="absolute inset-x-0 top-0"
+                      style="height:${gapPct}%; background-image: ${colorDashBg};"
+                    ></div>
+                  </div>
+                </div>
+                ${gapBodyHtml}
               </div>
             `;
           } else {
             html += `
               <div class="timeline-capsule grid ${state.showTimes ? 'grid-cols-[44px_64px_1fr]' : 'grid-cols-[64px_1fr]'} items-center pr-2">
-                ${state.showTimes ? '<div></div>' : ''}
+                ${
+                  state.showTimes
+                    ? isNowInGap
+                      ? `<div class="text-right pr-2 text-[10px] font-bold text-primarytext tabular-nums">${liveNow.clockLabel}</div>`
+                      : '<div></div>'
+                    : ''
+                }
                 <div class="flex justify-center">
                   <div
-                    class="w-[4px] h-5 rounded-full"
-                    style="background: linear-gradient(to bottom, ${prevColor}, ${c.hex});"
-                  ></div>
+                    class="relative w-[4px] h-5 rounded-full overflow-hidden"
+                    style="background-color: rgb(var(--color-mutedtext) / 0.35);"
+                  >
+                    <div
+                      class="absolute inset-x-0 top-0"
+                      style="height:${gapPct}%; background: linear-gradient(to bottom, ${prevColor}, ${c.hex});"
+                    ></div>
+                  </div>
                 </div>
                 <div></div>
               </div>
@@ -9333,14 +9877,69 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           }
         }
 
-        const timeLabel =
-          task.durationMin === 0
+        // Determine live temporal state of the task capsule
+        const isPastTask =
+          dayRel < 0 ||
+          (dayRel === 0 && (task.durationMin <= 0 ? liveNow.nowMinFloat >= task.startMin : liveNow.nowMinFloat >= endMin));
+        const isActiveTask =
+          dayRel === 0 && task.durationMin > 0 && liveNow.nowMinFloat >= task.startMin && liveNow.nowMinFloat < endMin;
+
+        const elapsedPct = isActiveTask
+          ? Math.max(4, Math.min(96, ((liveNow.nowMinFloat - task.startMin) / task.durationMin) * 100))
+          : isPastTask
+            ? 100
+            : 0;
+
+        let capsuleBgStyle = '';
+        let capsuleOverlayHtml = '';
+        if (isPastTask) {
+          capsuleBgStyle = `height:${pillHeight}px; background-color:${c.hex}; color:${c.text};`;
+        } else if (isActiveTask) {
+          const iconColor = elapsedPct >= 58 ? c.text : c.hex;
+          capsuleBgStyle = `height:${pillHeight}px; background-color:rgb(var(--color-pillbg)); color:${iconColor};`;
+          capsuleOverlayHtml = `
+            <div
+              class="pointer-events-none absolute inset-x-0 top-0 transition-all duration-700"
+              style="height:${elapsedPct.toFixed(1)}%; background: linear-gradient(to bottom, ${c.hex} 0%, rgba(${rgb}, 0.92) 68%, rgba(${rgb}, 0.38) 100%); box-shadow: 0 4px 14px rgba(${rgb}, 0.34);"
+            ></div>
+          `;
+        } else {
+          capsuleBgStyle = `height:${pillHeight}px; background-color:rgb(var(--color-pillbg)); color:${c.hex};`;
+        }
+
+        const timeLabel = isActiveTask
+          ? `<span class="font-semibold" style="color:${c.hex};">${formatRemainingShort(endMin - liveNow.nowMinFloat)} remaining</span>`
+          : task.durationMin === 0
             ? formatTime12(task.startMin)
             : `${formatTime12(task.startMin)} - ${formatTime12(endMin)} ${formatDuration(task.durationMin)}`;
+
+        let timeAxisColHtml = '';
+        if (state.showTimes) {
+          if (isActiveTask) {
+            const clampedNowPct = Math.max(20, Math.min(80, Math.round(elapsedPct)));
+            const showStart = clampedNowPct > 28;
+            const showEnd = clampedNowPct < 72;
+            timeAxisColHtml = `
+              <div class="relative self-stretch pr-2 text-right text-[10px] font-medium text-mutedtext tabular-nums">
+                ${showStart ? `<span class="absolute right-2 top-1 leading-none">${formatAxisHour(task.startMin)}</span>` : ''}
+                <span class="absolute right-2 -translate-y-1/2 font-bold text-primarytext leading-none" style="top:${clampedNowPct}%;">${liveNow.clockLabel}</span>
+                ${showEnd ? `<span class="absolute right-2 bottom-1 leading-none">${formatAxisHour(endMin)}</span>` : ''}
+              </div>
+            `;
+          } else {
+            timeAxisColHtml = `
+              <div class="flex flex-col ${task.durationMin > 0 ? 'justify-between' : 'justify-center'} text-right pr-2 text-[10px] font-medium text-mutedtext tabular-nums self-stretch py-1.5">
+                <span>${formatAxisHour(task.startMin)}</span>
+                ${task.durationMin > 0 ? `<span>${formatAxisHour(endMin)}</span>` : ''}
+              </div>
+            `;
+          }
+        }
 
         html += `
           <div
             data-task-row="${task.id}"
+            data-task-temporal="${isActiveTask ? 'active' : isPastTask ? 'past' : 'upcoming'}"
             onpointerdown="handleTimelineDragStart(event, ${task.id})"
             onpointermove="handleTimelineDragMove(event, ${task.id})"
             onpointerup="handleTimelineDragEnd(event, ${task.id})"
@@ -9350,26 +9949,20 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               isOverlapping ? '-mt-3.5 pt-1' : 'py-0.5'
             }"
           >
-            ${
-              state.showTimes
-                ? `
-                <div class="flex flex-col justify-between text-right pr-2 text-[10px] font-medium text-mutedtext self-stretch py-1.5">
-                  <span>${formatAxisHour(task.startMin)}</span>
-                  ${task.durationMin > 0 ? `<span>${formatAxisHour(endMin)}</span>` : ''}
-                </div>
-              `
-                : ''
-            }
+            ${timeAxisColHtml}
 
             <div class="flex justify-center relative">
               <div
                 data-capsule-pill="${task.id}"
-                style="height:${pillHeight}px; background-color:${c.hex}; color:${c.text};"
-                class="w-[54px] rounded-full flex items-center justify-center relative ${
+                style="${capsuleBgStyle}"
+                class="w-[54px] rounded-full overflow-hidden flex items-center justify-center relative ${
                   isOverlapping ? 'z-20 ring-[3px] ring-sheetbg' : 'z-10'
                 }"
               >
-                ${ICONS[task.icon] || ICONS.at}
+                ${capsuleOverlayHtml}
+                <span class="relative z-10 flex items-center justify-center">
+                  ${ICONS[task.icon] || ICONS.at}
+                </span>
               </div>
             </div>
 
@@ -10241,7 +10834,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       renderTimeline();
     }
 
-    function openTaskModal() {
+    function openTaskModal(prefillStartMin = null) {
       toggleTimelineFabMenu(false);
       state.schedulingQueueItemId = null;
       state.editingTaskId = null;
@@ -10266,7 +10859,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       state.modalColor = taskColorKeys[Math.floor(Math.random() * taskColorKeys.length)] || 'coral';
       state.modalIcon = 'at';
       state.modalAllDay = false;
-      state.modalStartMin = 510;
+      state.modalStartMin =
+        typeof prefillStartMin === 'number' && !Number.isNaN(prefillStartMin)
+          ? Math.max(0, Math.min(1435, Math.round(prefillStartMin)))
+          : 510;
       state.modalDurationMin = 30;
       state.modalEnergyTier = 1;
       state.modalPriority = 2;
@@ -10423,6 +11019,17 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (!picker) return;
       const show = typeof force === 'boolean' ? force : picker.classList.contains('hidden');
       picker.classList.toggle('hidden', !show);
+      if (show) {
+        modalIconSearchQuery = '';
+        const searchEl = document.getElementById('modal-icon-search');
+        if (searchEl) searchEl.value = '';
+        renderCategorizedIconPicker(
+          document.getElementById('modal-icon-grid'),
+          state.modalIcon,
+          'selectModalIcon',
+          ''
+        );
+      }
     }
 
     function selectModalIcon(iconKey) {
@@ -10529,20 +11136,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       const iconGrid = document.getElementById('modal-icon-grid');
       if (iconGrid) {
-        iconGrid.innerHTML = Object.entries(ICONS)
-          .map(([k, svg]) => {
-            const active = k === state.modalIcon;
-            return `
-              <button
-                type="button"
-                onclick="selectModalIcon('${k}')"
-                class="tactile-btn h-10 rounded-xl border flex items-center justify-center transition ${
-                  active ? 'bg-coral text-onaccent border-coral' : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext'
-                }"
-              >${svg}</button>
-            `;
-          })
-          .join('');
+        renderCategorizedIconPicker(iconGrid, state.modalIcon, 'selectModalIcon', modalIconSearchQuery);
       }
 
       const modalDateKey = CalLogic.isValidDateKey(state.modalDateKey)
@@ -11008,7 +11602,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   }
                   style="transform: translateY(${offsetY}px) scale(${scale}); z-index: ${20 - depth};"
                   class="tinder-card absolute inset-x-1 top-2 h-[235px] rounded-[28px] bg-cardbg border ${
-                    isTop ? 'border-borderline cursor-grab active:cursor-grabbing shadow-xl' : 'border-borderline/60 opacity-75 pointer-events-none'
+                    isTop ? 'border-borderline cursor-grab active:cursor-grabbing' : 'border-borderline/60 opacity-75 pointer-events-none'
                   } p-5 flex flex-col justify-between"
                 >
                   <div class="flex items-center justify-between gap-2">
@@ -11556,22 +12150,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const yearNum = d.getFullYear();
       const dayNum = d.getDate();
       const weekday = CalLogic.WEEKDAY_NAMES_FULL[d.getDay()].toUpperCase();
-      const isFinal = Boolean(meta.isFinal);
-      const gapDays = Number(meta.gapDays) || 1;
       const isHabit = meta.mode === 'habit';
 
-      const statusText = isFinal
-        ? (isHabit ? 'Punched today • Back on track' : 'Today')
-        : (isHabit
-          ? `Last punched ${gapDays}d ago`
-          : `${gapDays === 1 ? '1 day' : `${gapDays} days`} ago`);
-
       const topContextHtml = isHabit && meta.habitTitle
-        ? `<div class="inline-flex items-center gap-1.5 text-secondarytext max-w-full">
+        ? `<div class="inline-flex items-center gap-1.5 text-secondarytext max-w-full mb-3">
             <span class="w-3.5 h-3.5 text-coral flex items-center justify-center shrink-0 [&>svg]:w-3.5 [&>svg]:h-3.5">${ICONS[meta.habitIcon] || ICONS.spark}</span>
             <span class="text-[11px] font-semibold text-primarytext truncate">${escapeHtml(meta.habitTitle)}</span>
           </div>`
-        : `<span class="text-[10px] font-semibold uppercase tracking-[0.2em] ${isFinal ? 'text-coral' : 'text-mutedtext'}">${isFinal ? 'Today' : 'Catching up'}</span>`;
+        : '';
 
       return `
         <div class="w-full h-full rounded-b-[16px] bg-cardbg border-x border-b border-borderline/75 overflow-hidden flex flex-col select-none shadow-[0_6px_16px_rgba(0,0,0,0.2)]">
@@ -11579,13 +12165,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             <span class="font-display text-[11px] font-bold tracking-[0.15em]">${monthName}</span>
             <span class="text-[11px] font-bold tabular-nums opacity-90">${yearNum}</span>
           </div>
-          <div class="flex-1 px-4 py-5 flex flex-col items-center justify-between text-center">
+          <div class="flex-1 px-4 py-5 flex flex-col items-center justify-center text-center">
             ${topContextHtml}
             <div class="py-1">
               <p class="font-display text-[82px] leading-[0.92] font-bold tracking-tight text-primarytext tabular-nums">${dayNum}</p>
               <p class="mt-2.5 text-[11px] font-bold uppercase tracking-[0.22em] text-secondarytext">${weekday}</p>
             </div>
-            <p class="text-[11px] font-medium ${isFinal ? 'text-coral font-semibold' : 'text-secondarytext'} truncate max-w-full">${escapeHtml(statusText)}</p>
           </div>
         </div>
       `;
@@ -12123,6 +12708,17 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (!picker) return;
       const show = typeof force === 'boolean' ? force : picker.classList.contains('hidden');
       picker.classList.toggle('hidden', !show);
+      if (show) {
+        habitIconSearchQuery = '';
+        const searchEl = document.getElementById('habit-modal-icon-search');
+        if (searchEl) searchEl.value = '';
+        renderCategorizedIconPicker(
+          document.getElementById('habit-modal-icon-grid'),
+          state.habitModalIcon,
+          'selectHabitModalIcon',
+          ''
+        );
+      }
     }
 
     function selectHabitModalIcon(iconKey) {
@@ -12169,14 +12765,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       const grid = document.getElementById('habit-modal-icon-grid');
       if (grid) {
-        grid.innerHTML = Object.entries(ICONS)
-          .map(([k, svg]) => {
-            const active = k === state.habitModalIcon;
-            return `<button type="button" onclick="selectHabitModalIcon('${k}')" class="tactile-btn h-10 rounded-xl border flex items-center justify-center ${
-              active ? 'bg-coral text-onaccent border-coral' : 'bg-pillbg border-borderline text-secondarytext'
-            }">${svg}</button>`;
-          })
-          .join('');
+        renderCategorizedIconPicker(grid, state.habitModalIcon, 'selectHabitModalIcon', habitIconSearchQuery);
       }
 
       const timeText = document.getElementById('habit-modal-time-text');
@@ -16880,6 +17469,35 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       renderNotificationSettingsControls();
       appBootReady = true;
       checkAndRunDailyAppOpenTear();
+
+      // Real-time timeline progression ticker (Daily Timeline + Projects Timeline)
+      let lastLiveTickTodayKey = getTodayDateKey();
+      const runLiveTimelineTick = () => {
+        if (timelineDrag && (timelineDrag.taskId !== null || timelineDrag.active)) return;
+        const freshTodayKey = getTodayDateKey();
+        if (freshTodayKey !== lastLiveTickTodayKey) {
+          lastLiveTickTodayKey = freshTodayKey;
+          renderUnifiedCalendar();
+          renderTimeline();
+          return;
+        }
+        if (state.activeTab !== 'timeline') return;
+        if (state.timelineViewMode === 'projects') {
+          renderTimeline();
+          return;
+        }
+        if (
+          state.timelineViewMode === 'daily' &&
+          state.compartmentFilter !== 'completed' &&
+          (state.selectedDate || freshTodayKey) === freshTodayKey
+        ) {
+          renderTimeline();
+        }
+      };
+      setInterval(runLiveTimelineTick, 15000);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) runLiveTimelineTick();
+      });
 
       if (state.notificationsEnabled && window.StructuredNotificationEngine) {
         window.StructuredNotificationEngine.requestPermissions().then(() => {
