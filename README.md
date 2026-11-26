@@ -4,24 +4,32 @@
 
 # Structured • Visual Day Timeline
 
-A sleek, dark-themed visual day planner and timeline application with conflict detection, energy tagging, daily progress rings, spatial edge panel, mascot bot, and habit completion tracking.
+A sleek, dark-themed visual day planner, project timeframe calendar, and personal progression timeline with procedural Web Audio SFX, 3D memo spike physics, hierarchical Skills tracking, spatial mascot interactions, and Capacitor Android local notifications.
 
 ![Structured App Preview](preview.png)
 
 [![Download Android APK](https://img.shields.io/badge/Download-Timeline.apk-brightgreen?logo=android&style=for-the-badge)](https://github.com/HollowEmperor/structured-timeline/releases/latest)
 
 ## Features
-- **Visual Day Timeline**: Interactive color-coded timeline nodes with category glyphs and conflict detection.
-- **Spatial Edge Panel & Mascot**: Interactive slide-out side panel with teardrop gestures, voice input, and mascot reactions.
-- **Priority & Energy Tagging**: Plan around your daily rhythm from Restorative (1) to High Output (5).
-- **Day Compartments**: Dedicated day windows (Dawn, Morning, Afternoon, Evening) with smooth boundary transitions.
-- **Habit Mastery Targets**: Track cumulative habit check-ins (`completedDays / masteryDays`) with celebratory milestones.
-- **Contextual Notification Engine**: 152+ tailored personality templates across 4 tones (Begging, Passive-Aggressive, Sweet, Comforting).
-- **Calendar & Daily Progress Rings**: Dynamic Physical, Mental, and Gained progress rings.
-- **Horizon Goals**: Multi-horizon goals timeline (Daily, Weekly, Quarterly, Monthly, Vision).
+- **Visual Day Timeline**: Color-coded time blocks with category glyphs, overlap/conflict detection, priority indicators, and Energy 1–5 tagging.
+- **Saturday-First Dynamic Calendar & Timeframes**: Adaptive 4-, 5-, and 6-row month grid with multi-project span lanes, tear-off animations, due checkpoints, and Physical/Mental/Gained progress rings ([`calendar-projects-logic.js`](calendar-projects-logic.js)).
+- **Day Compartments**: Configurable day windows (Dawn, Morning, Afternoon, Evening) with automated boundary notifications and timeline filtering.
+- **Skills, Mastery & Areas of Life**: Recursive multi-depth skill trees, slow-start accelerating Level 1–10 progression, and 7-axis Areas of Life radar tracking ([`progress-system-logic.js`](progress-system-logic.js)).
+- **Tactile Spatial Panel, Hole-Punch & Memo Spike**: Slide-out edge drawer, teardrop capture, radial mascot cluster, visual hole-punch effects, and 3D perspective stacked memo spike physics ([`memo-spike-physics.js`](memo-spike-physics.js)).
+- **Procedural Web Audio SFX Engine**: 22 synthesized pentatonic and felt-hammer acoustic feedback cues (`paperTear`, `holePunch`, `paperStab`, `levelUp`, etc.) with mute toggle and cooldown control ([`sound-fx-engine.js`](sound-fx-engine.js)).
+- **Habit Targets & Horizon Goals**: Cumulative completion tracking (`completedDays / masteryDays`) and multi-horizon goals (Daily, Weekly, Quarterly, Monthly, Vision).
+- **Contextual Notification Engine**: Android local notifications powered by `@capacitor/local-notifications` across 4 adaptive tones (Begging, Passive-Aggressive, Sweet, Comforting).
+- **Custom Themes**: Multi-theme palette system with on-accent typography contrast and dark-first styling.
 
 ## Android Release
-Download the latest Android APK directly from [GitHub Releases](https://github.com/HollowEmperor/structured-timeline/releases/latest).
+Download the latest Android APK from [GitHub Releases](https://github.com/HollowEmperor/structured-timeline/releases/latest).
 
-## Live Demo
-This repository is 100% self-contained in `index.html` and can be run via `npm start`, opened directly in a browser, or imported into Google AI Studio without extra build steps.
+## Local Development & Verification
+This repository runs directly in any modern browser, Google AI Studio, or Express server without a complex bundler step:
+
+```bash
+npm install
+npm start                # Serves index.html and static assets on port 3000
+node --test *.test.mjs   # Runs unit tests for calendar, memo physics, progression, and SFX
+npm run build            # Syntax verification for server and modules
+```
