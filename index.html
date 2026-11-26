@@ -1191,12 +1191,274 @@
         animation-duration: 0.25s;
       }
     }
+
+    /* =====================================================================
+       DESKTOP WORKSPACE ADAPTATION (>= 1024px) — Mobile < 1024px untouched
+       ===================================================================== */
+    .desktop-rail-btn {
+      position: relative;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgb(var(--color-secondarytext));
+      transition: background-color 140ms ease, color 140ms ease, transform 120ms ease;
+    }
+    .desktop-rail-btn:hover {
+      background-color: rgb(var(--color-cardbg));
+      color: rgb(var(--color-primarytext));
+    }
+    .desktop-rail-btn:active {
+      transform: scale(0.95);
+    }
+    .desktop-rail-btn.is-active {
+      background-color: rgb(var(--color-accent) / 0.16);
+      color: rgb(var(--color-accent));
+    }
+    .desktop-rail-tip {
+      position: absolute;
+      left: calc(100% + 10px);
+      top: 50%;
+      transform: translateY(-50%) translateX(-4px);
+      padding: 5px 9px;
+      border-radius: 9px;
+      background: rgb(var(--color-cardbg));
+      border: 1px solid rgb(var(--color-borderline));
+      color: rgb(var(--color-primarytext));
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 120ms ease, transform 120ms ease;
+      z-index: 60;
+      box-shadow: var(--popover-shadow);
+    }
+    .desktop-rail-btn:hover .desktop-rail-tip {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+    }
+
+    @media (min-width: 1024px) {
+      /* Center full-screen sheet modals as crisp matte dialogs on desktop */
+      #task-modal,
+      #project-modal,
+      #habit-modal,
+      #habit-history-modal,
+      #topic-progress-calendar-modal {
+        inset: auto;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: min(520px, calc(100vw - 48px));
+        max-height: min(86vh, 780px);
+        border-radius: 26px;
+        border: 1px solid rgb(var(--color-borderline));
+        box-shadow: 0 0 0 100vmax var(--modal-scrim), var(--popover-shadow);
+      }
+
+      /* Center bottom-sheet overlays cleanly on desktop */
+      #journal-mood-modal,
+      #journal-energy-modal,
+      #journal-exercise-modal,
+      #new-topic-modal,
+      #inventory-add-modal,
+      #routine-add-modal,
+      #prompt-add-modal,
+      #topic-add-modal {
+        justify-content: center;
+        align-items: center;
+        padding: 24px;
+      }
+      #journal-mood-modal > div,
+      #journal-energy-modal > div,
+      #journal-exercise-modal > div,
+      #new-topic-modal > div,
+      #inventory-add-modal > div,
+      #routine-add-modal > div,
+      #prompt-add-modal > div,
+      #topic-add-modal > div {
+        width: 100%;
+        max-width: 480px;
+        border-radius: 26px;
+        border: 1px solid rgb(var(--color-borderline));
+        padding-bottom: 20px;
+        box-shadow: var(--popover-shadow);
+      }
+
+      /* Keep left rail accessible when Horizon Goals screen is open on desktop */
+      #horizon-goals-screen {
+        left: 64px;
+      }
+      #horizon-goals-screen > header,
+      #horizon-goals-screen > section,
+      #horizon-goals-screen > footer {
+        width: 100%;
+        max-width: 820px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center sm:py-4 selection:bg-coral/25 selection:text-primarytext">
+<body class="min-h-screen flex flex-col items-center justify-center sm:py-4 lg:py-0 selection:bg-coral/25 selection:text-primarytext">
 
-  <!-- Main Mobile Shell -->
-  <main class="w-full max-w-[430px] h-[100dvh] sm:h-[850px] bg-appbg sm:rounded-[40px] sm:border sm:border-borderline flex flex-col relative overflow-hidden">
+  <!-- Main Responsive App Shell (Mobile <1024px frame; Full 3-Column Desktop >=1024px) -->
+  <main id="app-shell" class="w-full max-w-[430px] lg:max-w-none h-[100dvh] sm:h-[850px] lg:h-[100dvh] bg-appbg sm:rounded-[40px] lg:rounded-none sm:border lg:border-0 sm:border-borderline flex flex-col lg:flex-row relative overflow-hidden">
+
+    <!-- DESKTOP COLUMN 1: Slim Left Icon Navigation Rail (>=1024px only) -->
+    <aside
+      id="desktop-nav-rail"
+      aria-label="Primary Navigation"
+      class="hidden lg:flex w-[64px] flex-shrink-0 bg-appbg border-r border-borderline flex-col items-center justify-between py-4 z-20 select-none"
+    >
+      <div class="flex flex-col items-center gap-2">
+        <!-- Monogram Avatar -->
+        <button
+          type="button"
+          onclick="toggleHorizonGoalsView(false); switchBottomTab('profile'); openProfileSubView('main');"
+          title="Profile & Areas of Life"
+          aria-label="Profile"
+          class="tactile-btn w-9 h-9 rounded-full bg-cardbg border border-coral/55 text-coral font-display font-bold text-sm flex items-center justify-center mb-1 hover:border-coral"
+        >
+          N
+        </button>
+
+        <div class="w-6 h-px bg-borderline/80 mb-1"></div>
+
+        <!-- Timeline -->
+        <button
+          type="button"
+          id="dnav-timeline"
+          onclick="toggleHorizonGoalsView(false); handleTimelineNavTap()"
+          aria-label="Timeline"
+          class="desktop-rail-btn is-active"
+        >
+          <svg class="w-[19px] h-[19px]" fill="none" stroke="currentColor" stroke-width="1.95" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+          <span class="desktop-rail-tip">Timeline</span>
+        </button>
+
+        <!-- Brain Dump -->
+        <button
+          type="button"
+          id="dnav-inbox"
+          onclick="toggleHorizonGoalsView(false); switchBottomTab('inbox')"
+          aria-label="Brain Dump"
+          class="desktop-rail-btn"
+        >
+          <svg class="w-[19px] h-[19px]" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 00-2.15-1.588H6.911a2.25 2.25 0 00-2.15 1.588L2.35 13.177a2.25 2.25 0 00-.1.661z"/></svg>
+          <span class="desktop-rail-tip">Brain Dump</span>
+        </button>
+
+        <!-- Habit -->
+        <button
+          type="button"
+          id="dnav-habit"
+          onclick="toggleHorizonGoalsView(false); switchBottomTab('habit')"
+          aria-label="Habit"
+          class="desktop-rail-btn"
+        >
+          <svg class="w-[19px] h-[19px]" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span class="desktop-rail-tip">Habits</span>
+        </button>
+
+        <!-- Journal -->
+        <button
+          type="button"
+          id="dnav-journal"
+          onclick="toggleHorizonGoalsView(false); switchBottomTab('journal')"
+          aria-label="Journal"
+          class="desktop-rail-btn"
+        >
+          <svg class="w-[19px] h-[19px]" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.24 12.24a6 6 0 00-8.49-8.49L5 10.5V19h8.5l6.74-6.76z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 8L2 22"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.5 15H9"/>
+          </svg>
+          <span class="desktop-rail-tip">Journal</span>
+        </button>
+
+        <!-- Goals Horizon -->
+        <button
+          type="button"
+          id="dnav-horizon"
+          onclick="toggleHorizonGoalsView()"
+          aria-label="Goals Horizon"
+          class="desktop-rail-btn"
+        >
+          <svg class="w-[19px] h-[19px]" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+            <rect x="3.5" y="5" width="17" height="15.5" rx="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.5 10h17M8 3v4M16 3v4"/>
+          </svg>
+          <span class="desktop-rail-tip">Goals Horizon</span>
+        </button>
+
+        <!-- Profile & Stats -->
+        <button
+          type="button"
+          id="dnav-profile"
+          onclick="toggleHorizonGoalsView(false); switchBottomTab('profile')"
+          aria-label="Profile & Stats"
+          class="desktop-rail-btn"
+        >
+          <svg class="w-[19px] h-[19px]" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+          <span class="desktop-rail-tip">Profile</span>
+        </button>
+      </div>
+
+      <!-- Bottom Utility Controls -->
+      <div class="flex flex-col items-center gap-2">
+        <button
+          type="button"
+          onclick="toggleHorizonGoalsView(false); jumpCalendarToToday(); switchBottomTab('timeline');"
+          aria-label="Jump to Today"
+          class="desktop-rail-btn"
+        >
+          <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.95" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8.5"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5v4.5l3 1.8"/>
+          </svg>
+          <span class="desktop-rail-tip">Jump to Today</span>
+        </button>
+
+        <button
+          type="button"
+          id="dnav-sfx-btn"
+          onclick="toggleSfxEnabled()"
+          aria-label="Toggle Sound FX"
+          class="desktop-rail-btn"
+        >
+          <svg id="dnav-sfx-on-icon" class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5L6 9H3v6h3l5 4V5z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.54 8.46a5 5 0 010 7.07M18.36 5.64a9 9 0 010 12.73"/>
+          </svg>
+          <svg id="dnav-sfx-off-icon" class="hidden w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5L6 9H3v6h3l5 4V5z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M22 9l-6 6M16 9l6 6"/>
+          </svg>
+          <span id="dnav-sfx-tip" class="desktop-rail-tip">Sound On</span>
+        </button>
+
+        <button
+          type="button"
+          id="dnav-settings"
+          onclick="toggleHorizonGoalsView(false); switchBottomTab('profile'); openProfileSubView('settings');"
+          aria-label="Settings"
+          class="desktop-rail-btn"
+        >
+          <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          <span class="desktop-rail-tip">Settings</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- DESKTOP COLUMN 2 (Full Width on Mobile): Primary Workspace -->
+    <div id="workspace-center-col" class="flex-1 flex flex-col min-h-0 min-w-0 relative overflow-hidden">
 
     <!-- Header Title & Anchor-Locked Pull-Down Calendar Drawer -->
     <header
@@ -1206,7 +1468,7 @@
       onpointermove="handleCalendarHeaderMove(event)"
       onpointerup="handleCalendarHeaderUp(event)"
       onpointercancel="handleCalendarHeaderUp(event)"
-      class="px-5 pt-2 pb-1.5 flex-shrink-0 select-none cursor-grab active:cursor-grabbing"
+      class="px-5 lg:px-8 pt-2 lg:pt-4 pb-1.5 flex-shrink-0 select-none cursor-grab active:cursor-grabbing"
     >
       <div class="min-h-[36px] flex items-center justify-between gap-2">
         <div class="flex items-center gap-1.5 min-w-0 text-left">
@@ -1254,6 +1516,20 @@
 
           <button
             type="button"
+            id="header-desktop-add-btn"
+            onpointerdown="event.stopPropagation()"
+            onclick="handleFabAction()"
+            title="Quick Add"
+            aria-label="Quick Add"
+            class="hidden lg:inline-flex tactile-btn w-9 h-9 rounded-xl bg-cardbg border border-borderline text-coral hover:border-coral items-center justify-center flex-shrink-0"
+          >
+            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+            </svg>
+          </button>
+
+          <button
+            type="button"
             id="header-calendar-btn"
             onpointerdown="event.stopPropagation()"
             onclick="toggleHorizonGoalsView(true)"
@@ -1286,10 +1562,10 @@
     </header>
 
     <!-- Main Rounded Dark Sheet Container -->
-    <div class="flex-1 bg-sheetbg rounded-t-[30px] border-t border-borderline/70 flex flex-col min-h-0 relative overflow-hidden">
+    <div class="flex-1 bg-sheetbg rounded-t-[30px] lg:rounded-none border-t border-borderline/70 flex flex-col min-h-0 relative overflow-hidden">
 
       <!-- Compartment Filter Bar -->
-      <div id="compartment-bar" class="px-4 pt-3.5 pb-2 flex items-center justify-between gap-2 flex-shrink-0">
+      <div id="compartment-bar" class="px-4 lg:px-8 pt-3.5 pb-2 flex items-center justify-between gap-2 flex-shrink-0">
         <div id="compartment-pills-list" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar"></div>
 
         <span id="hourly-mode-badge" class="hidden text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-coral/20 text-coral border border-coral/40 whitespace-nowrap flex-shrink-0">
@@ -1304,86 +1580,90 @@
         onpointermove="handleTimelineSwipeMove(event)"
         onpointerup="handleTimelineSwipeEnd(event)"
         onpointercancel="handleTimelineSwipeCancel(event)"
-        class="flex-1 overflow-y-auto no-scrollbar px-3 pb-24 pt-1 relative"
+        class="flex-1 overflow-y-auto no-scrollbar px-3 lg:px-8 pb-24 lg:pb-16 pt-1 relative"
       >
-        <div id="timeline-container" class="relative transition-transform duration-200"></div>
+        <div id="timeline-container" class="relative transition-transform duration-200 lg:max-w-[740px] lg:mx-auto"></div>
         <div id="projects-timeline-container" class="hidden relative"></div>
-        <div id="hourly-grid-container" class="hidden relative select-none"></div>
+        <div id="hourly-grid-container" class="hidden relative select-none lg:max-w-[740px] lg:mx-auto"></div>
       </section>
 
       <!-- VIEW 2: BRAIN DUMP (Tinder-Style Swipe Card Deck + Archived List Directly Below) -->
-      <section id="view-inbox" class="hidden flex-1 overflow-y-auto no-scrollbar px-5 pb-24 pt-3 space-y-4">
+      <section id="view-inbox" class="hidden flex-1 overflow-y-auto no-scrollbar px-5 lg:px-8 pb-24 lg:pb-14 pt-3 lg:pt-5 space-y-4">
         <div class="flex items-center justify-between">
-          <h2 class="font-display text-xl font-bold text-primarytext">Brain Dump</h2>
+          <h2 class="font-display text-xl lg:text-2xl font-bold text-primarytext">Brain Dump</h2>
         </div>
 
-        <form onsubmit="handleQuickInboxAdd(event)" class="flex items-center gap-2">
-          <input
-            id="quick-inbox-input"
-            type="text"
-            placeholder="Dump anything on your mind..."
-            class="flex-1 bg-cardbg text-sm text-primarytext placeholder-mutedtext px-3.5 py-3 rounded-2xl border border-borderline focus:border-coral focus:outline-none"
-          />
-          <button type="submit" class="tactile-btn bg-coral text-onaccent font-semibold text-sm px-4 py-3 rounded-2xl">
-            Add
-          </button>
-        </form>
+        <div class="space-y-4 xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] xl:gap-7 xl:items-start xl:space-y-0">
+          <div class="space-y-4">
+            <form onsubmit="handleQuickInboxAdd(event)" class="flex items-center gap-2">
+              <input
+                id="quick-inbox-input"
+                type="text"
+                placeholder="Dump anything on your mind..."
+                class="flex-1 bg-cardbg text-sm text-primarytext placeholder-mutedtext px-3.5 py-3 rounded-2xl border border-borderline focus:border-coral focus:outline-none"
+              />
+              <button type="submit" class="tactile-btn bg-coral text-onaccent font-semibold text-sm px-4 py-3 rounded-2xl">
+                Add
+              </button>
+            </form>
 
-        <div class="space-y-3">
-          <div id="tinder-deck-stage" class="relative h-[265px] w-full flex items-center justify-center"></div>
+            <div class="space-y-3">
+              <div id="tinder-deck-stage" class="relative h-[265px] w-full flex items-center justify-center"></div>
 
-          <div id="tinder-controls" class="flex items-center justify-center gap-4 pt-0.5">
-            <button
-              type="button"
-              onclick="triggerDeckSwipe('left')"
-              title="Archive for later"
-              class="tactile-btn w-13 h-13 p-3.5 rounded-full bg-cardbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
-            </button>
+              <div id="tinder-controls" class="flex items-center justify-center gap-4 pt-0.5">
+                <button
+                  type="button"
+                  onclick="triggerDeckSwipe('left')"
+                  title="Archive for later"
+                  class="tactile-btn w-13 h-13 p-3.5 rounded-full bg-cardbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
+                </button>
 
-            <button
-              type="button"
-              id="tinder-undo-btn"
-              onclick="undoLastCardSwipe()"
-              title="Undo last swipe"
-              class="tactile-btn w-10 h-10 rounded-full bg-cardbg border border-borderline text-coral flex items-center justify-center disabled:opacity-35"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/></svg>
-            </button>
+                <button
+                  type="button"
+                  id="tinder-undo-btn"
+                  onclick="undoLastCardSwipe()"
+                  title="Undo last swipe"
+                  class="tactile-btn w-10 h-10 rounded-full bg-cardbg border border-borderline text-coral flex items-center justify-center disabled:opacity-35"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/></svg>
+                </button>
 
-            <button
-              type="button"
-              onclick="triggerDeckSwipe('right')"
-              title="Send to Timeline"
-              class="tactile-btn w-13 h-13 p-3.5 rounded-full bg-coral text-onaccent flex items-center justify-center"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-            </button>
+                <button
+                  type="button"
+                  onclick="triggerDeckSwipe('right')"
+                  title="Send to Timeline"
+                  class="tactile-btn w-13 h-13 p-3.5 rounded-full bg-coral text-onaccent flex items-center justify-center"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div class="pt-3 border-t border-borderline space-y-2">
-          <div class="flex items-center justify-between">
-            <p class="text-xs font-semibold uppercase tracking-wider text-secondarytext">Archived for Later</p>
-            <span id="archive-count-label" class="text-xs text-mutedtext">0 items</span>
+          <div class="pt-3 border-t border-borderline xl:border-t-0 xl:border-l xl:pl-6 xl:pt-0 space-y-2">
+            <div class="flex items-center justify-between">
+              <p class="text-xs font-semibold uppercase tracking-wider text-secondarytext">Archived for Later</p>
+              <span id="archive-count-label" class="text-xs text-mutedtext">0 items</span>
+            </div>
+            <div id="archived-dump-list" class="space-y-2"></div>
           </div>
-          <div id="archived-dump-list" class="space-y-2"></div>
         </div>
       </section>
 
       <!-- VIEW 3: HABIT -->
-      <section id="view-habit" class="hidden flex-1 overflow-y-auto no-scrollbar px-5 pb-24 pt-3 space-y-4">
-        <div id="habit-list-container" class="space-y-3"></div>
+      <section id="view-habit" class="hidden flex-1 overflow-y-auto no-scrollbar px-5 lg:px-8 pb-24 lg:pb-16 pt-3 lg:pt-4 space-y-4">
+        <div id="habit-list-container" class="space-y-3 lg:space-y-5"></div>
       </section>
 
       <!-- VIEW 4: JOURNAL TIMELINE -->
-      <section id="view-journal" class="hidden flex-1 overflow-y-auto no-scrollbar px-4 pb-24 pt-3.5 space-y-3">
-        <div id="journal-timeline-stream" class="flex flex-col"></div>
+      <section id="view-journal" class="hidden flex-1 overflow-y-auto no-scrollbar px-4 lg:px-8 pb-24 lg:pb-16 pt-3.5 lg:pt-5 space-y-3">
+        <div id="journal-timeline-stream" class="flex flex-col lg:max-w-[740px] lg:mx-auto"></div>
       </section>
 
       <!-- VIEW 5: PROFILE -->
-      <section id="view-profile" class="hidden flex-1 overflow-y-auto no-scrollbar px-5 pb-24 pt-4 space-y-4">
+      <section id="view-profile" class="hidden flex-1 overflow-y-auto no-scrollbar px-5 lg:px-8 pb-24 lg:pb-16 pt-4 lg:pt-6 space-y-4 lg:max-w-[860px] lg:w-full lg:mx-auto">
         <div class="flex items-center justify-between gap-3">
           <div class="flex items-center gap-3 min-w-0">
             <div class="w-11 h-11 rounded-full bg-cardbg border border-coral/50 flex items-center justify-center text-coral font-display font-bold text-base flex-shrink-0">
@@ -1974,7 +2254,7 @@
       <!-- Floating Journal + Action Menu (Add Journal Entry / Mood / Energy / Exercise) -->
       <div
         id="journal-fab-menu"
-        class="hidden absolute right-5 bottom-[142px] z-40 bg-cardbg border border-borderline rounded-2xl p-1.5 theme-popover-shadow space-y-1 min-w-[208px]"
+        class="hidden absolute right-5 lg:right-7 bottom-[142px] lg:bottom-[90px] z-40 bg-cardbg border border-borderline rounded-2xl p-1.5 theme-popover-shadow space-y-1 min-w-[208px]"
       >
         <button
           type="button"
@@ -2033,7 +2313,7 @@
       <!-- Floating Tasks + Action Menu (New Task / New Project) -->
       <div
         id="timeline-fab-menu"
-        class="hidden absolute right-5 bottom-[142px] z-40 bg-cardbg border border-borderline rounded-2xl p-1.5 theme-popover-shadow space-y-1 min-w-[188px]"
+        class="hidden absolute right-5 lg:right-7 bottom-[142px] lg:bottom-[90px] z-40 bg-cardbg border border-borderline rounded-2xl p-1.5 theme-popover-shadow space-y-1 min-w-[188px]"
       >
         <button
           type="button"
@@ -2133,7 +2413,7 @@
         type="button"
         onclick="handleFabAction()"
         title="New Task"
-        class="tactile-btn absolute right-5 bottom-[78px] z-30 w-14 h-14 rounded-full bg-coral text-onaccent flex items-center justify-center theme-fab-shadow transition-all duration-150"
+        class="tactile-btn absolute right-5 lg:right-7 bottom-[78px] lg:bottom-6 z-30 w-14 h-14 rounded-full bg-coral text-onaccent flex items-center justify-center theme-fab-shadow transition-all duration-150"
       >
         <svg id="fab-plus-icon" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -2149,7 +2429,7 @@
         type="button"
         onclick="if (!state.topicDragDidMove) openNewTopicModal()"
         title="New Skill Tree Topic"
-        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center transition-all duration-200"
+        class="hidden tactile-btn absolute bottom-[78px] lg:bottom-6 right-5 lg:right-7 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center transition-all duration-200"
       >
         <svg id="topics-list-fab-plus-icon" class="w-6 h-6 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -2165,7 +2445,7 @@
         type="button"
         onclick="openInventoryAddModal()"
         title="Add Inventory Item"
-        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center"
+        class="hidden tactile-btn absolute bottom-[78px] lg:bottom-6 right-5 lg:right-7 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center"
       >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -2178,7 +2458,7 @@
         type="button"
         onclick="openTopicAddModal()"
         title="Add to Skill Tree"
-        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center"
+        class="hidden tactile-btn absolute bottom-[78px] lg:bottom-6 right-5 lg:right-7 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center"
       >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -2191,7 +2471,7 @@
         type="button"
         onclick="openRoutineAddModal()"
         title="Add Routine or Step"
-        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center"
+        class="hidden tactile-btn absolute bottom-[78px] lg:bottom-6 right-5 lg:right-7 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center"
       >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -2204,7 +2484,7 @@
         type="button"
         onclick="openPromptAddModal()"
         title="Add Prompt"
-        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center"
+        class="hidden tactile-btn absolute bottom-[78px] lg:bottom-6 right-5 lg:right-7 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center"
       >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -2348,8 +2628,8 @@
         </div>
       </div>
 
-      <!-- Bottom Navigation Bar -->
-      <nav class="h-[64px] bg-cardbg border-t border-borderline px-1.5 grid grid-cols-5 items-center flex-shrink-0 z-20">
+      <!-- Bottom Navigation Bar (Mobile <1024px only) -->
+      <nav class="lg:hidden h-[64px] bg-cardbg border-t border-borderline px-1.5 grid grid-cols-5 items-center flex-shrink-0 z-20">
         <button onclick="switchBottomTab('inbox')" id="nav-inbox" title="Brain Dump" aria-label="Brain Dump" class="tactile-btn flex items-center justify-center text-secondarytext hover:text-primarytext">
           <div id="nav-pill-inbox" class="px-3.5 py-2 rounded-full">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 00-2.15-1.588H6.911a2.25 2.25 0 00-2.15 1.588L2.35 13.177a2.25 2.25 0 00-.1.661z"/></svg>
@@ -2385,6 +2665,14 @@
         </button>
       </nav>
     </div>
+    </div><!-- /#workspace-center-col -->
+
+    <!-- DESKTOP COLUMN 3: Right Contextual Inspector Pane (>=1024px only) -->
+    <aside
+      id="desktop-inspector-pane"
+      aria-label="Contextual Inspector"
+      class="hidden lg:flex w-[340px] xl:w-[390px] flex-shrink-0 bg-appbg border-l border-borderline flex-col overflow-y-auto no-scrollbar"
+    ></aside>
 
     <!-- Structured-Style Full-Height "New Task" / "Schedule Task" Screen -->
     <div id="task-modal" class="hidden absolute inset-0 z-50 bg-appbg flex flex-col justify-between p-5">
@@ -7362,6 +7650,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (!document.getElementById('project-modal')?.classList.contains('hidden')) renderProjectModalControls();
       if (!document.getElementById('journal-energy-modal')?.classList.contains('hidden')) renderJournalEnergyModal();
       if (!document.getElementById('journal-mood-modal')?.classList.contains('hidden')) renderJournalMoodModal();
+      if (typeof renderDesktopInspector === 'function') renderDesktopInspector();
       saveState();
     }
 
@@ -7485,6 +7774,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (summary) {
         summary.textContent = enabled ? 'On • Calm focus acoustics' : 'Off • Silent mode';
       }
+      if (typeof syncDesktopNavRail === 'function') syncDesktopNavRail();
     }
 
     function toggleSfxEnabled(force) {
@@ -7715,6 +8005,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       state.selectedDay = td.getDate();
       state.calendarYear = td.getFullYear();
       state.calendarMonth = td.getMonth();
+      state.desktopMiniCalYear = td.getFullYear();
+      state.desktopMiniCalMonth = td.getMonth();
       state.monthCells = CalLogic.buildMonthGrid(state.calendarYear, state.calendarMonth);
 
       saveState();
@@ -7794,6 +8086,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const parsed = CalLogic.parseDateKey(dateKey);
       state.selectedDate = dateKey;
       state.selectedDay = parsed.getDate();
+
+      state.desktopMiniCalYear = parsed.getFullYear();
+      state.desktopMiniCalMonth = parsed.getMonth();
 
       if (parsed.getFullYear() !== state.calendarYear || parsed.getMonth() !== state.calendarMonth) {
         state.calendarYear = parsed.getFullYear();
@@ -9570,6 +9865,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       if (isProjectsMode) {
         if (projectsContainer) renderProjectsTimelineView(projectsContainer);
+        if (typeof renderDesktopInspector === 'function') renderDesktopInspector();
         return;
       }
 
@@ -9581,6 +9877,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       if (state.compartmentFilter === 'completed') {
         renderCompletedMemoSpike(container, tasks);
+        if (typeof renderDesktopInspector === 'function') renderDesktopInspector();
         return;
       }
 
@@ -9702,6 +9999,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             </div>
           `;
         }
+        if (typeof renderDesktopInspector === 'function') renderDesktopInspector();
         return;
       }
 
@@ -10039,6 +10337,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       });
 
       container.innerHTML = html;
+      if (typeof renderDesktopInspector === 'function') renderDesktopInspector();
     }
 
     function renderHourlyGrid(draggedTaskId, liveStartMin) {
@@ -11659,6 +11958,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 )
                 .join('');
       }
+      if (typeof renderDesktopInspector === 'function') renderDesktopInspector();
     }
 
     // =========================================================================
@@ -11976,9 +12276,15 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         : '';
 
       const hiddenStyle = options.hidden ? ' opacity: 0;' : '';
+      const isDesktopSelected =
+        interactive &&
+        typeof window !== 'undefined' &&
+        window.innerWidth >= 1024 &&
+        state.desktopSelectedHabitId === h.id;
+      const selectedRingCls = isDesktopSelected ? ' ring-1 ring-coral/70 ring-offset-2 ring-offset-sheetbg' : '';
 
       return `
-        <article ${cardAttr} ${isStale ? 'data-habit-stale="true"' : ''} class="relative rounded-[22px] p-[2.5px] ${staleCardCls}" style="${borderProgressStyle}${hiddenStyle}">
+        <article ${cardAttr} ${isStale ? 'data-habit-stale="true"' : ''} class="relative rounded-[22px] p-[2.5px] ${staleCardCls}${selectedRingCls}" style="${borderProgressStyle}${hiddenStyle}">
           ${divisionTicksHtml}
           <div class="rounded-[19.5px] bg-cardbg p-3.5 space-y-3">
             <div class="flex items-center justify-between gap-2.5">
@@ -12011,6 +12317,34 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       `;
     }
 
+    function parseHabitTimeMinutes(timeLabel) {
+      if (!timeLabel || typeof timeLabel !== 'string') return null;
+      const m = timeLabel.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+      if (!m) return null;
+      let hh = parseInt(m[1], 10);
+      const mm = parseInt(m[2], 10);
+      const mer = m[3].toUpperCase();
+      if (Number.isNaN(hh) || Number.isNaN(mm) || hh < 1 || hh > 12 || mm < 0 || mm > 59) return null;
+      if (mer === 'AM') hh = hh === 12 ? 0 : hh;
+      else hh = hh === 12 ? 12 : hh + 12;
+      return hh * 60 + mm;
+    }
+
+    function getHabitTimeBucket(habit) {
+      const mins = parseHabitTimeMinutes(habit && habit.timeLabel);
+      if (mins === null) return 'others';
+      if (mins < 720) return 'morning';
+      if (mins < 1020) return 'afternoon';
+      return 'evening';
+    }
+
+    function toggleDesktopHabitGroup(groupKey) {
+      if (!state.desktopCollapsedHabitGroups) state.desktopCollapsedHabitGroups = {};
+      state.desktopCollapsedHabitGroups[groupKey] = !state.desktopCollapsedHabitGroups[groupKey];
+      playSfx('tick');
+      renderHabits();
+    }
+
     function renderHabits(hiddenHabitId = null) {
       const container = document.getElementById('habit-list-container');
       if (!container) return;
@@ -12020,6 +12354,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       if (state.habits.length === 0) {
         container.innerHTML = `<p class="text-sm text-mutedtext text-center py-8">No habits tracked yet. Tap + below to start one.</p>`;
+        if (typeof renderDesktopInspector === 'function') renderDesktopInspector();
         return;
       }
 
@@ -12037,14 +12372,64 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         return a.idx - b.idx;
       });
 
-      container.innerHTML = indexed
-        .map(({ habit }) =>
-          renderHabitPunchCardMarkup(habit, {
-            interactive: true,
-            hidden: hiddenHabitId !== null && habit.id === hiddenHabitId,
+      const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
+      if (isDesktop) {
+        const groupDefs = [
+          { key: 'morning', label: 'Morning' },
+          { key: 'afternoon', label: 'Afternoon' },
+          { key: 'evening', label: 'Evening' },
+          { key: 'others', label: 'Others' },
+        ];
+        const buckets = { morning: [], afternoon: [], evening: [], others: [] };
+        indexed.forEach((entry) => {
+          buckets[getHabitTimeBucket(entry.habit)].push(entry);
+        });
+        const collapsedMap = state.desktopCollapsedHabitGroups || {};
+
+        container.innerHTML = groupDefs
+          .filter((g) => buckets[g.key].length > 0)
+          .map((g) => {
+            const list = buckets[g.key];
+            const isCollapsed = Boolean(collapsedMap[g.key]);
+            const cardsHtml = list
+              .map(({ habit }) =>
+                renderHabitPunchCardMarkup(habit, {
+                  interactive: true,
+                  hidden: hiddenHabitId !== null && habit.id === hiddenHabitId,
+                })
+              )
+              .join('');
+
+            return `
+              <div class="space-y-2.5">
+                <button
+                  type="button"
+                  onclick="toggleDesktopHabitGroup('${g.key}')"
+                  class="group inline-flex items-center gap-1.5 text-left py-0.5 text-xs font-semibold text-secondarytext hover:text-primarytext transition"
+                >
+                  <svg class="w-3.5 h-3.5 text-mutedtext group-hover:text-secondarytext transition-transform duration-150 ${isCollapsed ? '-rotate-90' : ''}" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
+                  </svg>
+                  <span class="text-primarytext/90">${g.label}</span>
+                  <span class="text-[11px] font-medium text-mutedtext tabular-nums">${list.length}</span>
+                </button>
+                ${isCollapsed ? '' : `<div class="grid grid-cols-1 xl:grid-cols-2 gap-3.5">${cardsHtml}</div>`}
+              </div>
+            `;
           })
-        )
-        .join('');
+          .join('');
+      } else {
+        container.innerHTML = indexed
+          .map(({ habit }) =>
+            renderHabitPunchCardMarkup(habit, {
+              interactive: true,
+              hidden: hiddenHabitId !== null && habit.id === hiddenHabitId,
+            })
+          )
+          .join('');
+      }
+
+      if (typeof renderDesktopInspector === 'function') renderDesktopInspector();
     }
 
     function getHabitPreviousCompletedDateKey(habit, todayKey) {
@@ -12539,7 +12924,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       toolAnchor.style.opacity = '0';
 
       stage.innerHTML = `
-        <div id="habit-punch-elevated-wrap" class="w-full" style="will-change: transform;">
+        <div id="habit-punch-elevated-wrap" class="w-full max-w-[390px] mx-auto" style="will-change: transform;">
           <div id="habit-punch-recoil-wrap">
             ${renderHabitPunchCardMarkup(habit, { interactive: false })}
           </div>
@@ -12670,9 +13055,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         toolAnchor.style.opacity = '0';
       }, 880);
 
-      // Phase 7 (1200ms): Re-render list with destination card born hidden (opacity: 0), then glide clone cleanly into slot
+      // Phase 7 (1200ms): Re-render list with destination card born hidden (opacity: 0), then glide clone cleanly behind the + button into slot
       setTimeout(() => {
         renderHabits(habitId);
+        const fabBtn = document.getElementById('fab-action-btn');
+        if (fabBtn && !hasHabitMissedDayGap) {
+          fabBtn.style.zIndex = '78';
+        }
         const destCard = document.querySelector(`[data-habit-card-id="${habitId}"]`);
         if (destCard) {
           const destRect = destCard.getBoundingClientRect();
@@ -12714,6 +13103,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         }
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
+            const fabBtn = document.getElementById('fab-action-btn');
+            if (fabBtn) fabBtn.style.zIndex = '';
             backdrop.classList.remove('is-visible');
             overlay.classList.add('hidden');
             overlay.classList.remove('pointer-events-auto');
@@ -12901,6 +13292,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const habit = state.habits.find((h) => h.id === habitId);
       if (!habit) return;
       normalizeHabitData(habit);
+      if (typeof window !== 'undefined' && window.innerWidth >= 1024 && typeof selectDesktopHabitInspector === 'function') {
+        selectDesktopHabitInspector(habitId);
+        return;
+      }
       const todayD = CalLogic.parseDateKey(getTodayDateKey());
       state.historyModalHabitId = habitId;
       state.historyModalYear = todayD.getFullYear();
@@ -13777,6 +14172,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       if (filtered.length === 0) {
         streamEl.innerHTML = `<p class="text-sm text-mutedtext text-center py-8">No journal entries match this mood filter.</p>`;
+        if (typeof renderDesktopInspector === 'function') renderDesktopInspector();
         return;
       }
 
@@ -13897,6 +14293,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           `;
         })
         .join('');
+      if (typeof renderDesktopInspector === 'function') renderDesktopInspector();
     }
 
     // =========================================================================
@@ -14114,6 +14511,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         renderProfileRadar();
         renderProfileEnergyBars();
       }
+      if (typeof syncDesktopNavRail === 'function') syncDesktopNavRail();
+      if (typeof renderDesktopInspector === 'function') renderDesktopInspector();
     }
 
     function syncAllProfileFabs() {
@@ -17123,6 +17522,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       } else {
         syncAllProfileFabs();
       }
+      if (typeof syncDesktopNavRail === 'function') syncDesktopNavRail();
+      if (typeof renderDesktopInspector === 'function') renderDesktopInspector();
     }
 
     // =========================================================================
@@ -17181,6 +17582,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         renderHorizonView();
         if (rowsEl) rowsEl.scrollTop = prevScrollTop;
       }
+      if (typeof syncDesktopNavRail === 'function') syncDesktopNavRail();
     }
 
     function selectHorizonSlot(scope, slotKey) {
@@ -17550,14 +17952,680 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
 
       document.addEventListener('pointerdown', (e) => {
-        if (state.timelineFabMenuOpen && !e.target.closest('#timeline-fab-menu') && !e.target.closest('#fab-action-btn')) {
+        if (
+          state.timelineFabMenuOpen &&
+          !e.target.closest('#timeline-fab-menu') &&
+          !e.target.closest('#fab-action-btn') &&
+          !e.target.closest('#header-desktop-add-btn')
+        ) {
           toggleTimelineFabMenu(false);
         }
-        if (state.journalFabMenuOpen && !e.target.closest('#journal-fab-menu') && !e.target.closest('#fab-action-btn')) {
+        if (
+          state.journalFabMenuOpen &&
+          !e.target.closest('#journal-fab-menu') &&
+          !e.target.closest('#fab-action-btn') &&
+          !e.target.closest('#header-desktop-add-btn')
+        ) {
           toggleJournalFabMenu(false);
         }
       });
+
+      // Responsive desktop breakpoint sync (re-renders habit layout & right inspector across 1024px)
+      let lastDesktopBreakpoint = window.innerWidth >= 1024;
+      let desktopResizeTimer = null;
+      window.addEventListener('resize', () => {
+        clearTimeout(desktopResizeTimer);
+        desktopResizeTimer = setTimeout(() => {
+          const nowDesktop = window.innerWidth >= 1024;
+          if (nowDesktop !== lastDesktopBreakpoint) {
+            lastDesktopBreakpoint = nowDesktop;
+            renderHabits();
+            if (nowDesktop) {
+              syncDesktopNavRail();
+              renderDesktopInspector();
+            }
+          }
+        }, 120);
+      });
     });
+
+    // =========================================================================
+    // DESKTOP NAVIGATION RAIL SYNC & CONTEXTUAL RIGHT INSPECTOR (>= 1024px)
+    // =========================================================================
+    function isDesktopViewport() {
+      return typeof window !== 'undefined' && window.innerWidth >= 1024;
+    }
+
+    function syncDesktopNavRail() {
+      const horizonEl = document.getElementById('horizon-goals-screen');
+      const horizonOpen = Boolean(horizonEl && !horizonEl.classList.contains('hidden'));
+      const isSettingsOpen = !horizonOpen && state.activeTab === 'profile' && state.profileSubView === 'settings';
+
+      const railActiveMap = {
+        'dnav-timeline': !horizonOpen && state.activeTab === 'timeline',
+        'dnav-inbox': !horizonOpen && state.activeTab === 'inbox',
+        'dnav-habit': !horizonOpen && state.activeTab === 'habit',
+        'dnav-journal': !horizonOpen && state.activeTab === 'journal',
+        'dnav-horizon': horizonOpen,
+        'dnav-profile': !horizonOpen && state.activeTab === 'profile' && !isSettingsOpen,
+        'dnav-settings': isSettingsOpen,
+      };
+      Object.entries(railActiveMap).forEach(([id, active]) => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('is-active', active);
+      });
+
+      const sfxEnabled = state.sfxEnabled !== false;
+      const sfxOnIcon = document.getElementById('dnav-sfx-on-icon');
+      const sfxOffIcon = document.getElementById('dnav-sfx-off-icon');
+      const sfxTip = document.getElementById('dnav-sfx-tip');
+      if (sfxOnIcon) sfxOnIcon.classList.toggle('hidden', !sfxEnabled);
+      if (sfxOffIcon) sfxOffIcon.classList.toggle('hidden', sfxEnabled);
+      if (sfxTip) sfxTip.textContent = sfxEnabled ? 'Sound On' : 'Sound Off';
+
+      const headerAddBtn = document.getElementById('header-desktop-add-btn');
+      if (headerAddBtn) {
+        const showAdd = state.activeTab === 'timeline' || state.activeTab === 'habit' || state.activeTab === 'journal';
+        headerAddBtn.classList.toggle('lg:inline-flex', showAdd);
+        headerAddBtn.title =
+          state.activeTab === 'habit'
+            ? 'New Habit'
+            : state.activeTab === 'journal'
+              ? 'Add Journal Entry or Check-In'
+              : 'New Task or Project';
+      }
+    }
+
+    function selectDesktopHabitInspector(habitId) {
+      const habit = state.habits.find((h) => h.id === habitId);
+      if (!habit) return;
+      normalizeHabitData(habit);
+      const todayD = CalLogic.parseDateKey(getTodayDateKey());
+      state.desktopSelectedHabitId = habitId;
+      state.desktopHabitInspectorYear = todayD.getFullYear();
+      state.desktopHabitInspectorMonth = todayD.getMonth();
+      playSfx('tick');
+      renderHabits();
+    }
+
+    function clearDesktopSelectedHabit() {
+      state.desktopSelectedHabitId = null;
+      playSfx('tick');
+      renderHabits();
+    }
+
+    function stepDesktopHabitInspectorMonth(delta) {
+      const todayD = CalLogic.parseDateKey(getTodayDateKey());
+      const curY = Number.isInteger(state.desktopHabitInspectorYear) ? state.desktopHabitInspectorYear : todayD.getFullYear();
+      const curM = Number.isInteger(state.desktopHabitInspectorMonth) ? state.desktopHabitInspectorMonth : todayD.getMonth();
+      let nextM = curM + delta;
+      let nextY = curY;
+      if (nextM < 0) { nextM = 11; nextY -= 1; }
+      else if (nextM > 11) { nextM = 0; nextY += 1; }
+      if (delta > 0 && (nextY > todayD.getFullYear() || (nextY === todayD.getFullYear() && nextM > todayD.getMonth()))) {
+        return;
+      }
+      state.desktopHabitInspectorYear = nextY;
+      state.desktopHabitInspectorMonth = nextM;
+      playSfx('tick');
+      renderDesktopInspector();
+    }
+
+    function toggleDesktopHabitHistoryDay(habitId, dateKey) {
+      const habit = state.habits.find((h) => h.id === habitId);
+      if (!habit || !CalLogic.isValidDateKey(dateKey)) return;
+      const todayKey = getTodayDateKey();
+      if (CalLogic.compareDateKeys(dateKey, todayKey) > 0) return;
+      normalizeHabitData(habit);
+      const set = new Set(habit.completedDates);
+      const wasDone = set.has(dateKey);
+      if (wasDone) set.delete(dateKey);
+      else set.add(dateKey);
+      habit.completedDates = Array.from(set);
+      syncHabitDerivedFields(habit);
+      playSfx(wasDone ? 'uncheck' : 'tick');
+      saveState();
+      renderHabits();
+    }
+
+    function stepDesktopMiniCalMonth(delta) {
+      const baseY = Number.isInteger(state.desktopMiniCalYear) ? state.desktopMiniCalYear : state.calendarYear;
+      const baseM = Number.isInteger(state.desktopMiniCalMonth) ? state.desktopMiniCalMonth : state.calendarMonth;
+      let nextM = baseM + delta;
+      let nextY = baseY;
+      if (nextM < 0) { nextM = 11; nextY -= 1; }
+      else if (nextM > 11) { nextM = 0; nextY += 1; }
+      state.desktopMiniCalYear = nextY;
+      state.desktopMiniCalMonth = nextM;
+      playSfx('tick');
+      renderDesktopInspector();
+    }
+
+    function renderDesktopTimelineInspector(pane) {
+      const liveNow = getLiveNowInfo();
+      const todayKey = liveNow.todayKey;
+      const selectedKey = state.selectedDate || todayKey;
+      const dayTasks = (state.tasks || [])
+        .filter((t) => isTaskOnDay(t, selectedKey))
+        .sort((a, b) => a.startMin - b.startMin);
+      const doneCount = dayTasks.filter((t) => isTaskDoneOnDay(t, selectedKey)).length;
+      const isToday = selectedKey === todayKey;
+
+      let focusCardHtml = '';
+      if (dayTasks.length === 0) {
+        focusCardHtml = `
+          <div class="rounded-2xl bg-cardbg border border-borderline p-4 space-y-1.5">
+            <div class="flex items-center justify-between text-[11px] font-semibold text-secondarytext">
+              <span>${isToday ? 'Today' : escapeHtml(CalLogic.formatHumanDate(selectedKey, 'weekday-compact'))}</span>
+              <span class="tabular-nums text-mutedtext">0 blocks</span>
+            </div>
+            <p class="text-xs text-mutedtext leading-relaxed">Clear schedule. Add a focused time block when you're ready.</p>
+          </div>
+        `;
+      } else {
+        const activeTask = isToday
+          ? dayTasks.find((t) => liveNow.nowMinFloat >= t.startMin && liveNow.nowMinFloat < t.startMin + Math.max(1, t.durationMin))
+          : null;
+        const nextTask = !activeTask
+          ? dayTasks.find((t) => !isTaskDoneOnDay(t, selectedKey) && (!isToday || t.startMin >= liveNow.nowMinFloat)) ||
+            dayTasks.find((t) => !isTaskDoneOnDay(t, selectedKey))
+          : null;
+        const spotlight = activeTask || nextTask;
+
+        if (spotlight) {
+          const sc = CAPSULE_COLORS[spotlight.color] || CAPSULE_COLORS.coral;
+          const endMin = spotlight.startMin + spotlight.durationMin;
+          const pct = activeTask
+            ? Math.max(0, Math.min(100, Math.round(((liveNow.nowMinFloat - spotlight.startMin) / Math.max(1, spotlight.durationMin)) * 100)))
+            : Math.round((doneCount / Math.max(1, dayTasks.length)) * 100);
+          const statusLabel = activeTask
+            ? `In Progress · ${formatRemainingShort(endMin - liveNow.nowMinFloat)} left`
+            : isToday && spotlight.startMin > liveNow.nowMinFloat
+              ? `Up Next · in ${formatRemainingShort(spotlight.startMin - liveNow.nowMinFloat)}`
+              : 'Next Block';
+
+          focusCardHtml = `
+            <div class="rounded-2xl bg-cardbg border border-borderline p-4 space-y-3">
+              <div class="flex items-center justify-between gap-2 text-[11px] font-semibold">
+                <span class="text-coral truncate">${statusLabel}</span>
+                <span class="text-mutedtext tabular-nums flex-shrink-0">${doneCount}/${dayTasks.length} done</span>
+              </div>
+              <div class="flex items-center gap-3 min-w-0">
+                <span class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background-color:${sc.hex}; color:${sc.text};">
+                  ${ICONS[spotlight.icon] || ICONS.at}
+                </span>
+                <div class="min-w-0 flex-1">
+                  <p class="font-display text-sm font-bold text-primarytext truncate">${escapeHtml(spotlight.title)}</p>
+                  <p class="text-[11px] text-secondarytext tabular-nums">${formatTime12(spotlight.startMin)}${spotlight.durationMin > 0 ? ` – ${formatTime12(endMin)}` : ''}</p>
+                </div>
+              </div>
+              <div class="h-1.5 rounded-full bg-pillbg overflow-hidden">
+                <div class="h-full rounded-full transition-all duration-300" style="width:${pct}%; background-color:${sc.hex};"></div>
+              </div>
+            </div>
+          `;
+        } else {
+          focusCardHtml = `
+            <div class="rounded-2xl bg-cardbg border border-borderline p-4 space-y-2">
+              <div class="flex items-center justify-between text-[11px] font-semibold">
+                <span class="text-lime">All Blocks Complete</span>
+                <span class="text-secondarytext tabular-nums">${doneCount}/${dayTasks.length}</span>
+              </div>
+              <div class="h-1.5 rounded-full bg-pillbg overflow-hidden">
+                <div class="h-full rounded-full bg-lime" style="width:100%;"></div>
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      // Sync mini-calendar view month when selected date changes month
+      const selParsed = CalLogic.parseDateKey(selectedKey);
+      if (state.desktopMiniCalYear === null || state.desktopMiniCalYear === undefined) {
+        state.desktopMiniCalYear = selParsed.getFullYear();
+        state.desktopMiniCalMonth = selParsed.getMonth();
+      }
+      const viewY = state.desktopMiniCalYear;
+      const viewM = state.desktopMiniCalMonth;
+      const miniCells = CalLogic.buildMonthGrid(viewY, viewM);
+
+      const miniGridHtml = miniCells
+        .map((cell) => {
+          if (cell.out) {
+            return `<button type="button" onclick="state.desktopMiniCalYear=null; selectCalendarDate('${cell.dateKey}')" class="h-8 rounded-lg text-[11px] text-mutedtext/35 hover:text-secondarytext flex flex-col items-center justify-center tabular-nums">${cell.d}</button>`;
+          }
+          const isSel = cell.dateKey === selectedKey;
+          const isT = cell.dateKey === todayKey;
+          const hasTasks = (state.tasks || []).some((t) => isTaskOnDay(t, cell.dateKey));
+          const hasDueCp = CalLogic.getCalendarProjectDecorations(state.projects || [], cell.dateKey, todayKey).dueCheckpoints.length > 0;
+          const cellCls = isSel
+            ? 'bg-coral text-onaccent font-bold'
+            : isT
+              ? 'bg-pillbg border border-coral/70 text-coral font-bold'
+              : 'text-primarytext/85 hover:bg-cardbg font-medium';
+          const dotColor = isSel ? 'bg-onaccent/80' : hasDueCp ? 'bg-sky' : 'bg-coral/75';
+          return `
+            <button
+              type="button"
+              onclick="selectCalendarDate('${cell.dateKey}')"
+              class="tactile-btn h-8 rounded-lg text-[11px] flex flex-col items-center justify-center relative tabular-nums ${cellCls}"
+            >
+              <span>${cell.d}</span>
+              ${hasTasks || hasDueCp ? `<span class="w-1 h-1 rounded-full ${dotColor} absolute bottom-1"></span>` : ''}
+            </button>
+          `;
+        })
+        .join('');
+
+      const activeProjects = (state.projects || []).slice(0, 4);
+      const projectsHtml = activeProjects.length
+        ? activeProjects
+            .map((p) => {
+              const pc = CAPSULE_COLORS[p.color] || CAPSULE_COLORS.coral;
+              const cps = Array.isArray(p.checkpoints) ? p.checkpoints : [];
+              const cpDone = cps.filter((c) => c.done).length;
+              const cpPct = cps.length ? Math.round((cpDone / cps.length) * 100) : 0;
+              return `
+                <button
+                  type="button"
+                  onclick="setTimelineViewMode('projects', true)"
+                  class="tactile-btn w-full text-left p-2.5 rounded-xl bg-cardbg border border-borderline hover:border-secondarytext/50 space-y-2 transition"
+                >
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="flex items-center gap-2 min-w-0">
+                      <span class="w-2 h-2 rounded-full flex-shrink-0" style="background-color:${pc.hex};"></span>
+                      <span class="text-xs font-semibold text-primarytext truncate">${escapeHtml(p.title)}</span>
+                    </span>
+                    <span class="text-[10.5px] font-semibold text-secondarytext tabular-nums flex-shrink-0">${cpDone}/${cps.length}</span>
+                  </div>
+                  <div class="h-1 rounded-full bg-pillbg overflow-hidden">
+                    <div class="h-full rounded-full" style="width:${cpPct}%; background-color:${pc.hex};"></div>
+                  </div>
+                </button>
+              `;
+            })
+            .join('')
+        : `<p class="text-xs text-mutedtext">No active projects yet.</p>`;
+
+      pane.innerHTML = `
+        <div class="p-5 space-y-5 flex-1 flex flex-col">
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Day Focus</p>
+              ${!isToday ? `<button type="button" onclick="state.desktopMiniCalYear=null; jumpCalendarToToday()" class="tactile-btn text-[11px] font-semibold text-coral hover:underline">Today</button>` : `<span class="text-[11px] text-mutedtext tabular-nums">${liveNow.clockLabel}</span>`}
+            </div>
+            ${focusCardHtml}
+          </div>
+
+          <div class="rounded-2xl bg-sheetbg border border-borderline p-3.5 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="font-display text-xs font-bold text-primarytext">${CalLogic.MONTH_NAMES_FULL[viewM]} ${viewY}</span>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="stepDesktopMiniCalMonth(-1)" title="Previous month" class="tactile-btn w-6 h-6 rounded-lg bg-cardbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+                </button>
+                <button type="button" onclick="stepDesktopMiniCalMonth(1)" title="Next month" class="tactile-btn w-6 h-6 rounded-lg bg-cardbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="grid grid-cols-7 gap-1 text-center text-[9.5px] font-semibold text-mutedtext">
+              <span>SA</span><span>SU</span><span>MO</span><span>TU</span><span>WE</span><span>TH</span><span>FR</span>
+            </div>
+            <div class="grid grid-cols-7 gap-1">${miniGridHtml}</div>
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Active Projects</p>
+              <button type="button" onclick="setTimelineViewMode(state.timelineViewMode === 'projects' ? 'daily' : 'projects', true)" class="tactile-btn text-[11px] font-semibold text-coral hover:underline">
+                ${state.timelineViewMode === 'projects' ? 'Daily View' : 'Timeline'}
+              </button>
+            </div>
+            <div class="space-y-2">${projectsHtml}</div>
+          </div>
+
+          <div class="mt-auto pt-3 border-t border-borderline/70 grid grid-cols-2 gap-2">
+            <button type="button" onclick="openTaskModal()" class="tactile-btn py-2.5 px-3 rounded-xl bg-cardbg border border-borderline hover:border-coral/60 text-xs font-semibold text-primarytext flex items-center justify-center gap-1.5">
+              <span class="text-coral font-bold">+</span><span>New Task</span>
+            </button>
+            <button type="button" onclick="openProjectModal()" class="tactile-btn py-2.5 px-3 rounded-xl bg-cardbg border border-borderline hover:border-sky/60 text-xs font-semibold text-primarytext flex items-center justify-center gap-1.5">
+              <span class="text-sky font-bold">+</span><span>Project</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDesktopHabitInspector(pane) {
+      const todayKey = getTodayDateKey();
+      const todayD = CalLogic.parseDateKey(todayKey);
+      const totalHabits = state.habits.length;
+      const doneToday = state.habits.filter((h) => h.done).length;
+      const dayPct = totalHabits ? Math.round((doneToday / totalHabits) * 100) : 0;
+      const selectedHabit = state.habits.find((h) => h.id === state.desktopSelectedHabitId) || null;
+
+      if (selectedHabit) {
+        normalizeHabitData(selectedHabit);
+        const masteryDays = Number(selectedHabit.masteryDays) || 21;
+        const completedDays = selectedHabit.completedDays || 0;
+        const daysLeft = Math.max(0, masteryDays - completedDays);
+        const masteryPct = Math.min(100, Math.round((completedDays / Math.max(1, masteryDays)) * 100));
+        const viewY = Number.isInteger(state.desktopHabitInspectorYear) ? state.desktopHabitInspectorYear : todayD.getFullYear();
+        const viewM = Number.isInteger(state.desktopHabitInspectorMonth) ? state.desktopHabitInspectorMonth : todayD.getMonth();
+        const atCurrentMonth = viewY > todayD.getFullYear() || (viewY === todayD.getFullYear() && viewM >= todayD.getMonth());
+        const completedSet = new Set(selectedHabit.completedDates || []);
+        const cells = CalLogic.buildMonthGrid(viewY, viewM);
+
+        const gridHtml = cells
+          .map((cell) => {
+            if (cell.out) {
+              return `<div class="h-8 rounded-lg text-[11px] flex items-center justify-center text-mutedtext/25 select-none">${cell.d}</div>`;
+            }
+            const isFuture = CalLogic.compareDateKeys(cell.dateKey, todayKey) > 0;
+            const isToday = cell.dateKey === todayKey;
+            const done = completedSet.has(cell.dateKey);
+            if (isFuture) {
+              return `<button type="button" disabled class="h-8 rounded-lg text-[11px] font-medium flex items-center justify-center bg-pillbg/30 text-mutedtext/35 cursor-not-allowed tabular-nums">${cell.d}</button>`;
+            }
+            const cls = done
+              ? `bg-coral text-onaccent font-bold ${isToday ? 'ring-2 ring-primarytext/45 ring-offset-1 ring-offset-cardbg' : ''}`
+              : `bg-pillbg text-secondarytext border ${isToday ? 'border-coral text-coral font-bold' : 'border-borderline hover:border-coral/50'}`;
+            return `<button type="button" onclick="toggleDesktopHabitHistoryDay(${selectedHabit.id}, '${cell.dateKey}')" title="${CalLogic.formatHumanDate(cell.dateKey, 'short')} • ${done ? 'Completed (click to unmark)' : 'Click to mark complete'}" class="tactile-btn h-8 rounded-lg text-[11px] font-semibold flex items-center justify-center tabular-nums ${cls}">${cell.d}</button>`;
+          })
+          .join('');
+
+        pane.innerHTML = `
+          <div class="p-5 space-y-5 flex-1 flex flex-col">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <span class="w-10 h-10 rounded-xl bg-coral text-onaccent flex items-center justify-center flex-shrink-0">
+                  ${ICONS[selectedHabit.icon] || ICONS.spark}
+                </span>
+                <div class="min-w-0">
+                  <h3 class="font-display text-base font-bold text-primarytext truncate">${escapeHtml(selectedHabit.title)}</h3>
+                  <p class="text-xs text-secondarytext tabular-nums">${escapeHtml(selectedHabit.timeLabel || 'Daily')}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onclick="clearDesktopSelectedHabit()"
+                title="Close habit details"
+                class="tactile-btn w-8 h-8 rounded-xl bg-cardbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center flex-shrink-0"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <div class="rounded-2xl bg-cardbg border border-borderline p-3.5 space-y-2.5">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-secondarytext font-medium">Mastery Progress</span>
+                <span class="font-bold text-primarytext tabular-nums">${completedDays} / ${masteryDays} days</span>
+              </div>
+              <div class="h-1.5 rounded-full bg-pillbg overflow-hidden">
+                <div class="h-full rounded-full bg-coral transition-all duration-300" style="width:${masteryPct}%;"></div>
+              </div>
+              <div class="flex items-center justify-between text-[11px] text-secondarytext">
+                <span>${daysLeft === 0 ? 'Mastered ★' : `${daysLeft}d remaining`}</span>
+                <span class="tabular-nums">${masteryPct}%</span>
+              </div>
+            </div>
+
+            <div class="rounded-2xl bg-sheetbg border border-borderline p-3.5 space-y-3">
+              <div class="flex items-center justify-between">
+                <button type="button" onclick="stepDesktopHabitInspectorMonth(-1)" class="tactile-btn w-7 h-7 rounded-lg bg-cardbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+                </button>
+                <span class="font-display text-xs font-bold text-primarytext">${CalLogic.MONTH_NAMES_FULL[viewM]} ${viewY}</span>
+                <button type="button" ${atCurrentMonth ? 'disabled' : ''} onclick="stepDesktopHabitInspectorMonth(1)" class="tactile-btn w-7 h-7 rounded-lg bg-cardbg border border-borderline text-secondarytext hover:text-primarytext disabled:opacity-35 flex items-center justify-center">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                </button>
+              </div>
+              <div class="grid grid-cols-7 gap-1 text-center text-[9.5px] font-semibold text-mutedtext">
+                <span>SA</span><span>SU</span><span>MO</span><span>TU</span><span>WE</span><span>TH</span><span>FR</span>
+              </div>
+              <div class="grid grid-cols-7 gap-1">${gridHtml}</div>
+              <p class="text-[11px] text-mutedtext text-center pt-1">Click any past day to toggle punch history</p>
+            </div>
+
+            <div class="mt-auto pt-2">
+              <button
+                type="button"
+                onclick="toggleHabitToday(${selectedHabit.id})"
+                class="tactile-btn w-full py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 ${
+                  selectedHabit.done
+                    ? 'bg-cardbg border border-borderline text-secondarytext hover:text-primarytext'
+                    : 'bg-coral text-onaccent'
+                }"
+              >
+                ${selectedHabit.done ? '<svg class="w-4 h-4 text-coral" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Punched Today</span>' : '<span>Punch Today</span>'}
+              </button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // Quiet atmospheric overview when no habit is selected (inspired by minimal desktop workspace aesthetic)
+      pane.innerHTML = `
+        <div class="p-5 flex-1 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Today's Rhythm</p>
+              <span class="text-xs font-bold text-primarytext tabular-nums">${doneToday}/${totalHabits}</span>
+            </div>
+            <div class="h-1.5 rounded-full bg-cardbg overflow-hidden border border-borderline/60">
+              <div class="h-full rounded-full bg-coral transition-all duration-300" style="width:${dayPct}%;"></div>
+            </div>
+            <p class="text-xs text-mutedtext leading-relaxed">
+              Select any habit card on the left to inspect its punch calendar and adjust past check-ins.
+            </p>
+          </div>
+
+          <!-- Ultra-subtle minimalist desk motif matching serene matte right canvas -->
+          <div class="my-auto py-8 flex flex-col items-center justify-center text-center select-none pointer-events-none">
+            <svg class="w-48 h-40 text-primarytext opacity-[0.07]" viewBox="0 0 240 190" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M58 148 L96 76 C112 72 132 76 146 86 L108 158 C94 148 74 144 58 148 Z"/>
+              <path d="M146 86 C160 76 180 72 196 76 L158 148 C142 144 122 148 108 158"/>
+              <line x1="88" y1="102" x2="122" y2="108"/>
+              <line x1="80" y1="118" x2="114" y2="124"/>
+              <line x1="142" y1="106" x2="174" y2="100"/>
+              <line x1="134" y1="122" x2="166" y2="116"/>
+              <circle cx="94" cy="48" r="14"/>
+              <path d="M94 40 V48 L100 52"/>
+              <path d="M62 44 H78 M110 44 H126"/>
+              <rect x="150" y="30" width="38" height="28" rx="6"/>
+              <path d="M161 44 L167 50 L178 39"/>
+              <circle cx="196" cy="112" r="8"/>
+              <path d="M192.5 112 L195 114.5 L199.5 109.5"/>
+              <path d="M36 96 L42 90 L52 134 L43 136 Z"/>
+              <path d="M40 36 L42 42 L48 44 L42 46 L40 52 L38 46 L32 44 L38 42 Z"/>
+              <path d="M206 58 L207.5 62 L211.5 63.5 L207.5 65 L206 69 L204.5 65 L200.5 63.5 L204.5 62 Z"/>
+            </svg>
+          </div>
+
+          <div class="pt-3 border-t border-borderline/70">
+            <button type="button" onclick="openHabitModal()" class="tactile-btn w-full py-2.5 px-3 rounded-xl bg-cardbg border border-borderline hover:border-coral/60 text-xs font-semibold text-primarytext flex items-center justify-center gap-1.5">
+              <span class="text-coral font-bold">+</span><span>New Habit</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDesktopInboxInspector(pane) {
+      const queue = state.unscheduledQueue || [];
+      const queueHtml = queue.length
+        ? queue
+            .map(
+              (q) => `
+              <div class="rounded-xl bg-cardbg border border-borderline p-3 flex items-center justify-between gap-2">
+                <span class="text-xs font-medium text-primarytext truncate">${escapeHtml(q.text)}</span>
+                <button type="button" onclick="openScheduleFromQueue(${q.id})" class="tactile-btn px-2.5 py-1 rounded-lg bg-coral text-onaccent text-[10.5px] font-semibold whitespace-nowrap flex-shrink-0">
+                  Set Time
+                </button>
+              </div>
+            `
+            )
+            .join('')
+        : `<p class="text-xs text-mutedtext leading-relaxed">Swipe cards right to queue thoughts here for quick time-blocking.</p>`;
+
+      pane.innerHTML = `
+        <div class="p-5 space-y-5 flex-1 flex flex-col">
+          <div class="space-y-2.5">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Capture Overview</p>
+            <div class="grid grid-cols-3 gap-2">
+              <div class="rounded-xl bg-cardbg border border-borderline p-3 text-center">
+                <p class="font-display text-lg font-bold text-primarytext tabular-nums">${(state.inboxItems || []).length}</p>
+                <p class="text-[10.5px] text-secondarytext">In Deck</p>
+              </div>
+              <div class="rounded-xl bg-cardbg border border-borderline p-3 text-center">
+                <p class="font-display text-lg font-bold text-coral tabular-nums">${queue.length}</p>
+                <p class="text-[10.5px] text-secondarytext">Queued</p>
+              </div>
+              <div class="rounded-xl bg-cardbg border border-borderline p-3 text-center">
+                <p class="font-display text-lg font-bold text-secondarytext tabular-nums">${(state.archivedDumps || []).length}</p>
+                <p class="text-[10.5px] text-secondarytext">Archived</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2.5">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Ready to Schedule</p>
+            <div class="space-y-2">${queueHtml}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDesktopJournalInspector(pane) {
+      const latest = (state.journalDays || [])[0];
+      const moodCount = latest && Array.isArray(latest.moodLogs) ? latest.moodLogs.length : 0;
+      const energyCount = latest && Array.isArray(latest.energyLogs) ? latest.energyLogs.length : 0;
+      const exCount = latest && Array.isArray(latest.exerciseLogs) ? latest.exerciseLogs.length : 0;
+
+      pane.innerHTML = `
+        <div class="p-5 space-y-5 flex-1 flex flex-col">
+          <div class="space-y-2.5">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Quick Check-Ins</p>
+            <div class="space-y-2">
+              <button type="button" onclick="handleJournalFabOption('entry')" class="tactile-btn w-full px-3.5 py-3 rounded-xl bg-cardbg border border-borderline hover:border-coral/60 flex items-center justify-between text-xs font-semibold text-primarytext">
+                <span>Add Journal Entry</span>
+                <span class="text-coral">+</span>
+              </button>
+              <button type="button" onclick="handleJournalFabOption('mood')" class="tactile-btn w-full px-3.5 py-3 rounded-xl bg-cardbg border border-borderline hover:border-lime/60 flex items-center justify-between text-xs font-semibold text-primarytext">
+                <span>Mood Tracker</span>
+                <span class="text-[11px] text-secondarytext tabular-nums">${moodCount} today</span>
+              </button>
+              <button type="button" onclick="handleJournalFabOption('energy')" class="tactile-btn w-full px-3.5 py-3 rounded-xl bg-cardbg border border-borderline hover:border-sky/60 flex items-center justify-between text-xs font-semibold text-primarytext">
+                <span>Energy Tracker</span>
+                <span class="text-[11px] text-secondarytext tabular-nums">${energyCount} today</span>
+              </button>
+              <button type="button" onclick="handleJournalFabOption('exercise')" class="tactile-btn w-full px-3.5 py-3 rounded-xl bg-cardbg border border-borderline hover:border-plum/60 flex items-center justify-between text-xs font-semibold text-primarytext">
+                <span>Mindset Exercise (CBT · DBT · ACT)</span>
+                <span class="text-[11px] text-secondarytext tabular-nums">${exCount}</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="rounded-2xl bg-sheetbg border border-borderline p-4 space-y-1.5">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Entries Logged</p>
+            <p class="font-display text-2xl font-bold text-primarytext tabular-nums">${(state.journalDays || []).length}</p>
+            <p class="text-xs text-mutedtext">Reflections & structured check-ins saved locally.</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDesktopProfileInspector(pane) {
+      const subviews = [
+        { id: 'main', label: 'Overview & Radar' },
+        { id: 'topics', label: 'Skill Trees' },
+        { id: 'routines', label: 'Routines' },
+        { id: 'inventory', label: 'Inventory' },
+        { id: 'prompts', label: 'Reflection Prompts' },
+        { id: 'settings', label: 'Settings' },
+      ];
+      const activeSub = state.profileSubView || 'main';
+
+      pane.innerHTML = `
+        <div class="p-5 space-y-5 flex-1 flex flex-col">
+          <div class="space-y-2.5">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Sections</p>
+            <div class="space-y-1.5">
+              ${subviews
+                .map(
+                  (s) => `
+                  <button
+                    type="button"
+                    onclick="openProfileSubView('${s.id}')"
+                    class="tactile-btn w-full px-3.5 py-2.5 rounded-xl border text-left text-xs font-semibold transition ${
+                      activeSub === s.id
+                        ? 'bg-coral/15 border-coral/50 text-coral'
+                        : 'bg-cardbg border-borderline text-primarytext hover:border-secondarytext/50'
+                    }"
+                  >
+                    ${s.label}
+                  </button>
+                `
+                )
+                .join('')}
+            </div>
+          </div>
+
+          <div class="space-y-3 pt-3 border-t border-borderline/70">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Theme & Accent</p>
+            <div class="grid grid-cols-2 gap-2">
+              ${Object.entries(THEMES)
+                .map(([id, t]) => {
+                  const active = id === state.themeId;
+                  return `
+                    <button
+                      type="button"
+                      onclick="applyThemeAndAccent('${id}', state.accentKey)"
+                      class="tactile-btn text-left p-2.5 rounded-xl border transition ${
+                        active ? 'bg-pillbg border-coral' : 'bg-cardbg border-borderline hover:border-secondarytext/60'
+                      }"
+                    >
+                      <div class="flex items-center gap-1 mb-1.5">
+                        ${t.preview.map((hex) => `<span class="w-3.5 h-3.5 rounded-full border border-borderline" style="background-color:${hex};"></span>`).join('')}
+                      </div>
+                      <p class="text-[11px] font-semibold text-primarytext truncate">${escapeHtml(t.name)}</p>
+                    </button>
+                  `;
+                })
+                .join('')}
+            </div>
+            <div class="flex items-center justify-between gap-2 pt-1">
+              ${Object.entries(ACCENT_RGB)
+                .map(([key, val]) => {
+                  const active = key === state.accentKey;
+                  return `<button type="button" onclick="applyThemeAndAccent(state.themeId, '${key}')" style="background-color:${val.hex};" title="${key}" class="tactile-btn w-7 h-7 rounded-full transition ${active ? 'ring-2 ring-primarytext ring-offset-2 ring-offset-appbg scale-105' : 'opacity-80 hover:opacity-100'}"></button>`;
+                })
+                .join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDesktopInspector() {
+      if (!isDesktopViewport()) return;
+      const pane = document.getElementById('desktop-inspector-pane');
+      if (!pane) return;
+
+      if (state.activeTab === 'habit') {
+        renderDesktopHabitInspector(pane);
+      } else if (state.activeTab === 'inbox') {
+        renderDesktopInboxInspector(pane);
+      } else if (state.activeTab === 'journal') {
+        renderDesktopJournalInspector(pane);
+      } else if (state.activeTab === 'profile') {
+        renderDesktopProfileInspector(pane);
+      } else {
+        renderDesktopTimelineInspector(pane);
+      }
+    }
 
     // =========================================================================
     // SPATIAL EDGE PANEL & RADIAL TOOLS CONTROLLER
