@@ -122,6 +122,60 @@ export function buildMonthGrid(year, month) {
 }
 
 /**
+ * Builds a Saturday-first month grid for (year, month) and, when a focused project spans <= maxWeeks
+ * across a month boundary, includes the minimal extra leading/trailing week row(s) needed to show
+ * its full start-to-end timeframe without clipping.
+ */
+export function buildMonthGridForProject(year, month, project, fallbackDateKey, maxWeeks = 5) {
+  const baseCells = buildMonthGrid(year, month);
+  if (!project || baseCells.length < 7) return baseCells;
+
+  const range = getProjectEffectiveRange(project, fallbackDateKey);
+  const totalWeeks = getProjectWeekSpanCount(range.startDate, range.endDate);
+  if (totalWeeks > maxWeeks) return baseCells;
+
+  const monthFirstKey = formatDateKey(new Date(year, month, 1));
+  const monthLastKey = formatDateKey(new Date(year, month + 1, 0));
+  const overlapsActualMonth =
+    compareDateKeys(range.startDate, monthLastKey) <= 0 &&
+    compareDateKeys(range.endDate, monthFirstKey) >= 0;
+  if (!overlapsActualMonth) return baseCells;
+
+  const tfStartKey = getMondayDateKey(range.startDate);
+  const tfEndKey = addDaysToDateKey(getMondayDateKey(range.endDate), 6);
+  const baseStartKey = baseCells[0].dateKey;
+  const baseEndKey = baseCells[baseCells.length - 1].dateKey;
+
+  const gridStartKey = compareDateKeys(tfStartKey, baseStartKey) < 0 ? tfStartKey : baseStartKey;
+  const gridEndKey = compareDateKeys(tfEndKey, baseEndKey) > 0 ? tfEndKey : baseEndKey;
+
+  if (gridStartKey === baseStartKey && gridEndKey === baseEndKey) {
+    return baseCells;
+  }
+
+  const startDateObj = parseDateKey(gridStartKey);
+  const endDateObj = parseDateKey(gridEndKey);
+  const totalDays = Math.round((endDateObj.getTime() - startDateObj.getTime()) / 86400000) + 1;
+  const cells = [];
+  for (let i = 0; i < totalDays; i++) {
+    const cellDate = new Date(startDateObj.getFullYear(), startDateObj.getMonth(), startDateObj.getDate() + i);
+    const cellYear = cellDate.getFullYear();
+    const cellMonth = cellDate.getMonth();
+    const cellDay = cellDate.getDate();
+    cells.push({
+      year: cellYear,
+      month: cellMonth,
+      d: cellDay,
+      dateKey: formatDateKey(cellDate),
+      out: cellYear !== year || cellMonth !== month,
+      weekdayIdx: i % 7,
+      r: [0, 0, 0],
+    });
+  }
+  return cells;
+}
+
+/**
  * Resolves a task's primary dateKey ('YYYY-MM-DD') with clean legacy migration support.
  */
 export function getTaskDateKey(task, fallbackDateKey) {
@@ -584,51 +638,18 @@ export function computeCalendarTimeframeWindow(monthCells, projects, selectedDat
     };
   }
 
-  const eligible = overlapping.filter((item) => !item.exceedsMaxWeeks);
+  const effectiveSelectedRow =
+    selIdx >= 0 ? selectedRow : overlapping[0].firstRow;
 
-  if (eligible.length === 0) {
-    // All overlapping projects span more than 5 weeks -> do not expand the whole calendar
-    return {
-      mode: 'exceeds-max-weeks',
-      canExpand: false,
-      selectedRow,
-      expandedStartRow: selectedRow,
-      expandedEndRow: selectedRow,
-      expandedRowCount: 1,
-      expandedHeight: rowHeight,
-    };
-  }
-
-  // Prefer eligible timeframes covering the selected date/row if the union of all eligible projects would exceed maxWeeks
-  let targetGroup = eligible;
-  let minRow = Math.min(...targetGroup.map((item) => item.firstRow));
-  let maxRow = Math.max(...targetGroup.map((item) => item.lastRow));
-
-  if (maxRow - minRow + 1 > maxWeeks) {
-    const onDate = eligible.filter((item) => item.containsSelectedDate || item.containsSelectedRow);
-    if (onDate.length > 0) {
-      targetGroup = onDate;
-      minRow = Math.min(...targetGroup.map((item) => item.firstRow));
-      maxRow = Math.max(...targetGroup.map((item) => item.lastRow));
-    }
-    if (maxRow - minRow + 1 > maxWeeks) {
-      const closest = [...eligible].sort(
-        (a, b) =>
-          Math.min(Math.abs(a.firstRow - selectedRow), Math.abs(a.lastRow - selectedRow)) -
-          Math.min(Math.abs(b.firstRow - selectedRow), Math.abs(b.lastRow - selectedRow))
-      )[0];
-      minRow = closest.firstRow;
-      maxRow = closest.lastRow;
-    }
-  }
-
+  const minRow = Math.min(...overlapping.map((item) => item.firstRow));
+  const maxRow = Math.max(...overlapping.map((item) => item.lastRow));
   const expandedRowCount = Math.max(1, maxRow - minRow + 1);
-  const canExpand = expandedRowCount > 1 || minRow !== selectedRow;
+  const canExpand = expandedRowCount > 1 || minRow !== effectiveSelectedRow;
 
   return {
     mode: 'timeframe',
     canExpand,
-    selectedRow,
+    selectedRow: effectiveSelectedRow,
     expandedStartRow: minRow,
     expandedEndRow: maxRow,
     expandedRowCount,
@@ -756,6 +777,7 @@ if (typeof window !== 'undefined') {
     getOrdinalDay,
     formatHumanDate,
     buildMonthGrid,
+    buildMonthGridForProject,
     getTaskDateKey,
     isTaskOnDateKey,
     isTaskDoneOnDateKey,

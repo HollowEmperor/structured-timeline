@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   buildMonthGrid,
+  buildMonthGridForProject,
   isTaskOnDateKey,
   isTaskDoneOnDateKey,
   assignProjectLanes,
@@ -209,18 +210,38 @@ test('computeCalendarTimeframeWindow opens only timeframe week rows (<= 5 weeks)
   assert.equal(fiveWeekWin.expandedRowCount, 5);
   assert.equal(fiveWeekWin.expandedHeight, 276);
 
-  // 4) > 5-week project timeframe (Nov 1 -> Dec 20, 8 weeks total) -> does NOT expand the calendar
+  // 4) > 5-week project timeframe (Nov 1 -> Dec 20, 8 weeks total) -> expands all overlapping rows in the displayed month (rows 0..4)
   const overFiveWeekProjects = [
     { id: 'p8w', title: 'Quarter Initiative', startDate: '2026-11-01', endDate: '2026-12-20', checkpoints: [] },
   ];
   assert.ok(getProjectWeekSpanCount('2026-11-01', '2026-12-20') > 5);
-  const cappedWin = computeCalendarTimeframeWindow(nov2026, overFiveWeekProjects, '2026-11-24');
-  assert.equal(cappedWin.mode, 'exceeds-max-weeks');
-  assert.equal(cappedWin.canExpand, false);
-  assert.equal(cappedWin.expandedStartRow, 3);
-  assert.equal(cappedWin.expandedEndRow, 3);
-  assert.equal(cappedWin.expandedRowCount, 1);
-  assert.equal(cappedWin.expandedHeight, 52);
+  const longWin = computeCalendarTimeframeWindow(nov2026, overFiveWeekProjects, '2026-11-24');
+  assert.equal(longWin.mode, 'timeframe');
+  assert.equal(longWin.canExpand, true);
+  assert.equal(longWin.expandedStartRow, 0);
+  assert.equal(longWin.expandedEndRow, 4);
+  assert.equal(longWin.expandedRowCount, 5);
+  assert.equal(longWin.expandedHeight, 276);
+
+  // 5) Cross-month project (Nov 25 -> Dec 9, 3 weeks) extends Nov 2026 grid cleanly so Dec 5-9 isn't clipped
+  const crossProj = { id: 'px', title: 'Holiday Launch', startDate: '2026-11-25', endDate: '2026-12-09', checkpoints: [] };
+  const extGrid = buildMonthGridForProject(2026, 10, crossProj, '2026-11-25', 5);
+  assert.equal(extGrid.length, 42); // adds Dec 5..11 row
+  assert.equal(extGrid[extGrid.length - 1].dateKey, '2026-12-11');
+  const crossWin = computeCalendarTimeframeWindow(extGrid, [crossProj], '2026-11-25');
+  assert.equal(crossWin.mode, 'timeframe');
+  assert.equal(crossWin.canExpand, true);
+  assert.equal(crossWin.expandedStartRow, 3);
+  assert.equal(crossWin.expandedEndRow, 5);
+  assert.equal(crossWin.expandedRowCount, 3);
+
+  // 6) Focused project in another month (Dec 14 -> Dec 17) anchors selectedRow to project's row when selectedDate is in Nov
+  const decGrid = buildMonthGrid(2026, 11);
+  const decProj = { id: 'pdec', title: 'Winter Sprint', startDate: '2026-12-14', endDate: '2026-12-17', checkpoints: [] };
+  const decWin = computeCalendarTimeframeWindow(decGrid, [decProj], '2026-11-25');
+  assert.equal(decWin.selectedRow, 2);
+  assert.equal(decWin.expandedStartRow, 2);
+  assert.equal(decWin.expandedEndRow, 2);
 });
 
 test('computeCalendarCellTimeframeBoxes stretches continuous colored selection boxes across start, middle, and end days', () => {

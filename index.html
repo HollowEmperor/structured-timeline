@@ -4138,6 +4138,55 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         return cells;
       }
 
+      function buildMonthGridForProject(year, month, project, fallbackDateKey, maxWeeks = 5) {
+        const baseCells = buildMonthGrid(year, month);
+        if (!project || baseCells.length < 7) return baseCells;
+
+        const range = getProjectEffectiveRange(project, fallbackDateKey);
+        const totalWeeks = getProjectWeekSpanCount(range.startDate, range.endDate);
+        if (totalWeeks > maxWeeks) return baseCells;
+
+        const monthFirstKey = formatDateKey(new Date(year, month, 1));
+        const monthLastKey = formatDateKey(new Date(year, month + 1, 0));
+        const overlapsActualMonth =
+          compareDateKeys(range.startDate, monthLastKey) <= 0 &&
+          compareDateKeys(range.endDate, monthFirstKey) >= 0;
+        if (!overlapsActualMonth) return baseCells;
+
+        const tfStartKey = getMondayDateKey(range.startDate);
+        const tfEndKey = addDaysToDateKey(getMondayDateKey(range.endDate), 6);
+        const baseStartKey = baseCells[0].dateKey;
+        const baseEndKey = baseCells[baseCells.length - 1].dateKey;
+
+        const gridStartKey = compareDateKeys(tfStartKey, baseStartKey) < 0 ? tfStartKey : baseStartKey;
+        const gridEndKey = compareDateKeys(tfEndKey, baseEndKey) > 0 ? tfEndKey : baseEndKey;
+
+        if (gridStartKey === baseStartKey && gridEndKey === baseEndKey) {
+          return baseCells;
+        }
+
+        const startDateObj = parseDateKey(gridStartKey);
+        const endDateObj = parseDateKey(gridEndKey);
+        const totalDays = Math.round((endDateObj.getTime() - startDateObj.getTime()) / 86400000) + 1;
+        const cells = [];
+        for (let i = 0; i < totalDays; i++) {
+          const cellDate = new Date(startDateObj.getFullYear(), startDateObj.getMonth(), startDateObj.getDate() + i);
+          const cellYear = cellDate.getFullYear();
+          const cellMonth = cellDate.getMonth();
+          const cellDay = cellDate.getDate();
+          cells.push({
+            year: cellYear,
+            month: cellMonth,
+            d: cellDay,
+            dateKey: formatDateKey(cellDate),
+            out: cellYear !== year || cellMonth !== month,
+            weekdayIdx: i % 7,
+            r: [0, 0, 0],
+          });
+        }
+        return cells;
+      }
+
       function getTaskDateKey(task, fallbackDateKey) {
         if (task && isValidDateKey(task.dateKey)) return task.dateKey;
         if (task && task.day !== undefined && task.day !== null && !Number.isNaN(Number(task.day))) {
@@ -4478,49 +4527,16 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           };
         }
 
-        const eligible = overlapping.filter((item) => !item.exceedsMaxWeeks);
-
-        if (eligible.length === 0) {
-          return {
-            mode: 'exceeds-max-weeks',
-            canExpand: false,
-            selectedRow,
-            expandedStartRow: selectedRow,
-            expandedEndRow: selectedRow,
-            expandedRowCount: 1,
-            expandedHeight: rowHeight,
-          };
-        }
-
-        let targetGroup = eligible;
-        let minRow = Math.min(...targetGroup.map((item) => item.firstRow));
-        let maxRow = Math.max(...targetGroup.map((item) => item.lastRow));
-
-        if (maxRow - minRow + 1 > maxWeeks) {
-          const onDate = eligible.filter((item) => item.containsSelectedDate || item.containsSelectedRow);
-          if (onDate.length > 0) {
-            targetGroup = onDate;
-            minRow = Math.min(...targetGroup.map((item) => item.firstRow));
-            maxRow = Math.max(...targetGroup.map((item) => item.lastRow));
-          }
-          if (maxRow - minRow + 1 > maxWeeks) {
-            const closest = [...eligible].sort(
-              (a, b) =>
-                Math.min(Math.abs(a.firstRow - selectedRow), Math.abs(a.lastRow - selectedRow)) -
-                Math.min(Math.abs(b.firstRow - selectedRow), Math.abs(b.lastRow - selectedRow))
-            )[0];
-            minRow = closest.firstRow;
-            maxRow = closest.lastRow;
-          }
-        }
-
+        const effectiveSelectedRow = selIdx >= 0 ? selectedRow : overlapping[0].firstRow;
+        const minRow = Math.min(...overlapping.map((item) => item.firstRow));
+        const maxRow = Math.max(...overlapping.map((item) => item.lastRow));
         const expandedRowCount = Math.max(1, maxRow - minRow + 1);
-        const canExpand = expandedRowCount > 1 || minRow !== selectedRow;
+        const canExpand = expandedRowCount > 1 || minRow !== effectiveSelectedRow;
 
         return {
           mode: 'timeframe',
           canExpand,
-          selectedRow,
+          selectedRow: effectiveSelectedRow,
           expandedStartRow: minRow,
           expandedEndRow: maxRow,
           expandedRowCount,
@@ -4637,6 +4653,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         getOrdinalDay,
         formatHumanDate,
         buildMonthGrid,
+        buildMonthGridForProject,
         getTaskDateKey,
         isTaskOnDateKey,
         isTaskDoneOnDateKey,
@@ -7651,6 +7668,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       rowsEl.innerHTML = rowsHtml;
       if (animateLayout) {
         const mask = document.getElementById('calendar-viewport-mask');
+        if (options && options.resetAnchorBeforeAnimate) {
+          const win = getCalendarExpansionWindow();
+          rowsEl.style.transition = 'none';
+          rowsEl.style.transform = `translate3d(0px, ${(-win.selectedRow * 56).toFixed(1)}px, 0)`;
+        }
         if (mask) void mask.offsetHeight;
         applyCalendarProgress(state.monthExpanded ? 1 : 0, false);
       } else {
@@ -8103,7 +8125,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const changed = state.timelineViewMode !== next;
       state.timelineViewMode = next;
       if (next !== 'projects') {
-        state.focusedProjectId = null;
+        if (state.focusedProjectId) {
+          state.focusedProjectId = null;
+          state.monthCells = CalLogic.buildMonthGrid(state.calendarYear, state.calendarMonth);
+          computeSelectedDayRings();
+        }
       }
       if (changed) playSfx('tick');
       toggleTimelineFabMenu(false);
@@ -8155,6 +8181,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         projectHighlightRetractTimer = setTimeout(() => {
           projectHighlightRetractTimer = null;
           if (!state.focusedProjectId) {
+            if (CalLogic.isValidDateKey(state.selectedDate)) {
+              const selParsed = CalLogic.parseDateKey(state.selectedDate);
+              state.calendarYear = selParsed.getFullYear();
+              state.calendarMonth = selParsed.getMonth();
+            }
+            state.monthCells = CalLogic.buildMonthGrid(state.calendarYear, state.calendarMonth);
+            computeSelectedDayRings();
             renderUnifiedCalendar({ animateLayout: false });
           }
         }, 460);
@@ -8163,23 +8196,39 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       // Otherwise highlight ONLY this project's timeframe with smooth calendar open + left-to-right spread
       const wasCollapsed = !state.monthExpanded;
+      const prevYear = state.calendarYear;
+      const prevMonth = state.calendarMonth;
+      const prevFirstKey = state.monthCells[0]?.dateKey || '';
       state.focusedProjectId = projectId;
       playSfx('sweepOn');
       const proj = (state.projects || []).find((p) => String(p.id) === targetId);
       if (proj) {
         const todayKey = getTodayDateKey();
         const range = CalLogic.getProjectEffectiveRange(proj, todayKey);
-        const firstCellKey = state.monthCells[0]?.dateKey || '';
-        const lastCellKey = state.monthCells[state.monthCells.length - 1]?.dateKey || '';
-        const overlapsCurrentGrid = range.startDate <= lastCellKey && range.endDate >= firstCellKey;
-        if (!overlapsCurrentGrid && CalLogic.isValidDateKey(range.startDate)) {
+        const monthFirstKey = CalLogic.formatDateKey(new Date(state.calendarYear, state.calendarMonth, 1));
+        const monthLastKey = CalLogic.formatDateKey(new Date(state.calendarYear, state.calendarMonth + 1, 0));
+        const overlapsCurrentMonth =
+          CalLogic.compareDateKeys(range.startDate, monthLastKey) <= 0 &&
+          CalLogic.compareDateKeys(range.endDate, monthFirstKey) >= 0;
+        if (!overlapsCurrentMonth && CalLogic.isValidDateKey(range.startDate)) {
           const parsed = CalLogic.parseDateKey(range.startDate);
           state.calendarYear = parsed.getFullYear();
           state.calendarMonth = parsed.getMonth();
-          state.monthCells = CalLogic.buildMonthGrid(state.calendarYear, state.calendarMonth);
-          computeSelectedDayRings();
         }
+        state.monthCells = CalLogic.buildMonthGridForProject(
+          state.calendarYear,
+          state.calendarMonth,
+          proj,
+          todayKey,
+          5
+        );
+        computeSelectedDayRings();
       }
+
+      const gridOriginChanged =
+        state.calendarYear !== prevYear ||
+        state.calendarMonth !== prevMonth ||
+        (state.monthCells[0]?.dateKey || '') !== prevFirstKey;
 
       const win = getCalendarExpansionWindow();
       const willExpand = win.canExpand;
@@ -8194,6 +8243,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       renderUnifiedCalendar({
         animateLayout: true,
         animateTimeframeSpread: true,
+        resetAnchorBeforeAnimate: gridOriginChanged,
         spreadStartDelayMs: wasCollapsed && willExpand ? 90 : 20,
       });
       renderTimeline();
@@ -10180,6 +10230,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       });
       if (state.focusedProjectId && String(state.focusedProjectId) === String(targetId)) {
         state.focusedProjectId = null;
+        state.monthCells = CalLogic.buildMonthGrid(state.calendarYear, state.calendarMonth);
+        computeSelectedDayRings();
       }
       state.editingProjectId = null;
       playSfx('delete');
