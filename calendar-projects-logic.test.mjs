@@ -15,20 +15,20 @@ import {
   computeCalendarRowTimeframeBoxes,
 } from './calendar-projects-logic.js';
 
-test('buildMonthGrid produces 42 real Monday-first cells for any month/year including leap years', () => {
+test('buildMonthGrid produces 42 real Saturday-first cells for any month/year including leap years', () => {
   const feb2024 = buildMonthGrid(2024, 1); // Feb 2024 (leap year, starts Thu)
   assert.equal(feb2024.length, 42);
   const inMonth = feb2024.filter((c) => !c.out);
   assert.equal(inMonth.length, 29);
   assert.equal(inMonth[0].dateKey, '2024-02-01');
-  assert.equal(inMonth[0].weekdayIdx, 3); // Thu = 3 in Mon=0..Sun=6
+  assert.equal(inMonth[0].weekdayIdx, 5); // Thu = 5 in Sat=0..Fri=6
   assert.equal(inMonth[28].dateKey, '2024-02-29');
 
   const nov2026 = buildMonthGrid(2026, 10); // Nov 2026 (starts Sun)
   assert.equal(nov2026.length, 42);
   const firstNov = nov2026.find((c) => c.dateKey === '2026-11-01');
-  assert.equal(firstNov.weekdayIdx, 6); // Sun = 6
-  assert.equal(nov2026[0].dateKey, '2026-10-26');
+  assert.equal(firstNov.weekdayIdx, 1); // Sun = 1 in Sat=0..Fri=6
+  assert.equal(nov2026[0].dateKey, '2026-10-31'); // Sat Oct 31
   assert.equal(nov2026[0].out, true);
 });
 
@@ -162,19 +162,19 @@ test('resolveCalendarSwipeGesture distinguishes left/right month swipes, vertica
 });
 
 test('computeCalendarTimeframeWindow opens only timeframe week rows (<= 5 weeks) and refuses full expansion for > 5 weeks', () => {
-  const nov2026 = buildMonthGrid(2026, 10); // Row 0: Oct 26..Nov 1, Row 1: Nov 2..8, Row 2: Nov 9..15, Row 3: Nov 16..22, Row 4: Nov 23..29, Row 5: Nov 30..Dec 6
+  const nov2026 = buildMonthGrid(2026, 10); // Sat-first: Row 0: Oct 31..Nov 6, Row 1: Nov 7..13, Row 2: Nov 14..20, Row 3: Nov 21..27, Row 4: Nov 28..Dec 4, Row 5: Dec 5..11
 
   // 1) No projects -> full 6-row month expansion
   const emptyWin = computeCalendarTimeframeWindow(nov2026, [], '2026-11-24');
   assert.equal(emptyWin.mode, 'full-month');
   assert.equal(emptyWin.canExpand, true);
-  assert.equal(emptyWin.selectedRow, 4);
+  assert.equal(emptyWin.selectedRow, 3);
   assert.equal(emptyWin.expandedStartRow, 0);
   assert.equal(emptyWin.expandedEndRow, 5);
   assert.equal(emptyWin.expandedRowCount, 6);
   assert.equal(emptyWin.expandedHeight, 332);
 
-  // 2) 2-week project timeframe (Nov 16 -> Nov 26, rows 3..4) -> opens ONLY rows 3..4 (108px)
+  // 2) 2-week project timeframe (Nov 16 -> Nov 26, rows 2..3) -> opens ONLY rows 2..3 (108px)
   const twoWeekProjects = [
     { id: 'p2w', title: 'Sprint', startDate: '2026-11-16', endDate: '2026-11-26', checkpoints: [] },
   ];
@@ -182,12 +182,12 @@ test('computeCalendarTimeframeWindow opens only timeframe week rows (<= 5 weeks)
   const twoWeekWin = computeCalendarTimeframeWindow(nov2026, twoWeekProjects, '2026-11-24');
   assert.equal(twoWeekWin.mode, 'timeframe');
   assert.equal(twoWeekWin.canExpand, true);
-  assert.equal(twoWeekWin.expandedStartRow, 3);
-  assert.equal(twoWeekWin.expandedEndRow, 4);
+  assert.equal(twoWeekWin.expandedStartRow, 2);
+  assert.equal(twoWeekWin.expandedEndRow, 3);
   assert.equal(twoWeekWin.expandedRowCount, 2);
   assert.equal(twoWeekWin.expandedHeight, 108);
 
-  // 3) 5-week project timeframe (Nov 2 -> Dec 4, rows 1..5) -> opens rows 1..5 (276px)
+  // 3) 5-week project timeframe (Nov 2 -> Dec 4, rows 0..4) -> opens rows 0..4 (276px)
   const fiveWeekProjects = [
     { id: 'p5w', title: 'Release', startDate: '2026-11-02', endDate: '2026-12-04', checkpoints: [] },
   ];
@@ -195,8 +195,8 @@ test('computeCalendarTimeframeWindow opens only timeframe week rows (<= 5 weeks)
   const fiveWeekWin = computeCalendarTimeframeWindow(nov2026, fiveWeekProjects, '2026-11-24');
   assert.equal(fiveWeekWin.mode, 'timeframe');
   assert.equal(fiveWeekWin.canExpand, true);
-  assert.equal(fiveWeekWin.expandedStartRow, 1);
-  assert.equal(fiveWeekWin.expandedEndRow, 5);
+  assert.equal(fiveWeekWin.expandedStartRow, 0);
+  assert.equal(fiveWeekWin.expandedEndRow, 4);
   assert.equal(fiveWeekWin.expandedRowCount, 5);
   assert.equal(fiveWeekWin.expandedHeight, 276);
 
@@ -208,8 +208,8 @@ test('computeCalendarTimeframeWindow opens only timeframe week rows (<= 5 weeks)
   const cappedWin = computeCalendarTimeframeWindow(nov2026, overFiveWeekProjects, '2026-11-24');
   assert.equal(cappedWin.mode, 'exceeds-max-weeks');
   assert.equal(cappedWin.canExpand, false);
-  assert.equal(cappedWin.expandedStartRow, 4);
-  assert.equal(cappedWin.expandedEndRow, 4);
+  assert.equal(cappedWin.expandedStartRow, 3);
+  assert.equal(cappedWin.expandedEndRow, 3);
   assert.equal(cappedWin.expandedRowCount, 1);
   assert.equal(cappedWin.expandedHeight, 52);
 });
@@ -259,23 +259,23 @@ test('computeCalendarCellTimeframeBoxes stretches continuous colored selection b
 
 test('computeCalendarRowTimeframeBoxes builds single seamless row spans with uniform inset on overlaps', () => {
   const nov2026 = buildMonthGrid(2026, 10);
-  const week4 = nov2026.slice(28, 35); // Mon 2026-11-23 .. Sun 2026-11-29
+  const week3 = nov2026.slice(21, 28); // Sat 2026-11-21 .. Fri 2026-11-27
   const projects = [
     { id: 'p1', title: 'Launch', color: 'coral', startDate: '2026-11-18', endDate: '2026-11-25' },
-    { id: 'p2', title: 'Growth', color: 'sky', startDate: '2026-11-24', endDate: '2026-11-28' },
+    { id: 'p2', title: 'Growth', color: 'sky', startDate: '2026-11-24', endDate: '2026-11-26' },
   ];
-  const segments = computeCalendarRowTimeframeBoxes(week4, projects, '2026-11-24');
+  const segments = computeCalendarRowTimeframeBoxes(week3, projects, '2026-11-24');
   assert.equal(segments.length, 2);
 
   const coral = segments.find((s) => s.projectId === 'p1');
   const sky = segments.find((s) => s.projectId === 'p2');
   assert.deepEqual(
     { startCol: coral.startCol, endCol: coral.endCol, isStart: coral.isStart, isEnd: coral.isEnd, rowSlot: coral.rowSlot, insetPx: coral.insetPx },
-    { startCol: 0, endCol: 2, isStart: false, isEnd: true, rowSlot: 0, insetPx: 0 }
+    { startCol: 0, endCol: 4, isStart: false, isEnd: true, rowSlot: 0, insetPx: 0 }
   );
   assert.deepEqual(
     { startCol: sky.startCol, endCol: sky.endCol, isStart: sky.isStart, isEnd: sky.isEnd, rowSlot: sky.rowSlot, insetPx: sky.insetPx },
-    { startCol: 1, endCol: 5, isStart: true, isEnd: true, rowSlot: 1, insetPx: 3 }
+    { startCol: 3, endCol: 5, isStart: true, isEnd: true, rowSlot: 1, insetPx: 3 }
   );
 });
 

@@ -91,12 +91,12 @@ export function formatHumanDate(dateKey, style = 'short') {
 }
 
 /**
- * Generates a real 42-cell (6 rows x 7 cols, Monday-first) month grid for any year & month (0-11).
+ * Generates a real 42-cell (6 rows x 7 cols, Saturday-first) month grid for any year & month (0-11).
  */
 export function buildMonthGrid(year, month) {
   const firstOfMonth = new Date(year, month, 1);
-  // Convert JS Sun=0..Sat=6 into Mon=0..Sun=6
-  const startOffset = (firstOfMonth.getDay() + 6) % 7;
+  // Convert JS Sun=0..Sat=6 into Sat=0, Sun=1, Mon=2, Tue=3, Wed=4, Thu=5, Fri=6
+  const startOffset = (firstOfMonth.getDay() + 1) % 7;
   const gridStart = new Date(year, month, 1 - startOffset);
 
   const cells = [];
@@ -469,17 +469,17 @@ export function resolveCalendarSwipeGesture(dx, dy, options = {}) {
 }
 
 /**
- * Returns the Monday 'YYYY-MM-DD' dateKey of the Monday-first week containing `dateKey`.
+ * Returns the Saturday 'YYYY-MM-DD' dateKey of the Saturday-first week containing `dateKey`.
  */
 export function getMondayDateKey(dateKey) {
   const d = parseDateKey(dateKey);
-  const mondayOffset = (d.getDay() + 6) % 7;
-  const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() - mondayOffset);
-  return formatDateKey(monday);
+  const weekStartOffset = (d.getDay() + 1) % 7;
+  const weekStart = new Date(d.getFullYear(), d.getMonth(), d.getDate() - weekStartOffset);
+  return formatDateKey(weekStart);
 }
 
 /**
- * Computes how many Monday-first calendar weeks a [startDate, endDate] range spans in total.
+ * Computes how many Saturday-first calendar weeks a [startDate, endDate] range spans in total.
  */
 export function getProjectWeekSpanCount(startDate, endDate) {
   const sKey = isValidDateKey(startDate) ? startDate : formatDateKey(new Date());

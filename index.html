@@ -1288,7 +1288,7 @@
       <!-- Unified 6-Row Calendar: Full dynamic month grid behind a cropped 1-week viewport mask -->
       <div id="unified-calendar-container" style="touch-action: none;" class="mt-2.5 space-y-1">
         <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-medium text-secondarytext pb-0.5 px-1.5">
-          <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+          <span>SAT</span><span>SUN</span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span>
         </div>
         <div id="calendar-viewport-mask" style="height: 52px;" class="px-1.5">
           <div id="unified-calendar-rows" class="flex flex-col gap-1"></div>
@@ -3000,25 +3000,10 @@
           </div>
 
           <div class="grid grid-cols-7 gap-1.5 text-center text-[10px] font-semibold text-secondarytext">
-            <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+            <span>SAT</span><span>SUN</span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span>
           </div>
 
           <div id="habit-history-calendar-grid" class="grid grid-cols-7 gap-1.5"></div>
-
-          <div class="pt-2 border-t border-borderline flex items-center justify-center gap-4 text-[11px] text-secondarytext">
-            <span class="inline-flex items-center gap-1.5">
-              <span id="habit-history-legend-dot" class="w-2.5 h-2.5 rounded-full bg-coral"></span>
-              <span>Completed</span>
-            </span>
-            <span class="inline-flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-pillbg border border-borderline"></span>
-              <span>Not logged</span>
-            </span>
-            <span class="inline-flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-pillbg/40 border border-borderline/40 opacity-50"></span>
-              <span>Upcoming</span>
-            </span>
-          </div>
         </div>
       </div>
 
@@ -3190,7 +3175,7 @@
           </div>
 
           <div class="grid grid-cols-7 gap-1.5 text-center text-[10px] font-semibold text-secondarytext">
-            <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+            <span>SAT</span><span>SUN</span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span>
           </div>
 
           <div id="topic-cal-grid" class="grid grid-cols-7 gap-1.5"></div>
@@ -4129,7 +4114,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       function buildMonthGrid(year, month) {
         const firstOfMonth = new Date(year, month, 1);
-        const startOffset = (firstOfMonth.getDay() + 6) % 7;
+        const startOffset = (firstOfMonth.getDay() + 1) % 7;
         const gridStart = new Date(year, month, 1 - startOffset);
 
         const cells = [];
@@ -4394,9 +4379,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       function getMondayDateKey(dateKey) {
         const d = parseDateKey(dateKey);
-        const mondayOffset = (d.getDay() + 6) % 7;
-        const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() - mondayOffset);
-        return formatDateKey(monday);
+        const weekStartOffset = (d.getDay() + 1) % 7;
+        const weekStart = new Date(d.getFullYear(), d.getMonth(), d.getDate() - weekStartOffset);
+        return formatDateKey(weekStart);
       }
 
       function getProjectWeekSpanCount(startDate, endDate) {
@@ -4883,17 +4868,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               tier: Number(sub.tier || 1),
               status: sub.status || 'unlocked',
               xp: Number(sub.xp || 100),
-              drills: Array.isArray(sub.drills)
-                ? sub.drills
-                : [
-                    {
-                      id: `d-${sub.id || idx}-init`,
-                      title: `${sub.title || 'Core'} Practice Drill`,
-                      reps: '15m session',
-                      count: 0,
-                      done: false,
-                    },
-                  ],
+              drills: Array.isArray(sub.drills) ? sub.drills : [],
             });
           });
           delete node.subtopics;
@@ -4909,20 +4884,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         if (!Array.isArray(node.achievements)) node.achievements = [];
         if (!Array.isArray(node.resources)) node.resources = [];
 
-        node.branches.forEach((b, idx) => {
+        node.branches.forEach((b) => {
           if (!b || typeof b !== 'object') return;
           if (b.tier == null) b.tier = 1;
           if (!b.status) b.status = 'unlocked';
           if (!Array.isArray(b.drills)) {
-            b.drills = [
-              {
-                id: `d-${b.id || idx}-init`,
-                title: `${b.title || 'Core'} Practice Drill`,
-                reps: '15m session',
-                count: 0,
-                done: false,
-              },
-            ];
+            b.drills = [];
           }
           ensureTopicTreeSchema(b, node.lifeArea, lifeAreas);
         });
@@ -6387,9 +6354,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               tier: 1,
               status: 'mastered',
               xp: 120,
-              drills: [
-                { id: 'd-101', title: 'Freehand Straight Line & Hatching Warmup', reps: '3 sets × 10m', count: 6, done: true },
-              ],
+              drills: [],
               branches: [
                 {
                   id: 'b-101a',
@@ -6399,9 +6364,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   tier: 1,
                   status: 'unlocked',
                   xp: 100,
-                  drills: [
-                    { id: 'd-101a', title: 'Exploded Cube Axis Rep', reps: '3 plates', count: 1, done: false },
-                  ],
+                  drills: [],
                   milestones: [
                     {
                       id: 'm-101a',
@@ -6421,9 +6384,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   tier: 2,
                   status: 'unlocked',
                   xp: 90,
-                  drills: [
-                    { id: 'd-101b', title: '4-Weight Pen Calibration Sheet', reps: '2 sheets', count: 2, done: true },
-                  ],
+                  drills: [],
                   milestones: [
                     {
                       id: 'm-101b',
@@ -6444,9 +6405,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               tier: 2,
               status: 'unlocked',
               xp: 150,
-              drills: [
-                { id: 'd-102', title: '30°/60° Cube Exploded Assembly', reps: '4 plates', count: 3, done: false },
-              ],
+              drills: [],
             },
             {
               id: 'b-103',
@@ -6456,9 +6415,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               tier: 2,
               status: 'unlocked',
               xp: 150,
-              drills: [
-                { id: 'd-103', title: '2-Point Horizon Vanishing Study', reps: '5 thumbnails', count: 2, done: false },
-              ],
+              drills: [],
             },
             {
               id: 'b-104',
@@ -6468,9 +6425,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               tier: 3,
               status: 'locked',
               xp: 220,
-              drills: [
-                { id: 'd-104', title: '45° Sun-Angle Cast Shadow Pass', reps: '2 elevations', count: 0, done: false },
-              ],
+              drills: [],
             },
           ],
           milestones: [
@@ -6518,9 +6473,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               tier: 1,
               status: 'mastered',
               xp: 140,
-              drills: [
-                { id: 'd-201', title: 'Lock-Free Ring Buffer Stress Test', reps: '15m profiling', count: 4, done: true },
-              ],
+              drills: [],
             },
             {
               id: 'b-202',
@@ -6530,9 +6483,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               tier: 2,
               status: 'mastered',
               xp: 160,
-              drills: [
-                { id: 'd-202', title: 'Surface Resize & Context Loss Recovery', reps: '3 cycles', count: 3, done: true },
-              ],
+              drills: [],
             },
             {
               id: 'b-203',
@@ -6542,9 +6493,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               tier: 2,
               status: 'unlocked',
               xp: 180,
-              drills: [
-                { id: 'd-203', title: 'Custom SDF Antialiased Fragment Pass', reps: '2 passes', count: 2, done: false },
-              ],
+              drills: [],
             },
             {
               id: 'b-204',
@@ -6554,9 +6503,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               tier: 3,
               status: 'locked',
               xp: 250,
-              drills: [
-                { id: 'd-204', title: 'SwappyGL Choreographer Frame Audit', reps: '10m trace', count: 0, done: false },
-              ],
+              drills: [],
             },
           ],
           milestones: [
@@ -6602,9 +6549,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               tier: 1,
               status: 'mastered',
               xp: 120,
-              drills: [
-                { id: 'd-301', title: 'Touch Target & Contrast Audit', reps: '15m pass', count: 4, done: true },
-              ],
+              drills: [],
             },
             {
               id: 'b-302',
@@ -6614,9 +6559,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               tier: 2,
               status: 'unlocked',
               xp: 160,
-              drills: [
-                { id: 'd-302', title: 'Micro-Interaction Easing & Damping Drill', reps: '20m prototype', count: 3, done: false },
-              ],
+              drills: [],
             },
             {
               id: 'b-303',
@@ -6626,9 +6569,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               tier: 3,
               status: 'locked',
               xp: 200,
-              drills: [
-                { id: 'd-303', title: 'Haptic & Synth Feedback Sync', reps: '2 cues', count: 0, done: false },
-              ],
+              drills: [],
             },
           ],
           milestones: [
@@ -6665,9 +6606,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               tier: 1,
               status: 'unlocked',
               xp: 130,
-              drills: [
-                { id: 'd-401', title: 'Causal Loop Diagramming', reps: '1 system/wk', count: 2, done: false },
-              ],
+              drills: [],
             },
             {
               id: 'b-402',
@@ -6677,9 +6616,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               tier: 2,
               status: 'locked',
               xp: 180,
-              drills: [
-                { id: 'd-402', title: 'Intervention Matrix Simulation', reps: '15m trace', count: 0, done: false },
-              ],
+              drills: [],
             },
           ],
           milestones: [
@@ -6895,7 +6832,33 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             );
           }
           if (Array.isArray(parsed.journalDays)) state.journalDays = parsed.journalDays;
-          if (Array.isArray(parsed.topics)) state.topics = parsed.topics;
+          if (Array.isArray(parsed.topics)) {
+            const PLACEHOLDER_DRILL_IDS = new Set([
+              'd-101', 'd-101a', 'd-101b', 'd-102', 'd-103', 'd-104',
+              'd-201', 'd-202', 'd-203', 'd-204',
+              'd-301', 'd-302', 'd-303',
+              'd-401', 'd-402',
+            ]);
+            const stripPlaceholderDrills = (node) => {
+              if (!node || typeof node !== 'object') return;
+              if (Array.isArray(node.drills)) {
+                node.drills = node.drills.filter((d) => {
+                  if (!d || typeof d !== 'object') return false;
+                  const idStr = String(d.id || '');
+                  if (PLACEHOLDER_DRILL_IDS.has(idStr) || idStr.endsWith('-init')) return false;
+                  const titleStr = String(d.title || '');
+                  if ((d.reps === '15m session') && !d.done && (Number(d.count) || 0) === 0 && /(Practice Drill|Core Drill)$/.test(titleStr)) {
+                    return false;
+                  }
+                  return true;
+                });
+              }
+              if (Array.isArray(node.branches)) node.branches.forEach(stripPlaceholderDrills);
+              if (Array.isArray(node.subtopics)) node.subtopics.forEach(stripPlaceholderDrills);
+            };
+            state.topics = parsed.topics;
+            state.topics.forEach(stripPlaceholderDrills);
+          }
           if (CalLogic.isValidDateKey(parsed.selectedDate)) {
             state.selectedDate = parsed.selectedDate;
             const parsedD = CalLogic.parseDateKey(parsed.selectedDate);
@@ -13903,7 +13866,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             tier,
             status: 'unlocked',
             xp: tier * 75,
-            drills: [{ id: `d-${now}`, title: drillTitle || `${title} Practice Drill`, reps: '15m session', count: 0, done: false }],
+            drills: drillTitle ? [{ id: `d-${now}`, title: drillTitle, reps: '15m session', count: 0, done: false }] : [],
             milestones: contentItems.length > 0
               ? [
                   {
@@ -15734,7 +15697,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const todayKey = getTodayDateKey();
       if (gridEl) {
         const firstDay = new Date(year, month, 1);
-        const startOffset = (firstDay.getDay() + 6) % 7; // Monday-first
+        const startOffset = (firstDay.getDay() + 1) % 7; // Saturday-first
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         let cells = '';
 
@@ -16008,7 +15971,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             tier: 1,
             status: 'unlocked',
             xp: 100,
-            drills: [{ id: `d-${now}-1`, title: `${title} Core Drill`, reps: '15m session', count: 0, done: false }],
+            drills: [],
           },
         ],
         milestones: [],

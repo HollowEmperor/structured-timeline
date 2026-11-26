@@ -244,17 +244,7 @@ export function ensureTopicTreeSchema(node, fallbackArea = 'Knowledge', lifeArea
         tier: Number(sub.tier || 1),
         status: sub.status || 'unlocked',
         xp: Number(sub.xp || 100),
-        drills: Array.isArray(sub.drills)
-          ? sub.drills
-          : [
-              {
-                id: `d-${sub.id || idx}-init`,
-                title: `${sub.title || 'Core'} Practice Drill`,
-                reps: '15m session',
-                count: 0,
-                done: false,
-              },
-            ],
+        drills: Array.isArray(sub.drills) ? sub.drills : [],
       });
     });
     delete node.subtopics;
@@ -270,20 +260,12 @@ export function ensureTopicTreeSchema(node, fallbackArea = 'Knowledge', lifeArea
   if (!Array.isArray(node.achievements)) node.achievements = [];
   if (!Array.isArray(node.resources)) node.resources = [];
 
-  node.branches.forEach((b, idx) => {
+  node.branches.forEach((b) => {
     if (!b || typeof b !== 'object') return;
     if (b.tier == null) b.tier = 1;
     if (!b.status) b.status = 'unlocked';
     if (!Array.isArray(b.drills)) {
-      b.drills = [
-        {
-          id: `d-${b.id || idx}-init`,
-          title: `${b.title || 'Core'} Practice Drill`,
-          reps: '15m session',
-          count: 0,
-          done: false,
-        },
-      ];
+      b.drills = [];
     }
     ensureTopicTreeSchema(b, node.lifeArea, lifeAreas);
   });
