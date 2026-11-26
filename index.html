@@ -4115,10 +4115,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       function buildMonthGrid(year, month) {
         const firstOfMonth = new Date(year, month, 1);
         const startOffset = (firstOfMonth.getDay() + 1) % 7;
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
         const gridStart = new Date(year, month, 1 - startOffset);
 
         const cells = [];
-        for (let i = 0; i < 42; i++) {
+        for (let i = 0; i < totalCells; i++) {
           const cellDate = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + i);
           const cellYear = cellDate.getFullYear();
           const cellMonth = cellDate.getMonth();
@@ -7531,7 +7533,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       let rowsHtml = '';
       let cumulativeSpreadDelayMs = spreadStartDelayMs;
-      for (let row = 0; row < 6; row++) {
+      const totalRows = Math.ceil((state.monthCells || []).length / 7);
+      for (let row = 0; row < totalRows; row++) {
         const rowCells = state.monthCells.slice(row * 7, row * 7 + 7);
         const rowSegments = showProjectTimeframes
           ? CalLogic.computeCalendarRowTimeframeBoxes(rowCells, focusedProjects, todayKey, laneInfo)
@@ -7625,7 +7628,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               class="h-[52px] rounded-xl flex items-center justify-center relative transition overflow-visible ${cellBoxClasses}"
             >
               ${selectedInBoxHighlightHtml}
-              <div class="relative z-10 flex items-center justify-center">
+              <div class="relative z-10 w-[34px] h-[34px] flex items-center justify-center">
+                ${cell.out ? '' : `
                 <svg class="w-[34px] h-[34px] -rotate-90" viewBox="0 0 34 34">
                   <circle cx="17" cy="17" r="${r}" fill="none" stroke="rgb(var(--color-pillbg))" stroke-width="2.9" />
                   <circle cx="17" cy="17" r="${r}" fill="none" stroke="var(--color-ring-physical)" stroke-width="2.9" stroke-linecap="round"
@@ -7634,7 +7638,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                     stroke-dasharray="${seg2.toFixed(1)} ${circ.toFixed(1)}" stroke-dashoffset="${(-(circ * 0.333)).toFixed(1)}" />
                   <circle cx="17" cy="17" r="${r}" fill="none" stroke="var(--color-ring-gained)" stroke-width="2.9" stroke-linecap="round"
                     stroke-dasharray="${seg3.toFixed(1)} ${circ.toFixed(1)}" stroke-dashoffset="${(-(circ * 0.666)).toFixed(1)}" />
-                </svg>
+                </svg>`}
                 <span class="absolute text-[10px] font-bold ${dayNumColorCls}" ${dayNumColorStyle}>${cell.d}</span>
               </div>
               ${dueDotsHtml}
@@ -12299,11 +12303,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (gridEl) {
         const completedSet = new Set(habit.completedDates);
         const cells = CalLogic.buildMonthGrid(viewYear, viewMonth);
-        // Trim trailing all-out-of-month 6th row when unnecessary
-        const lastRowAllOutside = cells.slice(35).every((c) => c.out);
-        const displayCells = lastRowAllOutside ? cells.slice(0, 35) : cells;
 
-        gridEl.innerHTML = displayCells
+        gridEl.innerHTML = cells
           .map((cell) => {
             if (cell.out) {
               return `<div class="h-9 rounded-xl text-xs font-medium flex items-center justify-center text-mutedtext/25 select-none pointer-events-none">${cell.d}</div>`;

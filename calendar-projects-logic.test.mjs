@@ -15,21 +15,30 @@ import {
   computeCalendarRowTimeframeBoxes,
 } from './calendar-projects-logic.js';
 
-test('buildMonthGrid produces 42 real Saturday-first cells for any month/year including leap years', () => {
-  const feb2024 = buildMonthGrid(2024, 1); // Feb 2024 (leap year, starts Thu)
-  assert.equal(feb2024.length, 42);
+test('buildMonthGrid produces exact Saturday-first rows with no extra all-overflow rows across 4-, 5-, and 6-row months', () => {
+  const feb2024 = buildMonthGrid(2024, 1); // Feb 2024 (leap year, starts Thu -> 5 rows)
+  assert.equal(feb2024.length, 35);
   const inMonth = feb2024.filter((c) => !c.out);
   assert.equal(inMonth.length, 29);
   assert.equal(inMonth[0].dateKey, '2024-02-01');
   assert.equal(inMonth[0].weekdayIdx, 5); // Thu = 5 in Sat=0..Fri=6
   assert.equal(inMonth[28].dateKey, '2024-02-29');
 
-  const nov2026 = buildMonthGrid(2026, 10); // Nov 2026 (starts Sun)
-  assert.equal(nov2026.length, 42);
+  const nov2026 = buildMonthGrid(2026, 10); // Nov 2026 (starts Sun, 30 days -> 5 rows, no extra Dec-only row)
+  assert.equal(nov2026.length, 35);
   const firstNov = nov2026.find((c) => c.dateKey === '2026-11-01');
   assert.equal(firstNov.weekdayIdx, 1); // Sun = 1 in Sat=0..Fri=6
   assert.equal(nov2026[0].dateKey, '2026-10-31'); // Sat Oct 31
   assert.equal(nov2026[0].out, true);
+  assert.equal(nov2026[nov2026.length - 1].dateKey, '2026-12-04'); // Fri Dec 4 on end-date row
+
+  const feb2025 = buildMonthGrid(2025, 1); // Feb 2025 (starts Sat, 28 days -> exact 4 rows, zero out-of-month cells)
+  assert.equal(feb2025.length, 28);
+  assert.equal(feb2025.every((c) => !c.out), true);
+
+  const aug2025 = buildMonthGrid(2025, 7); // Aug 2025 (starts Fri, 31 days -> 6 rows, row 5 contains Aug 30-31)
+  assert.equal(aug2025.length, 42);
+  assert.equal(aug2025.slice(35).some((c) => !c.out), true);
 });
 
 test('tasks save and match on any selected dateKey instead of defaulting to day 22', () => {
@@ -162,17 +171,17 @@ test('resolveCalendarSwipeGesture distinguishes left/right month swipes, vertica
 });
 
 test('computeCalendarTimeframeWindow opens only timeframe week rows (<= 5 weeks) and refuses full expansion for > 5 weeks', () => {
-  const nov2026 = buildMonthGrid(2026, 10); // Sat-first: Row 0: Oct 31..Nov 6, Row 1: Nov 7..13, Row 2: Nov 14..20, Row 3: Nov 21..27, Row 4: Nov 28..Dec 4, Row 5: Dec 5..11
+  const nov2026 = buildMonthGrid(2026, 10); // Sat-first: Row 0: Oct 31..Nov 6, Row 1: Nov 7..13, Row 2: Nov 14..20, Row 3: Nov 21..27, Row 4: Nov 28..Dec 4
 
-  // 1) No projects -> full 6-row month expansion
+  // 1) No projects -> full 5-row month expansion (no extra all-Dec row)
   const emptyWin = computeCalendarTimeframeWindow(nov2026, [], '2026-11-24');
   assert.equal(emptyWin.mode, 'full-month');
   assert.equal(emptyWin.canExpand, true);
   assert.equal(emptyWin.selectedRow, 3);
   assert.equal(emptyWin.expandedStartRow, 0);
-  assert.equal(emptyWin.expandedEndRow, 5);
-  assert.equal(emptyWin.expandedRowCount, 6);
-  assert.equal(emptyWin.expandedHeight, 332);
+  assert.equal(emptyWin.expandedEndRow, 4);
+  assert.equal(emptyWin.expandedRowCount, 5);
+  assert.equal(emptyWin.expandedHeight, 276);
 
   // 2) 2-week project timeframe (Nov 16 -> Nov 26, rows 2..3) -> opens ONLY rows 2..3 (108px)
   const twoWeekProjects = [

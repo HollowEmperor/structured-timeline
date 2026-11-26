@@ -91,16 +91,19 @@ export function formatHumanDate(dateKey, style = 'short') {
 }
 
 /**
- * Generates a real 42-cell (6 rows x 7 cols, Saturday-first) month grid for any year & month (0-11).
+ * Generates a real Saturday-first month grid (4, 5, or 6 rows x 7 cols) for any year & month (0-11),
+ * including only rows that contain at least one day of the target month (no extra overflow rows).
  */
 export function buildMonthGrid(year, month) {
   const firstOfMonth = new Date(year, month, 1);
   // Convert JS Sun=0..Sat=6 into Sat=0, Sun=1, Mon=2, Tue=3, Wed=4, Thu=5, Fri=6
   const startOffset = (firstOfMonth.getDay() + 1) % 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
   const gridStart = new Date(year, month, 1 - startOffset);
 
   const cells = [];
-  for (let i = 0; i < 42; i++) {
+  for (let i = 0; i < totalCells; i++) {
     const cellDate = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + i);
     const cellYear = cellDate.getFullYear();
     const cellMonth = cellDate.getMonth();
