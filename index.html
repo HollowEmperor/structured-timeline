@@ -36,6 +36,7 @@
             secondarytext: 'rgb(var(--color-secondarytext) / <alpha-value>)',
             mutedtext: 'rgb(var(--color-mutedtext) / <alpha-value>)',
             coral: 'rgb(var(--color-accent) / <alpha-value>)',
+            onaccent: 'rgb(var(--color-on-accent) / <alpha-value>)',
             lime: '#81C953',
             emerald: '#169859',
             sky: '#6EA8D8',
@@ -48,6 +49,7 @@
   </script>
   <style>
     :root {
+      color-scheme: dark;
       --color-outerbg: 13 13 14;
       --color-appbg: 20 20 20;
       --color-sheetbg: 35 35 37;
@@ -58,6 +60,8 @@
       --color-secondarytext: 154 154 160;
       --color-mutedtext: 110 110 117;
       --color-accent: 242 139 130;
+      --color-on-accent: 20 20 20;
+      --color-accent-hex: #F28B82;
       --color-ring-physical: #169859;
       --color-ring-mental: #F28B82;
       --color-ring-gained: #81C953;
@@ -289,12 +293,26 @@
       --punch-hole-shadow-mid: rgba(0, 0, 0, 0.34);
       --punch-hole-rim-light: rgba(255, 255, 255, 0.06);
       --punch-overlay-scrim: rgba(8, 8, 10, 0.62);
+      --modal-scrim: rgba(8, 8, 10, 0.6);
+      --fab-shadow: 0 12px 26px rgba(0, 0, 0, 0.46);
     }
     html[data-theme="paper"] {
       --punch-hole-shadow-top: rgba(28, 25, 23, 0.24);
       --punch-hole-shadow-mid: rgba(28, 25, 23, 0.14);
       --punch-hole-rim-light: rgba(255, 255, 255, 0.72);
       --punch-overlay-scrim: rgba(24, 22, 20, 0.42);
+      --modal-scrim: rgba(28, 25, 23, 0.32);
+      --fab-shadow: 0 10px 22px rgba(28, 25, 23, 0.2);
+    }
+    .theme-modal-scrim {
+      background-color: var(--modal-scrim);
+    }
+    .theme-fab-shadow {
+      box-shadow: var(--fab-shadow);
+    }
+    select option {
+      background-color: rgb(var(--color-cardbg));
+      color: rgb(var(--color-primarytext));
     }
     .punch-hole-cutout {
       background-color: rgb(var(--color-appbg));
@@ -447,11 +465,11 @@
     }
 
     .spatial-glass-panel {
-      background: rgba(35, 35, 37, 0.95);
+      background: rgb(var(--color-sheetbg) / 0.95);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid #3A3A3F;
-      box-shadow: 0 22px 54px rgba(0, 0, 0, 0.62);
+      border: 1px solid rgb(var(--color-borderline));
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.24);
     }
 
     #spatial-edge-handle {
@@ -473,13 +491,13 @@
     .spatial-edge-sliver {
       width: 3.5px;
       height: 72px;
-      background: rgba(242, 139, 130, 0.42);
+      background: rgb(var(--color-accent) / 0.45);
       border-radius: 4px 0 0 4px;
       transition: background 0.2s ease, height 0.2s ease, width 0.2s ease;
     }
     #spatial-edge-handle:hover .spatial-edge-sliver,
     #spatial-edge-handle.dragging .spatial-edge-sliver {
-      background: #F28B82;
+      background: rgb(var(--color-accent));
       height: 80px;
       width: 4.5px;
     }
@@ -521,11 +539,11 @@
       z-index: 46;
       width: 66px;
       border-radius: 34px;
-      background: rgba(245, 245, 247, 0.96);
+      background: rgb(var(--color-sheetbg) / 0.96);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1.5px solid rgba(255, 255, 255, 0.92);
-      box-shadow: 0 22px 54px rgba(0, 0, 0, 0.58);
+      border: 1.5px solid rgb(var(--color-borderline));
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.24);
       transform: translate(120%, -50%) scale(0.92);
       transition: transform 0.34s var(--spring-ease), opacity 0.22s ease;
       pointer-events: none;
@@ -562,19 +580,19 @@
       width: 50px;
       height: 50px;
       border-radius: 9999px;
-      background: #2B2B2E;
-      border: 1.5px solid #3A3A3F;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+      background: rgb(var(--color-cardbg));
+      border: 1.5px solid rgb(var(--color-borderline));
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: visible;
+      overflow: hidden;
       cursor: pointer;
       transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s var(--spring-ease);
     }
     .spatial-mascot-stage:hover {
       transform: scale(1.06);
-      border-color: #F28B82;
+      border-color: rgb(var(--color-accent));
     }
     #spatial-bot-body-group {
       transform-origin: 32px 30px;
@@ -598,9 +616,9 @@
       width: 46px;
       padding: 4px 0;
       border-radius: 9999px;
-      background: #FFFFFF;
-      border: 1px solid rgba(20, 20, 22, 0.08);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+      background: rgb(var(--color-cardbg));
+      border: 1px solid rgb(var(--color-borderline));
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.14);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -613,7 +631,7 @@
       border: none;
     }
     .spatial-capture-group .spatial-rail-btn:hover {
-      background: rgba(20, 20, 22, 0.08);
+      background: rgb(var(--color-pillbg));
       transform: scale(1.1);
     }
 
@@ -625,15 +643,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(20, 20, 22, 0.05);
-      border: 1px solid rgba(20, 20, 22, 0.06);
+      background: rgb(var(--color-pillbg) / 0.65);
+      border: 1px solid rgb(var(--color-borderline) / 0.8);
       transition: transform 0.2s var(--spring-ease), background 0.18s ease, border-color 0.18s ease;
       cursor: pointer;
     }
     .spatial-rail-btn:hover {
       transform: scale(1.08);
-      background: #FFFFFF;
-      border-color: rgba(242, 139, 130, 0.55);
+      background: rgb(var(--color-pillbg));
+      border-color: rgb(var(--color-accent) / 0.65);
     }
     .spatial-rail-tooltip {
       position: absolute;
@@ -645,10 +663,10 @@
       border-radius: 9999px;
       font-size: 11px;
       font-weight: 600;
-      color: #F5F5F7;
-      background: #2B2B2E;
-      border: 1px solid #3A3A3F;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      color: rgb(var(--color-primarytext));
+      background: rgb(var(--color-cardbg));
+      border: 1px solid rgb(var(--color-borderline));
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.32);
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.16s ease, transform 0.16s ease;
@@ -676,9 +694,9 @@
       width: 54px;
       height: 54px;
       border-radius: 9999px;
-      background: #2B2B2E;
-      border: 1.5px solid #3A3A3F;
-      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65);
+      background: rgb(var(--color-cardbg));
+      border: 1.5px solid rgb(var(--color-borderline));
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.26);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -693,9 +711,9 @@
       transform: scale(0.94);
     }
     .spatial-bubble-core.wheel-open {
-      background: #F28B82;
-      border-color: #F28B82;
-      box-shadow: 0 12px 32px rgba(242, 139, 130, 0.28), 0 0 0 4px rgba(242, 139, 130, 0.16);
+      background: rgb(var(--color-accent));
+      border-color: rgb(var(--color-accent));
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.28);
     }
 
     .spatial-bubble-core.island-active {
@@ -703,9 +721,9 @@
       height: 54px;
       margin-left: -117px;
       border-radius: 20px;
-      background: #232325;
-      border: 1px solid #3A3A3F;
-      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(242, 139, 130, 0.18);
+      background: rgb(var(--color-sheetbg));
+      border: 1px solid rgb(var(--color-borderline));
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
       cursor: pointer;
     }
     .spatial-bubble-core.island-active.island-expanded {
@@ -751,7 +769,7 @@
       width: 188px;
       height: 188px;
       overflow: visible;
-      filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.48));
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.24));
       pointer-events: none;
     }
     .spatial-radial-cluster-item {
@@ -775,7 +793,7 @@
       pointer-events: auto;
     }
     .spatial-radial-cluster-item:hover {
-      background: rgba(20, 20, 22, 0.08);
+      background: rgb(var(--color-pillbg) / 0.85);
       transform: scale(1.14);
     }
 
@@ -791,16 +809,16 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #F5F5F7;
-      border: 1.5px solid rgba(255, 255, 255, 0.92);
-      color: #1C1C1E;
+      background: rgb(var(--color-sheetbg));
+      border: 1.5px solid rgb(var(--color-borderline));
+      color: rgb(var(--color-primarytext));
       cursor: pointer;
       opacity: 0;
       pointer-events: none;
       transform: translate(0, 0) scale(0.3);
       transition: transform 0.38s var(--spring-ease), opacity 0.22s ease, background 0.18s ease;
       z-index: 3;
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.48);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.24);
     }
     .wheel-active .spatial-radial-btn {
       opacity: 1;
@@ -808,7 +826,7 @@
       transform: translate(var(--tx), var(--ty)) scale(1);
     }
     .wheel-active .spatial-radial-btn:hover {
-      background: #FFFFFF;
+      background: rgb(var(--color-cardbg));
       transform: translate(var(--tx), var(--ty)) scale(1.12);
       z-index: 5;
     }
@@ -833,8 +851,8 @@
       width: 60px;
       height: 60px;
       border-radius: 9999px;
-      border: 2px solid #F28B82;
-      background: rgba(242, 139, 130, 0.16);
+      border: 2px solid rgb(var(--color-accent));
+      background: rgb(var(--color-accent) / 0.16);
       pointer-events: none;
       z-index: 95;
       animation: spatialDetachRipple 0.55s var(--smooth-ease) forwards;
@@ -851,10 +869,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #232325;
-      border: 1.5px solid #3A3A3F;
-      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65);
-      color: #9A9AA0;
+      background: rgb(var(--color-sheetbg));
+      border: 1.5px solid rgb(var(--color-borderline));
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+      color: rgb(var(--color-secondarytext));
       pointer-events: none;
       opacity: 0;
       transform: translateX(-50%) translateY(96px) scale(0.72);
@@ -867,7 +885,7 @@
     #spatial-dismiss-target.over-target {
       transform: translateX(-50%) translateY(-4px) scale(1.18);
       background: #DC2626;
-      border-color: #F28B82;
+      border-color: rgb(var(--color-accent));
       color: #F5F5F7;
     }
 
@@ -881,31 +899,31 @@
     }
     .spatial-bubble-core.over-dismiss {
       border-color: #DC2626;
-      box-shadow: 0 12px 32px rgba(220, 38, 38, 0.4), 0 0 0 4px rgba(242, 139, 130, 0.16);
+      box-shadow: 0 4px 10px rgba(220, 38, 38, 0.32);
     }
 
     .spatial-text-highlight {
-      outline: 2px solid rgba(242, 139, 130, 0.78);
+      outline: 2px solid rgb(var(--color-accent) / 0.78);
       outline-offset: 4px;
-      background-color: rgba(242, 139, 130, 0.12) !important;
+      background-color: rgb(var(--color-accent) / 0.12) !important;
       border-radius: 10px;
     }
     .spatial-bubble-core.scribbling,
     .spatial-bubble-core.reading-text {
-      border-color: #F28B82;
-      box-shadow: 0 12px 34px rgba(242, 139, 130, 0.34), 0 0 0 6px rgba(242, 139, 130, 0.16);
+      border-color: rgb(var(--color-accent));
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.28), 0 0 0 2px rgb(var(--color-accent) / 0.4);
     }
 
     @keyframes spatialVoiceAura {
-      0%, 100% { box-shadow: 0 14px 36px rgba(242, 139, 130, 0.36), 0 0 0 4px rgba(242, 139, 130, 0.18); }
-      50% { box-shadow: 0 14px 44px rgba(129, 201, 83, 0.38), 0 0 0 9px rgba(242, 139, 130, 0.14); }
+      0%, 100% { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.28), 0 0 0 2px rgb(var(--color-accent) / 0.35); }
+      50% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28), 0 0 0 4px rgb(var(--color-accent) / 0.22); }
     }
     .spatial-bubble-core.voice-recording {
       width: 118px;
       height: 50px;
       margin-left: -32px;
-      background: #232325;
-      border-color: #F28B82;
+      background: rgb(var(--color-sheetbg));
+      border-color: rgb(var(--color-accent));
       animation: spatialVoiceAura 1.3s ease-in-out infinite;
       cursor: pointer;
     }
@@ -996,16 +1014,16 @@
       gap: 5px;
       padding: 5px 10px;
       border-radius: 999px;
-      background: #F5F5F7;
-      color: #141416;
-      border: 1.5px solid #141416;
+      background: rgb(var(--color-sheetbg));
+      color: rgb(var(--color-primarytext));
+      border: 1.5px solid rgb(var(--color-borderline));
       font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
       font-size: 11px;
       font-weight: 700;
       letter-spacing: -0.01em;
       line-height: 1.1;
       white-space: nowrap;
-      box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(242, 139, 130, 0.35);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.24);
       will-change: transform, opacity;
     }
     .mascot-bye-bubble.tail-bottom {
@@ -1018,9 +1036,9 @@
       bottom: -5px;
       width: 8px;
       height: 8px;
-      background: #F5F5F7;
-      border-right: 1.5px solid #141416;
-      border-bottom: 1.5px solid #141416;
+      background: rgb(var(--color-sheetbg));
+      border-right: 1.5px solid rgb(var(--color-borderline));
+      border-bottom: 1.5px solid rgb(var(--color-borderline));
       transform: translateX(-50%) rotate(45deg);
       border-bottom-right-radius: 2px;
     }
@@ -1034,9 +1052,9 @@
       top: 50%;
       width: 8px;
       height: 8px;
-      background: #F5F5F7;
-      border-top: 1.5px solid #141416;
-      border-right: 1.5px solid #141416;
+      background: rgb(var(--color-sheetbg));
+      border-top: 1.5px solid rgb(var(--color-borderline));
+      border-right: 1.5px solid rgb(var(--color-borderline));
       transform: translateY(-50%) rotate(45deg);
       border-top-right-radius: 2px;
     }
@@ -1049,7 +1067,7 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center sm:py-4 selection:bg-coral/25 selection:text-white">
+<body class="min-h-screen flex flex-col items-center justify-center sm:py-4 selection:bg-coral/25 selection:text-primarytext">
 
   <!-- Main Mobile Shell -->
   <main class="w-full max-w-[430px] h-[100dvh] sm:h-[850px] bg-appbg sm:rounded-[40px] sm:border sm:border-borderline flex flex-col relative overflow-hidden">
@@ -1180,7 +1198,7 @@
             placeholder="Dump anything on your mind..."
             class="flex-1 bg-cardbg text-sm text-primarytext placeholder-mutedtext px-3.5 py-3 rounded-2xl border border-borderline focus:border-coral focus:outline-none"
           />
-          <button type="submit" class="tactile-btn bg-coral text-appbg font-semibold text-sm px-4 py-3 rounded-2xl">
+          <button type="submit" class="tactile-btn bg-coral text-onaccent font-semibold text-sm px-4 py-3 rounded-2xl">
             Add
           </button>
         </form>
@@ -1203,7 +1221,7 @@
               id="tinder-undo-btn"
               onclick="undoLastCardSwipe()"
               title="Undo last swipe"
-              class="tactile-btn w-10 h-10 rounded-full bg-cardbg border border-borderline text-amber flex items-center justify-center disabled:opacity-35"
+              class="tactile-btn w-10 h-10 rounded-full bg-cardbg border border-borderline text-coral flex items-center justify-center disabled:opacity-35"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/></svg>
             </button>
@@ -1212,7 +1230,7 @@
               type="button"
               onclick="triggerDeckSwipe('right')"
               title="Send to Timeline"
-              class="tactile-btn w-13 h-13 p-3.5 rounded-full bg-lime text-appbg flex items-center justify-center"
+              class="tactile-btn w-13 h-13 p-3.5 rounded-full bg-coral text-onaccent flex items-center justify-center"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
             </button>
@@ -1465,7 +1483,7 @@
             </div>
 
             <div class="bg-cardbg border border-borderline rounded-2xl p-1 grid grid-cols-3 gap-1">
-              <button type="button" onclick="setTopicDetailTab('branches')" id="topic-tab-branches" class="tactile-btn py-1.5 px-1.5 rounded-xl text-[11px] font-semibold bg-coral text-appbg truncate">Skills</button>
+              <button type="button" onclick="setTopicDetailTab('branches')" id="topic-tab-branches" class="tactile-btn py-1.5 px-1.5 rounded-xl text-[11px] font-semibold bg-coral text-onaccent truncate">Skills</button>
               <button type="button" onclick="setTopicDetailTab('drills')" id="topic-tab-drills" class="tactile-btn py-1.5 px-1.5 rounded-xl text-[11px] font-medium text-secondarytext hover:text-primarytext truncate">Drills</button>
               <button type="button" onclick="setTopicDetailTab('resources')" id="topic-tab-resources" class="tactile-btn py-1.5 px-1.5 rounded-xl text-[11px] font-medium text-secondarytext hover:text-primarytext truncate">Resources</button>
             </div>
@@ -1684,7 +1702,7 @@
               aria-label="Toggle Spatial Edge Panel"
               class="tactile-btn w-11 h-6 rounded-full bg-coral border border-coral p-0.5 flex items-center transition-colors flex-shrink-0"
             >
-              <span id="settings-spatial-knob" style="transform: translateX(20px);" class="w-4 h-4 rounded-full bg-appbg transition-transform"></span>
+              <span id="settings-spatial-knob" style="transform: translateX(20px);" class="w-4 h-4 rounded-full bg-onaccent transition-transform"></span>
             </button>
           </div>
 
@@ -1706,7 +1724,7 @@
               aria-label="Toggle Sound Effects"
               class="tactile-btn w-11 h-6 rounded-full bg-coral border border-coral p-0.5 flex items-center transition-colors flex-shrink-0"
             >
-              <span id="settings-sfx-knob" style="transform: translateX(20px);" class="w-4 h-4 rounded-full bg-appbg transition-transform"></span>
+              <span id="settings-sfx-knob" style="transform: translateX(20px);" class="w-4 h-4 rounded-full bg-onaccent transition-transform"></span>
             </button>
           </div>
 
@@ -1734,7 +1752,7 @@
                   aria-label="Toggle Notifications"
                   class="tactile-btn w-11 h-6 rounded-full bg-coral border border-coral p-0.5 flex items-center transition-colors"
                 >
-                  <span id="settings-notif-knob" style="transform: translateX(20px);" class="w-4 h-4 rounded-full bg-appbg transition-transform"></span>
+                  <span id="settings-notif-knob" style="transform: translateX(20px);" class="w-4 h-4 rounded-full bg-onaccent transition-transform"></span>
                 </button>
                 <button
                   type="button"
@@ -1859,13 +1877,13 @@
       <!-- Journal Mood Tracker Modal -->
       <div
         id="journal-mood-modal"
-        class="hidden absolute inset-0 z-40 flex flex-col justify-end bg-black/60 backdrop-blur-[2px] transition-opacity"
+        class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
         onclick="if (event.target === this) closeJournalToolModal('mood')"
       >
         <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 shadow-2xl max-h-[88%] overflow-y-auto no-scrollbar">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-[10.5px] font-bold uppercase tracking-wider text-lime">Journal Check-In</p>
+              <p class="text-[10.5px] font-bold uppercase tracking-wider text-coral">Journal Check-In</p>
               <h3 class="font-display text-base font-bold text-primarytext">Mood Tracker</h3>
             </div>
             <button type="button" onclick="closeJournalToolModal('mood')" class="tactile-btn w-8 h-8 rounded-full bg-cardbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center" title="Close">
@@ -1879,13 +1897,13 @@
       <!-- Journal Energy Tracker Modal -->
       <div
         id="journal-energy-modal"
-        class="hidden absolute inset-0 z-40 flex flex-col justify-end bg-black/60 backdrop-blur-[2px] transition-opacity"
+        class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
         onclick="if (event.target === this) closeJournalToolModal('energy')"
       >
         <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 shadow-2xl max-h-[88%] overflow-y-auto no-scrollbar">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-[10.5px] font-bold uppercase tracking-wider text-sky">Journal Check-In</p>
+              <p class="text-[10.5px] font-bold uppercase tracking-wider text-coral">Journal Check-In</p>
               <h3 class="font-display text-base font-bold text-primarytext">Energy Tracker</h3>
             </div>
             <button type="button" onclick="closeJournalToolModal('energy')" class="tactile-btn w-8 h-8 rounded-full bg-cardbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center" title="Close">
@@ -1899,13 +1917,13 @@
       <!-- Journal Exercise (CBT, DBT, ACT) Modal -->
       <div
         id="journal-exercise-modal"
-        class="hidden absolute inset-0 z-40 flex flex-col justify-end bg-black/60 backdrop-blur-[2px] transition-opacity"
+        class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
         onclick="if (event.target === this) closeJournalToolModal('exercise')"
       >
         <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 shadow-2xl max-h-[90%] overflow-y-auto no-scrollbar">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-[10.5px] font-bold uppercase tracking-wider text-plum">Therapeutic Reflection</p>
+              <p class="text-[10.5px] font-bold uppercase tracking-wider text-coral">Therapeutic Reflection</p>
               <h3 class="font-display text-base font-bold text-primarytext">Mindset Exercise</h3>
             </div>
             <button type="button" onclick="closeJournalToolModal('exercise')" class="tactile-btn w-8 h-8 rounded-full bg-cardbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center" title="Close">
@@ -1914,7 +1932,7 @@
           </div>
 
           <div class="bg-cardbg border border-borderline rounded-2xl p-1 grid grid-cols-3 gap-1">
-            <button type="button" onclick="setJournalExerciseTab('cbt')" id="journal-ex-tab-cbt" class="tactile-btn py-2 px-2 rounded-xl text-xs font-bold bg-plum text-appbg">CBT</button>
+            <button type="button" onclick="setJournalExerciseTab('cbt')" id="journal-ex-tab-cbt" class="tactile-btn py-2 px-2 rounded-xl text-xs font-bold bg-coral text-onaccent">CBT</button>
             <button type="button" onclick="setJournalExerciseTab('dbt')" id="journal-ex-tab-dbt" class="tactile-btn py-2 px-2 rounded-xl text-xs font-medium text-secondarytext hover:text-primarytext">DBT</button>
             <button type="button" onclick="setJournalExerciseTab('act')" id="journal-ex-tab-act" class="tactile-btn py-2 px-2 rounded-xl text-xs font-medium text-secondarytext hover:text-primarytext">ACT</button>
           </div>
@@ -1929,7 +1947,7 @@
         type="button"
         onclick="handleFabAction()"
         title="New Task"
-        class="tactile-btn absolute right-5 bottom-[78px] z-30 w-14 h-14 rounded-full bg-coral text-appbg flex items-center justify-center shadow-lg transition-all duration-150"
+        class="tactile-btn absolute right-5 bottom-[78px] z-30 w-14 h-14 rounded-full bg-coral text-onaccent flex items-center justify-center theme-fab-shadow transition-all duration-150"
       >
         <svg id="fab-plus-icon" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -1945,7 +1963,7 @@
         type="button"
         onclick="if (!state.topicDragDidMove) openNewTopicModal()"
         title="New Skill Tree Topic"
-        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-appbg shadow-xl shadow-black/50 flex items-center justify-center ring-2 ring-appbg/60 transition-all duration-200"
+        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center ring-2 ring-appbg/60 transition-all duration-200"
       >
         <svg id="topics-list-fab-plus-icon" class="w-6 h-6 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -1961,7 +1979,7 @@
         type="button"
         onclick="openInventoryAddModal()"
         title="Add Inventory Item"
-        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-appbg shadow-xl shadow-black/50 flex items-center justify-center ring-2 ring-appbg/60"
+        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center ring-2 ring-appbg/60"
       >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -1974,7 +1992,7 @@
         type="button"
         onclick="openTopicAddModal()"
         title="Add to Skill Tree"
-        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-appbg shadow-xl shadow-black/50 flex items-center justify-center ring-2 ring-appbg/60"
+        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center ring-2 ring-appbg/60"
       >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -1987,7 +2005,7 @@
         type="button"
         onclick="openRoutineAddModal()"
         title="Add Routine or Step"
-        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-appbg shadow-xl shadow-black/50 flex items-center justify-center ring-2 ring-appbg/60"
+        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center ring-2 ring-appbg/60"
       >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -2000,7 +2018,7 @@
         type="button"
         onclick="openPromptAddModal()"
         title="Add Prompt"
-        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-appbg shadow-xl shadow-black/50 flex items-center justify-center ring-2 ring-appbg/60"
+        class="hidden tactile-btn absolute bottom-[78px] right-5 z-30 w-[54px] h-[54px] rounded-full bg-coral text-onaccent theme-fab-shadow flex items-center justify-center ring-2 ring-appbg/60"
       >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -2010,7 +2028,7 @@
       <!-- Profile Modals -->
       <div
         id="new-topic-modal"
-        class="hidden absolute inset-0 z-40 flex flex-col justify-end bg-black/60 backdrop-blur-[2px] transition-opacity"
+        class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
         onclick="if (event.target === this) closeNewTopicModal()"
       >
         <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 shadow-2xl max-h-[88%] overflow-y-auto no-scrollbar">
@@ -2035,14 +2053,14 @@
                 <div id="new-topic-area-pills" class="flex flex-wrap gap-1.5"></div>
               </div>
             </div>
-            <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-appbg font-bold text-xs">Create Skill Tree</button>
+            <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-onaccent font-bold text-xs">Create Skill Tree</button>
           </form>
         </div>
       </div>
 
       <div
         id="inventory-add-modal"
-        class="hidden absolute inset-0 z-40 flex flex-col justify-end bg-black/60 backdrop-blur-[2px] transition-opacity"
+        class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
         onclick="if (event.target === this) closeInventoryAddModal()"
       >
         <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 shadow-2xl max-h-[88%] overflow-y-auto no-scrollbar">
@@ -2066,14 +2084,14 @@
                 <input id="new-inventory-category-input" type="text" placeholder="e.g. Mobile Studio, Stylus, Analog" class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3.5 py-2.5 rounded-xl border border-borderline focus:border-coral focus:outline-none" />
               </div>
             </div>
-            <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-appbg font-bold text-xs">Add to Inventory</button>
+            <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-onaccent font-bold text-xs">Add to Inventory</button>
           </form>
         </div>
       </div>
 
       <div
         id="routine-add-modal"
-        class="hidden absolute inset-0 z-40 flex flex-col justify-end bg-black/60 backdrop-blur-[2px] transition-opacity"
+        class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
         onclick="if (event.target === this) closeRoutineAddModal()"
       >
         <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 shadow-2xl max-h-[88%] overflow-y-auto no-scrollbar">
@@ -2087,7 +2105,7 @@
             </button>
           </div>
           <div class="grid grid-cols-2 gap-2">
-            <button type="button" onclick="selectRoutineAddMode('routine')" id="routine-modal-mode-routine" class="tactile-btn rounded-2xl border py-2.5 px-3 text-xs font-bold bg-coral text-appbg border-coral">New Routine</button>
+            <button type="button" onclick="selectRoutineAddMode('routine')" id="routine-modal-mode-routine" class="tactile-btn rounded-2xl border py-2.5 px-3 text-xs font-bold bg-coral text-onaccent border-coral">New Routine</button>
             <button type="button" onclick="selectRoutineAddMode('step')" id="routine-modal-mode-step" class="tactile-btn rounded-2xl border py-2.5 px-3 text-xs font-medium bg-cardbg border-borderline text-secondarytext hover:text-primarytext">Add Step</button>
           </div>
           <form id="routine-add-modal-form" onsubmit="handleSubmitRoutineAddModal(event)" class="space-y-3"></form>
@@ -2096,7 +2114,7 @@
 
       <div
         id="prompt-add-modal"
-        class="hidden absolute inset-0 z-40 flex flex-col justify-end bg-black/60 backdrop-blur-[2px] transition-opacity"
+        class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
         onclick="if (event.target === this) closePromptAddModal()"
       >
         <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 shadow-2xl max-h-[88%] overflow-y-auto no-scrollbar">
@@ -2116,14 +2134,14 @@
                 <input id="new-prompt-input" type="text" required placeholder="e.g. What gave me the most clarity today?" class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3.5 py-2.5 rounded-xl border border-borderline focus:border-coral focus:outline-none" />
               </div>
             </div>
-            <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-appbg font-bold text-xs">Add Prompt</button>
+            <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-onaccent font-bold text-xs">Add Prompt</button>
           </form>
         </div>
       </div>
 
       <div
         id="topic-add-modal"
-        class="hidden absolute inset-0 z-40 flex flex-col justify-end bg-black/60 backdrop-blur-[2px] transition-opacity"
+        class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
         onclick="if (event.target === this) closeTopicAddModal()"
       >
         <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 shadow-2xl max-h-[88%] overflow-y-auto no-scrollbar">
@@ -2243,7 +2261,7 @@
               <div class="space-y-3 min-w-0">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-2.5">
-                    <span id="gym-icon-cal" class="w-4 h-4 rounded-[4px] bg-coral text-appbg text-[9.5px] font-bold flex items-center justify-center">19</span>
+                    <span id="gym-icon-cal" class="w-4 h-4 rounded-[4px] bg-coral text-onaccent text-[9.5px] font-bold flex items-center justify-center">19</span>
                     <span class="text-xs font-medium text-primarytext">All-day</span>
                   </div>
                   <button
@@ -2326,14 +2344,14 @@
               <div id="gym-ring-col" class="flex flex-col items-center justify-center gap-2">
                 <div class="relative w-[68px] h-[68px] flex items-center justify-center">
                   <svg class="w-full h-full -rotate-90" viewBox="0 0 72 72">
-                    <circle cx="36" cy="36" r="28" fill="none" stroke="#333337" stroke-width="6.5"/>
+                    <circle cx="36" cy="36" r="28" fill="none" stroke="rgb(var(--color-pillbg))" stroke-width="6.5"/>
                     <circle
                       id="gym-ring-arc"
                       cx="36"
                       cy="36"
                       r="28"
                       fill="none"
-                      stroke="#F28B82"
+                      stroke="rgb(var(--color-accent))"
                       stroke-width="6.5"
                       stroke-linecap="round"
                       stroke-dasharray="175.9"
@@ -2344,7 +2362,7 @@
                 </div>
                 <span
                   id="gym-duration-pill"
-                  class="px-2.5 py-0.5 rounded-full bg-coral text-appbg text-[10.5px] font-bold whitespace-nowrap"
+                  class="px-2.5 py-0.5 rounded-full bg-coral text-onaccent text-[10.5px] font-bold whitespace-nowrap"
                 >
                   15m
                 </span>
@@ -2394,7 +2412,7 @@
                 id="modal-alert-start"
                 class="tactile-btn w-full bg-cardbg border border-borderline rounded-2xl px-3.5 py-2.5 flex items-center justify-between text-xs"
               >
-                <span class="inline-flex items-center gap-2.5 text-primarytext font-medium">
+                <span id="modal-alert-start-label" class="inline-flex items-center gap-2.5 text-primarytext font-medium">
                   <svg id="modal-alert-start-icon" class="w-4 h-4 text-coral" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
                   <span>At start of task</span>
                 </span>
@@ -2407,7 +2425,7 @@
                 id="modal-alert-end"
                 class="tactile-btn w-full bg-cardbg border border-borderline rounded-2xl px-3.5 py-2.5 flex items-center justify-between text-xs"
               >
-                <span class="inline-flex items-center gap-2.5 text-secondarytext font-medium">
+                <span id="modal-alert-end-label" class="inline-flex items-center gap-2.5 text-secondarytext font-medium">
                   <svg id="modal-alert-end-icon" class="w-4 h-4 text-mutedtext" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
                   <span>At end of task</span>
                 </span>
@@ -2511,7 +2529,7 @@
           type="button"
           id="modal-submit-btn"
           onclick="document.getElementById('task-modal-form').requestSubmit()"
-          class="tactile-btn w-full py-3.5 rounded-2xl bg-coral text-appbg font-semibold text-sm"
+          class="tactile-btn w-full py-3.5 rounded-2xl bg-coral text-onaccent font-semibold text-sm"
         >
           Create Task
         </button>
@@ -2619,7 +2637,7 @@
           type="button"
           id="project-submit-btn"
           onclick="document.getElementById('project-modal-form').requestSubmit()"
-          class="tactile-btn w-full py-3.5 rounded-2xl bg-coral text-appbg font-semibold text-sm"
+          class="tactile-btn w-full py-3.5 rounded-2xl bg-coral text-onaccent font-semibold text-sm"
         >
           Create Project
         </button>
@@ -2725,21 +2743,13 @@
             </div>
             <div id="habit-cadence-bar" class="grid grid-cols-3 bg-cardbg border border-borderline rounded-2xl p-1 gap-1"></div>
           </div>
-
-          <div class="space-y-2.5">
-            <div class="flex items-center justify-between">
-              <span class="text-sm font-semibold text-primarytext">What color?</span>
-              <span id="habit-modal-color-name" class="text-xs font-medium text-coral capitalize">Coral</span>
-            </div>
-            <div id="habit-modal-color-swatches" class="bg-cardbg border border-borderline rounded-2xl px-3 py-2.5 flex items-center justify-between gap-2"></div>
-          </div>
         </form>
       </div>
 
       <button
         type="button"
         onclick="document.getElementById('habit-modal-form').requestSubmit()"
-        class="tactile-btn w-full py-3.5 rounded-2xl bg-coral text-appbg font-semibold text-sm flex-shrink-0"
+        class="tactile-btn w-full py-3.5 rounded-2xl bg-coral text-onaccent font-semibold text-sm flex-shrink-0"
       >
         Create Habit
       </button>
@@ -2809,7 +2819,7 @@
       <button
         type="button"
         onclick="closeHabitHistoryModal()"
-        class="tactile-btn w-full py-3.5 rounded-2xl bg-coral text-appbg font-semibold text-sm flex-shrink-0"
+        class="tactile-btn w-full py-3.5 rounded-2xl bg-coral text-onaccent font-semibold text-sm flex-shrink-0"
       >
         Done
       </button>
@@ -2997,11 +3007,11 @@
     <aside id="spatial-edge-drawer" class="py-2.5 px-2 flex flex-col items-center gap-2" aria-label="Spatial Edge Tools">
       <div id="spatial-mascot-stage" class="spatial-mascot-stage" title="Tap Bot to view alerts">
         <svg id="spatial-mascot-svg" class="w-10 h-10 overflow-visible" viewBox="0 0 64 52" fill="none">
-          <circle id="spatial-bot-core-aura" cx="32" cy="29" r="18" fill="rgba(242, 139, 130, 0.26)" />
+          <circle id="spatial-bot-core-aura" cx="32" cy="29" r="14" fill="rgb(var(--color-accent) / 0.12)" />
           <g id="spatial-bot-body-group">
             <g id="spatial-bot-antenna-group">
               <line x1="32" y1="15" x2="32" y2="8.5" stroke="#F5F5F7" stroke-width="2.1" stroke-linecap="round" />
-              <circle id="spatial-bot-antenna-orb" cx="32" cy="6.5" r="3.4" fill="#F28B82" stroke="#141416" stroke-width="1.2" />
+              <circle id="spatial-bot-antenna-orb" cx="32" cy="6.5" r="3.4" fill="rgb(var(--color-accent))" stroke="#141416" stroke-width="1.2" />
             </g>
             <path
               d="M 16 25 C 16 17.5, 22.5 14.5, 32 14.5 C 41.5 14.5, 48 17.5, 48 25 C 52.5 25.5, 54.5 29.5, 53.5 34.5 C 52.5 39, 48 41.5, 42.5 41.8 L 39.2 46.5 C 38.4 47.6, 36.8 47.5, 36.2 46.2 L 34.4 42.2 C 25.5 42.4, 15 40.5, 11.5 35.5 C 9 31.8, 11 26, 16 25 Z"
@@ -3012,8 +3022,8 @@
             />
             <rect x="20.5" y="21.5" width="23" height="14.5" rx="7" fill="#141416" />
             <g id="spatial-bot-visor-eyes">
-              <path class="spatial-bot-eye" d="M 26.8 25.4 V 31.6 H 29.6" stroke="#F28B82" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" />
-              <path class="spatial-bot-eye" d="M 35.2 25.4 V 31.6 H 38.0" stroke="#F28B82" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" />
+              <path class="spatial-bot-eye" d="M 26.8 25.4 V 31.6 H 29.6" stroke="rgb(var(--color-accent))" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" />
+              <path class="spatial-bot-eye" d="M 35.2 25.4 V 31.6 H 38.0" stroke="rgb(var(--color-accent))" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" />
             </g>
           </g>
         </svg>
@@ -3052,9 +3062,9 @@
         <span class="spatial-rail-tooltip">Draw on Screen</span>
       </button>
 
-      <div class="w-6 h-px bg-black/15 my-0.5"></div>
+      <div class="w-6 h-px bg-borderline my-0.5"></div>
 
-      <button type="button" id="spatial-edge-popout-btn" class="spatial-rail-btn text-[#1C1C1E] hover:text-[#E05246]" aria-label="Pop Out to Bubble">
+      <button type="button" id="spatial-edge-popout-btn" class="spatial-rail-btn text-primarytext hover:text-coral" aria-label="Pop Out to Bubble">
         <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5h6m0 0v6m0-6L10 14M5 10v9h9"/></svg>
         <span class="spatial-rail-tooltip">Pop Out Bubble</span>
       </button>
@@ -3068,15 +3078,15 @@
   <svg id="spatial-teardrop-svg" aria-hidden="true">
     <defs>
       <linearGradient id="spatial-teardrop-fill" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="rgba(43, 43, 46, 0.96)" />
-        <stop offset="65%" stop-color="rgba(35, 35, 37, 0.96)" />
-        <stop offset="100%" stop-color="rgba(242, 139, 130, 0.34)" />
+        <stop offset="0%" stop-color="rgb(var(--color-cardbg))" stop-opacity="0.96" />
+        <stop offset="65%" stop-color="rgb(var(--color-sheetbg))" stop-opacity="0.96" />
+        <stop offset="100%" stop-color="rgb(var(--color-accent))" stop-opacity="0.34" />
       </linearGradient>
     </defs>
-    <path id="spatial-teardrop-glow" d="" fill="rgba(242, 139, 130, 0.16)" stroke="none"></path>
-    <path id="spatial-teardrop-path" d="" fill="url(#spatial-teardrop-fill)" stroke="rgba(242, 139, 130, 0.65)" stroke-width="1.6"></path>
+    <path id="spatial-teardrop-glow" d="" fill="rgb(var(--color-accent) / 0.16)" stroke="none"></path>
+    <path id="spatial-teardrop-path" d="" fill="url(#spatial-teardrop-fill)" stroke="rgb(var(--color-accent) / 0.65)" stroke-width="1.6"></path>
     <g id="spatial-teardrop-icon" opacity="0" transform="translate(0,0)">
-      <path d="M0 -9 L2.2 -2.2 L9 0 L2.2 2.2 L0 9 L-2.2 2.2 L-9 0 L-2.2 -2.2 Z" fill="none" stroke="#F28B82" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M0 -9 L2.2 -2.2 L9 0 L2.2 2.2 L0 9 L-2.2 2.2 L-9 0 L-2.2 -2.2 Z" fill="none" stroke="rgb(var(--color-accent))" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" />
     </g>
   </svg>
 
@@ -3091,7 +3101,7 @@
     <span class="w-2.5 h-2.5 rounded-full bg-coral animate-pulse"></span>
     <span class="text-xs font-bold tracking-wide text-coral uppercase">REC</span>
     <span id="spatial-rec-timer" class="text-sm font-mono font-semibold text-primarytext tabular-nums">00:00</span>
-    <button type="button" id="spatial-stop-rec-btn" class="ml-1 px-3 py-1 rounded-full bg-coral hover:opacity-90 text-appbg text-xs font-semibold transition cursor-pointer">
+    <button type="button" id="spatial-stop-rec-btn" class="ml-1 px-3 py-1 rounded-full bg-coral hover:opacity-90 text-onaccent text-xs font-semibold transition cursor-pointer">
       Stop &amp; Save
     </button>
   </div>
@@ -3115,7 +3125,7 @@
       <button type="button" id="spatial-ss-cancel" class="p-1.5 rounded-full hover:bg-pillbg text-secondarytext hover:text-primarytext transition cursor-pointer" title="Cancel">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
-      <button type="button" id="spatial-ss-save" class="px-3.5 py-1.5 rounded-full bg-amber hover:opacity-90 text-appbg text-xs font-bold transition cursor-pointer whitespace-nowrap">
+      <button type="button" id="spatial-ss-save" class="px-3.5 py-1.5 rounded-full bg-amber hover:opacity-90 text-[#141414] text-xs font-bold transition cursor-pointer whitespace-nowrap">
         Save to Inbox
       </button>
     </div>
@@ -3126,8 +3136,8 @@
     <!-- Curved Arc Pill Grouping Screenshot, Screen Record & Voice Memo -->
     <div id="spatial-radial-cluster" class="spatial-radial-cluster">
       <svg class="spatial-radial-cluster-svg" viewBox="0 0 188 188" fill="none">
-        <path d="M 126 38.57 A 64 64 0 0 1 126 149.43" stroke="rgba(255,255,255,0.92)" stroke-width="48" stroke-linecap="round" />
-        <path d="M 126 38.57 A 64 64 0 0 1 126 149.43" stroke="#F5F5F7" stroke-width="45" stroke-linecap="round" />
+        <path d="M 126 38.57 A 64 64 0 0 1 126 149.43" stroke="rgb(var(--color-borderline))" stroke-width="48" stroke-linecap="round" />
+        <path d="M 126 38.57 A 64 64 0 0 1 126 149.43" stroke="rgb(var(--color-sheetbg))" stroke-width="45" stroke-linecap="round" />
       </svg>
 
       <button type="button" data-spatial-tool="screenshot" class="spatial-radial-cluster-item text-[#169859]" style="left: 126px; top: 38.57px;" title="Screenshot" aria-label="Screenshot">
@@ -3160,7 +3170,7 @@
     <div id="spatial-bubble-core" class="spatial-bubble-core" title="Tap for Tools • Hold to Record Voice">
       <svg id="spatial-bubble-icon-bot" class="w-11 h-11 transition-transform duration-300 overflow-visible" viewBox="0 0 44 44" fill="none">
         <line x1="22" y1="11" x2="22" y2="5.5" stroke="#F5F5F7" stroke-width="2" stroke-linecap="round" />
-        <circle cx="22" cy="4.2" r="2.8" fill="#F28B82" stroke="#141416" stroke-width="1" />
+        <circle cx="22" cy="4.2" r="2.8" fill="rgb(var(--color-accent))" stroke="#141416" stroke-width="1" />
         <path
           d="M 9 20 C 9 13.5, 14.5 11, 22 11 C 29.5 11, 35 13.5, 35 20 C 38.5 20.5, 40 23.8, 39.2 28 C 38.4 31.8, 34.8 33.8, 30.2 34 L 27.6 38 C 26.9 38.9, 25.6 38.8, 25.1 37.7 L 23.7 34.3 C 16.5 34.5, 8 33, 5.2 28.8 C 3.2 25.6, 4.8 20.8, 9 20 Z"
           fill="#F5F5F7"
@@ -3170,12 +3180,12 @@
         />
         <rect x="12.5" y="16.8" width="19" height="12" rx="5.8" fill="#141416" />
         <g id="spatial-bubble-visor-eyes">
-          <path class="spatial-bot-eye" d="M 17.8 20.1 V 25.3 H 20.2" stroke="#F28B82" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" />
-          <path class="spatial-bot-eye" d="M 24.6 20.1 V 25.3 H 27.0" stroke="#F28B82" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" />
+          <path class="spatial-bot-eye" d="M 17.8 20.1 V 25.3 H 20.2" stroke="rgb(var(--color-accent))" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" />
+          <path class="spatial-bot-eye" d="M 24.6 20.1 V 25.3 H 27.0" stroke="rgb(var(--color-accent))" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" />
         </g>
       </svg>
 
-      <svg id="spatial-bubble-icon-close" class="w-5 h-5 text-appbg hidden transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+      <svg id="spatial-bubble-icon-close" class="w-5 h-5 text-onaccent hidden transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
       </svg>
 
@@ -3191,7 +3201,7 @@
             <span id="spatial-island-badge-icon" class="w-9 h-9 rounded-xl bg-coral/15 border border-coral/35 text-coral flex items-center justify-center shrink-0">
               <svg class="w-6 h-6 overflow-visible" viewBox="0 0 44 44" fill="none">
                 <line x1="22" y1="11" x2="22" y2="5.5" stroke="#F5F5F7" stroke-width="2" stroke-linecap="round" />
-                <circle id="spatial-island-bot-orb" cx="22" cy="4.2" r="2.8" fill="#F28B82" stroke="#141416" stroke-width="1" />
+                <circle id="spatial-island-bot-orb" cx="22" cy="4.2" r="2.8" fill="rgb(var(--color-accent))" stroke="#141416" stroke-width="1" />
                 <path
                   d="M 9 20 C 9 13.5, 14.5 11, 22 11 C 29.5 11, 35 13.5, 35 20 C 38.5 20.5, 40 23.8, 39.2 28 C 38.4 31.8, 34.8 33.8, 30.2 34 L 27.6 38 C 26.9 38.9, 25.6 38.8, 25.1 37.7 L 23.7 34.3 C 16.5 34.5, 8 33, 5.2 28.8 C 3.2 25.6, 4.8 20.8, 9 20 Z"
                   fill="#F5F5F7"
@@ -3201,8 +3211,8 @@
                 />
                 <rect x="12.5" y="16.8" width="19" height="12" rx="5.8" fill="#141416" />
                 <g style="transform: translate(3.2px, 0px);">
-                  <path class="spatial-bot-eye" d="M 17.8 20.1 V 25.3 H 20.2" stroke="#F28B82" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" />
-                  <path class="spatial-bot-eye" d="M 24.6 20.1 V 25.3 H 27.0" stroke="#F28B82" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" />
+                  <path class="spatial-bot-eye" d="M 17.8 20.1 V 25.3 H 20.2" stroke="rgb(var(--color-accent))" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" />
+                  <path class="spatial-bot-eye" d="M 24.6 20.1 V 25.3 H 27.0" stroke="rgb(var(--color-accent))" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" />
                 </g>
               </svg>
             </span>
@@ -3210,7 +3220,7 @@
           </div>
 
           <div class="flex items-center gap-1.5 shrink-0">
-            <button id="spatial-island-action-btn" type="button" class="px-2.5 py-1 rounded-lg bg-coral text-appbg text-[10.5px] font-bold hover:opacity-90 transition cursor-pointer">
+            <button id="spatial-island-action-btn" type="button" class="px-2.5 py-1 rounded-lg bg-coral text-onaccent text-[10.5px] font-bold hover:opacity-90 transition cursor-pointer">
               Inbox
             </button>
             <button id="spatial-island-dismiss-btn" type="button" class="p-1 rounded-lg text-secondarytext hover:text-primarytext hover:bg-pillbg transition cursor-pointer" aria-label="Collapse island">
@@ -3248,7 +3258,7 @@
     </div>
     <div id="spatial-tc-preview" class="max-h-36 overflow-y-auto rounded-xl bg-pillbg border border-borderline px-3 py-2 text-xs text-primarytext leading-relaxed whitespace-pre-wrap"></div>
     <div class="mt-2.5 flex items-center justify-end gap-2">
-      <button type="button" id="spatial-tc-save-inbox" class="flex-1 py-2 rounded-xl bg-coral hover:opacity-90 text-appbg text-xs font-bold cursor-pointer">
+      <button type="button" id="spatial-tc-save-inbox" class="flex-1 py-2 rounded-xl bg-coral hover:opacity-90 text-onaccent text-xs font-bold cursor-pointer">
         Save to Inbox
       </button>
     </div>
@@ -6712,13 +6722,23 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     };
 
     const ACCENT_RGB = {
-      coral: { rgb: '242 139 130', hex: '#F28B82' },
-      lime: { rgb: '129 201 83', hex: '#81C953' },
-      emerald: { rgb: '22 152 89', hex: '#169859' },
-      sky: { rgb: '110 168 216', hex: '#6EA8D8' },
-      amber: { rgb: '246 194 68', hex: '#F6C244' },
-      plum: { rgb: '196 123 155', hex: '#C47B9B' },
+      coral: { rgb: '242 139 130', hex: '#F28B82', fg: '20 20 20' },
+      lime: { rgb: '129 201 83', hex: '#81C953', fg: '20 20 20' },
+      emerald: { rgb: '22 152 89', hex: '#169859', fg: '245 245 247' },
+      sky: { rgb: '110 168 216', hex: '#6EA8D8', fg: '20 20 20' },
+      amber: { rgb: '246 194 68', hex: '#F6C244', fg: '20 20 20' },
+      plum: { rgb: '196 123 155', hex: '#C47B9B', fg: '20 20 20' },
     };
+
+    function getContrastTextForHex(hex) {
+      const clean = String(hex || '#F28B82').replace('#', '');
+      if (clean.length !== 6) return '#141414';
+      const r = parseInt(clean.slice(0, 2), 16);
+      const g = parseInt(clean.slice(2, 4), 16);
+      const b = parseInt(clean.slice(4, 6), 16);
+      const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      return lum > 0.56 ? '#141414' : '#F5F5F7';
+    }
 
     function applyThemeAndAccent(themeId = state.themeId, accentKey = state.accentKey) {
       state.themeId = THEMES[themeId] ? themeId : 'charcoal';
@@ -6727,18 +6747,33 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const theme = THEMES[state.themeId];
       const accent = ACCENT_RGB[state.accentKey];
       const root = document.documentElement;
+      const isLightTheme = state.themeId === 'paper';
       root.dataset.theme = state.themeId;
+      root.classList.toggle('dark', !isLightTheme);
+      root.style.colorScheme = isLightTheme ? 'light' : 'dark';
 
       Object.entries(theme.vars).forEach(([k, v]) => {
         root.style.setProperty(k, v);
       });
       root.style.setProperty('--color-accent', accent.rgb);
+      root.style.setProperty('--color-on-accent', accent.fg || '20 20 20');
+      root.style.setProperty('--color-accent-hex', accent.hex);
       root.style.setProperty('--color-ring-mental', accent.hex);
 
       renderSettingsThemeControls();
       renderUnifiedCalendar();
+      renderTimeline();
+      renderHabits();
       renderProfileRadar();
       renderProfileEnergyBars();
+      if (state.profileSubView === 'topics' && typeof renderProfileTopics === 'function') {
+        renderProfileTopics();
+      }
+      if (!document.getElementById('task-modal')?.classList.contains('hidden')) syncModalControls();
+      if (!document.getElementById('habit-modal')?.classList.contains('hidden')) syncHabitModalControls();
+      if (!document.getElementById('project-modal')?.classList.contains('hidden')) renderProjectModalControls();
+      if (!document.getElementById('journal-energy-modal')?.classList.contains('hidden')) renderJournalEnergyModal();
+      if (!document.getElementById('journal-mood-modal')?.classList.contains('hidden')) renderJournalMoodModal();
       saveState();
     }
 
@@ -6822,7 +6857,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         toggleBtn.classList.toggle('bg-pillbg', !enabled);
         toggleBtn.classList.toggle('border-borderline', !enabled);
         knob.style.transform = enabled ? 'translateX(20px)' : 'translateX(0px)';
-        knob.classList.toggle('bg-appbg', enabled);
+        knob.classList.toggle('bg-onaccent', enabled);
         knob.classList.toggle('bg-secondarytext', !enabled);
       }
       if (summary) {
@@ -6856,7 +6891,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         toggleBtn.classList.toggle('bg-pillbg', !enabled);
         toggleBtn.classList.toggle('border-borderline', !enabled);
         knob.style.transform = enabled ? 'translateX(20px)' : 'translateX(0px)';
-        knob.classList.toggle('bg-appbg', enabled);
+        knob.classList.toggle('bg-onaccent', enabled);
         knob.classList.toggle('bg-secondarytext', !enabled);
       }
       if (summary) {
@@ -6896,7 +6931,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         toggleBtn.classList.toggle('bg-pillbg', !enabled);
         toggleBtn.classList.toggle('border-borderline', !enabled);
         knob.style.transform = enabled ? 'translateX(20px)' : 'translateX(0px)';
-        knob.classList.toggle('bg-appbg', enabled);
+        knob.classList.toggle('bg-onaccent', enabled);
         knob.classList.toggle('bg-secondarytext', !enabled);
       }
       if (summary) {
@@ -6915,7 +6950,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 onclick="setNotificationTone('${t.id}')"
                 class="tactile-btn py-2 px-3 rounded-xl border text-[11px] font-semibold transition ${
                   active
-                    ? 'bg-coral text-appbg border-coral'
+                    ? 'bg-coral text-onaccent border-coral'
                     : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext'
                 }"
               >${t.label}</button>
@@ -7105,10 +7140,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function getCalendarExpansionWindow() {
-      const targetProjects =
-        state.activeTab === 'timeline' && state.timelineViewMode === 'projects'
-          ? getFocusedProjectsForCalendar()
-          : state.projects || [];
+      const targetProjects = getFocusedProjectsForCalendar();
       return CalLogic.computeCalendarTimeframeWindow(
         state.monthCells,
         targetProjects,
@@ -7501,7 +7533,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               data-comp-pill="${p.id}"
               onclick="setCompartmentFilter('${p.id}')"
               class="tactile-btn px-4 py-1.5 rounded-full text-sm whitespace-nowrap transition ${
-                active ? 'bg-coral text-appbg font-semibold' : 'text-secondarytext hover:text-primarytext font-medium'
+                active ? 'bg-coral text-onaccent font-semibold' : 'text-secondarytext hover:text-primarytext font-medium'
               }"
             >
               ${escapeHtml(p.name)}
@@ -8062,7 +8094,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                     d="${sheet.mainPath}"
                     fill="url(#${faceGradId})"
                     fill-opacity="1"
-                    stroke="${isInspected ? '#F5F5F7' : colors.edgeOutline}"
+                    stroke="${isInspected ? 'rgb(var(--color-primarytext))' : colors.edgeOutline}"
                     stroke-opacity="${isInspected ? '1' : '0.72'}"
                     stroke-width="${isInspected ? '1.6' : '0.45'}"
                     stroke-linejoin="miter"
@@ -8165,7 +8197,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               class="relative w-full max-w-[340px] rounded-[6px] p-5 pt-7 border-2 border-black/20 shadow-2xl space-y-4"
             >
               <!-- Punched spindle hole at top center of unfolded memo sheet -->
-              <div class="absolute top-2.5 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-[#18181B] border border-black/30"></div>
+              <div class="absolute top-2.5 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-appbg border border-black/30"></div>
 
               <!-- Top header row: Compartment pill + Close button -->
               <div class="flex items-center justify-between gap-2 pt-1">
@@ -8243,7 +8275,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 }
               </div>
 
-              <!-- Bottom Actions: Unstab & Restore / Delete / Keep -->
+              <!-- Bottom Actions: Unstab & Restore / Delete -->
               <div class="pt-1 flex items-center gap-2">
                 <button
                   type="button"
@@ -8256,18 +8288,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 <button
                   type="button"
                   onclick="deleteInspectedMemoPaper(${inspectedTask.id})"
-                  class="tactile-btn py-2.5 px-3 rounded-xl text-xs font-semibold border border-red-500/40 text-red-400 hover:bg-red-500/10"
+                  style="background-color: rgba(20, 20, 20, 0.14); color: ${ic.text};"
+                  class="tactile-btn py-2.5 px-3.5 rounded-xl text-xs font-semibold"
                   title="Delete permanently"
                 >
                   Delete
-                </button>
-                <button
-                  type="button"
-                  onclick="closeInspectedMemoPaper()"
-                  style="background-color: rgba(20, 20, 20, 0.14); color: ${ic.text};"
-                  class="tactile-btn py-2.5 px-3.5 rounded-xl text-xs font-semibold"
-                >
-                  Keep
                 </button>
               </div>
             </div>
@@ -8527,7 +8552,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               <button
                 type="button"
                 onclick="openProjectModal()"
-                class="tactile-btn inline-flex items-center justify-center px-5 py-2.5 rounded-2xl bg-coral text-appbg text-xs font-bold"
+                class="tactile-btn inline-flex items-center justify-center px-5 py-2.5 rounded-2xl bg-coral text-onaccent text-xs font-bold"
               >
                 + New Project
               </button>
@@ -8732,7 +8757,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               >
                 ${
                   row.isToday
-                    ? `<span class="px-1.5 py-0.5 rounded bg-coral text-appbg text-[8.5px] font-extrabold uppercase tracking-wider leading-none mb-0.5">TODAY</span>`
+                    ? `<span class="px-1.5 py-0.5 rounded bg-coral text-onaccent text-[8.5px] font-extrabold uppercase tracking-wider leading-none mb-0.5">TODAY</span>`
                     : ''
                 }
                 <span class="text-[10.5px] font-bold leading-tight whitespace-nowrap ${
@@ -8843,13 +8868,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
 
       if (state.unscheduledQueue.length > 0 && state.compartmentFilter !== 'completed') {
-        const firstTaskColor = tasks.length > 0 ? (CAPSULE_COLORS[tasks[0].color] || CAPSULE_COLORS.coral).hex : '#F28B82';
+        const firstTaskColor = tasks.length > 0 ? (CAPSULE_COLORS[tasks[0].color] || CAPSULE_COLORS.coral).hex : (ACCENT_RGB[state.accentKey] || ACCENT_RGB.coral).hex;
         const totalQueueCount = state.scheduledFromQueueCount + state.unscheduledQueue.length;
         html += `
           <div class="timeline-capsule grid ${state.showTimes ? 'grid-cols-[44px_64px_1fr]' : 'grid-cols-[64px_1fr]'} items-start pt-1 pr-1 transition-all duration-200">
             ${state.showTimes ? '<div class="text-right pr-2 pt-4 text-[10px] font-semibold text-amber">QUEUE</div>' : ''}
             <div class="flex flex-col items-center justify-center">
-              <div class="w-[54px] h-[54px] rounded-full bg-amber text-appbg flex items-center justify-center flex-shrink-0">
+              <div class="w-[54px] h-[54px] rounded-full bg-amber text-[#141414] flex items-center justify-center flex-shrink-0">
                 ${ICONS.at}
               </div>
               <div class="w-[4px] h-7 rounded-full my-1" style="background: linear-gradient(to bottom, #F6C244, ${firstTaskColor});"></div>
@@ -8870,7 +8895,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                           <button
                             type="button"
                             onclick="openScheduleFromQueue(${q.id})"
-                            class="tactile-btn text-[10.5px] font-semibold px-2.5 py-1 rounded-lg bg-coral text-appbg whitespace-nowrap"
+                            class="tactile-btn text-[10.5px] font-semibold px-2.5 py-1 rounded-lg bg-coral text-onaccent whitespace-nowrap"
                           >
                             Set Time
                           </button>
@@ -9063,7 +9088,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 type="button"
                 onpointerdown="event.stopPropagation()"
                 onclick="toggleTaskDone(${task.id})"
-                style="${taskDone ? `background-color:${c.hex}; border-color:${c.hex}; color:#141414;` : `border-color:${c.hex};`}"
+                style="${taskDone ? `background-color:${c.hex}; border-color:${c.hex}; color:${c.text};` : `border-color:${c.hex};`}"
                 class="tactile-btn w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition"
                 title="Toggle complete"
               >
@@ -9189,13 +9214,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (!fab || !plusIcon || !trashIcon) return;
 
       if (isTrash) {
-        fab.classList.remove('bg-coral', 'text-appbg');
+        fab.classList.remove('bg-coral', 'text-onaccent');
         fab.classList.add('bg-[#DC2626]', 'text-white');
         fab.style.transform = isOver ? 'scale(1.16)' : 'scale(1.04)';
         plusIcon.classList.add('hidden');
         trashIcon.classList.remove('hidden');
       } else {
-        fab.classList.add('bg-coral', 'text-appbg');
+        fab.classList.add('bg-coral', 'text-onaccent');
         fab.classList.remove('bg-[#DC2626]', 'text-white');
         fab.style.transform = '';
         plusIcon.classList.remove('hidden');
@@ -9636,8 +9661,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         if (deleteBtn) deleteBtn.classList.remove('hidden');
       } else {
         state.editingProjectId = null;
-        const colorKeys = Object.keys(CAPSULE_COLORS);
-        state.projectModalColor = colorKeys[(state.projects || []).length % colorKeys.length] || 'sky';
+        state.projectModalColor = state.accentKey || 'coral';
         const defaultStart = baseDate;
         const defaultEnd = CalLogic.addDaysToDateKey(baseDate, 14);
         state.projectModalCheckpoints = [
@@ -9890,7 +9914,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       state.modalDateKey = state.selectedDate || getTodayDateKey();
       state.modalProjectId = null;
-      state.modalColor = state.accentKey || 'coral';
+      const taskColorKeys = Object.keys(CAPSULE_COLORS);
+      state.modalColor = taskColorKeys[Math.floor(Math.random() * taskColorKeys.length)] || 'coral';
       state.modalIcon = 'at';
       state.modalAllDay = false;
       state.modalStartMin = 510;
@@ -10164,7 +10189,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 type="button"
                 onclick="selectModalIcon('${k}')"
                 class="tactile-btn h-10 rounded-xl border flex items-center justify-center transition ${
-                  active ? 'bg-coral text-appbg border-coral' : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext'
+                  active ? 'bg-coral text-onaccent border-coral' : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext'
                 }"
               >${svg}</button>
             `;
@@ -10187,7 +10212,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         allDayToggle.classList.toggle('bg-coral', state.modalAllDay);
         allDayToggle.classList.toggle('border-coral', state.modalAllDay);
         allDayKnob.style.transform = state.modalAllDay ? 'translateX(18px)' : 'translateX(0px)';
-        allDayKnob.classList.toggle('bg-appbg', state.modalAllDay);
+        allDayKnob.classList.toggle('bg-onaccent', state.modalAllDay);
         allDayKnob.classList.toggle('bg-secondarytext', !state.modalAllDay);
       }
 
@@ -10225,12 +10250,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const ringArc = document.getElementById('gym-ring-arc');
       const ringNum = document.getElementById('gym-ring-center-num');
       const durPill = document.getElementById('gym-duration-pill');
-      const cHex = (CAPSULE_COLORS[state.modalColor] || CAPSULE_COLORS.coral).hex;
       if (ringArc) {
         const circ = 175.9;
         const ratio = Math.min(1, Math.max(0.04, state.modalDurationMin / 240));
         ringArc.style.strokeDashoffset = String((circ * (1 - ratio)).toFixed(1));
-        ringArc.style.stroke = cHex;
+        ringArc.style.stroke = 'rgb(var(--color-accent))';
       }
       if (ringNum) ringNum.textContent = String(state.modalDurationMin);
       if (durPill) {
@@ -10249,7 +10273,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           .map((t) => {
             const active = t === state.modalEnergyTier;
             return `<button type="button" onclick="setModalEnergyTier(${t})" class="tactile-btn py-1.5 rounded-xl text-xs font-bold transition ${
-              active ? 'bg-coral text-appbg' : 'text-secondarytext hover:text-primarytext'
+              active ? 'bg-coral text-onaccent' : 'text-secondarytext hover:text-primarytext'
             }">${t + 1}</button>`;
           })
           .join('');
@@ -10264,15 +10288,19 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           .map((sym, idx) => {
             const active = idx === state.modalPriority;
             return `<button type="button" onclick="setModalPriority(${idx})" class="tactile-btn py-1.5 rounded-xl text-xs font-bold transition ${
-              active ? 'bg-coral text-appbg' : 'text-secondarytext hover:text-primarytext'
+              active ? 'bg-coral text-onaccent' : 'text-secondarytext hover:text-primarytext'
             }">${sym}</button>`;
           })
           .join('');
       }
 
+      const activeColor = CAPSULE_COLORS[state.modalColor] || CAPSULE_COLORS[state.accentKey] || CAPSULE_COLORS.coral;
       const colorNameEl = document.getElementById('modal-color-name');
       const swatchesEl = document.getElementById('modal-color-swatches');
-      if (colorNameEl) colorNameEl.textContent = state.modalColor;
+      if (colorNameEl) {
+        colorNameEl.textContent = state.modalColor;
+        colorNameEl.style.color = activeColor.hex;
+      }
       if (swatchesEl) {
         swatchesEl.innerHTML = Object.entries(CAPSULE_COLORS)
           .map(([key, val]) => {
@@ -10284,10 +10312,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           .join('');
       }
 
-      const activeColor = CAPSULE_COLORS[state.modalColor] || CAPSULE_COLORS[state.accentKey] || CAPSULE_COLORS.coral;
-      const activeColorHex = activeColor.hex;
-      const activeColorText = activeColor.text;
-
       const repeatSummary = document.getElementById('modal-repeat-summary');
       const repeatBar = document.getElementById('modal-repeat-bar');
       const weeklyDaysEl = document.getElementById('modal-weekly-days');
@@ -10297,8 +10321,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         repeatBar.innerHTML = Object.entries(repeatLabels)
           .map(([key, label]) => {
             const active = key === state.modalRepeat;
-            return `<button type="button" onclick="setModalRepeat('${key}')" style="${active ? `background-color:${activeColorHex}; color:${activeColorText};` : ''}" class="tactile-btn py-1.5 px-1 rounded-xl text-[11px] font-semibold transition truncate ${
-              active ? '' : 'text-secondarytext hover:text-primarytext'
+            return `<button type="button" onclick="setModalRepeat('${key}')" class="tactile-btn py-1.5 px-1 rounded-xl text-[11px] font-semibold transition truncate ${
+              active ? 'bg-coral text-onaccent' : 'text-secondarytext hover:text-primarytext'
             }">${label}</button>`;
           })
           .join('');
@@ -10308,8 +10332,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         weeklyDaysEl.innerHTML = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
           .map((d) => {
             const active = state.modalWeekDays.includes(d);
-            return `<button type="button" onclick="toggleModalWeekDay('${d}')" style="${active ? `background-color:${activeColorHex}; color:${activeColorText}; border-color:${activeColorHex};` : ''}" class="tactile-btn py-1.5 rounded-xl text-[10.5px] font-bold border ${
-              active ? '' : 'bg-cardbg border-borderline text-secondarytext'
+            return `<button type="button" onclick="toggleModalWeekDay('${d}')" class="tactile-btn py-1.5 rounded-xl text-[10.5px] font-bold border ${
+              active ? 'bg-coral text-onaccent border-coral' : 'bg-cardbg border-borderline text-secondarytext'
             }">${d[0]}</button>`;
           })
           .join('');
@@ -10317,13 +10341,33 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       const startBadge = document.getElementById('modal-alert-start-badge');
       const endBadge = document.getElementById('modal-alert-end-badge');
+      const startIcon = document.getElementById('modal-alert-start-icon');
+      const endIcon = document.getElementById('modal-alert-end-icon');
+      const startLabel = document.getElementById('modal-alert-start-label');
+      const endLabel = document.getElementById('modal-alert-end-label');
       if (startBadge) {
         startBadge.textContent = state.modalAlertStart ? 'On' : 'Off';
         startBadge.className = state.modalAlertStart ? 'text-[11px] font-semibold text-coral' : 'text-[11px] font-medium text-mutedtext';
       }
+      if (startIcon) {
+        startIcon.classList.toggle('text-coral', state.modalAlertStart);
+        startIcon.classList.toggle('text-mutedtext', !state.modalAlertStart);
+      }
+      if (startLabel) {
+        startLabel.classList.toggle('text-primarytext', state.modalAlertStart);
+        startLabel.classList.toggle('text-secondarytext', !state.modalAlertStart);
+      }
       if (endBadge) {
         endBadge.textContent = state.modalAlertEnd ? 'On' : 'Off';
         endBadge.className = state.modalAlertEnd ? 'text-[11px] font-semibold text-coral' : 'text-[11px] font-medium text-mutedtext';
+      }
+      if (endIcon) {
+        endIcon.classList.toggle('text-coral', state.modalAlertEnd);
+        endIcon.classList.toggle('text-mutedtext', !state.modalAlertEnd);
+      }
+      if (endLabel) {
+        endLabel.classList.toggle('text-primarytext', state.modalAlertEnd);
+        endLabel.classList.toggle('text-secondarytext', !state.modalAlertEnd);
       }
 
       const projSection = document.getElementById('modal-project-section');
@@ -10339,7 +10383,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         const noneActive = !state.modalProjectId;
         projPills.innerHTML = [
           `<button type="button" onclick="selectModalProject(null)" class="tactile-btn px-2.5 py-1 rounded-xl text-[11px] font-semibold border transition ${
-            noneActive ? 'bg-coral text-appbg border-coral' : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext'
+            noneActive ? 'bg-coral text-onaccent border-coral' : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext'
           }">None</button>`,
           ...projects.map((p) => {
             const active = state.modalProjectId === p.id;
@@ -10592,7 +10636,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         if (state.inboxItems.length === 0) {
           stage.innerHTML = `
             <div class="w-full h-[230px] rounded-[28px] bg-cardbg border border-dashed border-borderline flex flex-col items-center justify-center p-6 text-center space-y-2">
-              <span class="w-10 h-10 rounded-full bg-lime/15 text-lime flex items-center justify-center">
+              <span class="w-10 h-10 rounded-full bg-coral/15 text-coral flex items-center justify-center">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
               </span>
               <p class="font-display text-base font-bold text-primarytext">Brain Dump Cleared</p>
@@ -10627,7 +10671,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   </div>
 
                   <div class="relative my-auto py-2">
-                    <span data-stamp-right style="opacity:0;" class="pointer-events-none absolute -top-3 left-0 px-2.5 py-0.5 rounded-lg border-2 border-lime text-lime text-xs font-extrabold uppercase tracking-wider -rotate-6">
+                    <span data-stamp-right style="opacity:0;" class="pointer-events-none absolute -top-3 left-0 px-2.5 py-0.5 rounded-lg border-2 border-coral text-coral text-xs font-extrabold uppercase tracking-wider -rotate-6">
                       Timeline →
                     </span>
                     <span data-stamp-left style="opacity:0;" class="pointer-events-none absolute -top-3 right-0 px-2.5 py-0.5 rounded-lg border-2 border-secondarytext text-secondarytext text-xs font-extrabold uppercase tracking-wider rotate-6">
@@ -10640,7 +10684,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
                   <div class="flex items-center justify-between text-xs text-secondarytext pt-2 border-t border-borderline/70">
                     <span>← Swipe left to archive</span>
-                    <span class="text-lime font-semibold">Swipe right to schedule →</span>
+                    <span class="text-coral font-semibold">Swipe right to schedule →</span>
                   </div>
                 </div>
               `;
@@ -10735,14 +10779,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       return { slots, todaySlotIdx, slotCount, masteryDays, completedDays };
     }
 
-    function renderHabitPunchSlotHtml(h, slot, c, options = {}) {
+    function renderHabitPunchSlotHtml(h, slot, options = {}) {
       const interactive = options.interactive !== false;
       const justPunched = Boolean(options.justPunched && slot.isToday && slot.punched);
 
       if (slot.punched) {
         const stampSymbol = slot.isMasterySlot
-          ? `<span class="text-[9px] leading-none font-bold" style="color:${c.hex};">★</span>`
-          : `<svg class="w-2.5 h-2.5" style="color:${c.hex};" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
+          ? `<span class="text-[9px] leading-none font-bold text-coral">★</span>`
+          : `<svg class="w-2.5 h-2.5 text-coral" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
 
         const commonAttrs = slot.isToday
           ? `data-habit-today-slot="${h.id}" data-punch-state="punched"`
@@ -10777,8 +10821,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       if (slot.isToday) {
         const labelHtml = slot.isMasterySlot
-          ? `<span class="text-[11px] leading-none font-bold" style="color:${c.hex};">★</span><span class="text-[8.5px] font-bold tabular-nums leading-none" style="color:${c.hex};">${slot.dayNum}</span>`
-          : `<span class="text-[11.5px] font-bold tabular-nums leading-none" style="color:${c.hex};">${slot.dayNum}</span>`;
+          ? `<span class="text-[11px] leading-none font-bold text-coral">★</span><span class="text-[8.5px] font-bold tabular-nums leading-none text-coral">${slot.dayNum}</span>`
+          : `<span class="text-[11.5px] font-bold tabular-nums leading-none text-coral">${slot.dayNum}</span>`;
 
         if (interactive) {
           return `
@@ -10787,9 +10831,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               data-habit-today-slot="${h.id}"
               data-punch-state="unpunched"
               onclick="toggleHabitToday(${h.id})"
-              style="border: 2px solid ${c.hex};"
               title="Today (${slot.dayNum}) • Tap to punch"
-              class="tactile-btn w-9 h-9 mx-auto rounded-full bg-cardbg flex flex-col items-center justify-center select-none hover:bg-sheetbg/60 transition-colors"
+              class="tactile-btn w-9 h-9 mx-auto rounded-full border-2 border-coral bg-cardbg flex flex-col items-center justify-center select-none hover:bg-sheetbg/60 transition-colors"
             >
               ${labelHtml}
             </button>
@@ -10800,8 +10843,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           <div
             data-habit-today-slot="${h.id}"
             data-punch-state="unpunched"
-            style="border: 2px solid ${c.hex};"
-            class="w-9 h-9 mx-auto rounded-full bg-cardbg flex flex-col items-center justify-center select-none"
+            class="w-9 h-9 mx-auto rounded-full border-2 border-coral bg-cardbg flex flex-col items-center justify-center select-none"
           >
             ${labelHtml}
           </div>
@@ -10825,14 +10867,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function renderHabitPunchCardMarkup(h, options = {}) {
-      const c = CAPSULE_COLORS[h.color] || CAPSULE_COLORS.coral;
       const interactive = options.interactive !== false;
       const { slots, masteryDays, completedDays } = computeHabitPunchSlots(h);
       const pct = Math.min(100, Math.round((completedDays / Math.max(1, masteryDays)) * 100));
       const daysLeft = Math.max(0, masteryDays - completedDays);
 
       const slotsHtml = slots
-        .map((slot) => renderHabitPunchSlotHtml(h, slot, c, options))
+        .map((slot) => renderHabitPunchSlotHtml(h, slot, options))
         .join('');
 
       const punchBtnHtml = h.done
@@ -10843,15 +10884,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             class="tactile-btn px-3 py-1.5 rounded-xl bg-pillbg border border-borderline text-[11px] font-semibold text-secondarytext hover:text-primarytext whitespace-nowrap shrink-0 flex items-center gap-1"
             title="Tap to uncheck today"
           >
-            <svg class="w-3 h-3" style="color:${c.hex};" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <svg class="w-3 h-3 text-coral" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
             <span>Punched</span>
           </button>`
         : `<button
             type="button"
             ${interactive ? `onclick="toggleHabitToday(${h.id})"` : 'tabindex="-1"'}
             data-habit-punch-btn="${h.id}"
-            style="background-color:${c.hex}; color:${c.text};"
-            class="tactile-btn px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap shrink-0 flex items-center gap-1.5"
+            class="tactile-btn px-3 py-1.5 rounded-xl bg-coral text-onaccent text-[11px] font-bold whitespace-nowrap shrink-0 flex items-center gap-1.5"
             title="Punch today's habit slot"
           >
             <span>Punch Today</span>
@@ -10868,7 +10908,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 ${interactive ? `onclick="openHabitHistoryModal(${h.id})"` : 'tabindex="-1"'}
                 class="tactile-btn flex items-center gap-2.5 min-w-0 flex-1 text-left"
               >
-                <span style="background-color:${c.hex}; color:${c.text};" class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0">
+                <span class="w-10 h-10 rounded-xl bg-coral text-onaccent flex items-center justify-center flex-shrink-0">
                   ${ICONS[h.icon] || ICONS.spark}
                 </span>
                 <div class="min-w-0">
@@ -10877,7 +10917,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                     <span>${escapeHtml(h.timeLabel)}</span>
                     <span aria-hidden="true"> · </span>
                     <span class="font-semibold text-primarytext/90">${completedDays} / ${masteryDays}d</span>
-                    ${daysLeft === 0 ? '<span aria-hidden="true"> · </span><span style="color:' + c.hex + ';" class="font-semibold">Mastered ★</span>' : ''}
+                    ${daysLeft === 0 ? '<span aria-hidden="true"> · </span><span class="font-semibold text-coral">Mastered ★</span>' : ''}
                   </p>
                 </div>
               </button>
@@ -10891,7 +10931,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
             <div class="pt-2 border-t border-borderline/70 flex items-center justify-between gap-3">
               <div class="flex-1 h-1.5 rounded-full bg-pillbg overflow-hidden">
-                <div class="h-full rounded-full transition-all duration-300" style="width:${pct}%; background-color:${c.hex};"></div>
+                <div class="h-full rounded-full bg-coral transition-all duration-300" style="width:${pct}%;"></div>
               </div>
               <span class="text-[11px] font-bold tabular-nums text-secondarytext shrink-0">${pct}%</span>
             </div>
@@ -11146,7 +11186,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const modal = document.getElementById('habit-modal');
       const titleInput = document.getElementById('habit-modal-title');
       if (titleInput) titleInput.value = '';
-      state.habitModalColor = 'coral';
+      state.habitModalColor = state.accentKey || 'coral';
       state.habitModalIcon = 'spark';
       state.habitModalTimeMin = 480;
       state.habitModalCadence = 'daily';
@@ -11217,7 +11257,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           .map(([k, svg]) => {
             const active = k === state.habitModalIcon;
             return `<button type="button" onclick="selectHabitModalIcon('${k}')" class="tactile-btn h-10 rounded-xl border flex items-center justify-center ${
-              active ? 'bg-coral text-appbg border-coral' : 'bg-pillbg border-borderline text-secondarytext'
+              active ? 'bg-coral text-onaccent border-coral' : 'bg-pillbg border-borderline text-secondarytext'
             }">${svg}</button>`;
           })
           .join('');
@@ -11241,7 +11281,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               ? state.habitModalMasteryCustom
               : !state.habitModalMasteryCustom && state.habitModalMasteryDays === p;
             return `<button type="button" onclick="selectHabitMasteryPreset(${isCustom ? 21 : p}, ${isCustom})" class="tactile-btn py-1.5 rounded-lg text-[11px] font-semibold ${
-              active ? 'bg-coral text-appbg' : 'text-secondarytext hover:text-primarytext'
+              active ? 'bg-coral text-onaccent' : 'text-secondarytext hover:text-primarytext'
             }">${isCustom ? 'Custom' : `${p}d`}</button>`;
           })
           .join('');
@@ -11256,7 +11296,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           .map(([k, lbl]) => {
             const active = k === state.habitModalCadence;
             return `<button type="button" onclick="setHabitCadence('${k}')" class="tactile-btn py-1.5 rounded-xl text-[11px] font-semibold ${
-              active ? 'bg-coral text-appbg' : 'text-secondarytext hover:text-primarytext'
+              active ? 'bg-coral text-onaccent' : 'text-secondarytext hover:text-primarytext'
             }">${lbl}</button>`;
           })
           .join('');
@@ -11264,7 +11304,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       const colorName = document.getElementById('habit-modal-color-name');
       const swatches = document.getElementById('habit-modal-color-swatches');
-      if (colorName) colorName.textContent = state.habitModalColor;
+      const activeHabitColor = CAPSULE_COLORS[state.habitModalColor] || CAPSULE_COLORS.coral;
+      if (colorName) {
+        colorName.textContent = state.habitModalColor;
+        colorName.style.color = activeHabitColor.hex;
+      }
       if (swatches) {
         swatches.innerHTML = Object.entries(CAPSULE_COLORS)
           .map(([key, val]) => {
@@ -11348,13 +11392,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const gridEl = document.getElementById('habit-history-calendar-grid');
       const dotEl = document.getElementById('habit-history-legend-dot');
 
-      const c = CAPSULE_COLORS[habit.color] || CAPSULE_COLORS.coral;
       const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
       if (titleEl) titleEl.textContent = habit.title;
       if (countEl) countEl.textContent = `${Math.max(0, habit.masteryDays - habit.completedDays)}d left`;
       if (monthLabelEl) monthLabelEl.textContent = `${months[state.historyModalMonth]} ${state.historyModalYear}`;
-      if (dotEl) dotEl.style.backgroundColor = c.hex;
+      if (dotEl) dotEl.style.backgroundColor = '';
 
       if (gridEl) {
         let cells = '';
@@ -11365,9 +11408,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             <button
               type="button"
               onclick="toggleHabitHistoryDay(${histIdx})"
-              style="${done ? `background-color:${c.hex}; color:${c.text};` : ''}"
               class="tactile-btn h-9 rounded-xl text-xs font-bold flex items-center justify-center ${
-                done ? '' : 'bg-pillbg text-secondarytext border border-borderline'
+                done ? 'bg-coral text-onaccent' : 'bg-pillbg text-secondarytext border border-borderline'
               }"
             >${d}</button>
           `;
@@ -11544,7 +11586,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       const mt = state.journalMoodTracker;
       const activeMood = JOURNAL_MOOD_STATES.find((m) => m.key === mt.stateKey) || JOURNAL_MOOD_STATES[1];
-      const activeHex = (CAPSULE_COLORS[activeMood.color] || CAPSULE_COLORS.lime).hex;
+      const activeMoodColor = CAPSULE_COLORS[activeMood.color] || CAPSULE_COLORS.lime;
+      const activeHex = activeMoodColor.hex;
+      const activeText = activeMoodColor.text || '#141414';
 
       const recentMoodLogs = [];
       state.journalDays.forEach((d) => {
@@ -11587,7 +11631,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               ${Array.from({ length: 10 }, (_, i) => i + 1)
                 .map((n) => {
                   const active = n <= mt.intensity;
-                  return `<button type="button" onclick="setJournalMoodIntensity(${n})" style="${active ? `background-color:${activeHex}; color:#141414;` : ''}" class="tactile-btn h-6 rounded-md text-[10px] font-bold transition ${
+                  return `<button type="button" onclick="setJournalMoodIntensity(${n})" style="${active ? `background-color:${activeHex}; color:${activeText};` : ''}" class="tactile-btn h-6 rounded-md text-[10px] font-bold transition ${
                     active ? '' : 'bg-pillbg text-secondarytext hover:text-primarytext'
                   }">${n}</button>`;
                 })
@@ -11608,7 +11652,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 <button
                   type="button"
                   onclick="toggleJournalEmotionTag('${tag}')"
-                  style="${on ? `background-color:${activeHex}; color:#141414; border-color:${activeHex};` : ''}"
+                  style="${on ? `background-color:${activeHex}; color:${activeText}; border-color:${activeHex};` : ''}"
                   class="tactile-btn px-2.5 py-1 rounded-full text-[11px] font-semibold border transition ${
                     on ? '' : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext'
                   }"
@@ -11649,7 +11693,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         <button
           type="button"
           onclick="saveJournalMoodLog()"
-          class="tactile-btn w-full py-3 rounded-2xl bg-coral text-appbg font-bold text-xs"
+          class="tactile-btn w-full py-3 rounded-2xl bg-coral text-onaccent font-bold text-xs"
         >
           Log Mood to Journal
         </button>
@@ -11711,10 +11755,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (!body) return;
       const et = state.journalEnergyTracker;
 
+      const activeThemeVars = (THEMES[state.themeId] || THEMES.charcoal).vars;
+      const activeAccentHex = (ACCENT_RGB[state.accentKey] || ACCENT_RGB.coral).hex;
       const metrics = [
-        { key: 'physical', label: 'Physical Energy', hex: '#81C953' },
-        { key: 'mental', label: 'Mental Clarity', hex: '#6EA8D8' },
-        { key: 'emotional', label: 'Emotional Battery', hex: '#F28B82' },
+        { key: 'physical', label: 'Physical Energy', hex: activeThemeVars['--color-ring-gained'] || '#81C953' },
+        { key: 'mental', label: 'Mental Clarity', hex: activeThemeVars['--color-ring-physical'] || '#169859' },
+        { key: 'emotional', label: 'Emotional Battery', hex: activeAccentHex },
       ];
 
       body.innerHTML = `
@@ -11722,6 +11768,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           ${metrics
             .map((m) => {
               const val = et[m.key];
+              const fg = getContrastTextForHex(m.hex);
               return `
                 <div class="space-y-1.5">
                   <div class="flex items-center justify-between text-xs">
@@ -11735,7 +11782,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                     ${Array.from({ length: 10 }, (_, i) => i + 1)
                       .map((n) => {
                         const on = n <= val;
-                        return `<button type="button" onclick="setJournalEnergyMetric('${m.key}', ${n})" style="${on ? `background-color:${m.hex}; color:#141414;` : ''}" class="tactile-btn h-6 rounded-md text-[10px] font-bold transition ${
+                        return `<button type="button" onclick="setJournalEnergyMetric('${m.key}', ${n})" style="${on ? `background-color:${m.hex}; color:${fg};` : ''}" class="tactile-btn h-6 rounded-md text-[10px] font-bold transition ${
                           on ? '' : 'bg-pillbg text-secondarytext hover:text-primarytext'
                         }">${n}</button>`;
                       })
@@ -11761,7 +11808,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   onclick="toggleJournalEnergyTag('${tag}')"
                   class="tactile-btn px-2.5 py-1 rounded-full text-[11px] font-semibold border transition ${
                     on
-                      ? 'bg-sky text-appbg border-sky'
+                      ? 'bg-coral text-onaccent border-coral'
                       : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext'
                   }"
                 >${tag}</button>
@@ -11773,14 +11820,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             value="${escapeHtml(et.note || '')}"
             oninput="state.journalEnergyTracker.note = this.value"
             placeholder="Quick note on energy shift..."
-            class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3 py-2 rounded-xl border border-borderline focus:border-sky focus:outline-none"
+            class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3 py-2 rounded-xl border border-borderline focus:border-coral focus:outline-none"
           />
         </div>
 
         <button
           type="button"
           onclick="saveJournalEnergyLog()"
-          class="tactile-btn w-full py-3 rounded-2xl bg-sky text-appbg font-bold text-xs"
+          class="tactile-btn w-full py-3 rounded-2xl bg-coral text-onaccent font-bold text-xs"
         >
           Log Energy Check-In
         </button>
@@ -11871,7 +11918,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         if (!btn) return;
         const active = t === tab;
         btn.className = `tactile-btn py-2 px-2 rounded-xl text-xs transition ${
-          active ? 'bg-plum text-appbg font-bold' : 'text-secondarytext hover:text-primarytext font-medium'
+          active ? 'bg-coral text-onaccent font-bold' : 'text-secondarytext hover:text-primarytext font-medium'
         }`;
       });
 
@@ -11889,7 +11936,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 value="${escapeHtml(cbt.situation)}"
                 oninput="state.journalExercise.cbt.situation = this.value"
                 placeholder="What happened or triggered tension?"
-                class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3 py-2 rounded-xl border border-borderline focus:border-plum focus:outline-none"
+                class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3 py-2 rounded-xl border border-borderline focus:border-coral focus:outline-none"
               />
             </div>
 
@@ -11899,7 +11946,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 rows="2"
                 oninput="state.journalExercise.cbt.automaticThought = this.value"
                 placeholder="What unfiltered thought immediately came up?"
-                class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3 py-2 rounded-xl border border-borderline focus:border-plum focus:outline-none resize-none"
+                class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3 py-2 rounded-xl border border-borderline focus:border-coral focus:outline-none resize-none"
               >${escapeHtml(cbt.automaticThought)}</textarea>
             </div>
 
@@ -11909,19 +11956,19 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 ${CBT_DISTORTIONS.map((dist) => {
                   const on = cbt.distortion === dist;
                   return `<button type="button" onclick="state.journalExercise.cbt.distortion = '${dist}'; renderJournalExerciseModal();" class="tactile-btn px-2.5 py-1 rounded-full text-[10.5px] font-semibold border transition ${
-                    on ? 'bg-plum text-appbg border-plum' : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext'
+                    on ? 'bg-coral text-onaccent border-coral' : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext'
                   }">${dist}</button>`;
                 }).join('')}
               </div>
             </div>
 
             <div class="space-y-1">
-              <label class="text-[10.5px] font-semibold uppercase tracking-wider text-lime">4. Balanced Alternative Thought</label>
+              <label class="text-[10.5px] font-semibold uppercase tracking-wider text-coral">4. Balanced Alternative Thought</label>
               <textarea
                 rows="2"
                 oninput="state.journalExercise.cbt.balancedThought = this.value"
                 placeholder="What is a grounded, evidence-based reframe?"
-                class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3 py-2 rounded-xl border border-borderline focus:border-lime focus:outline-none resize-none"
+                class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3 py-2 rounded-xl border border-borderline focus:border-coral focus:outline-none resize-none"
               >${escapeHtml(cbt.balancedThought)}</textarea>
             </div>
           </div>
@@ -11929,7 +11976,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           <button
             type="button"
             onclick="saveJournalExerciseLog()"
-            class="tactile-btn w-full py-3 rounded-2xl bg-plum text-appbg font-bold text-xs"
+            class="tactile-btn w-full py-3 rounded-2xl bg-coral text-onaccent font-bold text-xs"
           >
             Save CBT Reframe to Journal
           </button>
@@ -11945,7 +11992,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 ${DBT_SKILLS.map((s) => {
                   const on = dbt.skill === s.key;
                   return `<button type="button" onclick="state.journalExercise.dbt.skill = '${s.key}'; renderJournalExerciseModal();" class="tactile-btn px-3 py-2 rounded-xl text-left border transition ${
-                    on ? 'bg-plum/20 border-plum text-plum font-bold' : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext font-medium'
+                    on ? 'bg-coral/15 border-coral text-coral font-bold' : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext font-medium'
                   }">
                     <p class="text-xs">${s.key}</p>
                   </button>`;
@@ -11964,7 +12011,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   ${[2, 4, 6, 8, 10]
                     .map(
                       (n) => `<button type="button" onclick="state.journalExercise.dbt.emotionBefore = ${n}; renderJournalExerciseModal();" class="tactile-btn py-1 rounded text-[10px] font-bold ${
-                        dbt.emotionBefore === n ? 'bg-coral text-appbg' : 'bg-cardbg text-secondarytext'
+                        dbt.emotionBefore === n ? 'bg-coral text-onaccent' : 'bg-cardbg text-secondarytext'
                       }">${n}</button>`
                     )
                     .join('')}
@@ -11974,13 +12021,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               <div class="bg-pillbg border border-borderline rounded-xl p-2.5 space-y-1.5">
                 <div class="flex items-center justify-between text-[10.5px]">
                   <span class="text-secondarytext">Distress After</span>
-                  <span class="font-bold text-lime">${dbt.emotionAfter}/10</span>
+                  <span class="font-bold text-coral">${dbt.emotionAfter}/10</span>
                 </div>
                 <div class="grid grid-cols-5 gap-1">
                   ${[1, 3, 5, 7, 9]
                     .map(
                       (n) => `<button type="button" onclick="state.journalExercise.dbt.emotionAfter = ${n}; renderJournalExerciseModal();" class="tactile-btn py-1 rounded text-[10px] font-bold ${
-                        dbt.emotionAfter === n ? 'bg-lime text-appbg' : 'bg-cardbg text-secondarytext'
+                        dbt.emotionAfter === n ? 'bg-coral text-onaccent' : 'bg-cardbg text-secondarytext'
                       }">${n}</button>`
                     )
                     .join('')}
@@ -11994,7 +12041,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 rows="2"
                 oninput="state.journalExercise.dbt.wiseMindNote = this.value"
                 placeholder="What does Wise Mind recommend right now?"
-                class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3 py-2 rounded-xl border border-borderline focus:border-plum focus:outline-none resize-none"
+                class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3 py-2 rounded-xl border border-borderline focus:border-coral focus:outline-none resize-none"
               >${escapeHtml(dbt.wiseMindNote)}</textarea>
             </div>
           </div>
@@ -12002,7 +12049,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           <button
             type="button"
             onclick="saveJournalExerciseLog()"
-            class="tactile-btn w-full py-3 rounded-2xl bg-plum text-appbg font-bold text-xs"
+            class="tactile-btn w-full py-3 rounded-2xl bg-coral text-onaccent font-bold text-xs"
           >
             Save DBT Check-In to Journal
           </button>
@@ -12018,12 +12065,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 value="${escapeHtml(act.hookThought)}"
                 oninput="state.journalExercise.act.hookThought = this.value"
                 placeholder="e.g. I won't finish everything on time"
-                class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3 py-2 rounded-xl border border-borderline focus:border-plum focus:outline-none"
+                class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3 py-2 rounded-xl border border-borderline focus:border-coral focus:outline-none"
               />
             </div>
 
             <div class="bg-pillbg/80 border border-borderline rounded-xl px-3 py-2 text-[11px] text-secondarytext">
-              <span class="text-plum font-semibold">Cognitive Defusion:</span> “I notice my mind is having the thought that <span class="text-primarytext font-medium">${escapeHtml(act.hookThought || '...')}</span>”
+              <span class="text-coral font-semibold">Cognitive Defusion:</span> “I notice my mind is having the thought that <span class="text-primarytext font-medium">${escapeHtml(act.hookThought || '...')}</span>”
             </div>
 
             <div class="space-y-1.5">
@@ -12032,19 +12079,19 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 ${ACT_VALUES.map((val) => {
                   const on = act.coreValue === val;
                   return `<button type="button" onclick="state.journalExercise.act.coreValue = '${val}'; renderJournalExerciseModal();" class="tactile-btn px-2.5 py-1 rounded-full text-[10.5px] font-semibold border transition ${
-                    on ? 'bg-plum text-appbg border-plum' : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext'
+                    on ? 'bg-coral text-onaccent border-coral' : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext'
                   }">${val}</button>`;
                 }).join('')}
               </div>
             </div>
 
             <div class="space-y-1">
-              <label class="text-[10.5px] font-semibold uppercase tracking-wider text-lime">3. Committed Action</label>
+              <label class="text-[10.5px] font-semibold uppercase tracking-wider text-coral">3. Committed Action</label>
               <textarea
                 rows="2"
                 oninput="state.journalExercise.act.committedAction = this.value"
                 placeholder="One small value-aligned step I can take right now..."
-                class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3 py-2 rounded-xl border border-borderline focus:border-lime focus:outline-none resize-none"
+                class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3 py-2 rounded-xl border border-borderline focus:border-coral focus:outline-none resize-none"
               >${escapeHtml(act.committedAction)}</textarea>
             </div>
           </div>
@@ -12052,7 +12099,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           <button
             type="button"
             onclick="saveJournalExerciseLog()"
-            class="tactile-btn w-full py-3 rounded-2xl bg-plum text-appbg font-bold text-xs"
+            class="tactile-btn w-full py-3 rounded-2xl bg-coral text-onaccent font-bold text-xs"
           >
             Save ACT Reflection to Journal
           </button>
@@ -12345,7 +12392,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             return `${(cx + r * Math.cos(angle)).toFixed(1)},${(cy + r * Math.sin(angle)).toFixed(1)}`;
           })
           .join(' ');
-        svg += `<polygon points="${pts}" fill="${idx === 3 ? 'rgba(255,255,255,0.015)' : 'none'}" stroke="rgb(var(--color-borderline))" stroke-width="1" />`;
+        svg += `<polygon points="${pts}" fill="${idx === 3 ? 'rgb(var(--color-pillbg) / 0.28)' : 'none'}" stroke="rgb(var(--color-borderline))" stroke-width="1" />`;
       });
 
       axes.forEach((axis, i) => {
@@ -12554,7 +12601,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             onclick="selectNewTopicArea('${area}')"
             class="tactile-btn px-3 py-1.5 rounded-full text-[11px] transition border ${
               isSelected
-                ? 'bg-coral text-appbg border-coral font-bold'
+                ? 'bg-coral text-onaccent border-coral font-bold'
                 : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext font-medium'
             }"
           >${area}</button>
@@ -12600,10 +12647,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (routineBtn && stepBtn) {
         const isRoutine = mode === 'routine';
         routineBtn.className = `tactile-btn rounded-2xl border py-2.5 px-3 text-xs transition ${
-          isRoutine ? 'bg-coral text-appbg border-coral font-bold' : 'bg-cardbg border-borderline text-secondarytext hover:text-primarytext font-medium'
+          isRoutine ? 'bg-coral text-onaccent border-coral font-bold' : 'bg-cardbg border-borderline text-secondarytext hover:text-primarytext font-medium'
         }`;
         stepBtn.className = `tactile-btn rounded-2xl border py-2.5 px-3 text-xs transition ${
-          !isRoutine ? 'bg-coral text-appbg border-coral font-bold' : 'bg-cardbg border-borderline text-secondarytext hover:text-primarytext font-medium'
+          !isRoutine ? 'bg-coral text-onaccent border-coral font-bold' : 'bg-cardbg border-borderline text-secondarytext hover:text-primarytext font-medium'
         }`;
       }
 
@@ -12630,7 +12677,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               </div>
             </div>
           </div>
-          <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-appbg font-bold text-xs">Create Routine</button>
+          <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-onaccent font-bold text-xs">Create Routine</button>
         `;
       } else {
         const hasRoutines = state.routines.length > 0;
@@ -12654,7 +12701,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 </div>
               </div>
             </div>
-            <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-appbg font-bold text-xs">Add Step</button>
+            <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-onaccent font-bold text-xs">Add Step</button>
           `
           : `<p class="text-xs text-secondarytext text-center py-4">Create a routine first before adding steps.</p>`;
       }
@@ -12746,7 +12793,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       catGridEl.innerHTML = TOPIC_ADD_CATEGORIES.map((cat) => {
         const isSelected = activeCat === cat.key;
-        const activeClasses = cat.key === 'achievement' ? 'bg-amber text-appbg border-amber font-bold' : 'bg-coral text-appbg border-coral font-bold';
+        const activeClasses = 'bg-coral text-onaccent border-coral font-bold';
         return `
           <button type="button" onclick="selectTopicAddCategory('${cat.key}')" class="tactile-btn rounded-2xl border py-2 px-1.5 flex flex-col items-center justify-center gap-1 transition ${
             isSelected ? activeClasses : 'bg-cardbg border-borderline text-secondarytext hover:text-primarytext font-medium'
@@ -12783,7 +12830,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               </div>
             </div>
           </div>
-          <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-appbg font-bold text-xs">Create Skill</button>
+          <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-onaccent font-bold text-xs">Create Skill</button>
         `;
       } else if (activeCat === 'drills') {
         const hasBranches = topic.branches.length > 0;
@@ -12807,7 +12854,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 </div>
               </div>
             </div>
-            <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-appbg font-bold text-xs">Create Drill</button>
+            <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-onaccent font-bold text-xs">Create Drill</button>
           `
           : `<p class="text-xs text-secondarytext text-center py-4">Add a Skill node first before assigning drills.</p>`;
       } else if (activeCat === 'milestone') {
@@ -12834,17 +12881,17 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               <input id="modal-milestone-items" type="text" placeholder="e.g. Part 1, Part 2, Part 3" class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3.5 py-2.5 rounded-xl border border-borderline focus:border-coral focus:outline-none" />
             </div>
           </div>
-          <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-appbg font-bold text-xs">Save Milestone</button>
+          <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-onaccent font-bold text-xs">Save Milestone</button>
         `;
       } else if (activeCat === 'achievement') {
         formEl.innerHTML = `
           <div class="bg-cardbg border border-borderline rounded-2xl p-3.5 space-y-3">
             <div class="space-y-1">
               <label for="modal-achievement-title" class="text-[10.5px] font-semibold uppercase tracking-wider text-secondarytext">Achievement Title</label>
-              <input id="modal-achievement-title" type="text" required placeholder="e.g. Graphics Cert" class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3.5 py-2.5 rounded-xl border border-borderline focus:border-amber focus:outline-none" />
+              <input id="modal-achievement-title" type="text" required placeholder="e.g. Graphics Cert" class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3.5 py-2.5 rounded-xl border border-borderline focus:border-coral focus:outline-none" />
             </div>
           </div>
-          <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-amber text-appbg font-bold text-xs">Log Achievement</button>
+          <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-onaccent font-bold text-xs">Log Achievement</button>
         `;
       } else {
         formEl.innerHTML = `
@@ -12865,7 +12912,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               </div>
             </div>
           </div>
-          <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-appbg font-bold text-xs">Save Resource</button>
+          <button type="submit" class="tactile-btn w-full py-3 rounded-2xl bg-coral text-onaccent font-bold text-xs">Save Resource</button>
         `;
       }
     }
@@ -13353,11 +13400,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 type="button"
                 onclick="setTopicAreaFilter('${area}')"
                 class="tactile-btn px-3 py-1 rounded-full text-[11px] whitespace-nowrap transition flex items-center gap-1.5 ${
-                  active ? 'bg-coral text-appbg font-semibold' : 'bg-cardbg border border-borderline text-secondarytext hover:text-primarytext font-medium'
+                  active ? 'bg-coral text-onaccent font-semibold' : 'bg-cardbg border border-borderline text-secondarytext hover:text-primarytext font-medium'
                 }"
               >
                 <span>${area}</span>
-                <span class="text-[10px] ${active ? 'text-appbg/80' : 'text-mutedtext'}">${count}</span>
+                <span class="text-[10px] ${active ? 'text-onaccent/80' : 'text-mutedtext'}">${count}</span>
               </button>
             `;
           })
@@ -13452,12 +13499,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       binIcon.classList.toggle('hidden', !isDragging);
 
       if (isDragging) {
-        fab.classList.remove('bg-coral', 'text-appbg');
+        fab.classList.remove('bg-coral', 'text-onaccent');
         fab.classList.add('bg-red-500', 'text-white');
         fab.style.transform = isHoveringBin ? 'scale(1.22)' : 'scale(1.06)';
       } else {
         fab.classList.remove('bg-red-500', 'text-white');
-        fab.classList.add('bg-coral', 'text-appbg');
+        fab.classList.add('bg-coral', 'text-onaccent');
         fab.style.transform = '';
       }
     }
@@ -13718,7 +13765,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         if (!btn) return;
         const active = state.activeTopicTab === t;
         btn.classList.toggle('bg-coral', active);
-        btn.classList.toggle('text-appbg', active);
+        btn.classList.toggle('text-onaccent', active);
         btn.classList.toggle('font-semibold', active);
         btn.classList.toggle('text-secondarytext', !active);
         btn.classList.toggle('font-medium', !active);
@@ -13789,10 +13836,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 : edge.mastered
                   ? '#81C953'
                   : edge.active
-                    ? 'rgba(255,255,255,0.34)'
-                    : 'rgba(255,255,255,0.16)';
+                    ? 'rgb(var(--color-secondarytext))'
+                    : 'rgb(var(--color-borderline))';
             const strokeWidth = focusedKey && isConnected ? '1.85' : '1.15';
-            const strokeOpacity = focusedKey ? (isConnected ? '0.92' : '0.14') : '0.68';
+            const strokeOpacity = focusedKey ? (isConnected ? '0.92' : '0.18') : '0.68';
             return `<line
               data-graph-edge="${escapeHtml(edge.id)}"
               data-source="${escapeHtml(edge.source)}"
@@ -13819,9 +13866,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 ? '#81C953'
                 : isUnlocked
                   ? accentHex
-                  : '#6B7280';
+                  : 'rgb(var(--color-mutedtext))';
             const ringStroke = isFocused
-              ? '#FFFFFF'
+              ? 'rgb(var(--color-primarytext))'
               : node.isRoot
                 ? `rgba(${accentRgb}, 0.45)`
                 : isMastered
@@ -13852,16 +13899,16 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 <circle
                   r="${node.radius.toFixed(1)}"
                   fill="${fillHex}"
-                  stroke="#141416"
+                  stroke="rgb(var(--color-appbg))"
                   stroke-width="1.4"
                 />
                 <text
                   y="${labelY.toFixed(1)}"
                   text-anchor="middle"
-                  fill="${isFocused || node.isRoot ? '#F5F5F7' : '#C2C2C9'}"
+                  fill="${isFocused || node.isRoot ? 'rgb(var(--color-primarytext))' : 'rgb(var(--color-secondarytext))'}"
                   font-size="${node.isRoot ? '9.8' : isFocused ? '9.4' : '8.5'}"
                   font-weight="${node.isRoot || isFocused ? '700' : '500'}"
-                  style="paint-order:stroke; stroke:#141416; stroke-width:3px; stroke-linejoin:round; user-select:none; pointer-events:none;"
+                  style="paint-order:stroke; stroke:rgb(var(--color-appbg)); stroke-width:3px; stroke-linejoin:round; user-select:none; pointer-events:none;"
                 >${escapeHtml(shortLabel)}</text>
               </g>
             `;
@@ -13872,7 +13919,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         const linkWord = graph.edges.length === 1 ? 'link' : 'links';
 
         let treeHtml = `
-          <div class="bg-[#141416] border border-borderline rounded-[24px] overflow-hidden relative">
+          <div class="bg-appbg border border-borderline rounded-[24px] overflow-hidden relative">
             <div class="flex items-center justify-between gap-2 px-3.5 pt-3 pb-1.5 relative z-10">
               <div class="min-w-0">
                 <div class="flex items-center gap-1.5 min-w-0">
@@ -13899,7 +13946,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               >
                 <defs>
                   <pattern id="obsidian-dot-grid" width="18" height="18" patternUnits="userSpaceOnUse">
-                    <circle cx="2" cy="2" r="0.85" fill="rgba(255,255,255,0.08)" />
+                    <circle cx="2" cy="2" r="0.85" fill="rgb(var(--color-borderline))" fill-opacity="0.55" />
                   </pattern>
                 </defs>
                 <rect width="${graph.width}" height="${graph.height}" fill="url(#obsidian-dot-grid)" />
@@ -13912,7 +13959,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 </g>
               </svg>
 
-              <div class="absolute left-2.5 bottom-2.5 flex items-center gap-1 bg-black/55 backdrop-blur-sm p-1 rounded-full border border-white/10">
+              <div class="absolute left-2.5 bottom-2.5 flex items-center gap-1 bg-cardbg/90 backdrop-blur-sm p-1 rounded-full border border-borderline">
                 <button type="button" onclick="adjustTopicGraphZoom(-0.2)" aria-label="Zoom out graph" class="tactile-btn w-6 h-6 rounded-full text-secondarytext hover:text-primarytext text-xs font-bold flex items-center justify-center">−</button>
                 <button type="button" onclick="resetTopicGraphView()" aria-label="Reset graph view" class="tactile-btn px-1.5 h-6 rounded-full text-[9.5px] font-bold text-secondarytext hover:text-coral flex items-center justify-center">Fit</button>
                 <button type="button" onclick="adjustTopicGraphZoom(0.2)" aria-label="Zoom in graph" class="tactile-btn w-6 h-6 rounded-full text-secondarytext hover:text-primarytext text-xs font-bold flex items-center justify-center">+</button>
@@ -13960,7 +14007,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                     type="button"
                     data-open-skill-btn="${pathKeyEsc}"
                     onclick="openSkillTopicDetail('${pathKeyEsc}')"
-                    class="tactile-btn px-2.5 py-1 rounded-full bg-coral text-appbg text-[10.5px] font-bold whitespace-nowrap"
+                    class="tactile-btn px-2.5 py-1 rounded-full bg-coral text-onaccent text-[10.5px] font-bold whitespace-nowrap"
                   >
                     Open →
                   </button>
@@ -14001,7 +14048,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                               class="tactile-btn flex items-center gap-2.5 min-w-0 flex-1 text-left"
                             >
                               <span class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition ${
-                                d.done ? 'bg-lime border-lime text-appbg' : 'border-borderline bg-cardbg'
+                                d.done ? 'bg-coral border-coral text-onaccent' : 'border-borderline bg-cardbg'
                               }">
                                 ${d.done ? '<svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
                               </span>
@@ -14122,7 +14169,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                                   class="tactile-btn flex items-center gap-2.5 min-w-0 flex-1 text-left"
                                 >
                                   <span class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition ${
-                                    d.done ? 'bg-lime border-lime text-appbg' : 'border-borderline bg-cardbg'
+                                    d.done ? 'bg-coral border-coral text-onaccent' : 'border-borderline bg-cardbg'
                                   }">
                                     ${d.done ? '<svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
                                   </span>
@@ -14200,7 +14247,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                             <div class="flex items-center gap-2.5 min-w-0">
                               <span class="w-6 h-6 rounded-full text-[10.5px] font-bold flex items-center justify-center flex-shrink-0 ${
                                 isModComplete
-                                  ? 'bg-coral text-appbg'
+                                  ? 'bg-coral text-onaccent'
                                   : 'bg-pillbg border border-borderline text-secondarytext'
                               }">
                                 ${isModComplete ? '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : String(mIdx + 1).padStart(2, '0')}
@@ -14232,7 +14279,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                                     class="tactile-btn flex items-center gap-2.5 min-w-0 flex-1 text-left"
                                   >
                                     <span class="w-4 h-4 rounded-[5px] border flex items-center justify-center flex-shrink-0 transition ${
-                                      les.done ? 'bg-coral border-coral text-appbg' : 'border-secondarytext bg-cardbg'
+                                      les.done ? 'bg-coral border-coral text-onaccent' : 'border-secondarytext bg-cardbg'
                                     }">
                                       ${les.done ? '<svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
                                     </span>
@@ -14374,12 +14421,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                     onclick="setTopicResourceCategory('${opt}')"
                     class="tactile-btn px-3 py-1 rounded-full text-[11px] whitespace-nowrap transition flex items-center gap-1.5 ${
                       isSelected
-                        ? 'bg-coral text-appbg font-semibold'
+                        ? 'bg-coral text-onaccent font-semibold'
                         : 'bg-cardbg border border-borderline text-secondarytext hover:text-primarytext font-medium'
                     }"
                   >
                     <span>${opt}</span>
-                    <span class="text-[10px] ${isSelected ? 'text-appbg/80' : 'text-mutedtext'}">${count}</span>
+                    <span class="text-[10px] ${isSelected ? 'text-onaccent/80' : 'text-mutedtext'}">${count}</span>
                   </button>
                 `;
               })
@@ -14421,7 +14468,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                                     class="tactile-btn flex items-center gap-2.5 min-w-0 flex-1 text-left"
                                   >
                                     <span class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition ${
-                                      r.done ? 'bg-lime border-lime text-appbg' : 'border-borderline bg-cardbg'
+                                      r.done ? 'bg-coral border-coral text-onaccent' : 'border-borderline bg-cardbg'
                                     }">
                                       ${r.done ? '<svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
                                     </span>
@@ -14686,7 +14733,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               class="tactile-btn flex items-center gap-3 min-w-0 flex-1 text-left"
             >
               <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition ${
-                item.ready ? 'bg-coral border-coral text-appbg' : 'border-borderline bg-pillbg'
+                item.ready ? 'bg-coral border-coral text-onaccent' : 'border-borderline bg-pillbg'
               }">
                 ${item.ready ? '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
               </span>
@@ -14820,7 +14867,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                             class="tactile-btn flex items-center gap-2.5 min-w-0 flex-1 text-left"
                           >
                             <span class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition ${
-                              s.done ? 'bg-lime border-lime text-appbg' : 'border-borderline bg-cardbg'
+                              s.done ? 'bg-coral border-coral text-onaccent' : 'border-borderline bg-cardbg'
                             }">
                               ${s.done ? '<svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
                             </span>
@@ -14849,7 +14896,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                         placeholder="Add step to ${escapeHtml(r.title)}..."
                         class="flex-1 bg-pillbg text-[11px] text-primarytext placeholder-mutedtext px-3 py-2 rounded-xl border border-borderline focus:border-coral focus:outline-none"
                       />
-                      <button type="submit" title="Add step" class="tactile-btn w-8 h-8 rounded-xl bg-coral text-appbg flex items-center justify-center flex-shrink-0">
+                      <button type="submit" title="Add step" class="tactile-btn w-8 h-8 rounded-xl bg-coral text-onaccent flex items-center justify-center flex-shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                       </button>
                     </form>
@@ -15312,7 +15359,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         return `
           <div onclick="toggleSingleGoalDone(event, '${scopeName}', '${slotKey}')" class="cursor-pointer flex items-center gap-2 text-xs py-0.5 min-w-0">
             <span class="w-4 h-4 rounded-[5px] border flex items-center justify-center flex-shrink-0 ${
-              g.done ? 'bg-coral border-coral text-appbg' : 'border-secondarytext'
+              g.done ? 'bg-coral border-coral text-onaccent' : 'border-secondarytext'
             }">
               ${g.done ? '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
             </span>
@@ -15335,7 +15382,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             onkeydown="if (event.key === 'Escape') cancelInlineHorizonEditor();"
             class="flex-1 bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3 py-2 rounded-xl border border-coral focus:outline-none"
           />
-          <button type="submit" class="tactile-btn px-3 py-2 rounded-xl bg-coral text-appbg text-[11px] font-bold">
+          <button type="submit" class="tactile-btn px-3 py-2 rounded-xl bg-coral text-onaccent text-[11px] font-bold">
             Save
           </button>
           <button type="button" onclick="cancelInlineHorizonEditor()" class="p-1.5 text-secondarytext hover:text-primarytext" title="Cancel">
@@ -15554,7 +15601,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         islandTimer: null,
         islandHandler: null,
         islandHistory: [
-          { title: 'Deep Work Block in 12m', accent: '#F28B82' },
+          { title: 'Deep Work Block in 12m', accent: 'rgb(var(--color-accent))' },
           { title: 'Brain Dump Ready', accent: '#81C953' },
         ],
         isRecording: false,
@@ -15709,7 +15756,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         el.setAttribute('role', 'status');
         el.setAttribute('aria-live', 'polite');
         el.className = `mascot-bye-bubble ${placement === 'left' ? 'tail-right' : 'tail-bottom'}`;
-        el.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-[#F28B82] shrink-0"></span><span>Bye bye!</span>`;
+        el.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-coral shrink-0"></span><span>Bye bye!</span>`;
 
         if (placement === 'left') {
           const left = clampVal(anchorRect.left - 82, 12, window.innerWidth - 96);
@@ -15769,8 +15816,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         } = opts;
 
         if (state.spatialPanelEnabled === false || wispr.active) return;
-        const hexMap = { coral: '#F28B82', lime: '#81C953', emerald: '#169859', sky: '#6EA8D8', amber: '#F6C244', plum: '#C47B9B' };
-        const barHex = hexMap[accent] || '#F28B82';
+        const currentAccentHex = (ACCENT_RGB[state.accentKey] || ACCENT_RGB.coral).hex;
+        const hexMap = { coral: currentAccentHex, lime: '#81C953', emerald: '#169859', sky: '#6EA8D8', amber: '#F6C244', plum: '#C47B9B' };
+        const barHex = hexMap[accent] || currentAccentHex;
 
         if (sp.mode !== 'bubble') {
           const anchorY = (sp.handleTopPct / 100) * window.innerHeight;
@@ -15781,7 +15829,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
         sp.islandActive = true;
         sp.islandHandler = onAction;
-        sp.islandHistory.unshift({ title, accent: barHex });
+        sp.islandHistory.unshift({ title, accent: accent === 'coral' ? 'rgb(var(--color-accent))' : barHex });
         if (sp.islandHistory.length > 5) sp.islandHistory.pop();
 
         if (islandBotOrb) islandBotOrb.setAttribute('fill', barHex);
@@ -15961,7 +16009,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         const ctx = wisprCanvas.getContext('2d');
         ctx.clearRect(0, 0, 64, 26);
         const t = now * 0.005;
-        ctx.fillStyle = '#F28B82';
+        ctx.fillStyle = (ACCENT_RGB[state.accentKey] || ACCENT_RGB.coral).hex;
         for (let i = 0; i < 13; i++) {
           const env = Math.exp(-Math.pow((i / 12 - 0.5) * 2, 2) * 2.4);
           const target = 0.16 + env * (0.35 + 0.45 * Math.abs(Math.sin(t * 2 - i * 0.55)));
@@ -16116,13 +16164,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         const left = clampVal(sp.bubbleX > window.innerWidth / 2 ? sp.bubbleX - 336 : sp.bubbleX + 68, 12, window.innerWidth - 338);
         const top = clampVal(sp.bubbleY - 40, 68, window.innerHeight - 260);
         const card = document.createElement('div');
-        card.className = `spatial-popover spatial-glass-panel rounded-[26px] p-4 border ${isInbox ? 'border-emerald/45' : 'border-sky/45'}`;
+        card.className = 'spatial-popover spatial-glass-panel rounded-[26px] p-4 border border-coral/45';
         card.style.left = `${left}px`;
         card.style.top = `${top}px`;
         card.innerHTML = `
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full ${isInbox ? 'bg-emerald' : 'bg-sky'}"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-coral"></span>
               <span class="text-sm font-semibold text-primarytext">${isInbox ? 'Add to Inbox' : 'Quick Note'}</span>
             </div>
             <button type="button" id="sp-pop-close" class="p-1.5 rounded-full hover:bg-pillbg text-secondarytext hover:text-primarytext cursor-pointer">
@@ -16132,7 +16180,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           <textarea id="sp-pop-input" rows="3" placeholder="${isInbox ? 'Dump a thought straight to Brain Dump...' : 'Jot down a quick note...'}" class="w-full px-3.5 py-2.5 rounded-2xl bg-pillbg border border-borderline text-xs text-primarytext placeholder-mutedtext focus:outline-none focus:border-coral resize-none leading-relaxed"></textarea>
           <div class="mt-3 flex items-center justify-end gap-2">
             <button type="button" id="sp-pop-cancel" class="px-3.5 py-2 rounded-full text-xs text-secondarytext hover:text-primarytext cursor-pointer">Cancel</button>
-            <button type="button" id="sp-pop-save" class="px-4 py-2 rounded-full ${isInbox ? 'bg-emerald text-primarytext' : 'bg-coral text-appbg'} text-xs font-bold cursor-pointer">
+            <button type="button" id="sp-pop-save" class="px-4 py-2 rounded-full bg-coral text-onaccent text-xs font-bold cursor-pointer">
               ${isInbox ? 'Add to Inbox' : 'Save Note'}
             </button>
           </div>
@@ -16147,7 +16195,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           if (!val) return;
           pushToAppInbox(val, isInbox ? 'Brain Dump' : 'Quick Note');
           closePopover();
-          showIslandAlert({ title: isInbox ? 'Added to Brain Dump' : 'Quick Note Saved', accent: isInbox ? 'emerald' : 'sky' });
+          showIslandAlert({ title: isInbox ? 'Added to Brain Dump' : 'Quick Note Saved', accent: 'coral' });
         };
       }
 
