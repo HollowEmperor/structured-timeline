@@ -154,6 +154,30 @@
       z-index: 60;
       animation: confettiBurstParticle 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
+    @keyframes calConfettiCelebrate {
+      0% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(0.7) rotate(0deg);
+      }
+      22% {
+        opacity: 1;
+        transform: translate3d(var(--cx-mid), var(--cy-mid), 0) scale(1.05) rotate(var(--crot-mid));
+      }
+      78% {
+        opacity: 0.92;
+      }
+      100% {
+        opacity: 0;
+        transform: translate3d(var(--cx-end), var(--cy-end), 0) scale(0.75) rotate(var(--crot-end));
+      }
+    }
+    .cal-confetti-piece {
+      position: fixed;
+      pointer-events: none;
+      z-index: 95;
+      will-change: transform, opacity;
+      animation: calConfettiCelebrate var(--cdur, 1150ms) cubic-bezier(0.18, 0.72, 0.24, 1) forwards;
+    }
 
     /* Tinder-Style Brain Dump Card Physics */
     .tinder-card {
@@ -439,6 +463,120 @@
       transform: translateY(5.5px);
       transition: transform 82ms cubic-bezier(0.32, 0, 0.16, 1);
     }
+
+    /* Matte Theme-Native Tear-Off Calendar Pad Overlay */
+    #calendar-tear-overlay {
+      overflow: hidden;
+    }
+    #cal-tear-sheet-frame {
+      perspective: 1100px;
+      isolation: isolate;
+    }
+    #calendar-tear-backdrop {
+      background-color: rgb(var(--color-appbg) / 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      opacity: 0;
+      transition: opacity 260ms ease;
+    }
+    #calendar-tear-backdrop.is-visible {
+      opacity: 1;
+    }
+    .cal-tear-pad-wrap {
+      transform: translate3d(0, 16px, 0) scale(0.93);
+      opacity: 0;
+      transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease;
+      will-change: transform, opacity;
+    }
+    .cal-tear-pad-wrap.is-visible {
+      transform: translate3d(0, 0, 0) scale(1);
+      opacity: 1;
+    }
+    .cal-tear-pad-wrap.is-leaving {
+      transform: translate3d(0, -12px, 0) scale(0.95);
+      opacity: 0;
+      transition: transform 260ms cubic-bezier(0.4, 0, 1, 1), opacity 220ms ease;
+    }
+    .cal-tear-pad-header {
+      background: linear-gradient(180deg, rgb(var(--color-sheetbg)) 0%, rgb(var(--color-cardbg)) 100%);
+      border-bottom: 1px solid rgb(var(--color-borderline) / 0.8);
+      isolation: isolate;
+      transform: translateZ(0);
+    }
+    .cal-tear-rivet {
+      background: radial-gradient(circle at 35% 30%, #D4D8DF 0%, #8C929C 55%, #4A4F57 100%);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 1px 2px rgba(0, 0, 0, 0.35);
+    }
+    .cal-tear-perf-row {
+      background-image: radial-gradient(circle, rgb(var(--color-appbg)) 1.8px, transparent 2.1px);
+      background-size: 10px 5px;
+      background-repeat: repeat-x;
+      background-position: center;
+    }
+    /* Loose, lightweight paper peeling strictly LEFT-TO-RIGHT cleanly below the top binding header */
+    @keyframes calSheetRipAway {
+      0% {
+        transform: translate3d(0, 0, 0) rotateZ(0deg) rotateY(0deg) rotateX(0deg) skewY(0deg) scale(1);
+        opacity: 1;
+      }
+      18% {
+        transform: translate3d(14px, 6px, 0) rotateZ(-4.5deg) rotateY(-18deg) rotateX(4deg) skewY(-2.5deg) scale(0.99);
+        opacity: 1;
+      }
+      42% {
+        transform: translate3d(76px, 18px, 0) rotateZ(-9deg) rotateY(-34deg) rotateX(9deg) skewY(-1.5deg) scale(0.96);
+        opacity: 0.95;
+      }
+      70% {
+        transform: translate3d(172px, 38px, 0) rotateZ(-4deg) rotateY(-48deg) rotateX(15deg) skewY(-3deg) scale(0.91);
+        opacity: 0.72;
+      }
+      100% {
+        transform: translate3d(300px, 78px, 0) rotateZ(6deg) rotateY(-58deg) rotateX(22deg) skewY(-1deg) scale(0.84);
+        opacity: 0;
+      }
+    }
+    @keyframes calPaperSheenSweep {
+      0% {
+        transform: translateX(-115%) skewX(-16deg);
+        opacity: 0;
+      }
+      30% {
+        opacity: 0.45;
+      }
+      75% {
+        opacity: 0.28;
+      }
+      100% {
+        transform: translateX(135%) skewX(-16deg);
+        opacity: 0;
+      }
+    }
+    .cal-tear-sheet-ripping {
+      transform-origin: 100% 0%;
+      transform-style: preserve-3d;
+      will-change: transform, opacity;
+      pointer-events: none;
+      animation: calSheetRipAway var(--tear-dur, 580ms) cubic-bezier(0.24, 0.08, 0.22, 1) forwards;
+    }
+    .cal-tear-sheet-ripping::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 0 0 16px 16px;
+      pointer-events: none;
+      background: linear-gradient(105deg, transparent 22%, rgba(255, 255, 255, 0.22) 48%, rgba(0, 0, 0, 0.14) 56%, transparent 78%);
+      animation: calPaperSheenSweep var(--tear-dur, 580ms) ease-out forwards;
+    }
+    @keyframes calPadLandingSettle {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.022); }
+      100% { transform: scale(1); }
+    }
+    .cal-tear-pad-landed {
+      animation: calPadLandingSettle 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .memo-note-stab,
       .memo-stack-absorb,
@@ -446,14 +584,18 @@
       .timeframe-spread-out,
       .punch-hole-just-punched,
       .punch-card-recoil,
-      .punch-chad-disc {
+      .punch-chad-disc,
+      .cal-tear-sheet-ripping,
+      .cal-tear-pad-landed {
         animation: none !important;
       }
       .cal-week-row,
       #habit-punch-backdrop,
       #habit-punch-tool-anchor,
       #puncher-upper-jaw,
-      #puncher-ram-pin {
+      #puncher-ram-pin,
+      #calendar-tear-backdrop,
+      .cal-tear-pad-wrap {
         transition: none !important;
       }
     }
@@ -1428,9 +1570,24 @@
                 </button>
                 <p class="text-xs font-semibold uppercase tracking-wider text-coral whitespace-nowrap">Topics • Skill Trees</p>
               </div>
-              <button type="button" onclick="openProfileSubView('main')" class="text-xs text-secondarytext hover:text-primarytext whitespace-nowrap">
-                ← Back to Karma
-              </button>
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  onclick="openTopicProgressCalendarModal(null)"
+                  title="Topics Progress Calendar"
+                  aria-label="Open Topics Progress Calendar"
+                  class="tactile-btn inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cardbg border border-borderline hover:border-coral text-[11px] font-semibold text-primarytext hover:text-coral transition"
+                >
+                  <svg class="w-3.5 h-3.5 text-coral" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="3.5" y="5" width="17" height="15.5" rx="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.5 10h17M8 3v4M16 3v4"/>
+                  </svg>
+                  <span>Calendar</span>
+                </button>
+                <button type="button" onclick="openProfileSubView('main')" class="text-xs text-secondarytext hover:text-primarytext whitespace-nowrap">
+                  ← Karma
+                </button>
+              </div>
             </div>
 
             <div id="topics-area-filter-bar" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5"></div>
@@ -1446,9 +1603,23 @@
               >
                 <span id="topic-detail-back-label">← Back to Topics</span>
               </button>
-              <span id="topic-detail-level-pill" class="px-2.5 py-0.5 rounded-full bg-coral/20 border border-coral/40 text-coral text-[11px] font-bold whitespace-nowrap flex-shrink-0">
-                LVL 1 / 10
-              </span>
+              <div class="flex items-center gap-1.5 flex-shrink-0">
+                <button
+                  type="button"
+                  onclick="openTopicProgressCalendarModal(state.activeTopicId)"
+                  title="Topic Progress Calendar"
+                  aria-label="Open Topic Progress Calendar"
+                  class="tactile-btn w-7 h-7 rounded-full bg-cardbg border border-borderline hover:border-coral text-coral flex items-center justify-center flex-shrink-0"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="3.5" y="5" width="17" height="15.5" rx="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.5 10h17M8 3v4M16 3v4"/>
+                  </svg>
+                </button>
+                <span id="topic-detail-level-pill" class="px-2.5 py-0.5 rounded-full bg-coral/20 border border-coral/40 text-coral text-[11px] font-bold whitespace-nowrap flex-shrink-0">
+                  LVL 1 / 10
+                </span>
+              </div>
             </div>
 
             <nav id="topic-detail-breadcrumbs" aria-label="Topic hierarchy" class="hidden flex items-center gap-1 flex-wrap text-[11px] text-secondarytext px-0.5"></nav>
@@ -1726,6 +1897,37 @@
             >
               <span id="settings-sfx-knob" style="transform: translateX(20px);" class="w-4 h-4 rounded-full bg-onaccent transition-transform"></span>
             </button>
+          </div>
+
+          <!-- Daily Tear-Off Calendar Preview (Testing) -->
+          <div class="bg-cardbg border border-borderline rounded-2xl px-4 py-3.5 space-y-2.5">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <span class="w-8 h-8 rounded-xl bg-pillbg border border-borderline text-coral flex items-center justify-center flex-shrink-0">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="3.5" y="5" width="17" height="15.5" rx="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.5 10h17M8 3v4M16 3v4"/>
+                  </svg>
+                </span>
+                <div class="min-w-0">
+                  <p class="text-xs font-semibold text-primarytext">Daily Tear-Off Calendar</p>
+                  <p class="text-[11px] text-secondarytext truncate">Preview first-open animation by day gap</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onclick="previewDailyCalendarTear(state.previewTearGapDays || 4)"
+                class="tactile-btn px-3 py-1.5 rounded-xl bg-coral text-onaccent text-[11px] font-bold whitespace-nowrap flex-shrink-0"
+              >
+                Preview
+              </button>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-[10px] font-semibold uppercase tracking-wider text-mutedtext mr-1">Gap:</span>
+              <button type="button" data-tear-gap="1" onclick="setPreviewTearGap(1)" class="tactile-btn px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-pillbg border border-borderline text-secondarytext hover:text-primarytext">1d</button>
+              <button type="button" data-tear-gap="4" onclick="setPreviewTearGap(4)" class="tactile-btn px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-coral text-onaccent border border-coral">4d</button>
+              <button type="button" data-tear-gap="14" onclick="setPreviewTearGap(14)" class="tactile-btn px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-pillbg border border-borderline text-secondarytext hover:text-primarytext">14d</button>
+            </div>
           </div>
 
           <!-- Notifications Toggle & Tone Settings -->
@@ -2765,7 +2967,7 @@
             </button>
             <div class="min-w-0">
               <h3 id="habit-history-title" class="font-display text-lg font-bold tracking-tight text-primarytext truncate">Habit History</h3>
-              <p id="habit-history-subtitle" class="text-[11px] text-secondarytext">Tap any missed day to mark complete</p>
+              <p id="habit-history-subtitle" class="text-[11px] text-secondarytext">Tap any past or today's date to toggle completion</p>
             </div>
           </div>
           <span id="habit-history-countdown" class="px-2.5 py-1 rounded-full bg-cardbg border border-borderline text-[11px] font-semibold text-primarytext whitespace-nowrap flex-shrink-0">
@@ -2790,7 +2992,7 @@
               type="button"
               id="habit-history-next-btn"
               onclick="stepHabitHistoryMonth(1)"
-              class="tactile-btn w-8 h-8 rounded-full bg-pillbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center disabled:opacity-30"
+              class="tactile-btn w-8 h-8 rounded-full bg-pillbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none"
               title="Next month"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
@@ -2810,7 +3012,11 @@
             </span>
             <span class="inline-flex items-center gap-1.5">
               <span class="w-2.5 h-2.5 rounded-full bg-pillbg border border-borderline"></span>
-              <span>Missed (tap to add)</span>
+              <span>Not logged</span>
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-pillbg/40 border border-borderline/40 opacity-50"></span>
+              <span>Upcoming</span>
             </span>
           </div>
         </div>
@@ -2935,6 +3141,94 @@
           </svg>
         </div>
       </div>
+    </div>
+
+    <!-- Topics Progress Calendar Modal (Styled to match Habit History Calendar) -->
+    <div id="topic-progress-calendar-modal" class="hidden absolute inset-0 z-50 bg-appbg flex flex-col justify-between p-5">
+      <div class="space-y-4 overflow-y-auto no-scrollbar pb-4">
+        <div class="flex items-center justify-between pt-1 gap-2">
+          <div class="flex items-center gap-3 min-w-0">
+            <button type="button" onclick="closeTopicProgressCalendarModal()" class="p-1.5 rounded-full text-primarytext hover:bg-cardbg flex-shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <div class="min-w-0">
+              <h3 id="topic-cal-title" class="font-display text-lg font-bold tracking-tight text-primarytext truncate">Progress Calendar</h3>
+              <p id="topic-cal-subtitle" class="text-[11px] text-secondarytext truncate">Tap any date to view topic progress</p>
+            </div>
+          </div>
+          <span id="topic-cal-active-count" class="px-2.5 py-1 rounded-full bg-cardbg border border-borderline text-[11px] font-semibold text-primarytext whitespace-nowrap flex-shrink-0">
+            0 active days
+          </span>
+        </div>
+
+        <div id="topic-cal-scope-row" class="hidden flex items-center gap-1.5">
+          <button type="button" id="topic-cal-scope-single" onclick="setTopicCalendarScope('single')" class="tactile-btn px-3 py-1 rounded-full text-[11px] font-semibold bg-coral text-onaccent">This Topic</button>
+          <button type="button" id="topic-cal-scope-all" onclick="setTopicCalendarScope('all')" class="tactile-btn px-3 py-1 rounded-full text-[11px] font-medium bg-cardbg border border-borderline text-secondarytext hover:text-primarytext">All Topics</button>
+        </div>
+
+        <div class="bg-cardbg border border-borderline rounded-[24px] p-4 space-y-4">
+          <div class="flex items-center justify-between">
+            <button
+              type="button"
+              onclick="stepTopicCalendarMonth(-1)"
+              class="tactile-btn w-8 h-8 rounded-full bg-pillbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center"
+              title="Previous month"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+            </button>
+
+            <span id="topic-cal-month-label" class="font-display text-sm font-bold text-primarytext">November 2026</span>
+
+            <button
+              type="button"
+              onclick="stepTopicCalendarMonth(1)"
+              class="tactile-btn w-8 h-8 rounded-full bg-pillbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center"
+              title="Next month"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-7 gap-1.5 text-center text-[10px] font-semibold text-secondarytext">
+            <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+          </div>
+
+          <div id="topic-cal-grid" class="grid grid-cols-7 gap-1.5"></div>
+
+          <div class="pt-2 border-t border-borderline flex items-center justify-center gap-4 text-[11px] text-secondarytext">
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-coral"></span>
+              <span>Progress made</span>
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-pillbg border border-borderline"></span>
+              <span>No activity</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="bg-cardbg border border-borderline rounded-[22px] p-4 space-y-2.5">
+          <div class="flex items-center justify-between gap-2">
+            <p id="topic-cal-day-heading" class="text-xs font-bold text-primarytext">Selected Date</p>
+            <span id="topic-cal-day-badge" class="text-[11px] font-semibold text-coral">0 updates</span>
+          </div>
+          <div id="topic-cal-day-log" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onclick="closeTopicProgressCalendarModal()"
+        class="tactile-btn w-full py-3.5 rounded-2xl bg-coral text-onaccent font-semibold text-sm flex-shrink-0"
+      >
+        Done
+      </button>
+    </div>
+
+    <!-- Matte Theme-Native Tear-Off Calendar Overlay (Daily First Open & Habit Post-Punch) -->
+    <div id="calendar-tear-overlay" class="hidden absolute inset-0 z-[80] flex items-center justify-center p-6 pointer-events-none" aria-hidden="true">
+      <div id="calendar-tear-backdrop" onclick="dismissCalendarTearOff()" class="absolute inset-0"></div>
+      <div id="calendar-tear-stage" class="relative z-10 w-full flex flex-col items-center justify-center pointer-events-none"></div>
     </div>
 
   <!-- Horizon Goals Timeline Screen (Connected via Top-Right Calendar Icon) -->
@@ -4955,14 +5249,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     (() => {
       const SFX_CUES = [
         'tick', 'select', 'drawerOpen', 'drawerClose', 'sweepOn', 'sweepOff',
-        'complete', 'uncheck', 'create', 'levelUp', 'paperStab', 'holePunch', 'swipeKeep',
+        'complete', 'uncheck', 'create', 'levelUp', 'paperStab', 'paperTear', 'holePunch', 'swipeKeep',
         'swipeArchive', 'delete', 'graphOpen', 'mascotOpen', 'mascotBye',
         'alert', 'recStart', 'recStop',
       ];
       const CUE_COOLDOWN_MS = {
         tick: 45, select: 55, drawerOpen: 110, drawerClose: 110,
         sweepOn: 120, sweepOff: 120, complete: 65, uncheck: 55,
-        create: 80, levelUp: 240, paperStab: 55, holePunch: 90, swipeKeep: 70,
+        create: 80, levelUp: 240, paperStab: 55, paperTear: 38, holePunch: 90, swipeKeep: 70,
         swipeArchive: 70, delete: 80, graphOpen: 90, mascotOpen: 100,
         mascotBye: 180, alert: 180, recStart: 90, recStop: 90,
       };
@@ -5148,6 +5442,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               case 'paperStab':
                 playFilteredNoise(audioCtx, { filterType: 'highpass', freq: 1400, endFreq: 900, q: 0.9, duration: 0.055, gain: 0.095 });
                 playTone(audioCtx, { type: 'sine', freq: 210, endFreq: 96, delay: 0.02, duration: 0.075, gain: 0.22, attack: 0.004, filterFreq: 800 });
+                break;
+              case 'paperTear':
+                playFilteredNoise(audioCtx, { filterType: 'bandpass', freq: 1850, endFreq: 3150, q: 1.5, duration: 0.046, gain: 0.145 });
+                playFilteredNoise(audioCtx, { filterType: 'bandpass', freq: 2550, endFreq: 1220, q: 1.65, delay: 0.018, duration: 0.072, gain: 0.175 });
+                playFilteredNoise(audioCtx, { filterType: 'highpass', freq: 2200, endFreq: 1380, q: 0.9, delay: 0.044, duration: 0.052, gain: 0.068 });
+                playTone(audioCtx, { type: 'triangle', freq: 620, endFreq: 940, delay: 0.01, duration: 0.038, gain: 0.022, attack: 0.004, filterFreq: 1800 });
                 break;
               case 'holePunch':
                 playTone(audioCtx, { type: 'triangle', freq: 1380, endFreq: 760, duration: 0.022, gain: 0.14, attack: 0.002, filterFreq: 2800 });
@@ -5988,7 +6288,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       historyModalHabitId: null,
       historyModalYear: INITIAL_TODAY_DATE.getFullYear(),
       historyModalMonth: INITIAL_TODAY_DATE.getMonth(),
-      habitSortMode: 'default',
+      habitSortMode: 'active',
       journalMoodFilter: 'all',
       journalFabMenuOpen: false,
       journalPrompts: [
@@ -6456,6 +6756,15 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         { label: 'Aesthetic', value: 0 },
       ],
       dailyProgressLog: {},
+      lastAppOpenedDateKey: null,
+      lastDailyTearShownDateKey: null,
+      previewTearGapDays: 4,
+      topicProgressLog: [],
+      topicCalendarYear: INITIAL_TODAY_DATE.getFullYear(),
+      topicCalendarMonth: INITIAL_TODAY_DATE.getMonth(),
+      topicCalendarSelectedDate: INITIAL_TODAY_KEY,
+      topicCalendarTopicId: null,
+      topicCalendarScope: 'all',
     };
 
     // =========================================================================
@@ -6487,6 +6796,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           accentKey: state.accentKey,
           karmaAxes: state.karmaAxes,
           dailyProgressLog: state.dailyProgressLog,
+          lastAppOpenedDateKey: state.lastAppOpenedDateKey,
+          lastDailyTearShownDateKey: state.lastDailyTearShownDateKey,
+          topicProgressLog: state.topicProgressLog,
           routines: state.routines,
           inventoryItems: state.inventoryItems,
           compartments: state.compartments,
@@ -6607,6 +6919,15 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           if (Array.isArray(parsed.karmaAxes)) state.karmaAxes = parsed.karmaAxes;
           if (parsed.dailyProgressLog && typeof parsed.dailyProgressLog === 'object' && !Array.isArray(parsed.dailyProgressLog)) {
             state.dailyProgressLog = parsed.dailyProgressLog;
+          }
+          if (CalLogic.isValidDateKey(parsed.lastAppOpenedDateKey)) {
+            state.lastAppOpenedDateKey = parsed.lastAppOpenedDateKey;
+          }
+          if (CalLogic.isValidDateKey(parsed.lastDailyTearShownDateKey)) {
+            state.lastDailyTearShownDateKey = parsed.lastDailyTearShownDateKey;
+          }
+          if (Array.isArray(parsed.topicProgressLog)) {
+            state.topicProgressLog = parsed.topicProgressLog;
           }
           if (Array.isArray(parsed.routines)) state.routines = parsed.routines;
           if (Array.isArray(parsed.inventoryItems)) state.inventoryItems = parsed.inventoryItems;
@@ -7076,8 +7397,15 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           filterIcon.innerHTML = isProjects
             ? '<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h10"/>'
             : '<path stroke-linecap="round" stroke-linejoin="round" d="M6 4v16M18 4v16M6 8h4M14 14h4M6 16h4"/>';
+        } else if (tab === 'habit') {
+          const isInactiveFirst = state.habitSortMode === 'inactive';
+          filterBtn.title = isInactiveFirst
+            ? 'Sorted: Inactive first (tap for Active first)'
+            : 'Sorted: Active first (tap for Inactive first)';
+          filterBtn.setAttribute('aria-label', filterBtn.title);
+          filterIcon.innerHTML = '<path stroke-linecap="round" d="M3.5 7h17M6.75 12h10.5M10 17h4"/>';
         } else {
-          filterBtn.title = tab === 'habit' ? 'Sort Habits' : 'Filter Journal Mood';
+          filterBtn.title = 'Filter Journal Mood';
           filterBtn.setAttribute('aria-label', filterBtn.title);
           filterIcon.innerHTML = '<path stroke-linecap="round" d="M3.5 7h17M6.75 12h10.5M10 17h4"/>';
         }
@@ -7934,8 +8262,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         return;
       }
       if (state.activeTab === 'habit') {
-        const order = ['default', 'progress', 'remaining'];
-        state.habitSortMode = order[(order.indexOf(state.habitSortMode) + 1) % order.length];
+        state.habitSortMode = state.habitSortMode === 'inactive' ? 'active' : 'inactive';
+        playSfx('tick');
+        syncCalendarHeader();
         renderHabits();
         return;
       }
@@ -10724,85 +11053,177 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     // =========================================================================
     let habitPunchAnimActive = false;
 
-    function computeHabitPunchSlots(h) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const masteryDays = Math.max(1, Number(h.masteryDays) || 21);
-      const completedDays = Math.max(0, Math.min(masteryDays, Number(h.completedDays) || 0));
-      const doneToday = Boolean(h.done);
-      const hist = Array.isArray(h.history) ? h.history : [];
-
-      const slotCount = masteryDays <= 28 ? masteryDays : 21;
-      const futureNeeded = Math.max(0, masteryDays - completedDays - (doneToday ? 0 : 1));
-
-      let futureSlots;
-      if (masteryDays <= 28) {
-        futureSlots = Math.min(slotCount - 1, futureNeeded);
-      } else if (futureNeeded <= 6) {
-        futureSlots = futureNeeded;
-      } else {
-        const effectiveDoneExcludingToday = Math.max(0, completedDays - (doneToday ? 1 : 0));
-        futureSlots = Math.min(futureNeeded, Math.max(1, slotCount - 1 - Math.min(14, effectiveDoneExcludingToday)));
+    function syncHabitDerivedFields(habit) {
+      if (!habit) return habit;
+      const todayKey = getTodayDateKey();
+      const set = new Set();
+      if (Array.isArray(habit.completedDates)) {
+        habit.completedDates.forEach((dk) => {
+          if (CalLogic.isValidDateKey(dk) && CalLogic.compareDateKeys(dk, todayKey) <= 0) {
+            set.add(dk);
+          }
+        });
       }
-      const todaySlotIdx = Math.max(0, Math.min(slotCount - 1, slotCount - 1 - futureSlots));
+      const sorted = Array.from(set).sort((a, b) => CalLogic.compareDateKeys(a, b));
+      habit.completedDates = sorted;
+      habit.completedDays = sorted.length;
+      habit.done = set.has(todayKey);
+      habit.lastCompletedDateKey = sorted.length > 0 ? sorted[sorted.length - 1] : null;
+      if (!CalLogic.isValidDateKey(habit.createdAtDateKey)) {
+        habit.createdAtDateKey = sorted.length > 0 ? sorted[0] : todayKey;
+      }
+
+      // Keep legacy history array aligned for backward compatibility
+      const hist = new Array(HEATMAP_ACTIVE_SLOTS).fill(0);
+      sorted.forEach((dk) => {
+        const d1 = CalLogic.parseDateKey(dk);
+        const d2 = CalLogic.parseDateKey(todayKey);
+        const diff = Math.round((d2.getTime() - d1.getTime()) / 86400000);
+        if (diff >= 0 && diff < HEATMAP_ACTIVE_SLOTS) {
+          hist[HEATMAP_ACTIVE_SLOTS - 1 - diff] = 1;
+        }
+      });
+      habit.history = hist;
+      return habit;
+    }
+
+    function normalizeHabitData(habit) {
+      if (!habit) return habit;
+      if (Array.isArray(habit.completedDates)) {
+        return syncHabitDerivedFields(habit);
+      }
+      const todayKey = getTodayDateKey();
+      const set = new Set();
+      if (Array.isArray(habit.history) && habit.history.length > 0) {
+        const len = habit.history.length;
+        for (let i = 0; i < len; i++) {
+          if (habit.history[i]) {
+            const daysBack = len - 1 - i;
+            set.add(CalLogic.addDaysToDateKey(todayKey, -daysBack));
+          }
+        }
+      }
+      if (habit.done) set.add(todayKey);
+      if (CalLogic.isValidDateKey(habit.lastCompletedDateKey) && CalLogic.compareDateKeys(habit.lastCompletedDateKey, todayKey) <= 0) {
+        set.add(habit.lastCompletedDateKey);
+      }
+      // Preserve legacy completedDays count if older completions preceded the history window
+      const targetCount = Math.max(set.size, Number(habit.completedDays) || 0);
+      let cursorOffset = habit.done ? 1 : 1;
+      while (set.size < targetCount && cursorOffset <= 400) {
+        const candidate = CalLogic.addDaysToDateKey(todayKey, -cursorOffset);
+        if (!set.has(candidate)) set.add(candidate);
+        cursorOffset += 1;
+      }
+      habit.completedDates = Array.from(set);
+      if (!CalLogic.isValidDateKey(habit.createdAtDateKey)) {
+        const sortedSeed = habit.completedDates.slice().sort((a, b) => CalLogic.compareDateKeys(a, b));
+        habit.createdAtDateKey = sortedSeed.length > 0 ? sortedSeed[0] : todayKey;
+      }
+      return syncHabitDerivedFields(habit);
+    }
+
+    function getHabitGapDays(prevDateKey, todayKey) {
+      if (!CalLogic.isValidDateKey(prevDateKey) || !CalLogic.isValidDateKey(todayKey)) return 0;
+      const d1 = CalLogic.parseDateKey(prevDateKey);
+      const d2 = CalLogic.parseDateKey(todayKey);
+      return Math.round((d2.getTime() - d1.getTime()) / 86400000);
+    }
+
+    function isHabitStaleOverWeek(habit, todayKey = getTodayDateKey()) {
+      if (!habit) return false;
+      normalizeHabitData(habit);
+      if (habit.done) return false;
+      if (CalLogic.isValidDateKey(habit.lastCompletedDateKey)) {
+        return getHabitGapDays(habit.lastCompletedDateKey, todayKey) > 7;
+      }
+      if (CalLogic.isValidDateKey(habit.createdAtDateKey)) {
+        return getHabitGapDays(habit.createdAtDateKey, todayKey) > 7;
+      }
+      return false;
+    }
+
+    function computeHabitPunchSlots(h) {
+      normalizeHabitData(h);
+      const todayKey = getTodayDateKey();
+      const masteryDays = Math.max(1, Number(h.masteryDays) || 21);
+      const completedDates = Array.isArray(h.completedDates) ? h.completedDates : [];
+      const completedDays = completedDates.length;
+      const doneToday = Boolean(h.done);
+
+      // Completion-first sequential holes: always fills left-to-right with zero missed-day gaps
+      const pageSize = masteryDays <= 28 ? masteryDays : 21;
+      const activeGlobalIdx = doneToday
+        ? Math.max(0, completedDays - 1)
+        : completedDays;
+      const pageIdx = Math.floor(activeGlobalIdx / pageSize);
+      const windowStart = pageIdx * pageSize;
+      const totalDisplaySlots = Math.max(masteryDays, completedDays + (doneToday ? 0 : 1));
+      const slotCount = Math.min(pageSize, Math.max(1, totalDisplaySlots - windowStart));
 
       const slots = [];
       for (let i = 0; i < slotCount; i++) {
-        const dayOffset = i - todaySlotIdx;
-        const slotDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + dayOffset);
-        const dayNum = slotDate.getDate();
-        const isToday = dayOffset === 0;
-        const isMasterySlot = i === slotCount - 1;
-        const isFuture = dayOffset > 0;
+        const globalIdx = windowStart + i;
+        const punched = globalIdx < completedDays;
+        const dateKey = punched ? completedDates[globalIdx] : null;
+        const isTodayPunched = punched && dateKey === todayKey;
+        const isNextAvailable = !doneToday && globalIdx === completedDays;
+        const isPunchTarget = doneToday ? isTodayPunched : isNextAvailable;
+        const isMasterySlot = globalIdx === masteryDays - 1;
 
-        let punched = false;
-        if (isToday) {
-          punched = doneToday;
-        } else if (dayOffset < 0) {
-          const histIdx = hist.length - 1 + dayOffset;
-          if (histIdx >= 0 && histIdx < hist.length) {
-            punched = Boolean(hist[histIdx]);
-          }
+        let dayNum = null;
+        let monthShort = '';
+        if (dateKey) {
+          const d = CalLogic.parseDateKey(dateKey);
+          dayNum = d.getDate();
+          monthShort = (CalLogic.MONTH_NAMES_SHORT[d.getMonth()] || '').toUpperCase();
         }
 
         slots.push({
           index: i,
-          dayOffset,
+          globalIdx,
+          dateKey,
           dayNum,
-          isToday,
-          isMasterySlot,
-          isFuture,
+          monthShort,
           punched,
+          isTodayPunched,
+          isNextAvailable,
+          isPunchTarget,
+          isMasterySlot,
         });
       }
 
-      return { slots, todaySlotIdx, slotCount, masteryDays, completedDays };
+      return { slots, slotCount, masteryDays, completedDays };
     }
 
     function renderHabitPunchSlotHtml(h, slot, options = {}) {
       const interactive = options.interactive !== false;
-      const justPunched = Boolean(options.justPunched && slot.isToday && slot.punched);
+      const isStale = Boolean(options.isStale);
+      const justPunched = Boolean(options.justPunched && slot.isTodayPunched && slot.punched);
 
       if (slot.punched) {
-        const stampSymbol = slot.isMasterySlot
-          ? `<span class="text-[9px] leading-none font-bold text-coral">★</span>`
-          : `<svg class="w-2.5 h-2.5 text-coral" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
-
-        const commonAttrs = slot.isToday
+        const commonAttrs = slot.isPunchTarget
           ? `data-habit-today-slot="${h.id}" data-punch-state="punched"`
           : `data-punch-state="punched"`;
+        const dateLabel = slot.dateKey ? CalLogic.formatHumanDate(slot.dateKey, 'short') : 'Punched';
+        const monthColorCls = isStale ? 'text-mutedtext' : 'text-coral';
+        const dayColorCls = isStale ? 'text-secondarytext' : 'text-primarytext/90';
+        const topLabel = slot.isMasterySlot
+          ? `<span class="text-[7px] font-bold uppercase tracking-wider leading-none ${monthColorCls}">★ ${slot.monthShort}</span>`
+          : `<span class="text-[7px] font-bold uppercase tracking-wider leading-none ${monthColorCls}">${slot.monthShort}</span>`;
+        const dayText = `<span class="text-[11px] font-bold tabular-nums leading-none ${dayColorCls}">${slot.dayNum}</span>`;
 
-        if (interactive && slot.isToday) {
+        if (interactive && slot.isTodayPunched) {
           return `
             <button
               type="button"
               ${commonAttrs}
               onclick="toggleHabitToday(${h.id})"
-              title="Today (${slot.dayNum}) • Tap to unpunch"
+              title="Punched ${dateLabel} • Tap to unpunch"
               class="tactile-btn punch-hole-cutout ${justPunched ? 'punch-hole-just-punched' : ''} w-9 h-9 mx-auto rounded-full flex flex-col items-center justify-center gap-[1px] select-none"
             >
-              <span class="text-[9px] font-bold tabular-nums leading-none text-secondarytext/85">${slot.dayNum}</span>
-              ${stampSymbol}
+              ${topLabel}
+              ${dayText}
             </button>
           `;
         }
@@ -10810,19 +11231,21 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         return `
           <div
             ${commonAttrs}
-            title="${slot.isMasterySlot ? `Mastery Day (${slot.dayNum}) • Punched` : `Day ${slot.dayNum} • Punched`}"
+            title="Punched ${dateLabel}"
             class="punch-hole-cutout ${justPunched ? 'punch-hole-just-punched' : ''} w-9 h-9 mx-auto rounded-full flex flex-col items-center justify-center gap-[1px] select-none"
           >
-            <span class="text-[9px] font-bold tabular-nums leading-none text-secondarytext/85">${slot.dayNum}</span>
-            ${stampSymbol}
+            ${topLabel}
+            ${dayText}
           </div>
         `;
       }
 
-      if (slot.isToday) {
-        const labelHtml = slot.isMasterySlot
-          ? `<span class="text-[11px] leading-none font-bold text-coral">★</span><span class="text-[8.5px] font-bold tabular-nums leading-none text-coral">${slot.dayNum}</span>`
-          : `<span class="text-[11.5px] font-bold tabular-nums leading-none text-coral">${slot.dayNum}</span>`;
+      // Next available unpunched hole (no future date shown — ready to punch today)
+      if (slot.isNextAvailable) {
+        const innerHtml = slot.isMasterySlot
+          ? `<span class="text-[12px] leading-none font-bold ${isStale ? 'text-mutedtext' : 'text-coral'}">★</span>`
+          : `<span class="w-1.5 h-1.5 rounded-full ${isStale ? 'bg-mutedtext/70' : 'bg-coral/70'}"></span>`;
+        const ringCls = isStale ? 'border-mutedtext/70' : 'border-coral/85';
 
         if (interactive) {
           return `
@@ -10831,10 +11254,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               data-habit-today-slot="${h.id}"
               data-punch-state="unpunched"
               onclick="toggleHabitToday(${h.id})"
-              title="Today (${slot.dayNum}) • Tap to punch"
-              class="tactile-btn w-9 h-9 mx-auto rounded-full border-2 border-coral bg-cardbg flex flex-col items-center justify-center select-none hover:bg-sheetbg/60 transition-colors"
+              title="Tap to punch today's completion"
+              class="tactile-btn w-9 h-9 mx-auto rounded-full border-2 border-dashed ${ringCls} bg-cardbg flex items-center justify-center select-none ${isStale ? '' : 'hover:bg-sheetbg/60'} transition-colors"
             >
-              ${labelHtml}
+              ${innerHtml}
             </button>
           `;
         }
@@ -10843,37 +11266,57 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           <div
             data-habit-today-slot="${h.id}"
             data-punch-state="unpunched"
-            class="w-9 h-9 mx-auto rounded-full border-2 border-coral bg-cardbg flex flex-col items-center justify-center select-none"
+            class="w-9 h-9 mx-auto rounded-full border-2 border-dashed ${ringCls} bg-cardbg flex items-center justify-center select-none"
           >
-            ${labelHtml}
+            ${innerHtml}
           </div>
         `;
       }
 
-      // Unpunched past or future slot
+      // Remaining unpunched completion holes (blank — no future dates or missed markers)
       const labelHtml = slot.isMasterySlot
-        ? `<span class="text-[12px] leading-none text-secondarytext" title="Mastery Target (Day ${slot.dayNum})">★</span>`
-        : `<span class="text-[11px] font-medium tabular-nums leading-none ${slot.isFuture ? 'text-mutedtext' : 'text-secondarytext'}">${slot.dayNum}</span>`;
+        ? `<span class="text-[11px] leading-none text-secondarytext/80" title="Mastery Target">★</span>`
+        : '';
 
       return `
         <div
           data-punch-state="unpunched"
-          title="${slot.isMasterySlot ? `Mastery Target • Day ${slot.dayNum}` : `Day ${slot.dayNum}`}"
-          class="w-9 h-9 mx-auto rounded-full border border-borderline bg-transparent flex items-center justify-center select-none"
+          title="${slot.isMasterySlot ? 'Mastery target hole' : 'Unpunched hole'}"
+          class="w-9 h-9 mx-auto rounded-full border border-borderline/80 bg-transparent flex items-center justify-center select-none"
         >
           ${labelHtml}
         </div>
       `;
     }
 
+    function formatHabitProgressSummaryHtml(completedDays, masteryDays, isStale) {
+      const daysLeft = Math.max(0, masteryDays - completedDays);
+      const pct = Math.min(100, Math.round((completedDays / Math.max(1, masteryDays)) * 100));
+      const isHugeTarget = masteryDays >= 60;
+      const strongCls = isStale ? 'text-secondarytext' : 'text-primarytext/90';
+
+      if (daysLeft === 0) {
+        return `<span class="font-semibold ${isStale ? 'text-secondarytext' : 'text-coral'}">${isHugeTarget ? '100% · ' : ''}Mastered ★</span>`;
+      }
+      if (isHugeTarget) {
+        return `<span class="font-semibold ${strongCls}">${pct}%</span><span aria-hidden="true"> · </span><span class="text-secondarytext">${completedDays}/${masteryDays}</span>`;
+      }
+      // Normal target: > half left -> show completed count; <= half left -> show remaining count only
+      if (daysLeft > masteryDays / 2) {
+        return `<span class="font-semibold ${strongCls}">${completedDays}d completed</span>`;
+      }
+      return `<span class="font-semibold ${strongCls}">${daysLeft}d left</span>`;
+    }
+
     function renderHabitPunchCardMarkup(h, options = {}) {
       const interactive = options.interactive !== false;
       const { slots, masteryDays, completedDays } = computeHabitPunchSlots(h);
+      const isStale = isHabitStaleOverWeek(h);
       const pct = Math.min(100, Math.round((completedDays / Math.max(1, masteryDays)) * 100));
-      const daysLeft = Math.max(0, masteryDays - completedDays);
+      const isHugeTarget = masteryDays >= 60;
 
       const slotsHtml = slots
-        .map((slot) => renderHabitPunchSlotHtml(h, slot, options))
+        .map((slot) => renderHabitPunchSlotHtml(h, slot, { ...options, isStale }))
         .join('');
 
       const punchBtnHtml = h.done
@@ -10891,33 +11334,53 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             type="button"
             ${interactive ? `onclick="toggleHabitToday(${h.id})"` : 'tabindex="-1"'}
             data-habit-punch-btn="${h.id}"
-            class="tactile-btn px-3 py-1.5 rounded-xl bg-coral text-onaccent text-[11px] font-bold whitespace-nowrap shrink-0 flex items-center gap-1.5"
+            class="tactile-btn px-3 py-1.5 rounded-xl ${
+              isStale
+                ? 'bg-pillbg border border-borderline text-secondarytext font-semibold'
+                : 'bg-coral text-onaccent font-bold'
+            } text-[11px] whitespace-nowrap shrink-0 flex items-center gap-1.5"
             title="Punch today's habit slot"
           >
             <span>Punch Today</span>
           </button>`;
 
       const cardAttr = interactive ? `data-habit-card-id="${h.id}"` : `data-habit-clone-id="${h.id}"`;
+      const fillColor = isStale ? 'rgb(var(--color-mutedtext) / 0.75)' : 'rgb(var(--color-accent))';
+      const trackColor = isStale ? 'rgb(var(--color-borderline) / 0.55)' : 'rgb(var(--color-borderline) / 0.85)';
+      const borderProgressStyle = `background: linear-gradient(90deg, ${fillColor} 0%, ${fillColor} ${pct}%, ${trackColor} ${pct}%, ${trackColor} 100%);`;
+      const staleCardCls = isStale ? 'opacity-60 grayscale' : '';
+      const progressSummaryHtml = formatHabitProgressSummaryHtml(completedDays, masteryDays, isStale);
+
+      const divisionTicksHtml = isHugeTarget
+        ? `
+          <span aria-hidden="true" class="pointer-events-none absolute top-0 left-1/4 w-[2px] h-[2.5px] bg-appbg/90"></span>
+          <span aria-hidden="true" class="pointer-events-none absolute top-0 left-1/2 w-[2px] h-[2.5px] bg-appbg/90"></span>
+          <span aria-hidden="true" class="pointer-events-none absolute top-0 left-3/4 w-[2px] h-[2.5px] bg-appbg/90"></span>
+          <span aria-hidden="true" class="pointer-events-none absolute bottom-0 left-1/4 w-[2px] h-[2.5px] bg-appbg/90"></span>
+          <span aria-hidden="true" class="pointer-events-none absolute bottom-0 left-1/2 w-[2px] h-[2.5px] bg-appbg/90"></span>
+          <span aria-hidden="true" class="pointer-events-none absolute bottom-0 left-3/4 w-[2px] h-[2.5px] bg-appbg/90"></span>
+        `
+        : '';
 
       return `
-        <article ${cardAttr} class="bg-cardbg rounded-[22px] p-[6px]">
-          <div class="rounded-[16px] border border-borderline/85 p-3.5 space-y-3">
+        <article ${cardAttr} ${isStale ? 'data-habit-stale="true"' : ''} class="relative rounded-[22px] p-[2.5px] transition-all duration-300 ${staleCardCls}" style="${borderProgressStyle}">
+          ${divisionTicksHtml}
+          <div class="rounded-[19.5px] bg-cardbg p-3.5 space-y-3">
             <div class="flex items-center justify-between gap-2.5">
               <button
                 type="button"
                 ${interactive ? `onclick="openHabitHistoryModal(${h.id})"` : 'tabindex="-1"'}
                 class="tactile-btn flex items-center gap-2.5 min-w-0 flex-1 text-left"
               >
-                <span class="w-10 h-10 rounded-xl bg-coral text-onaccent flex items-center justify-center flex-shrink-0">
+                <span class="w-10 h-10 rounded-xl ${isStale ? 'bg-pillbg text-mutedtext border border-borderline' : 'bg-coral text-onaccent'} flex items-center justify-center flex-shrink-0">
                   ${ICONS[h.icon] || ICONS.spark}
                 </span>
                 <div class="min-w-0">
-                  <p class="font-display text-[15px] font-bold tracking-tight text-primarytext truncate leading-snug">${escapeHtml(h.title)}</p>
+                  <p class="font-display text-[15px] font-bold tracking-tight ${isStale ? 'text-secondarytext' : 'text-primarytext'} truncate leading-snug">${escapeHtml(h.title)}</p>
                   <p class="text-[11.5px] text-secondarytext tabular-nums truncate">
                     <span>${escapeHtml(h.timeLabel)}</span>
                     <span aria-hidden="true"> · </span>
-                    <span class="font-semibold text-primarytext/90">${completedDays} / ${masteryDays}d</span>
-                    ${daysLeft === 0 ? '<span aria-hidden="true"> · </span><span class="font-semibold text-coral">Mastered ★</span>' : ''}
+                    ${progressSummaryHtml}
                   </p>
                 </div>
               </button>
@@ -10925,15 +11388,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               ${punchBtnHtml}
             </div>
 
-            <div class="grid grid-cols-7 gap-y-2 gap-x-1 pt-1 pb-0.5">
+            <div class="grid grid-cols-7 gap-y-2 gap-x-1 pt-0.5 pb-0.5">
               ${slotsHtml}
-            </div>
-
-            <div class="pt-2 border-t border-borderline/70 flex items-center justify-between gap-3">
-              <div class="flex-1 h-1.5 rounded-full bg-pillbg overflow-hidden">
-                <div class="h-full rounded-full bg-coral transition-all duration-300" style="width:${pct}%;"></div>
-              </div>
-              <span class="text-[11px] font-bold tabular-nums text-secondarytext shrink-0">${pct}%</span>
             </div>
           </div>
         </article>
@@ -10944,32 +11400,57 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const container = document.getElementById('habit-list-container');
       if (!container) return;
 
-      let list = [...state.habits];
-      if (state.habitSortMode === 'progress') {
-        list.sort((a, b) => b.completedDays / Math.max(1, b.masteryDays) - a.completedDays / Math.max(1, a.masteryDays));
-      } else if (state.habitSortMode === 'remaining') {
-        list.sort((a, b) => a.masteryDays - a.completedDays - (b.masteryDays - b.completedDays));
-      }
+      const todayKey = getTodayDateKey();
+      state.habits.forEach((h) => normalizeHabitData(h));
 
-      if (list.length === 0) {
+      if (state.habits.length === 0) {
         container.innerHTML = `<p class="text-sm text-mutedtext text-center py-8">No habits tracked yet. Tap + below to start one.</p>`;
         return;
       }
 
-      container.innerHTML = list
-        .map((h) => renderHabitPunchCardMarkup(h, { interactive: true }))
+      const inactiveFirst = state.habitSortMode === 'inactive';
+      const indexed = state.habits.map((h, idx) => ({
+        habit: h,
+        stale: isHabitStaleOverWeek(h, todayKey),
+        idx,
+      }));
+
+      indexed.sort((a, b) => {
+        if (a.stale !== b.stale) {
+          return inactiveFirst ? (a.stale ? -1 : 1) : (a.stale ? 1 : -1);
+        }
+        return a.idx - b.idx;
+      });
+
+      container.innerHTML = indexed
+        .map(({ habit }) => renderHabitPunchCardMarkup(habit, { interactive: true }))
         .join('');
     }
 
-    function commitHabitToggleState(habit, nextDone) {
-      habit.done = Boolean(nextDone);
-      if (habit.done) {
-        habit.completedDays = Math.min(habit.masteryDays, habit.completedDays + 1);
-        if (habit.history && habit.history.length > 0) habit.history[habit.history.length - 1] = 1;
-      } else {
-        habit.completedDays = Math.max(0, habit.completedDays - 1);
-        if (habit.history && habit.history.length > 0) habit.history[habit.history.length - 1] = 0;
+    function getHabitPreviousCompletedDateKey(habit, todayKey) {
+      if (!habit) return null;
+      normalizeHabitData(habit);
+      const refToday = CalLogic.isValidDateKey(todayKey) ? todayKey : getTodayDateKey();
+      const dates = Array.isArray(habit.completedDates) ? habit.completedDates : [];
+      for (let i = dates.length - 1; i >= 0; i--) {
+        if (CalLogic.compareDateKeys(dates[i], refToday) < 0) {
+          return dates[i];
+        }
       }
+      return null;
+    }
+
+    function commitHabitToggleState(habit, nextDone) {
+      normalizeHabitData(habit);
+      const todayKey = getTodayDateKey();
+      const set = new Set(habit.completedDates);
+      if (nextDone) {
+        set.add(todayKey);
+      } else {
+        set.delete(todayKey);
+      }
+      habit.completedDates = Array.from(set);
+      syncHabitDerivedFields(habit);
       saveState();
     }
 
@@ -10990,6 +11471,396 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       setTimeout(() => chad.remove(), 600);
     }
 
+    // =========================================================================
+    // MATTE THEME-NATIVE TEAR-OFF CALENDAR ANIMATION (DAILY OPEN & HABIT TRACKER)
+    // =========================================================================
+    let calendarTearTimers = [];
+    let calendarTearActive = false;
+
+    function clearCalendarTearTimers() {
+      calendarTearTimers.forEach((id) => clearTimeout(id));
+      calendarTearTimers = [];
+    }
+
+    function computeTearOffSchedule(fromDateKey, toDateKey) {
+      const startD = CalLogic.parseDateKey(fromDateKey);
+      const endD = CalLogic.parseDateKey(toDateKey);
+      const rawDiff = Math.round((endD.getTime() - startD.getTime()) / 86400000);
+      const gapDays = Math.max(1, rawDiff);
+
+      const MAX_VISIBLE_SHEETS = 24;
+      const dateKeys = [];
+      if (gapDays <= MAX_VISIBLE_SHEETS) {
+        for (let offset = 0; offset <= gapDays; offset++) {
+          dateKeys.push(CalLogic.addDaysToDateKey(fromDateKey, offset));
+        }
+      } else {
+        // Sample intermediate dates evenly while preserving exact start, penultimate, and today
+        dateKeys.push(fromDateKey);
+        const middleSteps = MAX_VISIBLE_SHEETS - 2;
+        for (let i = 1; i <= middleSteps; i++) {
+          const offset = Math.max(1, Math.min(gapDays - 2, Math.round((i / (middleSteps + 1)) * (gapDays - 1))));
+          const dk = CalLogic.addDaysToDateKey(fromDateKey, offset);
+          if (dateKeys[dateKeys.length - 1] !== dk) dateKeys.push(dk);
+        }
+        const penult = CalLogic.addDaysToDateKey(toDateKey, -1);
+        if (dateKeys[dateKeys.length - 1] !== penult) dateKeys.push(penult);
+        dateKeys.push(toDateKey);
+      }
+
+      // Gap-adaptive pacing: longer gap = faster tear speed
+      let baseStepMs;
+      if (gapDays === 1) baseStepMs = 680;
+      else if (gapDays === 2) baseStepMs = 470;
+      else if (gapDays === 3) baseStepMs = 350;
+      else if (gapDays <= 5) baseStepMs = 250;
+      else if (gapDays <= 10) baseStepMs = 165;
+      else if (gapDays <= 20) baseStepMs = 112;
+      else baseStepMs = 82;
+
+      const sheetTearCount = Math.max(1, dateKeys.length - 1);
+      const stepDurations = [];
+      for (let i = 0; i < sheetTearCount; i++) {
+        const isLast = i === sheetTearCount - 1;
+        const isSecondLast = sheetTearCount > 3 && i === sheetTearCount - 2;
+        const mult = isLast ? 1.42 : isSecondLast ? 1.15 : 1;
+        stepDurations.push(Math.max(72, Math.round(baseStepMs * mult)));
+      }
+
+      const initialHoldMs = gapDays <= 2 ? 420 : gapDays <= 6 ? 340 : 280;
+      return { gapDays, dateKeys, baseStepMs, stepDurations, initialHoldMs };
+    }
+
+    function renderTearCalendarSheetHtml(dateKey, meta = {}) {
+      const d = CalLogic.parseDateKey(dateKey);
+      const monthName = CalLogic.MONTH_NAMES_FULL[d.getMonth()].toUpperCase();
+      const yearNum = d.getFullYear();
+      const dayNum = d.getDate();
+      const weekday = CalLogic.WEEKDAY_NAMES_FULL[d.getDay()].toUpperCase();
+      const isFinal = Boolean(meta.isFinal);
+      const gapDays = Number(meta.gapDays) || 1;
+      const isHabit = meta.mode === 'habit';
+
+      const statusText = isFinal
+        ? (isHabit ? 'Punched today • Back on track' : 'Today')
+        : (isHabit
+          ? `Last punched ${gapDays}d ago`
+          : `${gapDays === 1 ? '1 day' : `${gapDays} days`} ago`);
+
+      const topContextHtml = isHabit && meta.habitTitle
+        ? `<div class="inline-flex items-center gap-1.5 text-secondarytext max-w-full">
+            <span class="w-3.5 h-3.5 text-coral flex items-center justify-center shrink-0 [&>svg]:w-3.5 [&>svg]:h-3.5">${ICONS[meta.habitIcon] || ICONS.spark}</span>
+            <span class="text-[11px] font-semibold text-primarytext truncate">${escapeHtml(meta.habitTitle)}</span>
+          </div>`
+        : `<span class="text-[10px] font-semibold uppercase tracking-[0.2em] ${isFinal ? 'text-coral' : 'text-mutedtext'}">${isFinal ? 'Today' : 'Catching up'}</span>`;
+
+      return `
+        <div class="w-full h-full rounded-b-[16px] bg-cardbg border-x border-b border-borderline/75 overflow-hidden flex flex-col select-none shadow-[0_6px_16px_rgba(0,0,0,0.2)]">
+          <div class="bg-coral text-onaccent px-4 py-2 flex items-center justify-between">
+            <span class="font-display text-[11px] font-bold tracking-[0.15em]">${monthName}</span>
+            <span class="text-[11px] font-bold tabular-nums opacity-90">${yearNum}</span>
+          </div>
+          <div class="flex-1 px-4 py-5 flex flex-col items-center justify-between text-center">
+            ${topContextHtml}
+            <div class="py-1">
+              <p class="font-display text-[82px] leading-[0.92] font-bold tracking-tight text-primarytext tabular-nums">${dayNum}</p>
+              <p class="mt-2.5 text-[11px] font-bold uppercase tracking-[0.22em] text-secondarytext">${weekday}</p>
+            </div>
+            <p class="text-[11px] font-medium ${isFinal ? 'text-coral font-semibold' : 'text-secondarytext'} truncate max-w-full">${escapeHtml(statusText)}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function dismissCalendarTearOff() {
+      const overlay = document.getElementById('calendar-tear-overlay');
+      const backdrop = document.getElementById('calendar-tear-backdrop');
+      const stage = document.getElementById('calendar-tear-stage');
+      if (!overlay) return;
+      clearCalendarTearTimers();
+      const padWrap = stage ? stage.querySelector('.cal-tear-pad-wrap') : null;
+      if (padWrap) padWrap.classList.add('is-leaving');
+      if (backdrop) backdrop.classList.remove('is-visible');
+      const cleanupTimer = setTimeout(() => {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('pointer-events-auto');
+        overlay.classList.add('pointer-events-none');
+        overlay.setAttribute('aria-hidden', 'true');
+        if (stage) stage.innerHTML = '';
+        calendarTearActive = false;
+      }, 260);
+      calendarTearTimers.push(cleanupTimer);
+    }
+
+    function playCalendarTearOffAnimation(opts = {}) {
+      const fromDateKey = opts.fromDateKey;
+      const toDateKey = opts.toDateKey || getTodayDateKey();
+      if (!CalLogic.isValidDateKey(fromDateKey) || !CalLogic.isValidDateKey(toDateKey)) return;
+      if (CalLogic.compareDateKeys(fromDateKey, toDateKey) >= 0) return;
+
+      const overlay = document.getElementById('calendar-tear-overlay');
+      const backdrop = document.getElementById('calendar-tear-backdrop');
+      const stage = document.getElementById('calendar-tear-stage');
+      if (!overlay || !backdrop || !stage) return;
+
+      clearCalendarTearTimers();
+      calendarTearActive = true;
+
+      const schedule = computeTearOffSchedule(fromDateKey, toDateKey);
+      const { gapDays, dateKeys, stepDurations, initialHoldMs } = schedule;
+      const mode = opts.mode === 'habit' ? 'habit' : 'app-open';
+      const prefersReducedMotion =
+        typeof window !== 'undefined' &&
+        window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      overlay.classList.remove('hidden');
+      overlay.classList.remove('pointer-events-none');
+      overlay.classList.add('pointer-events-auto');
+      overlay.setAttribute('aria-hidden', 'false');
+      backdrop.classList.remove('is-visible');
+
+      const startSheetHtml = renderTearCalendarSheetHtml(dateKeys[0], {
+        mode,
+        gapDays,
+        habitTitle: opts.habitTitle,
+        habitIcon: opts.habitIcon,
+        isFinal: false,
+      });
+      const secondSheetHtml = renderTearCalendarSheetHtml(dateKeys[1] || toDateKey, {
+        mode,
+        gapDays,
+        habitTitle: opts.habitTitle,
+        habitIcon: opts.habitIcon,
+        isFinal: dateKeys.length <= 2,
+      });
+
+      stage.innerHTML = `
+        <div class="cal-tear-pad-wrap pointer-events-auto flex flex-col items-center overflow-visible" onclick="dismissCalendarTearOff()">
+          <div class="relative w-[240px] overflow-visible">
+            <!-- Thin lightweight paper stack edges -->
+            <div class="pointer-events-none absolute inset-x-[4px] top-[32px] -bottom-[6px] rounded-b-[16px] bg-sheetbg border border-borderline/65 opacity-75"></div>
+            <div class="pointer-events-none absolute inset-x-[2px] top-[32px] -bottom-[3px] rounded-b-[16px] bg-cardbg border border-borderline/80"></div>
+
+            <!-- Slim matte binding bar with twin rivets (strictly above peeling sheet plane) -->
+            <div class="cal-tear-pad-header relative z-40 h-[32px] rounded-t-[16px] border-x border-t border-borderline/80 px-6 flex items-center justify-between">
+              <span class="cal-tear-rivet w-3 h-3 rounded-full"></span>
+              <span class="text-[9px] font-bold uppercase tracking-[0.22em] text-secondarytext">${mode === 'habit' ? 'Habit Log' : 'Daily Pad'}</span>
+              <span class="cal-tear-rivet w-3 h-3 rounded-full"></span>
+              <div class="cal-tear-perf-row pointer-events-none absolute inset-x-3 -bottom-[2.5px] h-[5px]"></div>
+            </div>
+
+            <!-- Calendar Sheet Stack Area (overflow-visible so loose pages flutter cleanly off to the right) -->
+            <div id="cal-tear-sheet-frame" class="relative z-20 w-full h-[252px] overflow-visible">
+              <div id="cal-tear-under-sheet" class="absolute inset-0 z-10">
+                ${secondSheetHtml}
+              </div>
+              <div id="cal-tear-top-sheet" class="absolute inset-0 z-20">
+                ${startSheetHtml}
+              </div>
+            </div>
+          </div>
+
+          <p class="mt-6 text-[11px] font-medium text-secondarytext/80 tracking-wide">Tap anywhere to continue</p>
+        </div>
+      `;
+
+      const padWrap = stage.querySelector('.cal-tear-pad-wrap');
+      const sheetFrame = document.getElementById('cal-tear-sheet-frame');
+      let underEl = document.getElementById('cal-tear-under-sheet');
+      let topEl = document.getElementById('cal-tear-top-sheet');
+
+      requestAnimationFrame(() => {
+        backdrop.classList.add('is-visible');
+        if (padWrap) padWrap.classList.add('is-visible');
+      });
+
+      function spawnCalendarTearConfetti(anchorEl) {
+        if (prefersReducedMotion) return;
+        const rect = anchorEl ? anchorEl.getBoundingClientRect() : null;
+        const originX = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
+        const originY = rect ? rect.top + rect.height * 0.42 : window.innerHeight / 2;
+        const accentHex =
+          (typeof getComputedStyle === 'function' &&
+            getComputedStyle(document.documentElement).getPropertyValue('--color-accent-hex').trim()) ||
+          '#F28B82';
+        const palette = [accentHex, '#81C953', '#F6C244', '#6EA8D8', '#C47B9B', '#F5F5F7'];
+        const count = 34;
+
+        for (let i = 0; i < count; i++) {
+          const piece = document.createElement('span');
+          const spreadAngle = -Math.PI + (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.28;
+          const burstRadius = 68 + Math.random() * 115;
+          const midX = Math.cos(spreadAngle) * (burstRadius * 0.62);
+          const midY = Math.sin(spreadAngle) * (burstRadius * 0.62) - (38 + Math.random() * 44);
+          const endX = Math.cos(spreadAngle) * burstRadius + (Math.random() - 0.5) * 28;
+          const endY = midY + 86 + Math.random() * 92;
+          const rotMid = Math.round((Math.random() - 0.5) * 260);
+          const rotEnd = rotMid + Math.round((Math.random() > 0.5 ? 1 : -1) * (160 + Math.random() * 240));
+          const durMs = 950 + Math.round(Math.random() * 420);
+          const isRibbon = i % 3 !== 0;
+
+          piece.className = 'cal-confetti-piece';
+          piece.style.left = `${Math.round(originX + (Math.random() - 0.5) * 44)}px`;
+          piece.style.top = `${Math.round(originY + (Math.random() - 0.5) * 32)}px`;
+          piece.style.width = isRibbon ? `${6 + Math.round(Math.random() * 4)}px` : '6px';
+          piece.style.height = isRibbon ? `${4 + Math.round(Math.random() * 2)}px` : '6px';
+          piece.style.borderRadius = isRibbon ? '2px' : '9999px';
+          piece.style.backgroundColor = palette[i % palette.length];
+          piece.style.setProperty('--cx-mid', `${midX.toFixed(1)}px`);
+          piece.style.setProperty('--cy-mid', `${midY.toFixed(1)}px`);
+          piece.style.setProperty('--cx-end', `${endX.toFixed(1)}px`);
+          piece.style.setProperty('--cy-end', `${endY.toFixed(1)}px`);
+          piece.style.setProperty('--crot-mid', `${rotMid}deg`);
+          piece.style.setProperty('--crot-end', `${rotEnd}deg`);
+          piece.style.setProperty('--cdur', `${durMs}ms`);
+
+          document.body.appendChild(piece);
+          setTimeout(() => piece.remove(), durMs + 60);
+        }
+      }
+
+      if (prefersReducedMotion) {
+        const snapTimer = setTimeout(() => {
+          if (topEl) {
+            topEl.innerHTML = renderTearCalendarSheetHtml(toDateKey, {
+              mode,
+              gapDays,
+              habitTitle: opts.habitTitle,
+              habitIcon: opts.habitIcon,
+              isFinal: true,
+            });
+          }
+          playSfx('levelUp', { bypassCooldown: true });
+          const closeTimer = setTimeout(() => dismissCalendarTearOff(), 2400);
+          calendarTearTimers.push(closeTimer);
+        }, 320);
+        calendarTearTimers.push(snapTimer);
+        return;
+      }
+
+      let stepIdx = 0;
+
+      function runNextTearStep() {
+        if (!calendarTearActive || !sheetFrame || !topEl || !underEl) return;
+        if (stepIdx >= stepDurations.length) {
+          // Landed on final sheet (Today) — celebrate with confetti & hold comfortably (~2.4s)
+          if (padWrap) {
+            padWrap.classList.remove('cal-tear-pad-landed');
+            void padWrap.offsetWidth;
+            padWrap.classList.add('cal-tear-pad-landed');
+          }
+          spawnCalendarTearConfetti(sheetFrame || padWrap);
+          playSfx('levelUp', { bypassCooldown: true });
+          const endTimer = setTimeout(() => dismissCalendarTearOff(), 2400);
+          calendarTearTimers.push(endTimer);
+          return;
+        }
+
+        const durMs = stepDurations[stepIdx];
+        const nextDateKey = dateKeys[stepIdx + 1];
+        const isNextFinal = stepIdx + 1 === dateKeys.length - 1;
+        // Let each lightweight sheet sail gracefully off to the right even as fast multi-day sheets follow behind
+        const flightDurationMs = Math.max(460, Math.round(durMs * 1.45));
+
+        // Prepare the revealed sheet directly underneath before peeling the top sheet
+        underEl.innerHTML = renderTearCalendarSheetHtml(nextDateKey, {
+          mode,
+          gapDays,
+          habitTitle: opts.habitTitle,
+          habitIcon: opts.habitIcon,
+          isFinal: isNextFinal,
+        });
+
+        // Peel and flutter the current top sheet strictly LEFT-TO-RIGHT
+        const rippingSheet = topEl;
+        rippingSheet.style.setProperty('--tear-dur', `${flightDurationMs}ms`);
+        rippingSheet.classList.add('cal-tear-sheet-ripping');
+        playSfx('paperTear');
+
+        // Promote underneath sheet to active top and mount a fresh underneath layer
+        const promotedTop = underEl;
+        promotedTop.id = 'cal-tear-top-sheet';
+        promotedTop.style.zIndex = '20';
+
+        const freshUnder = document.createElement('div');
+        freshUnder.id = 'cal-tear-under-sheet';
+        freshUnder.className = 'absolute inset-0 z-10';
+        const lookaheadKey = dateKeys[stepIdx + 2] || toDateKey;
+        freshUnder.innerHTML = renderTearCalendarSheetHtml(lookaheadKey, {
+          mode,
+          gapDays,
+          habitTitle: opts.habitTitle,
+          habitIcon: opts.habitIcon,
+          isFinal: stepIdx + 2 >= dateKeys.length - 1,
+        });
+        sheetFrame.insertBefore(freshUnder, promotedTop);
+
+        rippingSheet.id = '';
+        rippingSheet.style.zIndex = String(30 + stepIdx);
+        const removeRipTimer = setTimeout(() => {
+          rippingSheet.remove();
+        }, flightDurationMs + 50);
+        calendarTearTimers.push(removeRipTimer);
+
+        topEl = promotedTop;
+        underEl = freshUnder;
+        stepIdx += 1;
+
+        const nextStepTimer = setTimeout(runNextTearStep, durMs);
+        calendarTearTimers.push(nextStepTimer);
+      }
+
+      const startTimer = setTimeout(runNextTearStep, initialHoldMs);
+      calendarTearTimers.push(startTimer);
+    }
+
+    function setPreviewTearGap(days) {
+      state.previewTearGapDays = Math.max(1, Number(days) || 1);
+      document.querySelectorAll('[data-tear-gap]').forEach((btn) => {
+        const active = Number(btn.getAttribute('data-tear-gap')) === state.previewTearGapDays;
+        btn.className = `tactile-btn px-2.5 py-1 rounded-lg text-[11px] font-semibold border ${
+          active
+            ? 'bg-coral text-onaccent border-coral'
+            : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext'
+        }`;
+      });
+      playSfx('tick');
+    }
+
+    function previewDailyCalendarTear(gapDays = 4) {
+      const todayKey = getTodayDateKey();
+      const safeGap = Math.max(1, Number(gapDays) || 4);
+      const fromDateKey = CalLogic.addDaysToDateKey(todayKey, -safeGap);
+      playCalendarTearOffAnimation({
+        mode: 'app-open',
+        fromDateKey,
+        toDateKey: todayKey,
+      });
+    }
+
+    function checkAndRunDailyAppOpenTear() {
+      const todayKey = getTodayDateKey();
+      const prevOpenKey = state.lastAppOpenedDateKey;
+      const alreadyShownToday = state.lastDailyTearShownDateKey === todayKey;
+
+      if (CalLogic.isValidDateKey(prevOpenKey) && CalLogic.compareDateKeys(prevOpenKey, todayKey) < 0 && !alreadyShownToday) {
+        state.lastAppOpenedDateKey = todayKey;
+        state.lastDailyTearShownDateKey = todayKey;
+        saveState();
+        setTimeout(() => {
+          playCalendarTearOffAnimation({
+            mode: 'app-open',
+            fromDateKey: prevOpenKey,
+            toDateKey: todayKey,
+          });
+        }, 260);
+      } else if (!CalLogic.isValidDateKey(prevOpenKey)) {
+        state.lastAppOpenedDateKey = todayKey;
+        saveState();
+      }
+    }
+
     function toggleHabitToday(habitId) {
       const habit = state.habits.find((h) => h.id === habitId);
       if (!habit) return;
@@ -11002,6 +11873,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         renderHabits();
         return;
       }
+
+      const todayKey = getTodayDateKey();
+      const prevHabitCompletedKey = getHabitPreviousCompletedDateKey(habit, todayKey);
+      // Only show tear-off calendar when there is at least 1 missed day in between (gap >= 2 days)
+      const hasHabitMissedDayGap = getHabitGapDays(prevHabitCompletedKey, todayKey) >= 2;
 
       const prefersReducedMotion =
         typeof window !== 'undefined' &&
@@ -11021,6 +11897,17 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         commitHabitToggleState(habit, true);
         playSfx('holePunch', { bypassCooldown: true });
         renderHabits();
+        if (hasHabitMissedDayGap) {
+          setTimeout(() => {
+            playCalendarTearOffAnimation({
+              mode: 'habit',
+              fromDateKey: prevHabitCompletedKey,
+              toDateKey: todayKey,
+              habitTitle: habit.title,
+              habitIcon: habit.icon,
+            });
+          }, 120);
+        }
         return;
       }
 
@@ -11110,9 +11997,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       // Phase 4 (635ms): Exact punch-through impact — card micro-recoil, SFX, dark recessed hole, falling chad
       setTimeout(() => {
-        const { slots } = computeHabitPunchSlots(habit);
-        const todaySlot = slots.find((s) => s.isToday);
-        const todayDayNum = todaySlot ? todaySlot.dayNum : new Date().getDate();
+        const todayDayNum = CalLogic.parseDateKey(todayKey).getDate();
 
         commitHabitToggleState(habit, true);
         playSfx('holePunch', { bypassCooldown: true });
@@ -11128,7 +12013,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           recoilWrap.classList.add('punch-card-recoil');
         }
 
-        spawnFallingPunchChad(chadLayer, scaledSlotX, scaledSlotY, todayDayNum);
+        spawnFallingPunchChad(chadLayer, scaledSlotX, scaledSlotY, '');
       }, 635);
 
       // Phase 5 (790ms): Jaw releases open
@@ -11168,7 +12053,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         }
       }, 1200);
 
-      // Phase 8 (1500ms): Clean up overlay and reveal the list card
+      // Phase 8 (1500ms): Clean up overlay, reveal list card, then play habit tear-off calendar only if >= 1 day was missed
       setTimeout(() => {
         const destCard = document.querySelector(`[data-habit-card-id="${habitId}"]`);
         if (destCard) destCard.style.opacity = '';
@@ -11179,6 +12064,18 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         chadLayer.innerHTML = '';
         toolAnchor.classList.remove('is-retracting');
         habitPunchAnimActive = false;
+
+        if (hasHabitMissedDayGap) {
+          setTimeout(() => {
+            playCalendarTearOffAnimation({
+              mode: 'habit',
+              fromDateKey: prevHabitCompletedKey,
+              toDateKey: todayKey,
+              habitTitle: habit.title,
+              habitIcon: habit.icon,
+            });
+          }, 90);
+        }
       }, 1500);
     }
 
@@ -11333,9 +12230,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         timeLabel: formatTime12(state.habitModalTimeMin),
         masteryDays: state.habitModalMasteryDays,
         completedDays: 0,
+        completedDates: [],
         color: state.habitModalColor,
         icon: state.habitModalIcon,
         done: false,
+        createdAtDateKey: getTodayDateKey(),
+        lastCompletedDateKey: null,
         history: new Array(HEATMAP_ACTIVE_SLOTS).fill(0),
       });
 
@@ -11348,7 +12248,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function openHabitHistoryModal(habitId) {
       const habit = state.habits.find((h) => h.id === habitId);
       if (!habit) return;
+      normalizeHabitData(habit);
+      const todayD = CalLogic.parseDateKey(getTodayDateKey());
       state.historyModalHabitId = habitId;
+      state.historyModalYear = todayD.getFullYear();
+      state.historyModalMonth = todayD.getMonth();
       document.getElementById('habit-history-modal')?.classList.remove('hidden');
       renderHabitHistoryCalendar();
     }
@@ -11360,61 +12264,117 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function stepHabitHistoryMonth(delta) {
-      state.historyModalMonth += delta;
-      if (state.historyModalMonth < 0) {
-        state.historyModalMonth = 11;
-        state.historyModalYear -= 1;
-      } else if (state.historyModalMonth > 11) {
-        state.historyModalMonth = 0;
-        state.historyModalYear += 1;
+      const todayD = CalLogic.parseDateKey(getTodayDateKey());
+      let nextMonth = state.historyModalMonth + delta;
+      let nextYear = state.historyModalYear;
+      if (nextMonth < 0) {
+        nextMonth = 11;
+        nextYear -= 1;
+      } else if (nextMonth > 11) {
+        nextMonth = 0;
+        nextYear += 1;
       }
+      // Prevent navigating past the current month since upcoming dates cannot be completed
+      if (delta > 0 && (nextYear > todayD.getFullYear() || (nextYear === todayD.getFullYear() && nextMonth > todayD.getMonth()))) {
+        return;
+      }
+      state.historyModalMonth = nextMonth;
+      state.historyModalYear = nextYear;
+      playSfx('tick');
       renderHabitHistoryCalendar();
     }
 
-    function toggleHabitHistoryDay(dayIndex) {
+    function toggleHabitHistoryDay(dateKey) {
       const habit = state.habits.find((h) => h.id === state.historyModalHabitId);
-      if (!habit || !habit.history) return;
-      const idx = Math.max(0, Math.min(habit.history.length - 1, dayIndex));
-      const wasDone = Boolean(habit.history[idx]);
-      habit.history[idx] = wasDone ? 0 : 1;
-      habit.completedDays = Math.max(0, Math.min(habit.masteryDays, habit.completedDays + (wasDone ? -1 : 1)));
+      if (!habit || !CalLogic.isValidDateKey(dateKey)) return;
+      const todayKey = getTodayDateKey();
+      if (CalLogic.compareDateKeys(dateKey, todayKey) > 0) return;
+
+      normalizeHabitData(habit);
+      const set = new Set(habit.completedDates);
+      const wasDone = set.has(dateKey);
+      if (wasDone) {
+        set.delete(dateKey);
+      } else {
+        set.add(dateKey);
+      }
+      habit.completedDates = Array.from(set);
+      syncHabitDerivedFields(habit);
+      playSfx(wasDone ? 'uncheck' : 'tick');
       saveState();
       renderHabitHistoryCalendar();
+      renderHabits();
     }
 
     function renderHabitHistoryCalendar() {
       const habit = state.habits.find((h) => h.id === state.historyModalHabitId);
       if (!habit) return;
+      normalizeHabitData(habit);
 
       const titleEl = document.getElementById('habit-history-title');
       const countEl = document.getElementById('habit-history-countdown');
       const monthLabelEl = document.getElementById('habit-history-month-label');
       const gridEl = document.getElementById('habit-history-calendar-grid');
       const dotEl = document.getElementById('habit-history-legend-dot');
+      const nextBtn = document.getElementById('habit-history-next-btn');
 
-      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const todayKey = getTodayDateKey();
+      const todayD = CalLogic.parseDateKey(todayKey);
+      const viewYear = Number.isInteger(state.historyModalYear) ? state.historyModalYear : todayD.getFullYear();
+      const viewMonth = Number.isInteger(state.historyModalMonth) ? state.historyModalMonth : todayD.getMonth();
 
       if (titleEl) titleEl.textContent = habit.title;
-      if (countEl) countEl.textContent = `${Math.max(0, habit.masteryDays - habit.completedDays)}d left`;
-      if (monthLabelEl) monthLabelEl.textContent = `${months[state.historyModalMonth]} ${state.historyModalYear}`;
+      const daysLeft = Math.max(0, (Number(habit.masteryDays) || 21) - habit.completedDays);
+      if (countEl) countEl.textContent = daysLeft === 0 ? 'Mastered ★' : `${daysLeft}d left`;
+      if (monthLabelEl) monthLabelEl.textContent = `${CalLogic.MONTH_NAMES_FULL[viewMonth]} ${viewYear}`;
       if (dotEl) dotEl.style.backgroundColor = '';
 
+      const isAtOrPastCurrentMonth =
+        viewYear > todayD.getFullYear() || (viewYear === todayD.getFullYear() && viewMonth >= todayD.getMonth());
+      if (nextBtn) nextBtn.disabled = isAtOrPastCurrentMonth;
+
       if (gridEl) {
-        let cells = '';
-        for (let d = 1; d <= 30; d++) {
-          const histIdx = Math.max(0, habit.history.length - 31 + d);
-          const done = Boolean(habit.history[histIdx]);
-          cells += `
-            <button
-              type="button"
-              onclick="toggleHabitHistoryDay(${histIdx})"
-              class="tactile-btn h-9 rounded-xl text-xs font-bold flex items-center justify-center ${
-                done ? 'bg-coral text-onaccent' : 'bg-pillbg text-secondarytext border border-borderline'
-              }"
-            >${d}</button>
-          `;
-        }
-        gridEl.innerHTML = cells;
+        const completedSet = new Set(habit.completedDates);
+        const cells = CalLogic.buildMonthGrid(viewYear, viewMonth);
+        // Trim trailing all-out-of-month 6th row when unnecessary
+        const lastRowAllOutside = cells.slice(35).every((c) => c.out);
+        const displayCells = lastRowAllOutside ? cells.slice(0, 35) : cells;
+
+        gridEl.innerHTML = displayCells
+          .map((cell) => {
+            if (cell.out) {
+              return `<div class="h-9 rounded-xl text-xs font-medium flex items-center justify-center text-mutedtext/25 select-none pointer-events-none">${cell.d}</div>`;
+            }
+            const isFuture = CalLogic.compareDateKeys(cell.dateKey, todayKey) > 0;
+            const isToday = cell.dateKey === todayKey;
+            const done = completedSet.has(cell.dateKey);
+
+            if (isFuture) {
+              return `
+                <button
+                  type="button"
+                  disabled
+                  aria-disabled="true"
+                  title="Upcoming date"
+                  class="h-9 rounded-xl text-xs font-semibold flex items-center justify-center bg-pillbg/35 text-mutedtext/40 border border-borderline/35 cursor-not-allowed select-none"
+                >${cell.d}</button>
+              `;
+            }
+
+            const stateClass = done
+              ? `bg-coral text-onaccent ${isToday ? 'ring-2 ring-primarytext/45 ring-offset-1 ring-offset-cardbg' : ''}`
+              : `bg-pillbg text-secondarytext border ${isToday ? 'border-coral text-coral font-bold' : 'border-borderline hover:border-coral/50'}`;
+
+            return `
+              <button
+                type="button"
+                onclick="toggleHabitHistoryDay('${cell.dateKey}')"
+                title="${CalLogic.formatHumanDate(cell.dateKey, 'short')} • ${done ? 'Completed (tap to unmark)' : 'Tap to mark complete'}"
+                class="tactile-btn h-9 rounded-xl text-xs font-bold flex items-center justify-center ${stateClass}"
+              >${cell.d}</button>
+            `;
+          })
+          .join('');
       }
     }
 
@@ -14524,6 +15484,339 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       return null;
     }
 
+    // =========================================================================
+    // TOPICS PROGRESS CALENDAR LOGGING & MODAL (HABIT-HISTORY THEME)
+    // =========================================================================
+    function seedInitialTopicProgressLogIfEmpty() {
+      if (Array.isArray(state.topicProgressLog) && state.topicProgressLog.length > 0) return;
+      const todayKey = getTodayDateKey();
+      const seeded = [];
+      const dayOffsets = [1, 2, 4, 6, 8, 10, 13, 15, 18, 21];
+      let cursor = 0;
+
+      function walkTopic(node, rootTopic, skillTitle = null) {
+        if (!node || typeof node !== 'object') return;
+        const milestones = Array.isArray(node.milestones) ? node.milestones : [];
+        milestones.forEach((mod) => {
+          const lessons = Array.isArray(mod.lessons) ? mod.lessons : [];
+          lessons.forEach((les) => {
+            if (les && les.done) {
+              const offset = dayOffsets[cursor % dayOffsets.length];
+              cursor += 1;
+              seeded.push({
+                id: `tpl-seed-${rootTopic.id}-${les.id}`,
+                dateKey: CalLogic.addDaysToDateKey(todayKey, -offset),
+                topicId: rootTopic.id,
+                topicTitle: rootTopic.title,
+                skillTitle,
+                itemId: String(les.id),
+                itemTitle: les.title,
+                kind: 'milestone',
+              });
+            }
+          });
+        });
+
+        const drills = Array.isArray(node.drills) ? node.drills : [];
+        drills.forEach((dr) => {
+          if (dr && dr.done) {
+            const offset = dayOffsets[cursor % dayOffsets.length];
+            cursor += 1;
+            seeded.push({
+              id: `tpl-seed-${rootTopic.id}-${dr.id}`,
+              dateKey: CalLogic.addDaysToDateKey(todayKey, -offset),
+              topicId: rootTopic.id,
+              topicTitle: rootTopic.title,
+              skillTitle,
+              itemId: String(dr.id),
+              itemTitle: dr.title,
+              kind: 'drill',
+            });
+          }
+        });
+
+        const achievements = Array.isArray(node.achievements) ? node.achievements : [];
+        achievements.forEach((ach) => {
+          if (ach && ach.unlocked) {
+            const offset = dayOffsets[cursor % dayOffsets.length];
+            cursor += 1;
+            seeded.push({
+              id: `tpl-seed-${rootTopic.id}-${ach.id}`,
+              dateKey: CalLogic.addDaysToDateKey(todayKey, -offset),
+              topicId: rootTopic.id,
+              topicTitle: rootTopic.title,
+              skillTitle,
+              itemId: String(ach.id),
+              itemTitle: ach.title,
+              kind: 'achievement',
+            });
+          }
+        });
+
+        const branches = Array.isArray(node.branches) ? node.branches : [];
+        branches.forEach((b) => walkTopic(b, rootTopic, b.title));
+      }
+
+      (state.topics || []).forEach((t) => walkTopic(t, t, null));
+      if (seeded.length > 0) {
+        state.topicProgressLog = seeded;
+      }
+    }
+
+    function logTopicProgressEvent({ rootTopic, activeNode, itemId, itemTitle, kind, completed }) {
+      if (!rootTopic) return;
+      if (!Array.isArray(state.topicProgressLog)) state.topicProgressLog = [];
+      const todayKey = getTodayDateKey();
+      const targetItemId = String(itemId || '');
+      const skillTitle = activeNode && String(activeNode.id) !== String(rootTopic.id) ? activeNode.title : null;
+
+      if (completed) {
+        const existsToday = state.topicProgressLog.some(
+          (entry) =>
+            entry.dateKey === todayKey &&
+            String(entry.topicId) === String(rootTopic.id) &&
+            String(entry.itemId) === targetItemId &&
+            entry.kind === kind
+        );
+        if (!existsToday) {
+          state.topicProgressLog.unshift({
+            id: `tpl-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+            dateKey: todayKey,
+            topicId: rootTopic.id,
+            topicTitle: rootTopic.title,
+            skillTitle,
+            itemId: targetItemId,
+            itemTitle: String(itemTitle || 'Progress update'),
+            kind: kind || 'milestone',
+          });
+        }
+      } else {
+        state.topicProgressLog = state.topicProgressLog.filter(
+          (entry) =>
+            !(
+              entry.dateKey === todayKey &&
+              String(entry.topicId) === String(rootTopic.id) &&
+              String(entry.itemId) === targetItemId &&
+              entry.kind === kind
+            )
+        );
+      }
+    }
+
+    function openTopicProgressCalendarModal(topicId = null) {
+      const todayKey = getTodayDateKey();
+      const todayD = CalLogic.parseDateKey(todayKey);
+      state.topicCalendarTopicId = topicId != null ? topicId : null;
+      state.topicCalendarScope = topicId != null ? 'single' : 'all';
+      state.topicCalendarYear = todayD.getFullYear();
+      state.topicCalendarMonth = todayD.getMonth();
+      state.topicCalendarSelectedDate = todayKey;
+
+      // Default selection to most recent active day in current month if today has no logs yet
+      const scopedLogs = getFilteredTopicCalendarLogs();
+      const monthPrefix = `${state.topicCalendarYear}-${String(state.topicCalendarMonth + 1).padStart(2, '0')}-`;
+      const hasToday = scopedLogs.some((e) => e.dateKey === todayKey);
+      if (!hasToday) {
+        const latestInMonth = scopedLogs
+          .filter((e) => typeof e.dateKey === 'string' && e.dateKey.startsWith(monthPrefix))
+          .sort((a, b) => CalLogic.compareDateKeys(b.dateKey, a.dateKey))[0];
+        if (latestInMonth) {
+          state.topicCalendarSelectedDate = latestInMonth.dateKey;
+        }
+      }
+
+      document.getElementById('topic-progress-calendar-modal')?.classList.remove('hidden');
+      playSfx('drawerOpen');
+      renderTopicProgressCalendar();
+    }
+
+    function closeTopicProgressCalendarModal() {
+      document.getElementById('topic-progress-calendar-modal')?.classList.add('hidden');
+      playSfx('drawerClose');
+    }
+
+    function setTopicCalendarScope(scope) {
+      state.topicCalendarScope = scope === 'single' && state.topicCalendarTopicId != null ? 'single' : 'all';
+      playSfx('tick');
+      renderTopicProgressCalendar();
+    }
+
+    function stepTopicCalendarMonth(delta) {
+      state.topicCalendarMonth += delta;
+      if (state.topicCalendarMonth < 0) {
+        state.topicCalendarMonth = 11;
+        state.topicCalendarYear -= 1;
+      } else if (state.topicCalendarMonth > 11) {
+        state.topicCalendarMonth = 0;
+        state.topicCalendarYear += 1;
+      }
+      playSfx('tick');
+      renderTopicProgressCalendar();
+    }
+
+    function selectTopicCalendarDate(dateKey) {
+      if (!CalLogic.isValidDateKey(dateKey)) return;
+      state.topicCalendarSelectedDate = dateKey;
+      playSfx('tick');
+      renderTopicProgressCalendar();
+    }
+
+    function getFilteredTopicCalendarLogs() {
+      const logs = Array.isArray(state.topicProgressLog) ? state.topicProgressLog : [];
+      if (state.topicCalendarScope === 'single' && state.topicCalendarTopicId != null) {
+        return logs.filter((e) => String(e.topicId) === String(state.topicCalendarTopicId));
+      }
+      return logs;
+    }
+
+    function renderTopicProgressCalendar() {
+      const titleEl = document.getElementById('topic-cal-title');
+      const subtitleEl = document.getElementById('topic-cal-subtitle');
+      const activeCountEl = document.getElementById('topic-cal-active-count');
+      const scopeRowEl = document.getElementById('topic-cal-scope-row');
+      const scopeSingleBtn = document.getElementById('topic-cal-scope-single');
+      const scopeAllBtn = document.getElementById('topic-cal-scope-all');
+      const monthLabelEl = document.getElementById('topic-cal-month-label');
+      const gridEl = document.getElementById('topic-cal-grid');
+      const dayHeadingEl = document.getElementById('topic-cal-day-heading');
+      const dayBadgeEl = document.getElementById('topic-cal-day-badge');
+      const dayLogEl = document.getElementById('topic-cal-day-log');
+
+      const scopedTopic =
+        state.topicCalendarTopicId != null
+          ? (state.topics || []).find((t) => String(t.id) === String(state.topicCalendarTopicId))
+          : null;
+
+      if (scopeRowEl) scopeRowEl.classList.toggle('hidden', !scopedTopic);
+      if (scopeSingleBtn && scopeAllBtn) {
+        const isSingle = state.topicCalendarScope === 'single' && Boolean(scopedTopic);
+        scopeSingleBtn.className = `tactile-btn px-3 py-1 rounded-full text-[11px] ${
+          isSingle ? 'font-semibold bg-coral text-onaccent' : 'font-medium bg-cardbg border border-borderline text-secondarytext hover:text-primarytext'
+        }`;
+        scopeAllBtn.className = `tactile-btn px-3 py-1 rounded-full text-[11px] ${
+          !isSingle ? 'font-semibold bg-coral text-onaccent' : 'font-medium bg-cardbg border border-borderline text-secondarytext hover:text-primarytext'
+        }`;
+      }
+
+      if (titleEl) {
+        titleEl.textContent = state.topicCalendarScope === 'single' && scopedTopic ? scopedTopic.title : 'Progress Calendar';
+      }
+      if (subtitleEl) {
+        subtitleEl.textContent =
+          state.topicCalendarScope === 'single' && scopedTopic
+            ? 'Topic progress history • Tap a date to inspect'
+            : 'All topics progress • Tap a date to inspect';
+      }
+
+      const logs = getFilteredTopicCalendarLogs();
+      const byDate = new Map();
+      logs.forEach((entry) => {
+        if (!entry || !CalLogic.isValidDateKey(entry.dateKey)) return;
+        if (!byDate.has(entry.dateKey)) byDate.set(entry.dateKey, []);
+        byDate.get(entry.dateKey).push(entry);
+      });
+
+      const year = state.topicCalendarYear;
+      const month = state.topicCalendarMonth;
+      const monthPrefix = `${year}-${String(month + 1).padStart(2, '0')}-`;
+      let activeDaysInMonth = 0;
+      byDate.forEach((_, dk) => {
+        if (dk.startsWith(monthPrefix)) activeDaysInMonth += 1;
+      });
+
+      if (activeCountEl) {
+        activeCountEl.textContent = `${activeDaysInMonth} active ${activeDaysInMonth === 1 ? 'day' : 'days'}`;
+      }
+      if (monthLabelEl) {
+        monthLabelEl.textContent = `${CalLogic.MONTH_NAMES_FULL[month]} ${year}`;
+      }
+
+      const todayKey = getTodayDateKey();
+      if (gridEl) {
+        const firstDay = new Date(year, month, 1);
+        const startOffset = (firstDay.getDay() + 6) % 7; // Monday-first
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        let cells = '';
+
+        for (let i = 0; i < startOffset; i++) {
+          cells += `<div class="h-9"></div>`;
+        }
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const dk = CalLogic.formatDateKey(new Date(year, month, d));
+          const entries = byDate.get(dk) || [];
+          const hasProgress = entries.length > 0;
+          const isSelected = state.topicCalendarSelectedDate === dk;
+          const isToday = dk === todayKey;
+
+          const stateCls = hasProgress
+            ? 'bg-coral text-onaccent'
+            : isToday
+              ? 'bg-pillbg text-coral border border-coral'
+              : 'bg-pillbg text-secondarytext border border-borderline';
+
+          const ringCls = isSelected ? 'ring-2 ring-primarytext ring-offset-1 ring-offset-cardbg' : '';
+          const countPip =
+            entries.length > 1
+              ? `<span class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-onaccent/85"></span>`
+              : '';
+
+          cells += `
+            <button
+              type="button"
+              onclick="selectTopicCalendarDate('${dk}')"
+              class="tactile-btn relative h-9 rounded-xl text-xs font-bold flex items-center justify-center ${stateCls} ${ringCls}"
+            >
+              <span>${d}</span>
+              ${countPip}
+            </button>
+          `;
+        }
+        gridEl.innerHTML = cells;
+      }
+
+      const selectedKey = state.topicCalendarSelectedDate || todayKey;
+      const selectedEntries = byDate.get(selectedKey) || [];
+      if (dayHeadingEl) {
+        dayHeadingEl.textContent = CalLogic.formatHumanDate(selectedKey, 'weekday-compact');
+      }
+      if (dayBadgeEl) {
+        dayBadgeEl.textContent = `${selectedEntries.length} ${selectedEntries.length === 1 ? 'update' : 'updates'}`;
+      }
+
+      if (dayLogEl) {
+        if (selectedEntries.length === 0) {
+          dayLogEl.innerHTML = `<p class="text-[11.5px] text-mutedtext py-2 text-center">No topic progress recorded on this day.</p>`;
+        } else {
+          const kindLabels = {
+            milestone: 'Milestone',
+            drill: 'Drill',
+            resource: 'Resource',
+            achievement: 'Achievement',
+          };
+          dayLogEl.innerHTML = selectedEntries
+            .map((entry) => {
+              const kindText = kindLabels[entry.kind] || 'Progress';
+              const subMeta = entry.skillTitle
+                ? `${escapeHtml(entry.topicTitle)} · ${escapeHtml(entry.skillTitle)}`
+                : escapeHtml(entry.topicTitle || 'Topic');
+              return `
+                <div class="rounded-xl bg-pillbg border border-borderline px-3 py-2 flex items-start justify-between gap-2">
+                  <div class="min-w-0">
+                    <p class="text-xs font-semibold text-primarytext leading-snug">${escapeHtml(entry.itemTitle)}</p>
+                    <p class="text-[10.5px] text-secondarytext truncate mt-0.5">${subMeta}</p>
+                  </div>
+                  <span class="px-2 py-0.5 rounded-full bg-cardbg border border-borderline text-[9.5px] font-bold uppercase tracking-wider text-coral whitespace-nowrap shrink-0">
+                    ${kindText}
+                  </span>
+                </div>
+              `;
+            })
+            .join('');
+        }
+      }
+    }
+
     function toggleTopicDrillDone(branchId, drillId) {
       const ctx = getActiveTopicContext();
       const topic = ctx ? ctx.activeNode : null;
@@ -14536,6 +15829,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (branch && branch.drills.length > 0 && branch.drills.every((d) => d.done)) {
         branch.status = 'mastered';
       }
+      logTopicProgressEvent({
+        rootTopic: ctx.rootTopic,
+        activeNode: branch || topic,
+        itemId: drill.id,
+        itemTitle: drill.title,
+        kind: 'drill',
+        completed: drill.done,
+      });
       const afterLvl = ProgLogic.computeTopicProgress(ctx.rootTopic).level;
       playSfx(afterLvl > beforeLvl ? 'levelUp' : drill.done ? 'complete' : 'uncheck');
       saveState();
@@ -14551,6 +15852,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const beforeLvl = ProgLogic.computeTopicProgress(ctx.rootTopic).level;
       drill.count = (drill.count || 0) + 1;
       drill.done = true;
+      logTopicProgressEvent({
+        rootTopic: ctx.rootTopic,
+        activeNode: branch || topic,
+        itemId: drill.id,
+        itemTitle: drill.title,
+        kind: 'drill',
+        completed: true,
+      });
       const afterLvl = ProgLogic.computeTopicProgress(ctx.rootTopic).level;
       playSfx(afterLvl > beforeLvl ? 'levelUp' : 'complete');
       saveState();
@@ -14578,6 +15887,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       recordProgressMutation(() => {
         les.done = !les.done;
         mod.done = mod.lessons.length > 0 && mod.lessons.every((l) => l.done);
+        logTopicProgressEvent({
+          rootTopic: ctx.rootTopic,
+          activeNode: topic,
+          itemId: les.id,
+          itemTitle: les.title,
+          kind: 'milestone',
+          completed: les.done,
+        });
       });
       const afterLvl = ProgLogic.computeTopicProgress(ctx.rootTopic).level;
       playSfx(afterLvl > beforeLvl ? 'levelUp' : les.done ? 'complete' : 'uncheck');
@@ -14620,6 +15937,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const ach = topic?.achievements.find((item) => item.id === achId);
       if (!ach) return;
       ach.unlocked = !ach.unlocked;
+      logTopicProgressEvent({
+        rootTopic: ctx.rootTopic,
+        activeNode: topic,
+        itemId: ach.id,
+        itemTitle: ach.title,
+        kind: 'achievement',
+        completed: ach.unlocked,
+      });
       playSfx(ach.unlocked ? 'levelUp' : 'uncheck');
       saveState();
       renderTopicDetailView(topic, ctx.chain);
@@ -14631,6 +15956,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const res = topic?.resources.find((item) => item.id === resId);
       if (!res) return;
       res.done = !res.done;
+      logTopicProgressEvent({
+        rootTopic: ctx.rootTopic,
+        activeNode: topic,
+        itemId: res.id,
+        itemTitle: res.title,
+        kind: 'resource',
+        completed: res.done,
+      });
       playSfx(res.done ? 'complete' : 'uncheck');
       saveState();
       renderTopicDetailView(topic, ctx.chain);
@@ -15510,6 +16843,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       } catch (_) {}
 
       loadState();
+      seedInitialTopicProgressLogIfEmpty();
       syncTaskCompartments();
       computeSelectedDayRings();
       applyThemeAndAccent(state.themeId || 'charcoal', state.accentKey || 'coral');
@@ -15529,6 +16863,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       applySfxPreference();
       renderNotificationSettingsControls();
       appBootReady = true;
+      checkAndRunDailyAppOpenTear();
 
       if (state.notificationsEnabled && window.StructuredNotificationEngine) {
         window.StructuredNotificationEngine.requestPermissions().then(() => {

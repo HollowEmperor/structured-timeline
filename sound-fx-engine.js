@@ -16,6 +16,7 @@ export const SFX_CUES = [
   'create',
   'levelUp',
   'paperStab',
+  'paperTear',
   'holePunch',
   'swipeKeep',
   'swipeArchive',
@@ -40,6 +41,7 @@ const CUE_COOLDOWN_MS = {
   create: 80,
   levelUp: 240,
   paperStab: 55,
+  paperTear: 38,
   holePunch: 90,
   swipeKeep: 70,
   swipeArchive: 70,
@@ -248,6 +250,14 @@ export function createSoundFXEngine(options = {}) {
         case 'paperStab':
           playFilteredNoise(audioCtx, { filterType: 'highpass', freq: 1400, endFreq: 900, q: 0.9, duration: 0.055, gain: 0.095 });
           playTone(audioCtx, { type: 'sine', freq: 210, endFreq: 96, delay: 0.02, duration: 0.075, gain: 0.22, attack: 0.004, filterFreq: 800 });
+          break;
+
+        case 'paperTear':
+          // Crisp, short, dry small-page flip / flick (inspired by small notebook/calendar page turn)
+          playFilteredNoise(audioCtx, { filterType: 'bandpass', freq: 1850, endFreq: 3150, q: 1.5, duration: 0.046, gain: 0.145 });
+          playFilteredNoise(audioCtx, { filterType: 'bandpass', freq: 2550, endFreq: 1220, q: 1.65, delay: 0.018, duration: 0.072, gain: 0.175 });
+          playFilteredNoise(audioCtx, { filterType: 'highpass', freq: 2200, endFreq: 1380, q: 0.9, delay: 0.044, duration: 0.052, gain: 0.068 });
+          playTone(audioCtx, { type: 'triangle', freq: 620, endFreq: 940, delay: 0.01, duration: 0.038, gain: 0.022, attack: 0.004, filterFreq: 1800 });
           break;
 
         case 'holePunch':
