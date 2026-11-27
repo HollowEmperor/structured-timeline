@@ -11,18 +11,20 @@
  */
 
 export const BOARD_SIZE = 420;
-export const FRAME_WIDTH = 28;
+export const FRAME_WIDTH = 34;
 export const PLAY_MIN = FRAME_WIDTH;
 export const PLAY_MAX = BOARD_SIZE - FRAME_WIDTH;
 export const PLAY_CENTER = BOARD_SIZE / 2;
 
-export const COIN_RADIUS = 16;
+export const COIN_RADIUS = 17;
 export const STRIKER_RADIUS = 19;
-export const POCKET_RADIUS = 22;
-export const POCKET_CAPTURE_RADIUS = 23;
-export const STRIKER_BASELINE_Y = PLAY_MAX - 58;
-export const STRIKER_MIN_X = PLAY_MIN + 56;
-export const STRIKER_MAX_X = PLAY_MAX - 56;
+export const POCKET_RADIUS = 18;
+export const POCKET_RIM_RADIUS = POCKET_RADIUS + 2;
+export const POCKET_INSET = POCKET_RIM_RADIUS + 3; // 23px inside PLAY_MIN/PLAY_MAX -> strictly inside playing field
+export const POCKET_CAPTURE_RADIUS = 22;
+export const STRIKER_BASELINE_Y = PLAY_MAX - 56;
+export const STRIKER_MIN_X = PLAY_MIN + 60;
+export const STRIKER_MAX_X = PLAY_MAX - 60;
 export const MAX_SHOT_SPEED = 21;
 
 export const CARROM_POCKETS = [
@@ -30,10 +32,10 @@ export const CARROM_POCKETS = [
     id: 'scheduling',
     corner: 'tl',
     label: 'Schedule',
-    shortLabel: 'SCHED',
+    shortLabel: 'SCHEDULE',
     color: '#F28B82',
-    x: PLAY_MIN + 19,
-    y: PLAY_MIN + 19,
+    x: PLAY_MIN + POCKET_INSET,
+    y: PLAY_MIN + POCKET_INSET,
   },
   {
     id: 'notes',
@@ -41,8 +43,8 @@ export const CARROM_POCKETS = [
     label: 'Notes',
     shortLabel: 'NOTES',
     color: '#6EA8D8',
-    x: PLAY_MAX - 19,
-    y: PLAY_MIN + 19,
+    x: PLAY_MAX - POCKET_INSET,
+    y: PLAY_MIN + POCKET_INSET,
   },
   {
     id: 'journal',
@@ -50,8 +52,8 @@ export const CARROM_POCKETS = [
     label: 'Journal',
     shortLabel: 'JOURNAL',
     color: '#81C953',
-    x: PLAY_MIN + 19,
-    y: PLAY_MAX - 19,
+    x: PLAY_MIN + POCKET_INSET,
+    y: PLAY_MAX - POCKET_INSET,
   },
   {
     id: 'archive',
@@ -59,15 +61,15 @@ export const CARROM_POCKETS = [
     label: 'Archive',
     shortLabel: 'ARCHIVE',
     color: '#9A9AA0',
-    x: PLAY_MAX - 19,
-    y: PLAY_MAX - 19,
+    x: PLAY_MAX - POCKET_INSET,
+    y: PLAY_MAX - POCKET_INSET,
   },
 ];
 
 const COIN_TONES = [
-  { fill: '#F7E7CE', ring: '#C9A875', text: '#2B1F14' }, // Ivory wood
-  { fill: '#3A322C', ring: '#7D6A58', text: '#F5EDE0' }, // Ebony wood
-  { fill: '#D95D5D', ring: '#F4A6A6', text: '#FFF8F6' }, // Queen crimson
+  { fill: '#F7E7CE', ring: '#C9A875', text: '#2B1F14' },
+  { fill: '#3A322C', ring: '#7D6A58', text: '#F5EDE0' },
+  { fill: '#D95D5D', ring: '#F4A6A6', text: '#FFF8F6' },
 ];
 
 export function createInitialStriker(x = PLAY_CENTER) {
@@ -88,9 +90,11 @@ export function clamp(val, min, max) {
 
 /**
  * Generates non-overlapping carrom coin positions packed around the center rose.
+ * When opts.singleCoin is true, only the head (active) brain dump item spawns at center.
  */
-export function layoutBrainDumpCoins(items, existingCoins = []) {
-  const list = Array.isArray(items) ? items : [];
+export function layoutBrainDumpCoins(items, existingCoins = [], opts = {}) {
+  const rawList = Array.isArray(items) ? items : [];
+  const list = opts && opts.singleCoin ? rawList.slice(0, 1) : rawList;
   const prevById = new Map((existingCoins || []).map((c) => [String(c.id), c]));
   const coins = [];
 
@@ -361,6 +365,8 @@ if (typeof window !== 'undefined') {
     COIN_RADIUS,
     STRIKER_RADIUS,
     POCKET_RADIUS,
+    POCKET_RIM_RADIUS,
+    POCKET_INSET,
     POCKET_CAPTURE_RADIUS,
     STRIKER_BASELINE_Y,
     STRIKER_MIN_X,

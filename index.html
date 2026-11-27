@@ -1702,10 +1702,7 @@
       <!-- VIEW 2: BRAIN DUMP (Playable 4-Pocket Carrom Board Game + Archive) -->
       <section id="view-inbox" class="hidden flex-1 overflow-y-auto no-scrollbar px-4 lg:px-8 pb-24 lg:pb-14 pt-3 lg:pt-5 space-y-4">
         <div class="flex items-center justify-between gap-3">
-          <div class="min-w-0">
-            <h2 class="font-display text-xl lg:text-2xl font-bold text-primarytext">Brain Dump Carrom</h2>
-            <p class="text-xs text-secondarytext truncate">Pull back the striker to pocket thoughts into Schedule, Notes, Journal, or Archive.</p>
-          </div>
+          <h2 class="font-display text-xl lg:text-2xl font-bold text-primarytext">Brain Dump</h2>
           <div class="flex items-center gap-1.5 flex-shrink-0">
             <button
               type="button"
@@ -1721,10 +1718,10 @@
             <button
               type="button"
               onclick="resetCarromBoardLayout()"
-              title="Re-rack coins at center"
+              title="Center coin & striker"
               class="tactile-btn px-3 py-1.5 rounded-xl bg-cardbg border border-borderline text-xs font-semibold text-secondarytext hover:text-primarytext hover:border-coral/60 whitespace-nowrap shrink-0"
             >
-              Re-rack
+              Center
             </button>
           </div>
         </div>
@@ -1735,81 +1732,93 @@
               <input
                 id="quick-inbox-input"
                 type="text"
-                placeholder="Drop a thought onto the Carrom board..."
+                placeholder="Dump a thought onto the board..."
                 class="flex-1 bg-cardbg text-sm text-primarytext placeholder-mutedtext px-3.5 py-2.5 rounded-2xl border border-borderline focus:border-coral focus:outline-none"
               />
               <button type="submit" class="tactile-btn bg-coral text-onaccent font-semibold text-sm px-4 py-2.5 rounded-2xl whitespace-nowrap shrink-0">
-                Drop Coin
+                Add
               </button>
             </form>
 
-            <!-- Carrom Board Stage -->
-            <div class="rounded-[24px] bg-cardbg border border-borderline p-3 sm:p-4 space-y-3">
-              <!-- 4 Corner Pocket Legend + Session Counters -->
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[11px] font-semibold">
-                <div class="flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-xl bg-pillbg border border-borderline">
-                  <span class="flex items-center gap-1.5 min-w-0">
-                    <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#F28B82;"></span>
-                    <span class="text-primarytext truncate">TL · Schedule</span>
-                  </span>
-                  <span id="carrom-count-scheduling" class="text-secondarytext tabular-nums">0</span>
+            <!-- Active Coin Card (Top, directly above the board) -->
+            <div id="carrom-active-coin-bar" class="max-w-[440px] mx-auto rounded-2xl bg-cardbg border border-borderline p-3.5 space-y-2.5">
+              <div class="flex items-start justify-between gap-2.5">
+                <div class="min-w-0">
+                  <p id="carrom-active-coin-meta" class="text-[11px] font-semibold text-secondarytext">Active Coin</p>
+                  <p id="carrom-active-coin-text" class="font-display text-base font-bold text-primarytext leading-snug mt-0.5 break-words">No coins on board</p>
                 </div>
-                <div class="flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-xl bg-pillbg border border-borderline">
-                  <span class="flex items-center gap-1.5 min-w-0">
-                    <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#6EA8D8;"></span>
-                    <span class="text-primarytext truncate">TR · Notes</span>
-                  </span>
-                  <span id="carrom-count-notes" class="text-secondarytext tabular-nums">0</span>
-                </div>
-                <div class="flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-xl bg-pillbg border border-borderline">
-                  <span class="flex items-center gap-1.5 min-w-0">
-                    <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#81C953;"></span>
-                    <span class="text-primarytext truncate">BL · Journal</span>
-                  </span>
-                  <span id="carrom-count-journal" class="text-secondarytext tabular-nums">0</span>
-                </div>
-                <div class="flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-xl bg-pillbg border border-borderline">
-                  <span class="flex items-center gap-1.5 min-w-0">
-                    <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#9A9AA0;"></span>
-                    <span class="text-primarytext truncate">BR · Archive</span>
-                  </span>
-                  <span id="carrom-count-archive" class="text-secondarytext tabular-nums">0</span>
-                </div>
+                <span id="carrom-coins-remaining" class="text-[11px] font-semibold text-secondarytext tabular-nums whitespace-nowrap shrink-0">0 left</span>
               </div>
+              <div class="grid grid-cols-4 gap-1.5">
+                <button
+                  type="button"
+                  data-carrom-flick="scheduling"
+                  onclick="flickSelectedCoinToPocket('scheduling')"
+                  class="tactile-btn py-1.5 px-2 rounded-xl bg-pillbg border border-borderline hover:border-coral text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#F28B82;"></span>
+                  <span>Schedule</span>
+                </button>
+                <button
+                  type="button"
+                  data-carrom-flick="notes"
+                  onclick="flickSelectedCoinToPocket('notes')"
+                  class="tactile-btn py-1.5 px-2 rounded-xl bg-pillbg border border-borderline hover:border-sky text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#6EA8D8;"></span>
+                  <span>Notes</span>
+                </button>
+                <button
+                  type="button"
+                  data-carrom-flick="journal"
+                  onclick="flickSelectedCoinToPocket('journal')"
+                  class="tactile-btn py-1.5 px-2 rounded-xl bg-pillbg border border-borderline hover:border-lime text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#81C953;"></span>
+                  <span>Journal</span>
+                </button>
+                <button
+                  type="button"
+                  data-carrom-flick="archive"
+                  onclick="flickSelectedCoinToPocket('archive')"
+                  class="tactile-btn py-1.5 px-2 rounded-xl bg-pillbg border border-borderline hover:border-secondarytext text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#9A9AA0;"></span>
+                  <span>Archive</span>
+                </button>
+              </div>
+            </div>
 
-              <!-- Square Playable Carrom Canvas -->
-              <div class="relative w-full max-w-[430px] mx-auto aspect-square select-none">
+            <!-- Theme-Matched Carrom Board Stage -->
+            <div class="max-w-[440px] mx-auto space-y-2.5">
+              <div class="relative w-full aspect-square select-none">
                 <canvas
                   id="carrom-board-canvas"
                   width="420"
                   height="420"
                   style="touch-action: none;"
-                  class="w-full h-full rounded-[22px] block cursor-crosshair shadow-xl"
+                  class="w-full h-full rounded-[24px] block cursor-crosshair border border-borderline"
                 ></canvas>
-                <div id="carrom-empty-overlay" class="hidden absolute inset-6 rounded-2xl bg-[#1A1410]/85 backdrop-blur-sm border border-[#D4B483]/35 flex flex-col items-center justify-center p-5 text-center space-y-2">
-                  <p class="font-display text-base font-bold text-[#F7E7CE]">Board Cleared</p>
-                  <p class="text-xs text-[#D6C6B2] max-w-[240px]">Drop a new thought above or restore an archived thought to play another round.</p>
+                <div id="carrom-empty-overlay" class="hidden absolute inset-5 rounded-2xl bg-appbg/92 backdrop-blur-sm border border-borderline flex flex-col items-center justify-center p-5 text-center space-y-2.5">
+                  <p class="font-display text-base font-bold text-primarytext">Brain Dump Cleared</p>
+                  <p class="text-xs text-secondarytext max-w-[230px]">Add a thought above or open Schedule to batch queued tasks.</p>
                   <button
                     type="button"
                     onclick="openTaskSwipeScheduler()"
-                    class="tactile-btn mt-1 px-3.5 py-2 rounded-xl bg-coral text-onaccent text-xs font-semibold whitespace-nowrap"
+                    class="tactile-btn mt-1 px-4 py-2 rounded-xl bg-coral text-onaccent text-xs font-semibold whitespace-nowrap"
                   >
-                    Open Task Swipe Scheduler
+                    Open Schedule
                   </button>
                 </div>
               </div>
 
-              <!-- Striker Baseline Position Slider -->
-              <div class="max-w-[430px] mx-auto space-y-1.5">
-                <div class="flex items-center justify-between text-[11px] text-secondarytext">
-                  <span class="font-semibold text-primarytext">Striker Position</span>
-                  <span id="carrom-status-hint" class="truncate">Drag striker back to aim &amp; shoot</span>
-                </div>
+              <!-- Minimal Striker Baseline Position Slider -->
+              <div class="px-1">
                 <input
                   id="carrom-striker-slider"
                   type="range"
-                  min="84"
-                  max="336"
+                  min="94"
+                  max="326"
                   step="1"
                   value="210"
                   oninput="handleCarromStrikerSlider(this.value)"
@@ -1817,63 +1826,14 @@
                   aria-label="Position striker along baseline"
                 />
               </div>
-
-              <!-- Selected Coin Readout + Direct Pocket Flick Controls -->
-              <div id="carrom-active-coin-bar" class="max-w-[430px] mx-auto rounded-2xl bg-pillbg border border-borderline p-3 space-y-2.5">
-                <div class="flex items-start justify-between gap-2">
-                  <div class="min-w-0">
-                    <p id="carrom-active-coin-meta" class="text-[11px] font-semibold text-secondarytext">Tap a coin on the board to inspect</p>
-                    <p id="carrom-active-coin-text" class="text-sm font-semibold text-primarytext leading-snug mt-0.5 break-words">No coins on board</p>
-                  </div>
-                  <span id="carrom-coins-remaining" class="text-[11px] font-bold text-coral tabular-nums whitespace-nowrap shrink-0">0 left</span>
-                </div>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                  <button
-                    type="button"
-                    data-carrom-flick="scheduling"
-                    onclick="flickSelectedCoinToPocket('scheduling')"
-                    class="tactile-btn py-2 px-2 rounded-xl bg-cardbg border border-borderline hover:border-coral text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
-                  >
-                    <span class="w-1.5 h-1.5 rounded-full" style="background:#F28B82;"></span>
-                    <span>Schedule</span>
-                  </button>
-                  <button
-                    type="button"
-                    data-carrom-flick="notes"
-                    onclick="flickSelectedCoinToPocket('notes')"
-                    class="tactile-btn py-2 px-2 rounded-xl bg-cardbg border border-borderline hover:border-sky text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
-                  >
-                    <span class="w-1.5 h-1.5 rounded-full" style="background:#6EA8D8;"></span>
-                    <span>Notes</span>
-                  </button>
-                  <button
-                    type="button"
-                    data-carrom-flick="journal"
-                    onclick="flickSelectedCoinToPocket('journal')"
-                    class="tactile-btn py-2 px-2 rounded-xl bg-cardbg border border-borderline hover:border-lime text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
-                  >
-                    <span class="w-1.5 h-1.5 rounded-full" style="background:#81C953;"></span>
-                    <span>Journal</span>
-                  </button>
-                  <button
-                    type="button"
-                    data-carrom-flick="archive"
-                    onclick="flickSelectedCoinToPocket('archive')"
-                    class="tactile-btn py-2 px-2 rounded-xl bg-cardbg border border-borderline hover:border-secondarytext text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
-                  >
-                    <span class="w-1.5 h-1.5 rounded-full" style="background:#9A9AA0;"></span>
-                    <span>Archive</span>
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
 
-          <!-- Right Column / Below: Coins Roster + Archived List -->
+          <!-- Right Column / Below: Up Next Queue + Archived List -->
           <div class="pt-2 border-t border-borderline xl:border-t-0 xl:border-l xl:pl-6 xl:pt-0 space-y-4">
             <div class="space-y-2">
               <div class="flex items-center justify-between">
-                <p class="text-xs font-semibold uppercase tracking-wider text-secondarytext">Coins on Board</p>
+                <p class="text-xs font-semibold uppercase tracking-wider text-secondarytext">Up Next</p>
                 <span id="carrom-board-roster-count" class="text-xs text-mutedtext tabular-nums">0</span>
               </div>
               <div id="carrom-coin-roster-list" class="space-y-1.5 max-h-[210px] overflow-y-auto no-scrollbar"></div>
@@ -1881,7 +1841,7 @@
 
             <div class="pt-3 border-t border-borderline/70 space-y-2">
               <div class="flex items-center justify-between">
-                <p class="text-xs font-semibold uppercase tracking-wider text-secondarytext">Archived Pocket</p>
+                <p class="text-xs font-semibold uppercase tracking-wider text-secondarytext">Archived</p>
                 <span id="archive-count-label" class="text-xs text-mutedtext">0 items</span>
               </div>
               <div id="archived-dump-list" class="space-y-2"></div>
@@ -3548,7 +3508,7 @@
 
     <!-- 4-Way Tinder Swipe Task Batch Scheduler Page / Modal -->
     <div id="task-swipe-scheduler-modal" class="hidden absolute inset-0 z-[54] bg-appbg flex flex-col">
-      <!-- Top Bar -->
+      <!-- Minimal Top Bar -->
       <div class="px-4 lg:px-7 py-3.5 border-b border-borderline flex items-center justify-between gap-3 flex-shrink-0">
         <div class="flex items-center gap-2.5 min-w-0">
           <button
@@ -3559,18 +3519,13 @@
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
-          <div class="min-w-0">
-            <h3 class="font-display text-base sm:text-lg font-bold tracking-tight text-primarytext truncate">
-              Schedule <span class="text-coral">&amp; Batch</span>
-            </h3>
-            <p id="task-swipe-subtitle" class="text-[11px] text-secondarytext truncate">
-              Swipe Up Urgency · Right Location/Route · Down Time · Left Energy
-            </p>
-          </div>
+          <h3 class="font-display text-base sm:text-lg font-bold tracking-tight text-primarytext truncate">
+            Schedule <span class="text-coral">&amp; Batch</span>
+          </h3>
         </div>
 
         <div class="flex items-center gap-2 flex-shrink-0">
-          <!-- Mobile Switcher: Deck vs Batches -->
+          <!-- Mobile Switcher: Swipe vs Batches -->
           <div class="lg:hidden flex items-center rounded-xl bg-cardbg border border-borderline p-0.5 text-xs font-semibold">
             <button
               type="button"
@@ -3589,117 +3544,81 @@
               Batches <span id="task-swipe-batched-count-tab" class="tabular-nums">0</span>
             </button>
           </div>
-
-          <button
-            type="button"
-            id="task-swipe-undo-btn"
-            onclick="undoLastTaskBatchSwipe()"
-            disabled
-            title="Undo last swipe (Z)"
-            class="tactile-btn px-3 py-1.5 rounded-xl bg-cardbg border border-borderline text-xs font-semibold text-primarytext hover:border-coral disabled:opacity-35 whitespace-nowrap shrink-0 flex items-center gap-1.5"
-          >
-            <svg class="w-3.5 h-3.5 text-coral" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/></svg>
-            <span>Undo</span>
-          </button>
         </div>
       </div>
 
       <!-- Body -->
       <div class="flex-1 min-h-0 overflow-y-auto no-scrollbar p-4 lg:p-6">
-        <div class="max-w-5xl mx-auto h-full flex flex-col lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)] gap-5">
-          <!-- Left / Primary: 4-Way Swipe Deck Arena -->
-          <div id="task-swipe-deck-pane" class="flex flex-col space-y-3.5">
-            <form onsubmit="handleSwipeSchedQuickAdd(event)" class="flex items-center gap-2">
-              <input
-                id="swipe-sched-quick-add"
-                type="text"
-                placeholder="Add a task directly to the swipe deck..."
-                class="flex-1 bg-cardbg text-sm text-primarytext placeholder-mutedtext px-3.5 py-2.5 rounded-2xl border border-borderline focus:border-coral focus:outline-none"
-              />
-              <button type="submit" class="tactile-btn px-4 py-2.5 rounded-2xl bg-cardbg border border-borderline hover:border-coral text-xs font-semibold text-primarytext whitespace-nowrap shrink-0">
-                + Queue
-              </button>
-            </form>
+        <div class="max-w-5xl mx-auto h-full flex flex-col lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(300px,0.9fr)] gap-6 items-center lg:items-stretch">
+          <!-- Left / Primary: Clean Dating-App Style Swipe Deck -->
+          <div id="task-swipe-deck-pane" class="w-full max-w-[390px] lg:max-w-none mx-auto flex flex-col justify-center items-center py-4 space-y-6">
+            <div id="task-swipe-deck-stage" class="relative w-full max-w-[360px] h-[306px] flex items-center justify-center"></div>
 
-            <!-- 4-Way Compass Arena -->
-            <div class="flex-1 flex flex-col justify-center rounded-[26px] bg-sheetbg border border-borderline p-3.5 sm:p-5 space-y-3">
-              <!-- TOP: UP = URGENCY -->
-              <div
-                id="swipe-zone-up"
-                class="flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-borderline/70 bg-cardbg/60 text-xs font-bold tracking-wide uppercase transition-all"
-                style="color:#F6C244;"
-              >
-                <span>↑</span>
-                <span>Urgency</span>
-              </div>
-
-              <!-- MIDDLE ROW: LEFT (ENERGY) + DECK STAGE + RIGHT (LOCATION/ROUTE) -->
-              <div class="grid grid-cols-[44px_minmax(0,1fr)_44px] sm:grid-cols-[72px_minmax(0,1fr)_72px] items-center gap-2 sm:gap-3">
-                <div
-                  id="swipe-zone-left"
-                  class="h-[250px] rounded-xl border border-borderline/70 bg-cardbg/60 flex flex-col items-center justify-center gap-1 px-1 text-center transition-all"
-                  style="color:#81C953;"
-                >
-                  <span class="text-sm font-bold">←</span>
-                  <span class="text-[10px] font-bold uppercase tracking-wider leading-tight">Energy</span>
-                </div>
-
-                <div id="task-swipe-deck-stage" class="relative h-[268px] w-full flex items-center justify-center"></div>
-
-                <div
-                  id="swipe-zone-right"
-                  class="h-[250px] rounded-xl border border-borderline/70 bg-cardbg/60 flex flex-col items-center justify-center gap-1 px-1 text-center transition-all"
-                  style="color:#F28B82;"
-                >
-                  <span class="text-sm font-bold">→</span>
-                  <span class="text-[10px] font-bold uppercase tracking-wider leading-tight">Route</span>
-                </div>
-              </div>
-
-              <!-- BOTTOM: DOWN = TIME -->
-              <div
-                id="swipe-zone-down"
-                class="flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-borderline/70 bg-cardbg/60 text-xs font-bold tracking-wide uppercase transition-all"
-                style="color:#6EA8D8;"
-              >
-                <span>↓</span>
-                <span>Time</span>
-              </div>
-
-              <!-- Tactile 4-Direction Tap Controls -->
-              <div class="grid grid-cols-4 gap-2 pt-1">
-                <button
-                  type="button"
-                  onclick="triggerTaskBatchSwipe('up')"
-                  class="tactile-btn py-2.5 px-2 rounded-xl bg-cardbg border border-borderline hover:border-amber text-xs font-semibold text-primarytext flex flex-col items-center gap-0.5"
-                >
-                  <span class="text-sm font-bold" style="color:#F6C244;">↑</span>
-                  <span class="text-[11px] whitespace-nowrap">Urgency</span>
-                </button>
+            <!-- Minimal Circular Swipe Action Buttons (Left Energy · Up Urgency · Undo · Down Time · Right Route) -->
+            <div class="flex items-center justify-center gap-3.5 sm:gap-4">
+              <div class="flex flex-col items-center gap-1.5">
                 <button
                   type="button"
                   onclick="triggerTaskBatchSwipe('left')"
-                  class="tactile-btn py-2.5 px-2 rounded-xl bg-cardbg border border-borderline hover:border-lime text-xs font-semibold text-primarytext flex flex-col items-center gap-0.5"
+                  title="Batch by Energy (Left)"
+                  class="tactile-btn w-12 h-12 rounded-full bg-cardbg border border-borderline hover:border-lime flex items-center justify-center"
+                  style="color:#81C953;"
                 >
-                  <span class="text-sm font-bold" style="color:#81C953;">←</span>
-                  <span class="text-[11px] whitespace-nowrap">Energy</span>
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
                 </button>
+                <span class="text-[10.5px] font-medium text-secondarytext">Energy</span>
+              </div>
+
+              <div class="flex flex-col items-center gap-1.5">
+                <button
+                  type="button"
+                  onclick="triggerTaskBatchSwipe('up')"
+                  title="Batch by Urgency (Up)"
+                  class="tactile-btn w-12 h-12 rounded-full bg-cardbg border border-borderline hover:border-amber flex items-center justify-center"
+                  style="color:#F6C244;"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l-6 6m6-6l6 6"/></svg>
+                </button>
+                <span class="text-[10.5px] font-medium text-secondarytext">Urgency</span>
+              </div>
+
+              <div class="flex flex-col items-center gap-1.5">
+                <button
+                  type="button"
+                  id="task-swipe-undo-btn"
+                  onclick="undoLastTaskBatchSwipe()"
+                  disabled
+                  title="Undo last swipe"
+                  class="tactile-btn w-10 h-10 rounded-full bg-cardbg border border-borderline text-coral flex items-center justify-center disabled:opacity-35"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/></svg>
+                </button>
+                <span class="text-[10.5px] font-medium text-mutedtext">Undo</span>
+              </div>
+
+              <div class="flex flex-col items-center gap-1.5">
                 <button
                   type="button"
                   onclick="triggerTaskBatchSwipe('down')"
-                  class="tactile-btn py-2.5 px-2 rounded-xl bg-cardbg border border-borderline hover:border-sky text-xs font-semibold text-primarytext flex flex-col items-center gap-0.5"
+                  title="Batch by Time (Down)"
+                  class="tactile-btn w-12 h-12 rounded-full bg-cardbg border border-borderline hover:border-sky flex items-center justify-center"
+                  style="color:#6EA8D8;"
                 >
-                  <span class="text-sm font-bold" style="color:#6EA8D8;">↓</span>
-                  <span class="text-[11px] whitespace-nowrap">Time</span>
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5v4.5l3 2"/></svg>
                 </button>
+                <span class="text-[10.5px] font-medium text-secondarytext">Time</span>
+              </div>
+
+              <div class="flex flex-col items-center gap-1.5">
                 <button
                   type="button"
                   onclick="triggerTaskBatchSwipe('right')"
-                  class="tactile-btn py-2.5 px-2 rounded-xl bg-cardbg border border-borderline hover:border-coral text-xs font-semibold text-primarytext flex flex-col items-center gap-0.5"
+                  title="Batch by Location / Route (Right)"
+                  class="tactile-btn w-12 h-12 rounded-full bg-coral text-onaccent flex items-center justify-center"
                 >
-                  <span class="text-sm font-bold" style="color:#F28B82;">→</span>
-                  <span class="text-[11px] whitespace-nowrap">Location</span>
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
                 </button>
+                <span class="text-[10.5px] font-medium text-secondarytext">Route</span>
               </div>
             </div>
           </div>
@@ -8817,6 +8736,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (!document.getElementById('journal-energy-modal')?.classList.contains('hidden')) renderJournalEnergyModal();
       if (!document.getElementById('journal-mood-modal')?.classList.contains('hidden')) renderJournalMoodModal();
       if (typeof renderDesktopInspector === 'function') renderDesktopInspector();
+      if (typeof drawCarromBoard === 'function' && state.activeTab === 'inbox') drawCarromBoard();
       saveState();
     }
 
@@ -13303,7 +13223,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     window.applyRestoredPlannerBackup = applyRestoredPlannerBackup;
 
     // =========================================================================
-    // BRAIN DUMP — PLAYABLE 4-POCKET CARROM BOARD GAME
+    // BRAIN DUMP — THEME-MATCHED 4-POCKET CARROM BOARD (ONE COIN AT A TIME)
     // Pockets:
     //   TL -> Schedule (unscheduledQueue)
     //   TR -> Notes    (Step-by-Step Sticky Note in state.routines)
@@ -13317,11 +13237,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       aiming: false,
       aimTarget: null, // 'striker' | coinId
       pointerX: 210,
-      pointerY: 334,
+      pointerY: 330,
       rafId: null,
       particles: [],
       popups: [],
-      pocketCounts: { scheduling: 0, notes: 0, journal: 0, archive: 0 },
+      spawnScale: 1,
       lastClackMs: 0,
       boundCanvas: null,
     };
@@ -13330,23 +13250,67 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       return window.CarromBrainDumpLogic || null;
     }
 
+    function readCssRgbTriplet(varName, fallback = '35 35 37') {
+      try {
+        const raw = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+        return raw || fallback;
+      } catch (_) {
+        return fallback;
+      }
+    }
+
+    function rgbVar(varName, alpha = 1, fallback = '35 35 37') {
+      const triplet = readCssRgbTriplet(varName, fallback).replace(/\s+/g, ', ');
+      return alpha >= 1 ? `rgb(${triplet})` : `rgba(${triplet}, ${alpha})`;
+    }
+
+    function getCarromThemePalette() {
+      let accentHex = '#F28B82';
+      try {
+        const raw = getComputedStyle(document.documentElement).getPropertyValue('--color-accent-hex').trim();
+        if (raw) accentHex = raw;
+      } catch (_) {}
+      const isLight = document.documentElement.dataset.theme === 'paper';
+      return {
+        isLight,
+        outerBg: rgbVar('--color-outerbg', 1, '13 13 14'),
+        appBg: rgbVar('--color-appbg', 1, '20 20 20'),
+        sheetBg: rgbVar('--color-sheetbg', 1, '35 35 37'),
+        cardBg: rgbVar('--color-cardbg', 1, '43 43 46'),
+        pillBg: rgbVar('--color-pillbg', 1, '51 51 55'),
+        border: rgbVar('--color-borderline', 1, '58 58 63'),
+        borderSoft: rgbVar('--color-borderline', 0.55, '58 58 63'),
+        primaryText: rgbVar('--color-primarytext', 1, '245 245 247'),
+        secondaryText: rgbVar('--color-secondarytext', 1, '154 154 160'),
+        mutedText: rgbVar('--color-mutedtext', 1, '110 110 117'),
+        onAccent: rgbVar('--color-on-accent', 1, '20 20 20'),
+        accent: accentHex,
+        accentSoft: rgbVar('--color-accent', 0.24, '242 139 130'),
+        accentMid: rgbVar('--color-accent', 0.55, '242 139 130'),
+      };
+    }
+
     function syncCarromCoinsFromState(forceRelayout = false) {
       const logic = getCarromLogic();
       if (!logic) return;
       if (!carromGame.striker) {
         carromGame.striker = logic.createInitialStriker();
       }
+      const prevHeadId = carromGame.coins[0] ? String(carromGame.coins[0].id) : null;
       carromGame.coins = logic.layoutBrainDumpCoins(
         state.inboxItems || [],
-        forceRelayout ? [] : carromGame.coins
+        forceRelayout ? [] : carromGame.coins,
+        { singleCoin: true }
       );
-      if (
-        carromGame.coins.length > 0 &&
-        !carromGame.coins.some((c) => String(c.id) === String(carromGame.selectedCoinId))
-      ) {
+      if (carromGame.coins.length > 0) {
+        const nextHeadId = String(carromGame.coins[0].id);
         carromGame.selectedCoinId = carromGame.coins[0].id;
-      } else if (carromGame.coins.length === 0) {
+        if (prevHeadId !== nextHeadId || forceRelayout) {
+          carromGame.spawnScale = 0.25;
+        }
+      } else {
         carromGame.selectedCoinId = null;
+        carromGame.spawnScale = 1;
       }
     }
 
@@ -13379,22 +13343,22 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function spawnCarromPocketBurst(x, y, color, label) {
-      for (let i = 0; i < 16; i += 1) {
-        const angle = (Math.PI * 2 * i) / 16 + Math.random() * 0.25;
-        const speed = 1.6 + Math.random() * 3.4;
+      for (let i = 0; i < 14; i += 1) {
+        const angle = (Math.PI * 2 * i) / 14 + Math.random() * 0.25;
+        const speed = 1.4 + Math.random() * 3.0;
         carromGame.particles.push({
           x,
           y,
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
-          r: 2.2 + Math.random() * 2.4,
+          r: 2 + Math.random() * 2.2,
           color,
           life: 1,
         });
       }
       carromGame.popups.push({
-        x: Math.max(76, Math.min(344, x)),
-        y: Math.max(60, Math.min(368, y)),
+        x: Math.max(82, Math.min(338, x)),
+        y: Math.max(66, Math.min(358, y)),
         label,
         color,
         life: 1,
@@ -13460,14 +13424,24 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         playSfx('swipeArchive');
       }
 
-      carromGame.pocketCounts[pocket.id] = (carromGame.pocketCounts[pocket.id] || 0) + 1;
       if (!Array.isArray(state.swipeHistory)) state.swipeHistory = [];
       state.swipeHistory.push(record);
 
       spawnCarromPocketBurst(pocket.x, pocket.y, pocket.color, `+ ${pocket.label.toUpperCase()}`);
+
+      // Drop the next queued thought coin cleanly onto center of the board
+      const logic = getCarromLogic();
+      if (logic) {
+        const slider = document.getElementById('carrom-striker-slider');
+        const nextX = slider ? Number(slider.value) : logic.PLAY_CENTER;
+        carromGame.striker = logic.createInitialStriker(nextX);
+      }
+      syncCarromCoinsFromState(true);
+
       saveState();
       syncTimelineScheduleBadge();
       updateCarromHudAndArchive();
+      ensureCarromLoop();
     }
 
     function undoLastCarromPocket() {
@@ -13500,16 +13474,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         state.archivedDumps = state.archivedDumps.filter((a) => String(a.id) !== String(last.item.id));
       }
 
-      if (carromGame.pocketCounts[pocketId] > 0) {
-        carromGame.pocketCounts[pocketId] -= 1;
-      }
-
       state.inboxItems.unshift(last.item);
       carromGame.selectedCoinId = last.item.id;
       playSfx('select');
       saveState();
       syncTimelineScheduleBadge();
-      renderInboxDeck();
+      renderInboxDeck(true);
     }
 
     function resetCarromBoardLayout() {
@@ -13520,7 +13490,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const slider = document.getElementById('carrom-striker-slider');
       if (slider) slider.value = String(Math.round(carromGame.striker.x));
       playSfx('select');
-      drawCarromBoard();
+      ensureCarromLoop();
       updateCarromHudAndArchive();
     }
 
@@ -13536,18 +13506,23 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function selectCarromCoin(id) {
+      const idx = (state.inboxItems || []).findIndex((item) => String(item.id) === String(id));
+      if (idx > 0) {
+        const [picked] = state.inboxItems.splice(idx, 1);
+        state.inboxItems.unshift(picked);
+        saveState();
+      }
       carromGame.selectedCoinId = id;
+      syncCarromCoinsFromState(true);
       playSfx('tick');
       updateCarromHudAndArchive();
-      drawCarromBoard();
+      ensureCarromLoop();
     }
 
     function flickSelectedCoinToPocket(pocketId) {
       const logic = getCarromLogic();
       if (!logic || carromGame.coins.length === 0) return;
-      const coin =
-        carromGame.coins.find((c) => String(c.id) === String(carromGame.selectedCoinId)) ||
-        carromGame.coins[0];
+      const coin = carromGame.coins[0];
       if (!coin) return;
       const impulse = logic.computeAssistedPocketImpulse(coin, pocketId, 16.5);
       coin.vx = impulse.vx;
@@ -13580,7 +13555,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
         if (!carromGame.striker) carromGame.striker = logic.createInitialStriker();
 
-        // Check if user grabbed striker (generous touch radius)
+        // Check if user grabbed striker
         if (!carromGame.striker.inMotion && !carromGame.striker.scratched) {
           const distStriker = Math.hypot(pt.x - carromGame.striker.x, pt.y - carromGame.striker.y);
           if (distStriker <= logic.STRIKER_RADIUS + 20) {
@@ -13592,21 +13567,20 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           }
         }
 
-        // Check if user tapped or pulled a specific coin
+        // Check if user grabbed the active coin directly for a slingshot flick
         for (let i = carromGame.coins.length - 1; i >= 0; i -= 1) {
           const c = carromGame.coins[i];
-          if (Math.hypot(pt.x - c.x, pt.y - c.y) <= c.r + 12) {
+          if (Math.hypot(pt.x - c.x, pt.y - c.y) <= c.r + 14) {
             carromGame.selectedCoinId = c.id;
             carromGame.aiming = true;
             carromGame.aimTarget = c.id;
             try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
-            updateCarromHudAndArchive();
             ensureCarromLoop();
             return;
           }
         }
 
-        // Otherwise allow sliding striker directly if tapping along the baseline strip
+        // Slide striker directly if tapping along the baseline strip
         if (!carromGame.striker.inMotion && Math.abs(pt.y - logic.STRIKER_BASELINE_Y) <= 30) {
           carromGame.striker.x = logic.clamp(pt.x, logic.STRIKER_MIN_X, logic.STRIKER_MAX_X);
           carromGame.striker.y = logic.STRIKER_BASELINE_Y;
@@ -13692,12 +13666,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         res.pocketed.forEach(({ coin, pocket }) => {
           routePocketedBrainDumpCoin(coin, pocket);
         });
-        if (
-          carromGame.coins.length > 0 &&
-          !carromGame.coins.some((c) => String(c.id) === String(carromGame.selectedCoinId))
-        ) {
-          carromGame.selectedCoinId = carromGame.coins[0].id;
-        }
+      }
+
+      if (carromGame.spawnScale < 1) {
+        carromGame.spawnScale = Math.min(1, carromGame.spawnScale + 0.14);
       }
 
       // Reset striker cleanly to baseline once all pieces settle
@@ -13715,15 +13687,15 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         const p = carromGame.particles[i];
         p.x += p.vx;
         p.y += p.vy;
-        p.vx *= 0.92;
-        p.vy *= 0.92;
-        p.life -= 0.045;
+        p.vx *= 0.91;
+        p.vy *= 0.91;
+        p.life -= 0.048;
         if (p.life <= 0) carromGame.particles.splice(i, 1);
       }
       for (let i = carromGame.popups.length - 1; i >= 0; i -= 1) {
         const pop = carromGame.popups[i];
-        pop.y -= 0.7;
-        pop.life -= 0.022;
+        pop.y -= 0.65;
+        pop.life -= 0.025;
         if (pop.life <= 0) carromGame.popups.splice(i, 1);
       }
 
@@ -13732,9 +13704,20 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       return (
         !res.allStopped ||
         carromGame.aiming ||
+        carromGame.spawnScale < 1 ||
         carromGame.particles.length > 0 ||
         carromGame.popups.length > 0
       );
+    }
+
+    function drawRoundedRectPath(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
     }
 
     function drawCarromBoard() {
@@ -13744,6 +13727,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
+      const pal = getCarromThemePalette();
       const S = logic.BOARD_SIZE;
       const F = logic.FRAME_WIDTH;
       const P0 = logic.PLAY_MIN;
@@ -13752,88 +13736,75 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       ctx.clearRect(0, 0, S, S);
 
-      // 1. Rich Rosewood Outer Frame
-      const frameGrad = ctx.createLinearGradient(0, 0, S, S);
-      frameGrad.addColorStop(0, '#4A2C1D');
-      frameGrad.addColorStop(0.5, '#341D12');
-      frameGrad.addColorStop(1, '#26140C');
-      ctx.fillStyle = frameGrad;
+      // 1. Matte Theme-Matched Outer Frame
+      ctx.fillStyle = pal.appBg;
       ctx.fillRect(0, 0, S, S);
 
-      // Inner brass bevel trim
-      ctx.strokeStyle = 'rgba(229, 193, 133, 0.35)';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(F - 2, F - 2, S - (F - 2) * 2, S - (F - 2) * 2);
+      // 2. Playing Surface (Sheet surface inset cleanly inside frame)
+      drawRoundedRectPath(ctx, P0, P0, P1 - P0, P1 - P0, 18);
+      ctx.fillStyle = pal.sheetBg;
+      ctx.fill();
+      ctx.strokeStyle = pal.border;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
 
-      // 2. Satin Birch Playing Surface
-      const surfGrad = ctx.createRadialGradient(C, C, 24, C, C, S * 0.65);
-      surfGrad.addColorStop(0, '#FAF0DC');
-      surfGrad.addColorStop(0.75, '#F0DFC1');
-      surfGrad.addColorStop(1, '#E2CAA2');
-      ctx.fillStyle = surfGrad;
-      ctx.fillRect(P0, P0, P1 - P0, P1 - P0);
-
-      // Subtle wood grain horizontal lines
-      ctx.strokeStyle = 'rgba(138, 97, 56, 0.06)';
-      ctx.lineWidth = 1;
-      for (let y = P0 + 14; y < P1; y += 16) {
-        ctx.beginPath();
-        ctx.moveTo(P0, y);
-        ctx.lineTo(P1, y);
-        ctx.stroke();
-      }
-
-      // 3. Traditional Center Rose Compass
+      // 3. Minimal Architectural Center Reticle
       ctx.save();
       ctx.translate(C, C - 14);
-      ctx.strokeStyle = 'rgba(176, 58, 58, 0.42)';
-      ctx.lineWidth = 1.6;
+      ctx.strokeStyle = pal.border;
+      ctx.lineWidth = 1.2;
       ctx.beginPath();
-      ctx.arc(0, 0, 56, 0, Math.PI * 2);
+      ctx.arc(0, 0, 54, 0, Math.PI * 2);
       ctx.stroke();
-      ctx.strokeStyle = 'rgba(54, 41, 31, 0.25)';
+
+      ctx.strokeStyle = pal.borderSoft;
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.arc(0, 0, 48, 0, Math.PI * 2);
+      ctx.arc(0, 0, 32, 0, Math.PI * 2);
       ctx.stroke();
-      // 8-point decorative compass star
-      for (let i = 0; i < 8; i += 1) {
-        const a = (Math.PI * 2 * i) / 8;
-        ctx.fillStyle = i % 2 === 0 ? 'rgba(176, 58, 58, 0.28)' : 'rgba(54, 41, 31, 0.18)';
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(Math.cos(a - 0.18) * 14, Math.sin(a - 0.18) * 14);
-        ctx.lineTo(Math.cos(a) * 44, Math.sin(a) * 44);
-        ctx.lineTo(Math.cos(a + 0.18) * 14, Math.sin(a + 0.18) * 14);
-        ctx.closePath();
-        ctx.fill();
-      }
-      ctx.fillStyle = '#C94C4C';
+
+      // Subtle crosshair ticks
+      ctx.strokeStyle = pal.borderSoft;
       ctx.beginPath();
-      ctx.arc(0, 0, 11, 0, Math.PI * 2);
+      ctx.moveTo(-62, 0);
+      ctx.lineTo(-38, 0);
+      ctx.moveTo(38, 0);
+      ctx.lineTo(62, 0);
+      ctx.moveTo(0, -62);
+      ctx.lineTo(0, -38);
+      ctx.moveTo(0, 38);
+      ctx.lineTo(0, 62);
+      ctx.stroke();
+
+      ctx.fillStyle = pal.accentSoft;
+      ctx.beginPath();
+      ctx.arc(0, 0, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = pal.accent;
+      ctx.beginPath();
+      ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
-      // 4. Diagonal Foul Arrows toward the 4 Pockets
-      ctx.strokeStyle = 'rgba(54, 41, 31, 0.34)';
-      ctx.lineWidth = 1.4;
+      // 4. Clean Hairline Diagonal Vectors to Each Corner Pocket
+      ctx.strokeStyle = pal.borderSoft;
+      ctx.lineWidth = 1.25;
       logic.CARROM_POCKETS.forEach((p) => {
         const dx = p.x - C;
         const dy = p.y - (C - 14);
         const len = Math.hypot(dx, dy) || 1;
         const ux = dx / len;
         const uy = dy / len;
-        const sx = C + ux * 68;
-        const sy = C - 14 + uy * 68;
-        const ex = p.x - ux * 36;
-        const ey = p.y - uy * 36;
+        const sx = C + ux * 66;
+        const sy = C - 14 + uy * 66;
+        const ex = p.x - ux * 32;
+        const ey = p.y - uy * 32;
         ctx.beginPath();
         ctx.moveTo(sx, sy);
         ctx.lineTo(ex, ey);
         ctx.stroke();
 
-        // Small arrowhead pointing to pocket
-        const ah = 7;
+        const ah = 6;
         const ang = Math.atan2(uy, ux);
         ctx.beginPath();
         ctx.moveTo(ex, ey);
@@ -13843,56 +13814,64 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         ctx.stroke();
       });
 
-      // 5. Striker Baseline Track (Bottom)
+      // 5. Minimal Striker Baseline Track
       const by = logic.STRIKER_BASELINE_Y;
-      ctx.strokeStyle = 'rgba(54, 41, 31, 0.48)';
-      ctx.lineWidth = 1.6;
+      ctx.strokeStyle = pal.border;
+      ctx.lineWidth = 1.35;
       ctx.beginPath();
-      ctx.moveTo(logic.STRIKER_MIN_X, by - 11);
-      ctx.lineTo(logic.STRIKER_MAX_X, by - 11);
-      ctx.moveTo(logic.STRIKER_MIN_X, by + 11);
-      ctx.lineTo(logic.STRIKER_MAX_X, by + 11);
+      ctx.moveTo(logic.STRIKER_MIN_X, by - 10);
+      ctx.lineTo(logic.STRIKER_MAX_X, by - 10);
+      ctx.moveTo(logic.STRIKER_MIN_X, by + 10);
+      ctx.lineTo(logic.STRIKER_MAX_X, by + 10);
       ctx.stroke();
 
       [logic.STRIKER_MIN_X, logic.STRIKER_MAX_X].forEach((bx) => {
-        ctx.fillStyle = '#C94C4C';
+        ctx.fillStyle = pal.cardBg;
         ctx.beginPath();
-        ctx.arc(bx, by, 10.5, 0, Math.PI * 2);
+        ctx.arc(bx, by, 9, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = '#36291F';
-        ctx.lineWidth = 1.3;
+        ctx.strokeStyle = pal.accentMid;
+        ctx.lineWidth = 1.5;
         ctx.stroke();
       });
 
-      // 6. 4 Corner Pockets + Clear Color-Coded Destination Labels
+      // 6. Four Corner Pockets (strictly inside playing field) + Clean Outer Frame Labels
       logic.CARROM_POCKETS.forEach((p) => {
-        // Outer colored rim
+        const rimR = logic.POCKET_RIM_RADIUS || (logic.POCKET_RADIUS + 2);
+
+        // Recessed pocket well
         ctx.beginPath();
-        ctx.arc(p.x, p.y, logic.POCKET_RADIUS + 3.5, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, logic.POCKET_RADIUS, 0, Math.PI * 2);
+        ctx.fillStyle = pal.outerBg;
+        ctx.fill();
+
+        // Crisp colored destination ring (strictly inside playing surface)
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, rimR, 0, Math.PI * 2);
+        ctx.strokeStyle = p.color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Destination label cleanly positioned on the outer frame margin (never overlaps board)
+        const isLeft = p.corner.includes('l');
+        const isTop = p.corner.includes('t');
+        const labelY = isTop ? F / 2 : S - F / 2;
+        const dotX = isLeft ? P0 + 10 : P1 - 10;
+        const textX = isLeft ? P0 + 20 : P1 - 20;
+
+        ctx.beginPath();
+        ctx.arc(dotX, labelY, 3.2, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
         ctx.fill();
 
-        // Deep recessed felt pocket hole
-        const holeGrad = ctx.createRadialGradient(p.x - 3, p.y - 3, 2, p.x, p.y, logic.POCKET_RADIUS);
-        holeGrad.addColorStop(0, '#2A2320');
-        holeGrad.addColorStop(0.7, '#120E0D');
-        holeGrad.addColorStop(1, '#070505');
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, logic.POCKET_RADIUS, 0, Math.PI * 2);
-        ctx.fillStyle = holeGrad;
-        ctx.fill();
-
-        // Pocket destination label cleanly placed near corner inside board
-        const labelX = p.corner.includes('l') ? P0 + 50 : P1 - 50;
-        const labelY = p.corner.includes('t') ? P0 + 18 : P1 - 12;
-        ctx.font = '700 9.5px "Plus Jakarta Sans", sans-serif';
-        ctx.textAlign = p.corner.includes('l') ? 'left' : 'right';
+        ctx.font = '700 10px "Plus Jakarta Sans", sans-serif';
+        ctx.textAlign = isLeft ? 'left' : 'right';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#2B1F14';
-        ctx.fillText(p.shortLabel, labelX, labelY);
+        ctx.fillStyle = pal.secondaryText;
+        ctx.fillText(p.shortLabel, textX, labelY + 0.5);
       });
 
-      // 7. Aiming Slingshot Line (when dragging striker or coin)
+      // 7. Aiming Slingshot Vector
       if (carromGame.aiming) {
         let origin = null;
         let maxPull = 115;
@@ -13915,108 +13894,103 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             const tx = origin.x + Math.cos(shot.angle) * aimLen;
             const ty = origin.y + Math.sin(shot.angle) * aimLen;
 
-            // Pull tension line behind striker
             ctx.save();
-            ctx.strokeStyle = 'rgba(201, 76, 76, 0.55)';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = pal.accentMid;
+            ctx.lineWidth = 1.8;
             ctx.beginPath();
             ctx.moveTo(origin.x, origin.y);
             ctx.lineTo(carromGame.pointerX, carromGame.pointerY);
             ctx.stroke();
 
-            // Dotted forward trajectory line
             ctx.setLineDash([5, 5]);
-            ctx.strokeStyle = '#2B1F14';
-            ctx.lineWidth = 2.2;
+            ctx.strokeStyle = pal.primaryText;
+            ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(origin.x, origin.y);
             ctx.lineTo(tx, ty);
             ctx.stroke();
             ctx.setLineDash([]);
 
-            // Power ring around origin
-            ctx.strokeStyle = shot.power > 0.75 ? '#D95D5D' : '#E09F3E';
-            ctx.lineWidth = 3;
+            ctx.strokeStyle = pal.accent;
+            ctx.lineWidth = 2.6;
             ctx.beginPath();
-            ctx.arc(origin.x, origin.y, origin.r + 6, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * shot.power);
+            ctx.arc(origin.x, origin.y, origin.r + 5.5, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * shot.power);
             ctx.stroke();
             ctx.restore();
           }
         }
       }
 
-      // 8. Brain Dump Carrom Coins
+      // 8. Active Thought Coin (Sleek App-Theme Matte Puck)
       carromGame.coins.forEach((coin) => {
-        const isSelected = String(coin.id) === String(carromGame.selectedCoinId);
+        const r = coin.r * carromGame.spawnScale;
 
-        // Shadow
+        // Soft drop shadow
         ctx.beginPath();
-        ctx.arc(coin.x + 1.5, coin.y + 2.5, coin.r, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(28, 16, 8, 0.25)';
+        ctx.arc(coin.x + 1, coin.y + 2.5, r, 0, Math.PI * 2);
+        ctx.fillStyle = pal.isLight ? 'rgba(20, 20, 24, 0.14)' : 'rgba(0, 0, 0, 0.36)';
         ctx.fill();
 
-        // Selected halo
-        if (isSelected) {
-          ctx.beginPath();
-          ctx.arc(coin.x, coin.y, coin.r + 3.5, 0, Math.PI * 2);
-          ctx.strokeStyle = '#F28B82';
-          ctx.lineWidth = 2.5;
-          ctx.stroke();
-        }
-
-        // Turned wooden disc
+        // Subtle outer glow ring
         ctx.beginPath();
-        ctx.arc(coin.x, coin.y, coin.r, 0, Math.PI * 2);
-        ctx.fillStyle = coin.tone.fill;
-        ctx.fill();
-        ctx.strokeStyle = coin.tone.ring;
+        ctx.arc(coin.x, coin.y, r + 3, 0, Math.PI * 2);
+        ctx.strokeStyle = pal.accentSoft;
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Inner concentric lathe groove
+        // Main matte puck body
         ctx.beginPath();
-        ctx.arc(coin.x, coin.y, coin.r - 4.5, 0, Math.PI * 2);
-        ctx.strokeStyle = coin.tone.ring;
+        ctx.arc(coin.x, coin.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = pal.cardBg;
+        ctx.fill();
+        ctx.strokeStyle = pal.accent;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Inner concentric precision ring
+        ctx.beginPath();
+        ctx.arc(coin.x, coin.y, Math.max(4, r - 5.5), 0, Math.PI * 2);
+        ctx.fillStyle = pal.pillBg;
+        ctx.fill();
+        ctx.strokeStyle = pal.border;
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        // Coin number
-        ctx.font = '700 11px "Plus Jakarta Sans", sans-serif';
+        // Crisp monogram letter from active thought
+        const initial = String(coin.text || '•').trim().charAt(0).toUpperCase() || '•';
+        ctx.font = `700 ${Math.max(8, Math.round(11 * carromGame.spawnScale))}px "Plus Jakarta Sans", sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = coin.tone.text;
-        ctx.fillText(String(coin.index || ''), coin.x, coin.y + 0.5);
+        ctx.fillStyle = pal.primaryText;
+        ctx.fillText(initial, coin.x, coin.y + 0.5);
       });
 
-      // 9. Striker Disc (Pearl-Gold Acrylic Striker)
+      // 9. Striker Disc (High-Contrast Theme Accent Striker)
       if (carromGame.striker && !carromGame.striker.scratched) {
         const st = carromGame.striker;
         ctx.beginPath();
-        ctx.arc(st.x + 2, st.y + 3, st.r, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(28, 16, 8, 0.28)';
+        ctx.arc(st.x + 1.5, st.y + 3, st.r, 0, Math.PI * 2);
+        ctx.fillStyle = pal.isLight ? 'rgba(20, 20, 24, 0.16)' : 'rgba(0, 0, 0, 0.4)';
         ctx.fill();
 
-        const stGrad = ctx.createRadialGradient(st.x - 5, st.y - 5, 3, st.x, st.y, st.r);
-        stGrad.addColorStop(0, '#FFFDF7');
-        stGrad.addColorStop(0.65, '#F5D68E');
-        stGrad.addColorStop(1, '#C98F36');
         ctx.beginPath();
         ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
-        ctx.fillStyle = stGrad;
+        ctx.fillStyle = pal.accent;
         ctx.fill();
-        ctx.strokeStyle = '#6E4514';
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = pal.primaryText;
+        ctx.lineWidth = 1.6;
         ctx.stroke();
 
-        // Inner striker motif
+        // Inner reticle ring
         ctx.beginPath();
         ctx.arc(st.x, st.y, st.r - 6, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(110, 69, 20, 0.55)';
-        ctx.lineWidth = 1.4;
+        ctx.strokeStyle = pal.onAccent;
+        ctx.lineWidth = 1.5;
         ctx.stroke();
+
         ctx.beginPath();
-        ctx.arc(st.x, st.y, 4, 0, Math.PI * 2);
-        ctx.fillStyle = '#C94C4C';
+        ctx.arc(st.x, st.y, 3.2, 0, Math.PI * 2);
+        ctx.fillStyle = pal.onAccent;
         ctx.fill();
       }
 
@@ -14037,7 +14011,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         ctx.font = '800 11px "Plus Jakarta Sans", sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#1B1410';
+        ctx.fillStyle = pal.outerBg;
         ctx.fillText(pop.label, pop.x + 1, pop.y + 1);
         ctx.fillStyle = pop.color;
         ctx.fillText(pop.label, pop.x, pop.y);
@@ -14056,29 +14030,22 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const activeText = document.getElementById('carrom-active-coin-text');
       const remainingEl = document.getElementById('carrom-coins-remaining');
 
+      const allItems = state.inboxItems || [];
+      const activeCoin = carromGame.coins[0] || null;
+
       if (undoBtn) undoBtn.disabled = !(Array.isArray(state.swipeHistory) && state.swipeHistory.length > 0);
-      if (emptyOverlay) emptyOverlay.classList.toggle('hidden', carromGame.coins.length > 0);
-
-      ['scheduling', 'notes', 'journal', 'archive'].forEach((k) => {
-        const el = document.getElementById(`carrom-count-${k}`);
-        if (el) el.textContent = String(carromGame.pocketCounts[k] || 0);
-      });
-
-      const activeCoin =
-        carromGame.coins.find((c) => String(c.id) === String(carromGame.selectedCoinId)) ||
-        carromGame.coins[0] ||
-        null;
+      if (emptyOverlay) emptyOverlay.classList.toggle('hidden', allItems.length > 0);
 
       if (remainingEl) {
-        remainingEl.textContent = `${carromGame.coins.length} ${carromGame.coins.length === 1 ? 'coin' : 'coins'}`;
+        remainingEl.textContent = `${allItems.length} ${allItems.length === 1 ? 'left' : 'left'}`;
       }
       if (activeMeta && activeText) {
         if (activeCoin) {
-          activeMeta.textContent = `Coin #${activeCoin.index} · ${activeCoin.tag || 'Thought'} · Flick directly or aim striker`;
+          activeMeta.textContent = `Current Coin · ${activeCoin.tag || 'Thought'}`;
           activeText.textContent = activeCoin.text;
         } else {
           activeMeta.textContent = 'Board clear';
-          activeText.textContent = 'Add a new thought above to drop a coin onto the board.';
+          activeText.textContent = 'Add a thought above to drop the next coin.';
         }
       }
 
@@ -14087,29 +14054,25 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         btn.classList.toggle('opacity-40', !activeCoin);
       });
 
-      if (rosterCount) rosterCount.textContent = String(carromGame.coins.length);
+      const upNext = allItems.slice(1);
+      if (rosterCount) rosterCount.textContent = String(upNext.length);
       if (rosterList) {
         rosterList.innerHTML =
-          carromGame.coins.length === 0
-            ? `<p class="text-xs text-mutedtext py-1">No thoughts on the board.</p>`
-            : carromGame.coins
-                .map((c) => {
-                  const sel = String(c.id) === String(carromGame.selectedCoinId);
+          upNext.length === 0
+            ? `<p class="text-xs text-mutedtext py-1">${allItems.length === 1 ? 'Last coin is on the board.' : 'No queued thoughts.'}</p>`
+            : upNext
+                .map((item, idx) => {
+                  const initial = String(item.text || '•').trim().charAt(0).toUpperCase() || '•';
                   return `
                     <button
                       type="button"
-                      onclick="selectCarromCoin(${JSON.stringify(c.id)})"
-                      class="w-full text-left rounded-xl px-3 py-2 border transition flex items-center gap-2.5 ${
-                        sel
-                          ? 'bg-coral/15 border-coral text-primarytext'
-                          : 'bg-cardbg border-borderline text-primarytext hover:border-coral/50'
-                      }"
+                      onclick="selectCarromCoin(${JSON.stringify(item.id)})"
+                      title="Bring to board now"
+                      class="w-full text-left rounded-xl px-3 py-2 border border-borderline bg-cardbg text-primarytext hover:border-coral/60 transition flex items-center gap-2.5"
                     >
-                      <span
-                        class="w-6 h-6 rounded-full flex items-center justify-center text-[10.5px] font-bold flex-shrink-0 border"
-                        style="background:${c.tone.fill}; color:${c.tone.text}; border-color:${c.tone.ring};"
-                      >${c.index}</span>
-                      <span class="text-xs font-medium truncate flex-1">${escapeHtml(c.text)}</span>
+                      <span class="w-6 h-6 rounded-full bg-pillbg border border-borderline flex items-center justify-center text-[10.5px] font-bold text-secondarytext flex-shrink-0">${initial}</span>
+                      <span class="text-xs font-medium truncate flex-1">${escapeHtml(item.text)}</span>
+                      <span class="text-[10px] text-mutedtext tabular-nums">#${idx + 2}</span>
                     </button>
                   `;
                 })
@@ -14163,7 +14126,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       input.value = '';
       playSfx('create');
       saveState();
-      renderInboxDeck();
+      renderInboxDeck(true);
     }
 
     function restoreArchivedDump(id) {
@@ -14174,19 +14137,20 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       carromGame.selectedCoinId = item.id;
       playSfx('select');
       saveState();
-      renderInboxDeck();
+      renderInboxDeck(true);
     }
 
-    function renderInboxDeck() {
-      syncCarromCoinsFromState(false);
+    function renderInboxDeck(forceRelayout = false) {
+      syncCarromCoinsFromState(forceRelayout);
       bindCarromCanvasEvents();
       drawCarromBoard();
       updateCarromHudAndArchive();
+      if (carromGame.spawnScale < 1) ensureCarromLoop();
     }
 
     function initCarromBoardIfActive() {
       if (state.activeTab === 'inbox') {
-        renderInboxDeck();
+        renderInboxDeck(false);
       }
     }
     window.initCarromBoardIfActive = initCarromBoardIfActive;
@@ -14295,58 +14259,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       renderTaskSwipeScheduler();
     }
 
-    function handleSwipeSchedQuickAdd(e) {
-      e.preventDefault();
-      const input = document.getElementById('swipe-sched-quick-add');
-      const title = input ? input.value.trim() : '';
-      if (!title) return;
-      const qId = Date.now();
-      state.unscheduledQueue.unshift({ id: qId, text: title });
-      taskSwipeSession.deck.unshift({
-        uid: `q-${qId}`,
-        source: 'queue',
-        queueId: qId,
-        taskId: null,
-        title,
-        location: '',
-        startMin: 540,
-        preferredStartMin: null,
-        durationMin: 30,
-        priority: 2,
-        energy: 2,
-        color: '',
-        metaLabel: 'Added just now',
-      });
-      input.value = '';
-      saveState();
-      syncTimelineScheduleBadge();
-      playSfx('create');
-      renderTaskSwipeScheduler();
-    }
-
-    function highlightSwipeDirectionZones(opacities) {
-      const map = {
-        up: { id: 'swipe-zone-up', color: '#F6C244' },
-        right: { id: 'swipe-zone-right', color: '#F28B82' },
-        down: { id: 'swipe-zone-down', color: '#6EA8D8' },
-        left: { id: 'swipe-zone-left', color: '#81C953' },
-      };
-      Object.entries(map).forEach(([dir, cfg]) => {
-        const el = document.getElementById(cfg.id);
-        if (!el) return;
-        const w = opacities ? opacities[dir] || 0 : 0;
-        if (w > 0.08) {
-          el.style.borderColor = cfg.color;
-          el.style.backgroundColor = `${cfg.color}${Math.round(w * 42).toString(16).padStart(2, '0')}`;
-          el.style.transform = `scale(${(1 + w * 0.04).toFixed(3)})`;
-        } else {
-          el.style.borderColor = '';
-          el.style.backgroundColor = '';
-          el.style.transform = '';
-        }
-      });
-    }
-
     function triggerTaskBatchSwipe(direction) {
       const logic = window.TaskBatchSwipeLogic;
       if (!logic || taskSwipeSession.deck.length === 0) return;
@@ -14357,7 +14269,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const batchedItem = { ...cardItem, batchKey };
       taskSwipeSession.batched.push(batchedItem);
       taskSwipeSession.history.push({ item: cardItem, batchKey });
-      highlightSwipeDirectionZones(null);
       playSfx('swipeKeep');
       renderTaskSwipeScheduler();
     }
@@ -14402,7 +14313,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       taskSwipeSession.gesture.dy = dy;
 
       const card = e.currentTarget;
-      const rot = dx * 0.045;
+      const rot = dx * 0.048;
       card.style.transition = 'none';
       card.style.transform = `translate3d(${dx}px, ${dy}px, 0) rotate(${rot.toFixed(1)}deg)`;
 
@@ -14411,7 +14322,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         const stamp = card.querySelector(`[data-batch-stamp="${dir}"]`);
         if (stamp) stamp.style.opacity = String(ops[dir] || 0);
       });
-      highlightSwipeDirectionZones(ops);
     }
 
     function handleTaskSwipeCardUp(e) {
@@ -14440,7 +14350,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           const stamp = card.querySelector(`[data-batch-stamp="${d}"]`);
           if (stamp) stamp.style.opacity = '0';
         });
-        highlightSwipeDirectionZones(null);
       }
     }
 
@@ -14586,24 +14495,24 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         }`;
       }
 
-      // Render 4-Way Swipe Card Stack
+      // Render Clean Dating-App Style Swipe Card Stack
       if (stage) {
         if (taskSwipeSession.deck.length === 0) {
           stage.innerHTML = `
-            <div class="w-full h-[240px] rounded-[26px] bg-cardbg border border-dashed border-borderline flex flex-col items-center justify-center p-5 text-center space-y-2.5">
-              <p class="font-display text-base font-bold text-primarytext">
-                ${batchedCount > 0 ? 'All Tasks Batched' : 'Deck Empty'}
+            <div class="w-full h-[284px] rounded-[28px] bg-cardbg border border-dashed border-borderline flex flex-col items-center justify-center p-6 text-center space-y-2.5">
+              <p class="font-display text-lg font-bold text-primarytext">
+                ${batchedCount > 0 ? 'All Tasks Batched' : 'Nothing to Batch'}
               </p>
-              <p class="text-xs text-secondarytext max-w-[230px]">
+              <p class="text-xs text-secondarytext max-w-[220px]">
                 ${
                   batchedCount > 0
-                    ? 'Review your 4 batches and apply them directly to your timeline.'
-                    : 'Queue a task above or pocket thoughts into Schedule from Brain Dump Carrom.'
+                    ? 'Apply your batches to schedule them on today’s timeline.'
+                    : 'Add tasks in Timeline or pocket thoughts into Schedule from Brain Dump.'
                 }
               </p>
               ${
                 batchedCount > 0
-                  ? `<button type="button" onclick="applyBatchedTasksToTimeline()" class="tactile-btn px-4 py-2 rounded-xl bg-coral text-onaccent text-xs font-bold">Apply to Timeline</button>`
+                  ? `<button type="button" onclick="applyBatchedTasksToTimeline()" class="tactile-btn mt-1 px-4 py-2.5 rounded-xl bg-coral text-onaccent text-xs font-bold">Apply to Timeline</button>`
                   : ''
               }
             </div>
@@ -14615,7 +14524,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               const depth = visible.length - 1 - revIdx;
               const isTop = depth === 0;
               const scale = 1 - depth * 0.045;
-              const offsetY = depth * 10;
+              const offsetY = depth * 11;
               return `
                 <div
                   ${
@@ -14624,40 +14533,41 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                       : ''
                   }
                   style="touch-action: none; transform: translateY(${offsetY}px) scale(${scale}); z-index: ${20 - depth};"
-                  class="tinder-card absolute inset-x-0 top-2 h-[246px] rounded-[26px] bg-cardbg border ${
-                    isTop ? 'border-borderline cursor-grab active:cursor-grabbing shadow-lg' : 'border-borderline/60 opacity-70 pointer-events-none'
-                  } p-5 flex flex-col justify-between select-none"
+                  class="tinder-card absolute inset-x-0 top-1 h-[284px] rounded-[28px] bg-cardbg border ${
+                    isTop ? 'border-borderline cursor-grab active:cursor-grabbing shadow-xl' : 'border-borderline/60 opacity-70 pointer-events-none'
+                  } p-6 flex flex-col justify-between select-none"
                 >
                   <div class="flex items-center justify-between gap-2 text-xs text-secondarytext">
-                    <span class="font-semibold text-primarytext truncate">${escapeHtml(item.source === 'queue' ? 'Unscheduled Queue' : 'Today Task')}</span>
-                    <span class="tabular-nums whitespace-nowrap">${taskSwipeSession.deck.length - depth} left</span>
+                    <span class="font-semibold text-coral">${escapeHtml(item.source === 'queue' ? 'Queue' : 'Scheduled')}</span>
+                    <span class="tabular-nums text-mutedtext">${taskSwipeSession.deck.length - depth} left</span>
                   </div>
 
-                  <div class="relative my-auto py-2">
-                    <span data-batch-stamp="up" style="opacity:0; border-color:#F6C244; color:#F6C244;" class="pointer-events-none absolute -top-5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-lg border-2 text-[11px] font-extrabold uppercase tracking-wider whitespace-nowrap">
+                  <div class="relative my-auto py-3">
+                    <span data-batch-stamp="up" style="opacity:0; border-color:#F6C244; color:#F6C244;" class="pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-lg border-2 text-xs font-extrabold uppercase tracking-wider whitespace-nowrap">
                       ↑ Urgency
                     </span>
-                    <span data-batch-stamp="right" style="opacity:0; border-color:#F28B82; color:#F28B82;" class="pointer-events-none absolute -top-3 left-0 px-2.5 py-0.5 rounded-lg border-2 text-[11px] font-extrabold uppercase tracking-wider -rotate-6 whitespace-nowrap">
-                      Location / Route →
+                    <span data-batch-stamp="right" style="opacity:0; border-color:#F28B82; color:#F28B82;" class="pointer-events-none absolute -top-4 left-0 px-2.5 py-0.5 rounded-lg border-2 text-xs font-extrabold uppercase tracking-wider -rotate-6 whitespace-nowrap">
+                      Route →
                     </span>
-                    <span data-batch-stamp="left" style="opacity:0; border-color:#81C953; color:#81C953;" class="pointer-events-none absolute -top-3 right-0 px-2.5 py-0.5 rounded-lg border-2 text-[11px] font-extrabold uppercase tracking-wider rotate-6 whitespace-nowrap">
+                    <span data-batch-stamp="left" style="opacity:0; border-color:#81C953; color:#81C953;" class="pointer-events-none absolute -top-4 right-0 px-2.5 py-0.5 rounded-lg border-2 text-xs font-extrabold uppercase tracking-wider rotate-6 whitespace-nowrap">
                       ← Energy
                     </span>
-                    <span data-batch-stamp="down" style="opacity:0; border-color:#6EA8D8; color:#6EA8D8;" class="pointer-events-none absolute -bottom-5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-lg border-2 text-[11px] font-extrabold uppercase tracking-wider whitespace-nowrap">
+                    <span data-batch-stamp="down" style="opacity:0; border-color:#6EA8D8; color:#6EA8D8;" class="pointer-events-none absolute -bottom-6 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-lg border-2 text-xs font-extrabold uppercase tracking-wider whitespace-nowrap">
                       ↓ Time
                     </span>
 
-                    <p class="font-display text-lg sm:text-xl font-bold text-primarytext leading-snug line-clamp-3">
+                    <p class="font-display text-2xl font-bold text-primarytext leading-snug line-clamp-3">
                       ${escapeHtml(item.title)}
                     </p>
-                    <p class="text-xs text-secondarytext mt-1.5 truncate">
+                    <p class="text-xs text-secondarytext mt-2 truncate">
                       ${escapeHtml(item.metaLabel)}
                     </p>
                   </div>
 
-                  <div class="flex items-center justify-between text-[11px] text-mutedtext pt-2 border-t border-borderline/70">
-                    <span>Drag in any of 4 directions</span>
-                    <span class="hidden sm:inline">Arrow keys supported</span>
+                  <div class="flex items-center justify-between text-[11px] text-mutedtext">
+                    <span>← Energy</span>
+                    <span>↑ Urgent · ↓ Time</span>
+                    <span class="text-coral font-medium">Route →</span>
                   </div>
                 </div>
               `;

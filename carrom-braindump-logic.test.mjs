@@ -4,6 +4,7 @@ import {
   CARROM_POCKETS,
   PLAY_MIN,
   PLAY_MAX,
+  POCKET_RIM_RADIUS,
   STRIKER_BASELINE_Y,
   createInitialStriker,
   layoutBrainDumpCoins,
@@ -12,11 +13,27 @@ import {
   stepCarromPhysics,
 } from './carrom-braindump-logic.js';
 
-test('CARROM_POCKETS defines all 4 brain dump destinations in distinct corners', () => {
+test('CARROM_POCKETS defines all 4 brain dump destinations strictly inside playing surface bounds', () => {
   const ids = CARROM_POCKETS.map((p) => p.id);
   assert.deepEqual(ids, ['scheduling', 'notes', 'journal', 'archive']);
   const corners = new Set(CARROM_POCKETS.map((p) => p.corner));
   assert.equal(corners.size, 4);
+  for (const p of CARROM_POCKETS) {
+    assert.ok(p.x - POCKET_RIM_RADIUS >= PLAY_MIN, `${p.id} overlaps left frame`);
+    assert.ok(p.x + POCKET_RIM_RADIUS <= PLAY_MAX, `${p.id} overlaps right frame`);
+    assert.ok(p.y - POCKET_RIM_RADIUS >= PLAY_MIN, `${p.id} overlaps top frame`);
+    assert.ok(p.y + POCKET_RIM_RADIUS <= PLAY_MAX, `${p.id} overlaps bottom frame`);
+  }
+});
+
+test('layoutBrainDumpCoins singleCoin mode spawns only the active head thought at center', () => {
+  const items = [
+    { id: 101, text: 'First thought' },
+    { id: 102, text: 'Second thought' },
+  ];
+  const coins = layoutBrainDumpCoins(items, [], { singleCoin: true });
+  assert.equal(coins.length, 1);
+  assert.equal(coins[0].id, 101);
 });
 
 test('layoutBrainDumpCoins packs multiple items cleanly without overlapping', () => {
