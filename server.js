@@ -19,6 +19,8 @@ const BLOCKED_FILES = new Set([
   '/progress-system-logic.test.mjs',
   '/routines-automation-logic.test.mjs',
   '/habit-task-link-logic.test.mjs',
+  '/carrom-braindump-logic.test.mjs',
+  '/task-batch-swipe-logic.test.mjs',
 ]);
 
 function readFirebaseWebConfig() {

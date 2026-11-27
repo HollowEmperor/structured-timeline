@@ -1663,11 +1663,26 @@
 
       <!-- Compartment Filter Bar -->
       <div id="compartment-bar" class="px-4 lg:px-8 pt-3.5 pb-2 flex items-center justify-between gap-2 flex-shrink-0">
-        <div id="compartment-pills-list" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar"></div>
+        <div id="compartment-pills-list" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar min-w-0"></div>
 
-        <span id="hourly-mode-badge" class="hidden text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-coral/20 text-coral border border-coral/40 whitespace-nowrap flex-shrink-0">
-          Hourly Depth
-        </span>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <span id="hourly-mode-badge" class="hidden text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-coral/20 text-coral border border-coral/40 whitespace-nowrap flex-shrink-0">
+            Hourly Depth
+          </span>
+          <button
+            type="button"
+            id="timeline-schedule-btn"
+            onclick="openTaskSwipeScheduler()"
+            title="Schedule & batch tasks with 4-way swipe"
+            class="tactile-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-coral text-onaccent text-xs font-semibold whitespace-nowrap shrink-0"
+          >
+            <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 003.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0120.25 6v1.5m0 9V18A2.25 2.25 0 0118 20.25h-1.5m-9 0H6A2.25 2.25 0 013.75 18v-1.5M12 7.5v9m-4.5-4.5h9"/>
+            </svg>
+            <span>Schedule</span>
+            <span id="timeline-schedule-queue-count" class="hidden text-[10.5px] font-bold opacity-90 tabular-nums"></span>
+          </button>
+        </div>
       </div>
 
       <!-- VIEW 1: TIMELINE (Daily Capsule Timeline + Parallel Projects Timeline) -->
@@ -1684,67 +1699,193 @@
         <div id="hourly-grid-container" class="hidden relative select-none lg:max-w-[740px] lg:mx-auto"></div>
       </section>
 
-      <!-- VIEW 2: BRAIN DUMP (Tinder-Style Swipe Card Deck + Archived List Directly Below) -->
-      <section id="view-inbox" class="hidden flex-1 overflow-y-auto no-scrollbar px-5 lg:px-8 pb-24 lg:pb-14 pt-3 lg:pt-5 space-y-4">
-        <div class="flex items-center justify-between">
-          <h2 class="font-display text-xl lg:text-2xl font-bold text-primarytext">Brain Dump</h2>
+      <!-- VIEW 2: BRAIN DUMP (Playable 4-Pocket Carrom Board Game + Archive) -->
+      <section id="view-inbox" class="hidden flex-1 overflow-y-auto no-scrollbar px-4 lg:px-8 pb-24 lg:pb-14 pt-3 lg:pt-5 space-y-4">
+        <div class="flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <h2 class="font-display text-xl lg:text-2xl font-bold text-primarytext">Brain Dump Carrom</h2>
+            <p class="text-xs text-secondarytext truncate">Pull back the striker to pocket thoughts into Schedule, Notes, Journal, or Archive.</p>
+          </div>
+          <div class="flex items-center gap-1.5 flex-shrink-0">
+            <button
+              type="button"
+              id="carrom-undo-btn"
+              onclick="undoLastCarromPocket()"
+              disabled
+              title="Undo last pocketed coin"
+              class="tactile-btn px-3 py-1.5 rounded-xl bg-cardbg border border-borderline text-xs font-semibold text-primarytext hover:border-coral disabled:opacity-35 whitespace-nowrap shrink-0 flex items-center gap-1.5"
+            >
+              <svg class="w-3.5 h-3.5 text-coral" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/></svg>
+              <span>Undo</span>
+            </button>
+            <button
+              type="button"
+              onclick="resetCarromBoardLayout()"
+              title="Re-rack coins at center"
+              class="tactile-btn px-3 py-1.5 rounded-xl bg-cardbg border border-borderline text-xs font-semibold text-secondarytext hover:text-primarytext hover:border-coral/60 whitespace-nowrap shrink-0"
+            >
+              Re-rack
+            </button>
+          </div>
         </div>
 
         <div class="space-y-4 xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] xl:gap-7 xl:items-start xl:space-y-0">
-          <div class="space-y-4">
+          <div class="space-y-3.5">
             <form onsubmit="handleQuickInboxAdd(event)" class="flex items-center gap-2">
               <input
                 id="quick-inbox-input"
                 type="text"
-                placeholder="Dump anything on your mind..."
-                class="flex-1 bg-cardbg text-sm text-primarytext placeholder-mutedtext px-3.5 py-3 rounded-2xl border border-borderline focus:border-coral focus:outline-none"
+                placeholder="Drop a thought onto the Carrom board..."
+                class="flex-1 bg-cardbg text-sm text-primarytext placeholder-mutedtext px-3.5 py-2.5 rounded-2xl border border-borderline focus:border-coral focus:outline-none"
               />
-              <button type="submit" class="tactile-btn bg-coral text-onaccent font-semibold text-sm px-4 py-3 rounded-2xl">
-                Add
+              <button type="submit" class="tactile-btn bg-coral text-onaccent font-semibold text-sm px-4 py-2.5 rounded-2xl whitespace-nowrap shrink-0">
+                Drop Coin
               </button>
             </form>
 
-            <div class="space-y-3">
-              <div id="tinder-deck-stage" class="relative h-[265px] w-full flex items-center justify-center"></div>
+            <!-- Carrom Board Stage -->
+            <div class="rounded-[24px] bg-cardbg border border-borderline p-3 sm:p-4 space-y-3">
+              <!-- 4 Corner Pocket Legend + Session Counters -->
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[11px] font-semibold">
+                <div class="flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-xl bg-pillbg border border-borderline">
+                  <span class="flex items-center gap-1.5 min-w-0">
+                    <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#F28B82;"></span>
+                    <span class="text-primarytext truncate">TL · Schedule</span>
+                  </span>
+                  <span id="carrom-count-scheduling" class="text-secondarytext tabular-nums">0</span>
+                </div>
+                <div class="flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-xl bg-pillbg border border-borderline">
+                  <span class="flex items-center gap-1.5 min-w-0">
+                    <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#6EA8D8;"></span>
+                    <span class="text-primarytext truncate">TR · Notes</span>
+                  </span>
+                  <span id="carrom-count-notes" class="text-secondarytext tabular-nums">0</span>
+                </div>
+                <div class="flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-xl bg-pillbg border border-borderline">
+                  <span class="flex items-center gap-1.5 min-w-0">
+                    <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#81C953;"></span>
+                    <span class="text-primarytext truncate">BL · Journal</span>
+                  </span>
+                  <span id="carrom-count-journal" class="text-secondarytext tabular-nums">0</span>
+                </div>
+                <div class="flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-xl bg-pillbg border border-borderline">
+                  <span class="flex items-center gap-1.5 min-w-0">
+                    <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#9A9AA0;"></span>
+                    <span class="text-primarytext truncate">BR · Archive</span>
+                  </span>
+                  <span id="carrom-count-archive" class="text-secondarytext tabular-nums">0</span>
+                </div>
+              </div>
 
-              <div id="tinder-controls" class="flex items-center justify-center gap-4 pt-0.5">
-                <button
-                  type="button"
-                  onclick="triggerDeckSwipe('left')"
-                  title="Archive for later"
-                  class="tactile-btn w-13 h-13 p-3.5 rounded-full bg-cardbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center"
-                >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
-                </button>
+              <!-- Square Playable Carrom Canvas -->
+              <div class="relative w-full max-w-[430px] mx-auto aspect-square select-none">
+                <canvas
+                  id="carrom-board-canvas"
+                  width="420"
+                  height="420"
+                  style="touch-action: none;"
+                  class="w-full h-full rounded-[22px] block cursor-crosshair shadow-xl"
+                ></canvas>
+                <div id="carrom-empty-overlay" class="hidden absolute inset-6 rounded-2xl bg-[#1A1410]/85 backdrop-blur-sm border border-[#D4B483]/35 flex flex-col items-center justify-center p-5 text-center space-y-2">
+                  <p class="font-display text-base font-bold text-[#F7E7CE]">Board Cleared</p>
+                  <p class="text-xs text-[#D6C6B2] max-w-[240px]">Drop a new thought above or restore an archived thought to play another round.</p>
+                  <button
+                    type="button"
+                    onclick="openTaskSwipeScheduler()"
+                    class="tactile-btn mt-1 px-3.5 py-2 rounded-xl bg-coral text-onaccent text-xs font-semibold whitespace-nowrap"
+                  >
+                    Open Task Swipe Scheduler
+                  </button>
+                </div>
+              </div>
 
-                <button
-                  type="button"
-                  id="tinder-undo-btn"
-                  onclick="undoLastCardSwipe()"
-                  title="Undo last swipe"
-                  class="tactile-btn w-10 h-10 rounded-full bg-cardbg border border-borderline text-coral flex items-center justify-center disabled:opacity-35"
-                >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/></svg>
-                </button>
+              <!-- Striker Baseline Position Slider -->
+              <div class="max-w-[430px] mx-auto space-y-1.5">
+                <div class="flex items-center justify-between text-[11px] text-secondarytext">
+                  <span class="font-semibold text-primarytext">Striker Position</span>
+                  <span id="carrom-status-hint" class="truncate">Drag striker back to aim &amp; shoot</span>
+                </div>
+                <input
+                  id="carrom-striker-slider"
+                  type="range"
+                  min="84"
+                  max="336"
+                  step="1"
+                  value="210"
+                  oninput="handleCarromStrikerSlider(this.value)"
+                  class="w-full accent-coral cursor-pointer"
+                  aria-label="Position striker along baseline"
+                />
+              </div>
 
-                <button
-                  type="button"
-                  onclick="triggerDeckSwipe('right')"
-                  title="Send to Timeline"
-                  class="tactile-btn w-13 h-13 p-3.5 rounded-full bg-coral text-onaccent flex items-center justify-center"
-                >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-                </button>
+              <!-- Selected Coin Readout + Direct Pocket Flick Controls -->
+              <div id="carrom-active-coin-bar" class="max-w-[430px] mx-auto rounded-2xl bg-pillbg border border-borderline p-3 space-y-2.5">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="min-w-0">
+                    <p id="carrom-active-coin-meta" class="text-[11px] font-semibold text-secondarytext">Tap a coin on the board to inspect</p>
+                    <p id="carrom-active-coin-text" class="text-sm font-semibold text-primarytext leading-snug mt-0.5 break-words">No coins on board</p>
+                  </div>
+                  <span id="carrom-coins-remaining" class="text-[11px] font-bold text-coral tabular-nums whitespace-nowrap shrink-0">0 left</span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                  <button
+                    type="button"
+                    data-carrom-flick="scheduling"
+                    onclick="flickSelectedCoinToPocket('scheduling')"
+                    class="tactile-btn py-2 px-2 rounded-xl bg-cardbg border border-borderline hover:border-coral text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full" style="background:#F28B82;"></span>
+                    <span>Schedule</span>
+                  </button>
+                  <button
+                    type="button"
+                    data-carrom-flick="notes"
+                    onclick="flickSelectedCoinToPocket('notes')"
+                    class="tactile-btn py-2 px-2 rounded-xl bg-cardbg border border-borderline hover:border-sky text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full" style="background:#6EA8D8;"></span>
+                    <span>Notes</span>
+                  </button>
+                  <button
+                    type="button"
+                    data-carrom-flick="journal"
+                    onclick="flickSelectedCoinToPocket('journal')"
+                    class="tactile-btn py-2 px-2 rounded-xl bg-cardbg border border-borderline hover:border-lime text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full" style="background:#81C953;"></span>
+                    <span>Journal</span>
+                  </button>
+                  <button
+                    type="button"
+                    data-carrom-flick="archive"
+                    onclick="flickSelectedCoinToPocket('archive')"
+                    class="tactile-btn py-2 px-2 rounded-xl bg-cardbg border border-borderline hover:border-secondarytext text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full" style="background:#9A9AA0;"></span>
+                    <span>Archive</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="pt-3 border-t border-borderline xl:border-t-0 xl:border-l xl:pl-6 xl:pt-0 space-y-2">
-            <div class="flex items-center justify-between">
-              <p class="text-xs font-semibold uppercase tracking-wider text-secondarytext">Archived for Later</p>
-              <span id="archive-count-label" class="text-xs text-mutedtext">0 items</span>
+          <!-- Right Column / Below: Coins Roster + Archived List -->
+          <div class="pt-2 border-t border-borderline xl:border-t-0 xl:border-l xl:pl-6 xl:pt-0 space-y-4">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <p class="text-xs font-semibold uppercase tracking-wider text-secondarytext">Coins on Board</p>
+                <span id="carrom-board-roster-count" class="text-xs text-mutedtext tabular-nums">0</span>
+              </div>
+              <div id="carrom-coin-roster-list" class="space-y-1.5 max-h-[210px] overflow-y-auto no-scrollbar"></div>
             </div>
-            <div id="archived-dump-list" class="space-y-2"></div>
+
+            <div class="pt-3 border-t border-borderline/70 space-y-2">
+              <div class="flex items-center justify-between">
+                <p class="text-xs font-semibold uppercase tracking-wider text-secondarytext">Archived Pocket</p>
+                <span id="archive-count-label" class="text-xs text-mutedtext">0 items</span>
+              </div>
+              <div id="archived-dump-list" class="space-y-2"></div>
+            </div>
           </div>
         </div>
       </section>
@@ -2534,11 +2675,23 @@
         </button>
       </div>
 
-      <!-- Floating Tasks + Action Menu (New Task / New Project) -->
+      <!-- Floating Tasks + Action Menu (New Task / New Project / Schedule & Batch) -->
       <div
         id="timeline-fab-menu"
-        class="hidden absolute right-5 lg:right-7 bottom-[142px] lg:bottom-[90px] z-40 bg-cardbg border border-borderline rounded-2xl p-1.5 theme-popover-shadow space-y-1 min-w-[188px]"
+        class="hidden absolute right-5 lg:right-7 bottom-[142px] lg:bottom-[90px] z-40 bg-cardbg border border-borderline rounded-2xl p-1.5 theme-popover-shadow space-y-1 min-w-[204px]"
       >
+        <button
+          type="button"
+          onclick="handleTimelineFabOption('schedule')"
+          class="tactile-btn w-full px-3.5 py-2.5 rounded-xl hover:bg-pillbg flex items-center justify-between gap-3 text-left text-xs font-semibold text-primarytext"
+        >
+          <span class="flex items-center gap-2.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber flex-shrink-0"></span>
+            <span>Schedule &amp; Batch</span>
+          </span>
+          <span class="text-[10px] font-medium text-secondarytext">4-Way Swipe</span>
+        </button>
+        <div class="border-t border-borderline/70 my-0.5"></div>
         <button
           type="button"
           onclick="handleTimelineFabOption('task')"
@@ -3390,6 +3543,211 @@
         >
           Delete Project
         </button>
+      </div>
+    </div>
+
+    <!-- 4-Way Tinder Swipe Task Batch Scheduler Page / Modal -->
+    <div id="task-swipe-scheduler-modal" class="hidden absolute inset-0 z-[54] bg-appbg flex flex-col">
+      <!-- Top Bar -->
+      <div class="px-4 lg:px-7 py-3.5 border-b border-borderline flex items-center justify-between gap-3 flex-shrink-0">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <button
+            type="button"
+            onclick="closeTaskSwipeScheduler()"
+            class="tactile-btn p-2 rounded-xl bg-cardbg border border-borderline text-primarytext hover:border-coral flex-shrink-0"
+            aria-label="Close schedule batcher"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+          <div class="min-w-0">
+            <h3 class="font-display text-base sm:text-lg font-bold tracking-tight text-primarytext truncate">
+              Schedule <span class="text-coral">&amp; Batch</span>
+            </h3>
+            <p id="task-swipe-subtitle" class="text-[11px] text-secondarytext truncate">
+              Swipe Up Urgency · Right Location/Route · Down Time · Left Energy
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <!-- Mobile Switcher: Deck vs Batches -->
+          <div class="lg:hidden flex items-center rounded-xl bg-cardbg border border-borderline p-0.5 text-xs font-semibold">
+            <button
+              type="button"
+              id="task-swipe-tab-deck"
+              onclick="setTaskSwipeTab('deck')"
+              class="px-2.5 py-1 rounded-lg bg-coral text-onaccent whitespace-nowrap"
+            >
+              Swipe
+            </button>
+            <button
+              type="button"
+              id="task-swipe-tab-batches"
+              onclick="setTaskSwipeTab('batches')"
+              class="px-2.5 py-1 rounded-lg text-secondarytext whitespace-nowrap"
+            >
+              Batches <span id="task-swipe-batched-count-tab" class="tabular-nums">0</span>
+            </button>
+          </div>
+
+          <button
+            type="button"
+            id="task-swipe-undo-btn"
+            onclick="undoLastTaskBatchSwipe()"
+            disabled
+            title="Undo last swipe (Z)"
+            class="tactile-btn px-3 py-1.5 rounded-xl bg-cardbg border border-borderline text-xs font-semibold text-primarytext hover:border-coral disabled:opacity-35 whitespace-nowrap shrink-0 flex items-center gap-1.5"
+          >
+            <svg class="w-3.5 h-3.5 text-coral" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/></svg>
+            <span>Undo</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="flex-1 min-h-0 overflow-y-auto no-scrollbar p-4 lg:p-6">
+        <div class="max-w-5xl mx-auto h-full flex flex-col lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)] gap-5">
+          <!-- Left / Primary: 4-Way Swipe Deck Arena -->
+          <div id="task-swipe-deck-pane" class="flex flex-col space-y-3.5">
+            <form onsubmit="handleSwipeSchedQuickAdd(event)" class="flex items-center gap-2">
+              <input
+                id="swipe-sched-quick-add"
+                type="text"
+                placeholder="Add a task directly to the swipe deck..."
+                class="flex-1 bg-cardbg text-sm text-primarytext placeholder-mutedtext px-3.5 py-2.5 rounded-2xl border border-borderline focus:border-coral focus:outline-none"
+              />
+              <button type="submit" class="tactile-btn px-4 py-2.5 rounded-2xl bg-cardbg border border-borderline hover:border-coral text-xs font-semibold text-primarytext whitespace-nowrap shrink-0">
+                + Queue
+              </button>
+            </form>
+
+            <!-- 4-Way Compass Arena -->
+            <div class="flex-1 flex flex-col justify-center rounded-[26px] bg-sheetbg border border-borderline p-3.5 sm:p-5 space-y-3">
+              <!-- TOP: UP = URGENCY -->
+              <div
+                id="swipe-zone-up"
+                class="flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-borderline/70 bg-cardbg/60 text-xs font-bold tracking-wide uppercase transition-all"
+                style="color:#F6C244;"
+              >
+                <span>↑</span>
+                <span>Urgency</span>
+              </div>
+
+              <!-- MIDDLE ROW: LEFT (ENERGY) + DECK STAGE + RIGHT (LOCATION/ROUTE) -->
+              <div class="grid grid-cols-[44px_minmax(0,1fr)_44px] sm:grid-cols-[72px_minmax(0,1fr)_72px] items-center gap-2 sm:gap-3">
+                <div
+                  id="swipe-zone-left"
+                  class="h-[250px] rounded-xl border border-borderline/70 bg-cardbg/60 flex flex-col items-center justify-center gap-1 px-1 text-center transition-all"
+                  style="color:#81C953;"
+                >
+                  <span class="text-sm font-bold">←</span>
+                  <span class="text-[10px] font-bold uppercase tracking-wider leading-tight">Energy</span>
+                </div>
+
+                <div id="task-swipe-deck-stage" class="relative h-[268px] w-full flex items-center justify-center"></div>
+
+                <div
+                  id="swipe-zone-right"
+                  class="h-[250px] rounded-xl border border-borderline/70 bg-cardbg/60 flex flex-col items-center justify-center gap-1 px-1 text-center transition-all"
+                  style="color:#F28B82;"
+                >
+                  <span class="text-sm font-bold">→</span>
+                  <span class="text-[10px] font-bold uppercase tracking-wider leading-tight">Route</span>
+                </div>
+              </div>
+
+              <!-- BOTTOM: DOWN = TIME -->
+              <div
+                id="swipe-zone-down"
+                class="flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-borderline/70 bg-cardbg/60 text-xs font-bold tracking-wide uppercase transition-all"
+                style="color:#6EA8D8;"
+              >
+                <span>↓</span>
+                <span>Time</span>
+              </div>
+
+              <!-- Tactile 4-Direction Tap Controls -->
+              <div class="grid grid-cols-4 gap-2 pt-1">
+                <button
+                  type="button"
+                  onclick="triggerTaskBatchSwipe('up')"
+                  class="tactile-btn py-2.5 px-2 rounded-xl bg-cardbg border border-borderline hover:border-amber text-xs font-semibold text-primarytext flex flex-col items-center gap-0.5"
+                >
+                  <span class="text-sm font-bold" style="color:#F6C244;">↑</span>
+                  <span class="text-[11px] whitespace-nowrap">Urgency</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="triggerTaskBatchSwipe('left')"
+                  class="tactile-btn py-2.5 px-2 rounded-xl bg-cardbg border border-borderline hover:border-lime text-xs font-semibold text-primarytext flex flex-col items-center gap-0.5"
+                >
+                  <span class="text-sm font-bold" style="color:#81C953;">←</span>
+                  <span class="text-[11px] whitespace-nowrap">Energy</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="triggerTaskBatchSwipe('down')"
+                  class="tactile-btn py-2.5 px-2 rounded-xl bg-cardbg border border-borderline hover:border-sky text-xs font-semibold text-primarytext flex flex-col items-center gap-0.5"
+                >
+                  <span class="text-sm font-bold" style="color:#6EA8D8;">↓</span>
+                  <span class="text-[11px] whitespace-nowrap">Time</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="triggerTaskBatchSwipe('right')"
+                  class="tactile-btn py-2.5 px-2 rounded-xl bg-cardbg border border-borderline hover:border-coral text-xs font-semibold text-primarytext flex flex-col items-center gap-0.5"
+                >
+                  <span class="text-sm font-bold" style="color:#F28B82;">→</span>
+                  <span class="text-[11px] whitespace-nowrap">Location</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right / Batches Summary & Apply Panel -->
+          <div id="task-swipe-batches-pane" class="hidden lg:flex flex-col rounded-[26px] bg-sheetbg border border-borderline p-4 space-y-3.5 min-h-0">
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <h4 class="font-display text-sm font-bold text-primarytext">Batched Schedule Plan</h4>
+                <p id="task-swipe-batch-summary" class="text-[11px] text-secondarytext">0 tasks batched for this day</p>
+              </div>
+              <label class="flex items-center gap-1.5 text-[11px] text-secondarytext">
+                <span>Start</span>
+                <select
+                  id="task-swipe-start-select"
+                  class="bg-cardbg border border-borderline rounded-lg px-2 py-1 text-xs font-semibold text-primarytext focus:border-coral focus:outline-none"
+                >
+                  <option value="480">8:00 AM</option>
+                  <option value="540" selected>9:00 AM</option>
+                  <option value="600">10:00 AM</option>
+                  <option value="780">1:00 PM</option>
+                  <option value="900">3:00 PM</option>
+                </select>
+              </label>
+            </div>
+
+            <div id="task-swipe-batches-list" class="flex-1 overflow-y-auto no-scrollbar space-y-2.5"></div>
+
+            <div class="pt-2 border-t border-borderline/70 flex items-center gap-2">
+              <button
+                type="button"
+                onclick="resetTaskSwipeSession()"
+                class="tactile-btn px-3.5 py-3 rounded-2xl bg-cardbg border border-borderline text-xs font-semibold text-secondarytext hover:text-primarytext whitespace-nowrap"
+              >
+                Reset
+              </button>
+              <button
+                type="button"
+                id="task-swipe-apply-btn"
+                onclick="applyBatchedTasksToTimeline()"
+                disabled
+                class="tactile-btn flex-1 py-3 px-4 rounded-2xl bg-coral text-onaccent text-xs font-bold disabled:opacity-35 whitespace-nowrap"
+              >
+                Apply Batches to Timeline
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -10672,6 +11030,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function renderTimeline() {
+      if (typeof syncTimelineScheduleBadge === 'function') syncTimelineScheduleBadge();
       const container = document.getElementById('timeline-container');
       const projectsContainer = document.getElementById('projects-timeline-container');
       if (!container) return;
@@ -10763,9 +11122,18 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             </div>
             <div class="pl-2.5 pt-0.5 min-w-0">
               <div class="bg-cardbg border border-borderline rounded-2xl p-3 space-y-2">
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between gap-2">
                   <span class="text-xs font-bold text-primarytext">Schedule Tasks</span>
-                  <span class="text-[10.5px] font-semibold px-2 py-0.5 rounded-full bg-amber/20 text-amber">${state.scheduledFromQueueCount}/${totalQueueCount}</span>
+                  <div class="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onclick="openTaskSwipeScheduler()"
+                      class="tactile-btn text-[10.5px] font-semibold px-2.5 py-1 rounded-lg bg-coral text-onaccent whitespace-nowrap"
+                    >
+                      Swipe Batch
+                    </button>
+                    <span class="text-[10.5px] font-semibold px-2 py-0.5 rounded-full bg-amber/20 text-amber tabular-nums">${state.scheduledFromQueueCount}/${totalQueueCount}</span>
+                  </div>
                 </div>
                 <div class="space-y-1.5">
                   ${state.unscheduledQueue
@@ -11124,7 +11492,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   }
                   ${
                     task.location
-                      ? `<span class="inline-flex items-center gap-1 truncate max-w-[160px]"><span>•</span><span class="truncate">${escapeHtml(task.location)}</span></span>`
+                      ? `<span class="inline-flex items-center gap-1 truncate max-w-[160px]"><span>·</span><span class="truncate">${escapeHtml(task.location)}</span></span>`
+                      : ''
+                  }
+                  ${
+                    task.scheduleBatch
+                      ? `<span class="inline-flex items-center gap-1 font-semibold" style="color:${(window.TaskBatchSwipeLogic?.BATCH_META_BY_KEY?.[task.scheduleBatch]?.hex) || '#F28B82'};"><span>·</span><span>${escapeHtml((window.TaskBatchSwipeLogic?.BATCH_META_BY_KEY?.[task.scheduleBatch]?.shortLabel || task.scheduleBatch) + ' batch')}</span></span>`
                       : ''
                   }
                   ${typeof buildTaskLocationVerifyBadgeHtml === 'function' ? buildTaskLocationVerifyBadgeHtml(task, taskDone) : ''}
@@ -11694,7 +12067,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
     function handleTimelineFabOption(choice) {
       toggleTimelineFabMenu(false);
-      if (choice === 'task') {
+      if (choice === 'schedule') {
+        openTaskSwipeScheduler();
+      } else if (choice === 'task') {
         openTaskModal();
       } else if (choice === 'project') {
         openProjectModal();
@@ -12928,213 +13303,837 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     window.applyRestoredPlannerBackup = applyRestoredPlannerBackup;
 
     // =========================================================================
-    // BRAIN DUMP (TINDER-STYLE SWIPE CARD DECK + ARCHIVE)
+    // BRAIN DUMP — PLAYABLE 4-POCKET CARROM BOARD GAME
+    // Pockets:
+    //   TL -> Schedule (unscheduledQueue)
+    //   TR -> Notes    (Step-by-Step Sticky Note in state.routines)
+    //   BL -> Journal  (Today's Journal entry in state.journalDays)
+    //   BR -> Archive  (state.archivedDumps)
     // =========================================================================
-    const deckGesture = {
-      active: false,
-      startX: 0,
-      startY: 0,
-      dx: 0,
+    const carromGame = {
+      coins: [],
+      striker: null,
+      selectedCoinId: null,
+      aiming: false,
+      aimTarget: null, // 'striker' | coinId
+      pointerX: 210,
+      pointerY: 334,
+      rafId: null,
+      particles: [],
+      popups: [],
+      pocketCounts: { scheduling: 0, notes: 0, journal: 0, archive: 0 },
+      lastClackMs: 0,
+      boundCanvas: null,
     };
 
-    function handleQuickInboxAdd(e) {
-      e.preventDefault();
-      const input = document.getElementById('quick-inbox-input');
-      const text = input ? input.value.trim() : '';
-      if (!text) return;
-
-      state.inboxItems.unshift({
-        id: Date.now(),
-        text,
-        tag: 'Captured',
-        added: 'Just now',
-      });
-      input.value = '';
-      playSfx('create');
-      saveState();
-      renderInboxDeck();
+    function getCarromLogic() {
+      return window.CarromBrainDumpLogic || null;
     }
 
-    function triggerDeckSwipe(direction) {
-      if (state.inboxItems.length === 0) return;
-      const topItem = state.inboxItems.shift();
-      state.swipeHistory.push({ item: topItem, direction });
+    function syncCarromCoinsFromState(forceRelayout = false) {
+      const logic = getCarromLogic();
+      if (!logic) return;
+      if (!carromGame.striker) {
+        carromGame.striker = logic.createInitialStriker();
+      }
+      carromGame.coins = logic.layoutBrainDumpCoins(
+        state.inboxItems || [],
+        forceRelayout ? [] : carromGame.coins
+      );
+      if (
+        carromGame.coins.length > 0 &&
+        !carromGame.coins.some((c) => String(c.id) === String(carromGame.selectedCoinId))
+      ) {
+        carromGame.selectedCoinId = carromGame.coins[0].id;
+      } else if (carromGame.coins.length === 0) {
+        carromGame.selectedCoinId = null;
+      }
+    }
 
-      if (direction === 'right') {
-        state.unscheduledQueue.unshift({ id: Date.now(), text: topItem.text });
+    function stopCarromLoop() {
+      if (carromGame.rafId !== null) {
+        cancelAnimationFrame(carromGame.rafId);
+        carromGame.rafId = null;
+      }
+    }
+
+    function ensureCarromLoop() {
+      if (state.activeTab !== 'inbox') {
+        stopCarromLoop();
+        return;
+      }
+      if (carromGame.rafId !== null) return;
+      const tick = () => {
+        if (state.activeTab !== 'inbox') {
+          carromGame.rafId = null;
+          return;
+        }
+        const keepRunning = stepAndDrawCarromBoard();
+        if (keepRunning) {
+          carromGame.rafId = requestAnimationFrame(tick);
+        } else {
+          carromGame.rafId = null;
+        }
+      };
+      carromGame.rafId = requestAnimationFrame(tick);
+    }
+
+    function spawnCarromPocketBurst(x, y, color, label) {
+      for (let i = 0; i < 16; i += 1) {
+        const angle = (Math.PI * 2 * i) / 16 + Math.random() * 0.25;
+        const speed = 1.6 + Math.random() * 3.4;
+        carromGame.particles.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          r: 2.2 + Math.random() * 2.4,
+          color,
+          life: 1,
+        });
+      }
+      carromGame.popups.push({
+        x: Math.max(76, Math.min(344, x)),
+        y: Math.max(60, Math.min(368, y)),
+        label,
+        color,
+        life: 1,
+      });
+    }
+
+    function routePocketedBrainDumpCoin(coin, pocket) {
+      const idx = (state.inboxItems || []).findIndex((item) => String(item.id) === String(coin.id));
+      const item = idx >= 0
+        ? state.inboxItems.splice(idx, 1)[0]
+        : { id: coin.id, text: coin.text, tag: coin.tag || 'Thought', added: 'Just now' };
+
+      const record = {
+        item,
+        pocketId: pocket.id,
+        createdId: null,
+        journalEntryId: null,
+        journalPrevText: null,
+      };
+
+      if (pocket.id === 'scheduling') {
+        const qId = Date.now() + Math.floor(Math.random() * 1000);
+        state.unscheduledQueue.unshift({ id: qId, text: item.text });
+        record.createdId = qId;
         playSfx('swipeKeep');
+      } else if (pocket.id === 'notes') {
+        const noteId = Date.now() + Math.floor(Math.random() * 1000);
+        if (!Array.isArray(state.routines)) state.routines = [];
+        state.routines.unshift({
+          id: noteId,
+          title: item.text,
+          window: 'Brain Dump Note',
+          color: 'sky',
+          note: 'Pocketed from Brain Dump Carrom',
+          expanded: true,
+          driveFiles: [],
+          steps: [
+            {
+              id: `rs-${noteId}-0`,
+              title: item.text,
+              duration: '',
+              note: '',
+              done: false,
+            },
+          ],
+        });
+        record.createdId = noteId;
+        if (typeof syncProfileActionCounts === 'function') syncProfileActionCounts();
+        playSfx('create');
+      } else if (pocket.id === 'journal') {
+        const entry = typeof getActiveJournalTargetEntry === 'function' ? getActiveJournalTargetEntry() : null;
+        if (entry) {
+          record.journalEntryId = entry.id;
+          record.journalPrevText = entry.text || '';
+          const prefix = entry.text && entry.text.trim().length > 0 ? '\n' : '';
+          entry.text = `${entry.text || ''}${prefix}• ${item.text}`;
+          if (typeof renderJournalView === 'function') renderJournalView();
+        }
+        playSfx('complete');
       } else {
-        state.archivedDumps.unshift({ ...topItem, archivedAt: 'Just now' });
+        state.archivedDumps.unshift({ ...item, archivedAt: 'Just now' });
+        record.createdId = item.id;
         playSfx('swipeArchive');
       }
+
+      carromGame.pocketCounts[pocket.id] = (carromGame.pocketCounts[pocket.id] || 0) + 1;
+      if (!Array.isArray(state.swipeHistory)) state.swipeHistory = [];
+      state.swipeHistory.push(record);
+
+      spawnCarromPocketBurst(pocket.x, pocket.y, pocket.color, `+ ${pocket.label.toUpperCase()}`);
       saveState();
-      renderInboxDeck();
+      syncTimelineScheduleBadge();
+      updateCarromHudAndArchive();
     }
 
-    function undoLastCardSwipe() {
-      if (state.swipeHistory.length === 0) return;
+    function undoLastCarromPocket() {
+      if (!Array.isArray(state.swipeHistory) || state.swipeHistory.length === 0) return;
       const last = state.swipeHistory.pop();
-      if (!last) return;
+      if (!last || !last.item) return;
 
-      if (last.direction === 'right') {
-        const idx = state.unscheduledQueue.findIndex((q) => q.text === last.item.text);
-        if (idx >= 0) state.unscheduledQueue.splice(idx, 1);
-      } else {
-        state.archivedDumps = state.archivedDumps.filter((a) => a.id !== last.item.id);
-      }
-      state.inboxItems.unshift(last.item);
-      playSfx('select');
-      saveState();
-      renderInboxDeck();
-    }
-
-    function restoreArchivedDump(id) {
-      const idx = state.archivedDumps.findIndex((a) => a.id === id);
-      if (idx < 0) return;
-      const [item] = state.archivedDumps.splice(idx, 1);
-      state.inboxItems.unshift(item);
-      playSfx('select');
-      saveState();
-      renderInboxDeck();
-    }
-
-    function handleDeckCardDown(e) {
-      if (e.button !== undefined && e.button !== 0) return;
-      deckGesture.active = true;
-      deckGesture.startX = e.clientX;
-      deckGesture.startY = e.clientY;
-      deckGesture.dx = 0;
-      try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
-    }
-
-    function handleDeckCardMove(e) {
-      if (!deckGesture.active) return;
-      const dx = e.clientX - deckGesture.startX;
-      deckGesture.dx = dx;
-      const card = e.currentTarget;
-      const rot = dx * 0.05;
-      card.style.transition = 'none';
-      card.style.transform = `translateX(${dx}px) rotate(${rot.toFixed(1)}deg)`;
-
-      const rightStamp = card.querySelector('[data-stamp-right]');
-      const leftStamp = card.querySelector('[data-stamp-left]');
-      if (rightStamp) rightStamp.style.opacity = String(Math.max(0, Math.min(1, (dx - 20) / 70)));
-      if (leftStamp) leftStamp.style.opacity = String(Math.max(0, Math.min(1, (-dx - 20) / 70)));
-    }
-
-    function handleDeckCardUp(e) {
-      if (!deckGesture.active) return;
-      deckGesture.active = false;
-      const dx = deckGesture.dx;
-      const card = e.currentTarget;
-
-      if (dx > 85) {
-        card.style.transition = 'transform 0.22s ease, opacity 0.2s ease';
-        card.style.transform = 'translateX(360px) rotate(16deg)';
-        card.style.opacity = '0';
-        setTimeout(() => triggerDeckSwipe('right'), 180);
-      } else if (dx < -85) {
-        card.style.transition = 'transform 0.22s ease, opacity 0.2s ease';
-        card.style.transform = 'translateX(-360px) rotate(-16deg)';
-        card.style.opacity = '0';
-        setTimeout(() => triggerDeckSwipe('left'), 180);
-      } else {
-        card.style.transition = 'transform 0.24s cubic-bezier(0.22, 1, 0.36, 1)';
-        card.style.transform = 'translateX(0px) rotate(0deg)';
-        const rightStamp = card.querySelector('[data-stamp-right]');
-        const leftStamp = card.querySelector('[data-stamp-left]');
-        if (rightStamp) rightStamp.style.opacity = '0';
-        if (leftStamp) leftStamp.style.opacity = '0';
-      }
-    }
-
-    function renderInboxDeck() {
-      const stage = document.getElementById('tinder-deck-stage');
-      const archiveList = document.getElementById('archived-dump-list');
-      const archiveCount = document.getElementById('archive-count-label');
-      const undoBtn = document.getElementById('tinder-undo-btn');
-
-      if (undoBtn) undoBtn.disabled = state.swipeHistory.length === 0;
-      if (archiveCount) {
-        archiveCount.textContent = `${state.archivedDumps.length} ${state.archivedDumps.length === 1 ? 'item' : 'items'}`;
-      }
-
-      if (stage) {
-        if (state.inboxItems.length === 0) {
-          stage.innerHTML = `
-            <div class="w-full h-[230px] rounded-[28px] bg-cardbg border border-dashed border-borderline flex flex-col items-center justify-center p-6 text-center space-y-2">
-              <span class="w-10 h-10 rounded-full bg-coral/15 text-coral flex items-center justify-center">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-              </span>
-              <p class="font-display text-base font-bold text-primarytext">Brain Dump Cleared</p>
-              <p class="text-sm text-secondarytext">Add a thought above or restore an archived card below.</p>
-            </div>
-          `;
+      const pocketId = last.pocketId || (last.direction === 'right' ? 'scheduling' : 'archive');
+      if (pocketId === 'scheduling') {
+        if (last.createdId != null) {
+          state.unscheduledQueue = state.unscheduledQueue.filter((q) => q.id !== last.createdId);
         } else {
-          const visible = state.inboxItems.slice(0, 3).reverse();
-          stage.innerHTML = visible
-            .map((item, revIdx) => {
-              const depth = visible.length - 1 - revIdx;
-              const isTop = depth === 0;
-              const scale = 1 - depth * 0.045;
-              const offsetY = depth * 10;
-              return `
-                <div
-                  ${
-                    isTop
-                      ? `onpointerdown="handleDeckCardDown(event)" onpointermove="handleDeckCardMove(event)" onpointerup="handleDeckCardUp(event)" onpointercancel="handleDeckCardUp(event)"`
-                      : ''
-                  }
-                  style="transform: translateY(${offsetY}px) scale(${scale}); z-index: ${20 - depth};"
-                  class="tinder-card absolute inset-x-1 top-2 h-[235px] rounded-[28px] bg-cardbg border ${
-                    isTop ? 'border-borderline cursor-grab active:cursor-grabbing' : 'border-borderline/60 opacity-75 pointer-events-none'
-                  } p-5 flex flex-col justify-between"
-                >
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="px-2.5 py-1 rounded-full bg-pillbg border border-borderline text-xs font-semibold text-coral">
-                      ${escapeHtml(item.tag || 'Thought')}
-                    </span>
-                    <span class="text-xs text-mutedtext">${escapeHtml(item.added || 'Now')}</span>
-                  </div>
+          const idx = state.unscheduledQueue.findIndex((q) => q.text === last.item.text);
+          if (idx >= 0) state.unscheduledQueue.splice(idx, 1);
+        }
+      } else if (pocketId === 'notes') {
+        if (last.createdId != null && Array.isArray(state.routines)) {
+          state.routines = state.routines.filter((r) => r.id !== last.createdId);
+          if (typeof syncProfileActionCounts === 'function') syncProfileActionCounts();
+        }
+      } else if (pocketId === 'journal') {
+        if (last.journalEntryId != null && Array.isArray(state.journalDays)) {
+          const entry = state.journalDays.find((d) => d.id === last.journalEntryId);
+          if (entry && typeof last.journalPrevText === 'string') {
+            entry.text = last.journalPrevText;
+            if (typeof renderJournalView === 'function') renderJournalView();
+          }
+        }
+      } else {
+        state.archivedDumps = state.archivedDumps.filter((a) => String(a.id) !== String(last.item.id));
+      }
 
-                  <div class="relative my-auto py-2">
-                    <span data-stamp-right style="opacity:0;" class="pointer-events-none absolute -top-3 left-0 px-2.5 py-0.5 rounded-lg border-2 border-coral text-coral text-xs font-extrabold uppercase tracking-wider -rotate-6">
-                      Timeline →
-                    </span>
-                    <span data-stamp-left style="opacity:0;" class="pointer-events-none absolute -top-3 right-0 px-2.5 py-0.5 rounded-lg border-2 border-secondarytext text-secondarytext text-xs font-extrabold uppercase tracking-wider rotate-6">
-                      ← Archive
-                    </span>
-                    <p class="font-display text-xl font-bold text-primarytext leading-snug">
-                      ${escapeHtml(item.text)}
-                    </p>
-                  </div>
+      if (carromGame.pocketCounts[pocketId] > 0) {
+        carromGame.pocketCounts[pocketId] -= 1;
+      }
 
-                  <div class="flex items-center justify-between text-xs text-secondarytext pt-2 border-t border-borderline/70">
-                    <span>← Swipe left to archive</span>
-                    <span class="text-coral font-semibold">Swipe right to schedule →</span>
-                  </div>
-                </div>
-              `;
-            })
-            .join('');
+      state.inboxItems.unshift(last.item);
+      carromGame.selectedCoinId = last.item.id;
+      playSfx('select');
+      saveState();
+      syncTimelineScheduleBadge();
+      renderInboxDeck();
+    }
+
+    function resetCarromBoardLayout() {
+      const logic = getCarromLogic();
+      if (!logic) return;
+      carromGame.striker = logic.createInitialStriker();
+      syncCarromCoinsFromState(true);
+      const slider = document.getElementById('carrom-striker-slider');
+      if (slider) slider.value = String(Math.round(carromGame.striker.x));
+      playSfx('select');
+      drawCarromBoard();
+      updateCarromHudAndArchive();
+    }
+
+    function handleCarromStrikerSlider(val) {
+      const logic = getCarromLogic();
+      if (!logic) return;
+      if (!carromGame.striker) carromGame.striker = logic.createInitialStriker();
+      if (carromGame.striker.inMotion) return;
+      carromGame.striker.x = logic.clamp(Number(val) || logic.PLAY_CENTER, logic.STRIKER_MIN_X, logic.STRIKER_MAX_X);
+      carromGame.striker.y = logic.STRIKER_BASELINE_Y;
+      carromGame.striker.scratched = false;
+      drawCarromBoard();
+    }
+
+    function selectCarromCoin(id) {
+      carromGame.selectedCoinId = id;
+      playSfx('tick');
+      updateCarromHudAndArchive();
+      drawCarromBoard();
+    }
+
+    function flickSelectedCoinToPocket(pocketId) {
+      const logic = getCarromLogic();
+      if (!logic || carromGame.coins.length === 0) return;
+      const coin =
+        carromGame.coins.find((c) => String(c.id) === String(carromGame.selectedCoinId)) ||
+        carromGame.coins[0];
+      if (!coin) return;
+      const impulse = logic.computeAssistedPocketImpulse(coin, pocketId, 16.5);
+      coin.vx = impulse.vx;
+      coin.vy = impulse.vy;
+      playSfx('tick');
+      ensureCarromLoop();
+    }
+
+    function getCanvasBoardCoords(canvas, clientX, clientY) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = 420 / Math.max(1, rect.width);
+      const scaleY = 420 / Math.max(1, rect.height);
+      return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY,
+      };
+    }
+
+    function bindCarromCanvasEvents() {
+      const canvas = document.getElementById('carrom-board-canvas');
+      if (!canvas || carromGame.boundCanvas === canvas) return;
+      carromGame.boundCanvas = canvas;
+
+      canvas.addEventListener('pointerdown', (e) => {
+        const logic = getCarromLogic();
+        if (!logic) return;
+        const pt = getCanvasBoardCoords(canvas, e.clientX, e.clientY);
+        carromGame.pointerX = pt.x;
+        carromGame.pointerY = pt.y;
+
+        if (!carromGame.striker) carromGame.striker = logic.createInitialStriker();
+
+        // Check if user grabbed striker (generous touch radius)
+        if (!carromGame.striker.inMotion && !carromGame.striker.scratched) {
+          const distStriker = Math.hypot(pt.x - carromGame.striker.x, pt.y - carromGame.striker.y);
+          if (distStriker <= logic.STRIKER_RADIUS + 20) {
+            carromGame.aiming = true;
+            carromGame.aimTarget = 'striker';
+            try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+            ensureCarromLoop();
+            return;
+          }
+        }
+
+        // Check if user tapped or pulled a specific coin
+        for (let i = carromGame.coins.length - 1; i >= 0; i -= 1) {
+          const c = carromGame.coins[i];
+          if (Math.hypot(pt.x - c.x, pt.y - c.y) <= c.r + 12) {
+            carromGame.selectedCoinId = c.id;
+            carromGame.aiming = true;
+            carromGame.aimTarget = c.id;
+            try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+            updateCarromHudAndArchive();
+            ensureCarromLoop();
+            return;
+          }
+        }
+
+        // Otherwise allow sliding striker directly if tapping along the baseline strip
+        if (!carromGame.striker.inMotion && Math.abs(pt.y - logic.STRIKER_BASELINE_Y) <= 30) {
+          carromGame.striker.x = logic.clamp(pt.x, logic.STRIKER_MIN_X, logic.STRIKER_MAX_X);
+          carromGame.striker.y = logic.STRIKER_BASELINE_Y;
+          const slider = document.getElementById('carrom-striker-slider');
+          if (slider) slider.value = String(Math.round(carromGame.striker.x));
+          carromGame.aiming = true;
+          carromGame.aimTarget = 'striker';
+          try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+          ensureCarromLoop();
+        }
+      });
+
+      canvas.addEventListener('pointermove', (e) => {
+        if (!carromGame.aiming) return;
+        const pt = getCanvasBoardCoords(canvas, e.clientX, e.clientY);
+        carromGame.pointerX = pt.x;
+        carromGame.pointerY = pt.y;
+        drawCarromBoard();
+      });
+
+      const releaseAim = () => {
+        if (!carromGame.aiming) return;
+        const logic = getCarromLogic();
+        const target = carromGame.aimTarget;
+        carromGame.aiming = false;
+        carromGame.aimTarget = null;
+        if (!logic) return;
+
+        if (target === 'striker' && carromGame.striker) {
+          const shot = logic.computeStrikerShotVelocity(
+            carromGame.striker.x,
+            carromGame.striker.y,
+            carromGame.pointerX,
+            carromGame.pointerY
+          );
+          if (shot.power > 0.05) {
+            carromGame.striker.vx = shot.vx;
+            carromGame.striker.vy = shot.vy;
+            carromGame.striker.inMotion = true;
+            playSfx('tick');
+            ensureCarromLoop();
+            return;
+          }
+        } else if (target != null) {
+          const coin = carromGame.coins.find((c) => String(c.id) === String(target));
+          if (coin) {
+            const shot = logic.computeStrikerShotVelocity(
+              coin.x,
+              coin.y,
+              carromGame.pointerX,
+              carromGame.pointerY,
+              96
+            );
+            if (shot.power > 0.06) {
+              coin.vx = shot.vx * 0.9;
+              coin.vy = shot.vy * 0.9;
+              playSfx('tick');
+              ensureCarromLoop();
+              return;
+            }
+          }
+        }
+        drawCarromBoard();
+      };
+
+      canvas.addEventListener('pointerup', releaseAim);
+      canvas.addEventListener('pointercancel', releaseAim);
+    }
+
+    function stepAndDrawCarromBoard() {
+      const logic = getCarromLogic();
+      if (!logic) return false;
+      if (!carromGame.striker) carromGame.striker = logic.createInitialStriker();
+
+      const res = logic.stepCarromPhysics(carromGame.coins, carromGame.striker);
+
+      if ((res.collisions > 0 || res.wallHits > 0) && Date.now() - carromGame.lastClackMs > 55) {
+        carromGame.lastClackMs = Date.now();
+        playSfx('tick');
+      }
+
+      if (res.pocketed.length > 0) {
+        res.pocketed.forEach(({ coin, pocket }) => {
+          routePocketedBrainDumpCoin(coin, pocket);
+        });
+        if (
+          carromGame.coins.length > 0 &&
+          !carromGame.coins.some((c) => String(c.id) === String(carromGame.selectedCoinId))
+        ) {
+          carromGame.selectedCoinId = carromGame.coins[0].id;
         }
       }
 
+      // Reset striker cleanly to baseline once all pieces settle
+      if (res.allStopped && (carromGame.striker.inMotion || carromGame.striker.scratched)) {
+        const slider = document.getElementById('carrom-striker-slider');
+        const nextX = slider ? Number(slider.value) : logic.PLAY_CENTER;
+        carromGame.striker = logic.createInitialStriker(nextX);
+        if (res.strikerScratched) {
+          spawnCarromPocketBurst(logic.PLAY_CENTER, logic.STRIKER_BASELINE_Y, '#F6C244', 'STRIKER RESET');
+        }
+      }
+
+      // Step particles & floating popups
+      for (let i = carromGame.particles.length - 1; i >= 0; i -= 1) {
+        const p = carromGame.particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.92;
+        p.vy *= 0.92;
+        p.life -= 0.045;
+        if (p.life <= 0) carromGame.particles.splice(i, 1);
+      }
+      for (let i = carromGame.popups.length - 1; i >= 0; i -= 1) {
+        const pop = carromGame.popups[i];
+        pop.y -= 0.7;
+        pop.life -= 0.022;
+        if (pop.life <= 0) carromGame.popups.splice(i, 1);
+      }
+
+      drawCarromBoard();
+
+      return (
+        !res.allStopped ||
+        carromGame.aiming ||
+        carromGame.particles.length > 0 ||
+        carromGame.popups.length > 0
+      );
+    }
+
+    function drawCarromBoard() {
+      const canvas = document.getElementById('carrom-board-canvas');
+      const logic = getCarromLogic();
+      if (!canvas || !logic) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const S = logic.BOARD_SIZE;
+      const F = logic.FRAME_WIDTH;
+      const P0 = logic.PLAY_MIN;
+      const P1 = logic.PLAY_MAX;
+      const C = logic.PLAY_CENTER;
+
+      ctx.clearRect(0, 0, S, S);
+
+      // 1. Rich Rosewood Outer Frame
+      const frameGrad = ctx.createLinearGradient(0, 0, S, S);
+      frameGrad.addColorStop(0, '#4A2C1D');
+      frameGrad.addColorStop(0.5, '#341D12');
+      frameGrad.addColorStop(1, '#26140C');
+      ctx.fillStyle = frameGrad;
+      ctx.fillRect(0, 0, S, S);
+
+      // Inner brass bevel trim
+      ctx.strokeStyle = 'rgba(229, 193, 133, 0.35)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(F - 2, F - 2, S - (F - 2) * 2, S - (F - 2) * 2);
+
+      // 2. Satin Birch Playing Surface
+      const surfGrad = ctx.createRadialGradient(C, C, 24, C, C, S * 0.65);
+      surfGrad.addColorStop(0, '#FAF0DC');
+      surfGrad.addColorStop(0.75, '#F0DFC1');
+      surfGrad.addColorStop(1, '#E2CAA2');
+      ctx.fillStyle = surfGrad;
+      ctx.fillRect(P0, P0, P1 - P0, P1 - P0);
+
+      // Subtle wood grain horizontal lines
+      ctx.strokeStyle = 'rgba(138, 97, 56, 0.06)';
+      ctx.lineWidth = 1;
+      for (let y = P0 + 14; y < P1; y += 16) {
+        ctx.beginPath();
+        ctx.moveTo(P0, y);
+        ctx.lineTo(P1, y);
+        ctx.stroke();
+      }
+
+      // 3. Traditional Center Rose Compass
+      ctx.save();
+      ctx.translate(C, C - 14);
+      ctx.strokeStyle = 'rgba(176, 58, 58, 0.42)';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.arc(0, 0, 56, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(54, 41, 31, 0.25)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(0, 0, 48, 0, Math.PI * 2);
+      ctx.stroke();
+      // 8-point decorative compass star
+      for (let i = 0; i < 8; i += 1) {
+        const a = (Math.PI * 2 * i) / 8;
+        ctx.fillStyle = i % 2 === 0 ? 'rgba(176, 58, 58, 0.28)' : 'rgba(54, 41, 31, 0.18)';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(a - 0.18) * 14, Math.sin(a - 0.18) * 14);
+        ctx.lineTo(Math.cos(a) * 44, Math.sin(a) * 44);
+        ctx.lineTo(Math.cos(a + 0.18) * 14, Math.sin(a + 0.18) * 14);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.fillStyle = '#C94C4C';
+      ctx.beginPath();
+      ctx.arc(0, 0, 11, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // 4. Diagonal Foul Arrows toward the 4 Pockets
+      ctx.strokeStyle = 'rgba(54, 41, 31, 0.34)';
+      ctx.lineWidth = 1.4;
+      logic.CARROM_POCKETS.forEach((p) => {
+        const dx = p.x - C;
+        const dy = p.y - (C - 14);
+        const len = Math.hypot(dx, dy) || 1;
+        const ux = dx / len;
+        const uy = dy / len;
+        const sx = C + ux * 68;
+        const sy = C - 14 + uy * 68;
+        const ex = p.x - ux * 36;
+        const ey = p.y - uy * 36;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(ex, ey);
+        ctx.stroke();
+
+        // Small arrowhead pointing to pocket
+        const ah = 7;
+        const ang = Math.atan2(uy, ux);
+        ctx.beginPath();
+        ctx.moveTo(ex, ey);
+        ctx.lineTo(ex - Math.cos(ang - 0.5) * ah, ey - Math.sin(ang - 0.5) * ah);
+        ctx.moveTo(ex, ey);
+        ctx.lineTo(ex - Math.cos(ang + 0.5) * ah, ey - Math.sin(ang + 0.5) * ah);
+        ctx.stroke();
+      });
+
+      // 5. Striker Baseline Track (Bottom)
+      const by = logic.STRIKER_BASELINE_Y;
+      ctx.strokeStyle = 'rgba(54, 41, 31, 0.48)';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(logic.STRIKER_MIN_X, by - 11);
+      ctx.lineTo(logic.STRIKER_MAX_X, by - 11);
+      ctx.moveTo(logic.STRIKER_MIN_X, by + 11);
+      ctx.lineTo(logic.STRIKER_MAX_X, by + 11);
+      ctx.stroke();
+
+      [logic.STRIKER_MIN_X, logic.STRIKER_MAX_X].forEach((bx) => {
+        ctx.fillStyle = '#C94C4C';
+        ctx.beginPath();
+        ctx.arc(bx, by, 10.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#36291F';
+        ctx.lineWidth = 1.3;
+        ctx.stroke();
+      });
+
+      // 6. 4 Corner Pockets + Clear Color-Coded Destination Labels
+      logic.CARROM_POCKETS.forEach((p) => {
+        // Outer colored rim
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, logic.POCKET_RADIUS + 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+
+        // Deep recessed felt pocket hole
+        const holeGrad = ctx.createRadialGradient(p.x - 3, p.y - 3, 2, p.x, p.y, logic.POCKET_RADIUS);
+        holeGrad.addColorStop(0, '#2A2320');
+        holeGrad.addColorStop(0.7, '#120E0D');
+        holeGrad.addColorStop(1, '#070505');
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, logic.POCKET_RADIUS, 0, Math.PI * 2);
+        ctx.fillStyle = holeGrad;
+        ctx.fill();
+
+        // Pocket destination label cleanly placed near corner inside board
+        const labelX = p.corner.includes('l') ? P0 + 50 : P1 - 50;
+        const labelY = p.corner.includes('t') ? P0 + 18 : P1 - 12;
+        ctx.font = '700 9.5px "Plus Jakarta Sans", sans-serif';
+        ctx.textAlign = p.corner.includes('l') ? 'left' : 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#2B1F14';
+        ctx.fillText(p.shortLabel, labelX, labelY);
+      });
+
+      // 7. Aiming Slingshot Line (when dragging striker or coin)
+      if (carromGame.aiming) {
+        let origin = null;
+        let maxPull = 115;
+        if (carromGame.aimTarget === 'striker' && carromGame.striker) {
+          origin = carromGame.striker;
+        } else if (carromGame.aimTarget != null) {
+          origin = carromGame.coins.find((c) => String(c.id) === String(carromGame.aimTarget)) || null;
+          maxPull = 96;
+        }
+        if (origin) {
+          const shot = logic.computeStrikerShotVelocity(
+            origin.x,
+            origin.y,
+            carromGame.pointerX,
+            carromGame.pointerY,
+            maxPull
+          );
+          if (shot.power > 0.05) {
+            const aimLen = 45 + shot.power * 165;
+            const tx = origin.x + Math.cos(shot.angle) * aimLen;
+            const ty = origin.y + Math.sin(shot.angle) * aimLen;
+
+            // Pull tension line behind striker
+            ctx.save();
+            ctx.strokeStyle = 'rgba(201, 76, 76, 0.55)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(origin.x, origin.y);
+            ctx.lineTo(carromGame.pointerX, carromGame.pointerY);
+            ctx.stroke();
+
+            // Dotted forward trajectory line
+            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = '#2B1F14';
+            ctx.lineWidth = 2.2;
+            ctx.beginPath();
+            ctx.moveTo(origin.x, origin.y);
+            ctx.lineTo(tx, ty);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Power ring around origin
+            ctx.strokeStyle = shot.power > 0.75 ? '#D95D5D' : '#E09F3E';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(origin.x, origin.y, origin.r + 6, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * shot.power);
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+      }
+
+      // 8. Brain Dump Carrom Coins
+      carromGame.coins.forEach((coin) => {
+        const isSelected = String(coin.id) === String(carromGame.selectedCoinId);
+
+        // Shadow
+        ctx.beginPath();
+        ctx.arc(coin.x + 1.5, coin.y + 2.5, coin.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(28, 16, 8, 0.25)';
+        ctx.fill();
+
+        // Selected halo
+        if (isSelected) {
+          ctx.beginPath();
+          ctx.arc(coin.x, coin.y, coin.r + 3.5, 0, Math.PI * 2);
+          ctx.strokeStyle = '#F28B82';
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+        }
+
+        // Turned wooden disc
+        ctx.beginPath();
+        ctx.arc(coin.x, coin.y, coin.r, 0, Math.PI * 2);
+        ctx.fillStyle = coin.tone.fill;
+        ctx.fill();
+        ctx.strokeStyle = coin.tone.ring;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Inner concentric lathe groove
+        ctx.beginPath();
+        ctx.arc(coin.x, coin.y, coin.r - 4.5, 0, Math.PI * 2);
+        ctx.strokeStyle = coin.tone.ring;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Coin number
+        ctx.font = '700 11px "Plus Jakarta Sans", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = coin.tone.text;
+        ctx.fillText(String(coin.index || ''), coin.x, coin.y + 0.5);
+      });
+
+      // 9. Striker Disc (Pearl-Gold Acrylic Striker)
+      if (carromGame.striker && !carromGame.striker.scratched) {
+        const st = carromGame.striker;
+        ctx.beginPath();
+        ctx.arc(st.x + 2, st.y + 3, st.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(28, 16, 8, 0.28)';
+        ctx.fill();
+
+        const stGrad = ctx.createRadialGradient(st.x - 5, st.y - 5, 3, st.x, st.y, st.r);
+        stGrad.addColorStop(0, '#FFFDF7');
+        stGrad.addColorStop(0.65, '#F5D68E');
+        stGrad.addColorStop(1, '#C98F36');
+        ctx.beginPath();
+        ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
+        ctx.fillStyle = stGrad;
+        ctx.fill();
+        ctx.strokeStyle = '#6E4514';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Inner striker motif
+        ctx.beginPath();
+        ctx.arc(st.x, st.y, st.r - 6, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(110, 69, 20, 0.55)';
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(st.x, st.y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#C94C4C';
+        ctx.fill();
+      }
+
+      // 10. Pocket Celebration Particles & Floating Labels
+      carromGame.particles.forEach((p) => {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      carromGame.popups.forEach((pop) => {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, pop.life);
+        ctx.font = '800 11px "Plus Jakarta Sans", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#1B1410';
+        ctx.fillText(pop.label, pop.x + 1, pop.y + 1);
+        ctx.fillStyle = pop.color;
+        ctx.fillText(pop.label, pop.x, pop.y);
+        ctx.restore();
+      });
+    }
+
+    function updateCarromHudAndArchive() {
+      const undoBtn = document.getElementById('carrom-undo-btn');
+      const emptyOverlay = document.getElementById('carrom-empty-overlay');
+      const archiveList = document.getElementById('archived-dump-list');
+      const archiveCount = document.getElementById('archive-count-label');
+      const rosterList = document.getElementById('carrom-coin-roster-list');
+      const rosterCount = document.getElementById('carrom-board-roster-count');
+      const activeMeta = document.getElementById('carrom-active-coin-meta');
+      const activeText = document.getElementById('carrom-active-coin-text');
+      const remainingEl = document.getElementById('carrom-coins-remaining');
+
+      if (undoBtn) undoBtn.disabled = !(Array.isArray(state.swipeHistory) && state.swipeHistory.length > 0);
+      if (emptyOverlay) emptyOverlay.classList.toggle('hidden', carromGame.coins.length > 0);
+
+      ['scheduling', 'notes', 'journal', 'archive'].forEach((k) => {
+        const el = document.getElementById(`carrom-count-${k}`);
+        if (el) el.textContent = String(carromGame.pocketCounts[k] || 0);
+      });
+
+      const activeCoin =
+        carromGame.coins.find((c) => String(c.id) === String(carromGame.selectedCoinId)) ||
+        carromGame.coins[0] ||
+        null;
+
+      if (remainingEl) {
+        remainingEl.textContent = `${carromGame.coins.length} ${carromGame.coins.length === 1 ? 'coin' : 'coins'}`;
+      }
+      if (activeMeta && activeText) {
+        if (activeCoin) {
+          activeMeta.textContent = `Coin #${activeCoin.index} · ${activeCoin.tag || 'Thought'} · Flick directly or aim striker`;
+          activeText.textContent = activeCoin.text;
+        } else {
+          activeMeta.textContent = 'Board clear';
+          activeText.textContent = 'Add a new thought above to drop a coin onto the board.';
+        }
+      }
+
+      document.querySelectorAll('[data-carrom-flick]').forEach((btn) => {
+        btn.disabled = !activeCoin;
+        btn.classList.toggle('opacity-40', !activeCoin);
+      });
+
+      if (rosterCount) rosterCount.textContent = String(carromGame.coins.length);
+      if (rosterList) {
+        rosterList.innerHTML =
+          carromGame.coins.length === 0
+            ? `<p class="text-xs text-mutedtext py-1">No thoughts on the board.</p>`
+            : carromGame.coins
+                .map((c) => {
+                  const sel = String(c.id) === String(carromGame.selectedCoinId);
+                  return `
+                    <button
+                      type="button"
+                      onclick="selectCarromCoin(${JSON.stringify(c.id)})"
+                      class="w-full text-left rounded-xl px-3 py-2 border transition flex items-center gap-2.5 ${
+                        sel
+                          ? 'bg-coral/15 border-coral text-primarytext'
+                          : 'bg-cardbg border-borderline text-primarytext hover:border-coral/50'
+                      }"
+                    >
+                      <span
+                        class="w-6 h-6 rounded-full flex items-center justify-center text-[10.5px] font-bold flex-shrink-0 border"
+                        style="background:${c.tone.fill}; color:${c.tone.text}; border-color:${c.tone.ring};"
+                      >${c.index}</span>
+                      <span class="text-xs font-medium truncate flex-1">${escapeHtml(c.text)}</span>
+                    </button>
+                  `;
+                })
+                .join('');
+      }
+
+      if (archiveCount) {
+        archiveCount.textContent = `${state.archivedDumps.length} ${state.archivedDumps.length === 1 ? 'item' : 'items'}`;
+      }
       if (archiveList) {
         archiveList.innerHTML =
           state.archivedDumps.length === 0
-            ? `<p class="text-sm text-mutedtext py-2">No archived thoughts yet.</p>`
+            ? `<p class="text-xs text-mutedtext py-2">No archived thoughts yet.</p>`
             : state.archivedDumps
                 .map(
                   (a) => `
                   <div class="bg-cardbg border border-borderline rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-2.5">
                     <div class="min-w-0">
-                      <p class="text-sm font-medium text-primarytext truncate">${escapeHtml(a.text)}</p>
-                      <p class="text-xs text-mutedtext">${escapeHtml(a.tag || 'Archived')}</p>
+                      <p class="text-xs font-medium text-primarytext truncate">${escapeHtml(a.text)}</p>
+                      <p class="text-[11px] text-mutedtext">${escapeHtml(a.tag || 'Archived')}</p>
                     </div>
                     <button
                       type="button"
-                      onclick="restoreArchivedDump(${a.id})"
+                      onclick="restoreArchivedDump(${JSON.stringify(a.id)})"
                       class="tactile-btn px-2.5 py-1 rounded-xl bg-pillbg border border-borderline hover:border-coral text-xs font-semibold text-coral whitespace-nowrap"
                     >
                       Restore
@@ -13146,6 +14145,603 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
       if (typeof renderDesktopInspector === 'function') renderDesktopInspector();
     }
+
+    function handleQuickInboxAdd(e) {
+      e.preventDefault();
+      const input = document.getElementById('quick-inbox-input');
+      const text = input ? input.value.trim() : '';
+      if (!text) return;
+
+      const newId = Date.now();
+      state.inboxItems.unshift({
+        id: newId,
+        text,
+        tag: 'Captured',
+        added: 'Just now',
+      });
+      carromGame.selectedCoinId = newId;
+      input.value = '';
+      playSfx('create');
+      saveState();
+      renderInboxDeck();
+    }
+
+    function restoreArchivedDump(id) {
+      const idx = state.archivedDumps.findIndex((a) => String(a.id) === String(id));
+      if (idx < 0) return;
+      const [item] = state.archivedDumps.splice(idx, 1);
+      state.inboxItems.unshift(item);
+      carromGame.selectedCoinId = item.id;
+      playSfx('select');
+      saveState();
+      renderInboxDeck();
+    }
+
+    function renderInboxDeck() {
+      syncCarromCoinsFromState(false);
+      bindCarromCanvasEvents();
+      drawCarromBoard();
+      updateCarromHudAndArchive();
+    }
+
+    function initCarromBoardIfActive() {
+      if (state.activeTab === 'inbox') {
+        renderInboxDeck();
+      }
+    }
+    window.initCarromBoardIfActive = initCarromBoardIfActive;
+
+    // =========================================================================
+    // 4-WAY TINDER SWIPE TASK BATCH SCHEDULER
+    //   UP    -> Urgency
+    //   RIGHT -> Location / Route
+    //   DOWN  -> Time
+    //   LEFT  -> Energy
+    // =========================================================================
+    const taskSwipeSession = {
+      open: false,
+      mobileTab: 'deck', // 'deck' | 'batches'
+      deck: [],
+      batched: [],
+      history: [],
+      gesture: { active: false, startX: 0, startY: 0, dx: 0, dy: 0 },
+    };
+
+    function syncTimelineScheduleBadge() {
+      const el = document.getElementById('timeline-schedule-queue-count');
+      if (!el) return;
+      const qCount = (state.unscheduledQueue || []).length;
+      if (qCount > 0) {
+        el.textContent = `· ${qCount}`;
+        el.classList.remove('hidden');
+      } else {
+        el.classList.add('hidden');
+      }
+    }
+
+    function buildTaskSwipeDeckItems() {
+      const dateKey = state.selectedDate || getTodayDateKey();
+      const items = [];
+
+      // 1. Queued unscheduled tasks (e.g. from Brain Dump Carrom Schedule pocket)
+      (state.unscheduledQueue || []).forEach((q) => {
+        items.push({
+          uid: `q-${q.id}`,
+          source: 'queue',
+          queueId: q.id,
+          taskId: null,
+          title: q.text,
+          location: '',
+          startMin: 540,
+          preferredStartMin: null,
+          durationMin: 30,
+          priority: 2,
+          energy: 2,
+          color: '',
+          metaLabel: 'From Schedule Queue',
+        });
+      });
+
+      // 2. Uncompleted tasks on the selected day (for re-batching & route/energy/urgency grouping)
+      const dayTasks = typeof getTasksForDate === 'function' ? getTasksForDate(dateKey) : [];
+      dayTasks.forEach((t) => {
+        if (typeof isTaskDoneOnDay === 'function' && isTaskDoneOnDay(t, dateKey)) return;
+        items.push({
+          uid: `t-${t.id}`,
+          source: 'task',
+          queueId: null,
+          taskId: t.id,
+          title: t.title,
+          location: t.location || '',
+          startMin: t.startMin ?? 540,
+          preferredStartMin: t.startMin ?? null,
+          durationMin: t.durationMin > 0 ? t.durationMin : 30,
+          priority: t.priority ?? 2,
+          energy: t.energy ?? 1,
+          color: t.color || '',
+          metaLabel: `${formatTime12(t.startMin ?? 540)} · ${formatDuration(t.durationMin || 30)}${t.location ? ` · ${t.location}` : ''}`,
+        });
+      });
+
+      return items;
+    }
+
+    function openTaskSwipeScheduler() {
+      taskSwipeSession.open = true;
+      taskSwipeSession.mobileTab = 'deck';
+      taskSwipeSession.deck = buildTaskSwipeDeckItems();
+      taskSwipeSession.batched = [];
+      taskSwipeSession.history = [];
+      document.getElementById('task-swipe-scheduler-modal')?.classList.remove('hidden');
+      playSfx('select');
+      renderTaskSwipeScheduler();
+    }
+
+    function closeTaskSwipeScheduler() {
+      taskSwipeSession.open = false;
+      document.getElementById('task-swipe-scheduler-modal')?.classList.add('hidden');
+    }
+
+    function setTaskSwipeTab(tab) {
+      taskSwipeSession.mobileTab = tab === 'batches' ? 'batches' : 'deck';
+      renderTaskSwipeScheduler();
+    }
+
+    function resetTaskSwipeSession() {
+      taskSwipeSession.deck = buildTaskSwipeDeckItems();
+      taskSwipeSession.batched = [];
+      taskSwipeSession.history = [];
+      playSfx('select');
+      renderTaskSwipeScheduler();
+    }
+
+    function handleSwipeSchedQuickAdd(e) {
+      e.preventDefault();
+      const input = document.getElementById('swipe-sched-quick-add');
+      const title = input ? input.value.trim() : '';
+      if (!title) return;
+      const qId = Date.now();
+      state.unscheduledQueue.unshift({ id: qId, text: title });
+      taskSwipeSession.deck.unshift({
+        uid: `q-${qId}`,
+        source: 'queue',
+        queueId: qId,
+        taskId: null,
+        title,
+        location: '',
+        startMin: 540,
+        preferredStartMin: null,
+        durationMin: 30,
+        priority: 2,
+        energy: 2,
+        color: '',
+        metaLabel: 'Added just now',
+      });
+      input.value = '';
+      saveState();
+      syncTimelineScheduleBadge();
+      playSfx('create');
+      renderTaskSwipeScheduler();
+    }
+
+    function highlightSwipeDirectionZones(opacities) {
+      const map = {
+        up: { id: 'swipe-zone-up', color: '#F6C244' },
+        right: { id: 'swipe-zone-right', color: '#F28B82' },
+        down: { id: 'swipe-zone-down', color: '#6EA8D8' },
+        left: { id: 'swipe-zone-left', color: '#81C953' },
+      };
+      Object.entries(map).forEach(([dir, cfg]) => {
+        const el = document.getElementById(cfg.id);
+        if (!el) return;
+        const w = opacities ? opacities[dir] || 0 : 0;
+        if (w > 0.08) {
+          el.style.borderColor = cfg.color;
+          el.style.backgroundColor = `${cfg.color}${Math.round(w * 42).toString(16).padStart(2, '0')}`;
+          el.style.transform = `scale(${(1 + w * 0.04).toFixed(3)})`;
+        } else {
+          el.style.borderColor = '';
+          el.style.backgroundColor = '';
+          el.style.transform = '';
+        }
+      });
+    }
+
+    function triggerTaskBatchSwipe(direction) {
+      const logic = window.TaskBatchSwipeLogic;
+      if (!logic || taskSwipeSession.deck.length === 0) return;
+      const batchKey = logic.directionToBatchKey(direction);
+      if (!batchKey) return;
+
+      const cardItem = taskSwipeSession.deck.shift();
+      const batchedItem = { ...cardItem, batchKey };
+      taskSwipeSession.batched.push(batchedItem);
+      taskSwipeSession.history.push({ item: cardItem, batchKey });
+      highlightSwipeDirectionZones(null);
+      playSfx('swipeKeep');
+      renderTaskSwipeScheduler();
+    }
+
+    function undoLastTaskBatchSwipe() {
+      if (taskSwipeSession.history.length === 0) return;
+      const last = taskSwipeSession.history.pop();
+      if (!last) return;
+      taskSwipeSession.batched = taskSwipeSession.batched.filter((b) => b.uid !== last.item.uid);
+      taskSwipeSession.deck.unshift(last.item);
+      playSfx('select');
+      renderTaskSwipeScheduler();
+    }
+
+    function removeFromTaskBatch(uid) {
+      const idx = taskSwipeSession.batched.findIndex((b) => b.uid === uid);
+      if (idx < 0) return;
+      const [removed] = taskSwipeSession.batched.splice(idx, 1);
+      taskSwipeSession.history = taskSwipeSession.history.filter((h) => h.item.uid !== uid);
+      const { batchKey, ...rest } = removed;
+      taskSwipeSession.deck.unshift(rest);
+      playSfx('select');
+      renderTaskSwipeScheduler();
+    }
+
+    function handleTaskSwipeCardDown(e) {
+      if (e.button !== undefined && e.button !== 0) return;
+      taskSwipeSession.gesture.active = true;
+      taskSwipeSession.gesture.startX = e.clientX;
+      taskSwipeSession.gesture.startY = e.clientY;
+      taskSwipeSession.gesture.dx = 0;
+      taskSwipeSession.gesture.dy = 0;
+      try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
+    }
+
+    function handleTaskSwipeCardMove(e) {
+      if (!taskSwipeSession.gesture.active) return;
+      const logic = window.TaskBatchSwipeLogic;
+      const dx = e.clientX - taskSwipeSession.gesture.startX;
+      const dy = e.clientY - taskSwipeSession.gesture.startY;
+      taskSwipeSession.gesture.dx = dx;
+      taskSwipeSession.gesture.dy = dy;
+
+      const card = e.currentTarget;
+      const rot = dx * 0.045;
+      card.style.transition = 'none';
+      card.style.transform = `translate3d(${dx}px, ${dy}px, 0) rotate(${rot.toFixed(1)}deg)`;
+
+      const ops = logic ? logic.computeSwipeStampOpacities(dx, dy) : { up: 0, right: 0, down: 0, left: 0 };
+      ['up', 'right', 'down', 'left'].forEach((dir) => {
+        const stamp = card.querySelector(`[data-batch-stamp="${dir}"]`);
+        if (stamp) stamp.style.opacity = String(ops[dir] || 0);
+      });
+      highlightSwipeDirectionZones(ops);
+    }
+
+    function handleTaskSwipeCardUp(e) {
+      if (!taskSwipeSession.gesture.active) return;
+      taskSwipeSession.gesture.active = false;
+      const logic = window.TaskBatchSwipeLogic;
+      const { dx, dy } = taskSwipeSession.gesture;
+      const card = e.currentTarget;
+      const dir = logic ? logic.classifyFourWaySwipe(dx, dy, 62) : null;
+
+      if (dir) {
+        const fly = {
+          right: 'translate3d(340px, 0px, 0) rotate(14deg)',
+          left: 'translate3d(-340px, 0px, 0) rotate(-14deg)',
+          up: 'translate3d(0px, -290px, 0) scale(0.94)',
+          down: 'translate3d(0px, 290px, 0) scale(0.94)',
+        };
+        card.style.transition = 'transform 0.2s ease, opacity 0.18s ease';
+        card.style.transform = fly[dir];
+        card.style.opacity = '0';
+        setTimeout(() => triggerTaskBatchSwipe(dir), 170);
+      } else {
+        card.style.transition = 'transform 0.24s cubic-bezier(0.22, 1, 0.36, 1)';
+        card.style.transform = 'translate3d(0px, 0px, 0) rotate(0deg)';
+        ['up', 'right', 'down', 'left'].forEach((d) => {
+          const stamp = card.querySelector(`[data-batch-stamp="${d}"]`);
+          if (stamp) stamp.style.opacity = '0';
+        });
+        highlightSwipeDirectionZones(null);
+      }
+    }
+
+    function applyBatchedTasksToTimeline() {
+      const logic = window.TaskBatchSwipeLogic;
+      if (!logic || taskSwipeSession.batched.length === 0) return;
+
+      const dateKey = state.selectedDate || getTodayDateKey();
+      const parsedDate = CalLogic.parseDateKey(dateKey);
+      const dayNum = parsedDate.getDate();
+      const startSelect = document.getElementById('task-swipe-start-select');
+      const startMin = startSelect ? Number(startSelect.value) || 540 : 540;
+
+      const plan = logic.buildBatchedTimelinePlan(taskSwipeSession.batched, {
+        startMin,
+        gapMin: 10,
+        batchBreakMin: 15,
+      });
+
+      const batchIcons = {
+        urgency: 'spark',
+        energy: 'bolt',
+        location: 'map',
+        time: 'clock',
+      };
+
+      plan.forEach((slot, idx) => {
+        if (slot.source === 'task' && slot.taskId != null) {
+          const existing = state.tasks.find((t) => String(t.id) === String(slot.taskId));
+          if (existing) {
+            existing.startMin = slot.startMin;
+            existing.durationMin = slot.durationMin;
+            existing.priority = slot.priority;
+            existing.energy = slot.energy;
+            existing.scheduleBatch = slot.batchKey;
+            existing.compartment = inferCompartment(slot.startMin);
+            return;
+          }
+        }
+
+        const newTask = {
+          id: Date.now() + idx * 7,
+          title: slot.title,
+          dateKey,
+          day: dayNum,
+          projectId: null,
+          habitId: null,
+          startMin: slot.startMin,
+          durationMin: slot.durationMin,
+          color: slot.color || 'coral',
+          icon: batchIcons[slot.batchKey] || 'at',
+          recurring: false,
+          repeat: 'once',
+          weekDays: null,
+          energy: slot.energy,
+          priority: slot.priority,
+          alertStart: false,
+          alertEnd: false,
+          pinned: slot.batchKey === 'urgency',
+          location: slot.location || '',
+          locationPlaceId: '',
+          locationLat: null,
+          locationLng: null,
+          locationRadiusMeters: 150,
+          locationVerifyMode: 'off',
+          driveFiles: [],
+          note: `Scheduled via ${logic.BATCH_META_BY_KEY[slot.batchKey]?.label || slot.batchKey} batch`,
+          prePrompts: [],
+          intraPrompts: [],
+          postPrompts: [],
+          subtasks: null,
+          done: false,
+          doneDays: {},
+          compartment: inferCompartment(slot.startMin),
+          scheduleBatch: slot.batchKey,
+        };
+        state.tasks.push(newTask);
+
+        if (slot.source === 'queue' && slot.queueId != null) {
+          state.unscheduledQueue = state.unscheduledQueue.filter((q) => q.id !== slot.queueId);
+          state.scheduledFromQueueCount = (state.scheduledFromQueueCount || 0) + 1;
+        }
+      });
+
+      saveState();
+      playSfx('complete');
+      computeSelectedDayRings();
+      renderUnifiedCalendar();
+      syncTimelineScheduleBadge();
+      closeTaskSwipeScheduler();
+      if (state.activeTab !== 'timeline') {
+        switchBottomTab('timeline');
+      } else {
+        renderTimeline();
+      }
+    }
+
+    function renderTaskSwipeScheduler() {
+      const logic = window.TaskBatchSwipeLogic;
+      const stage = document.getElementById('task-swipe-deck-stage');
+      const batchesList = document.getElementById('task-swipe-batches-list');
+      const undoBtn = document.getElementById('task-swipe-undo-btn');
+      const applyBtn = document.getElementById('task-swipe-apply-btn');
+      const summaryEl = document.getElementById('task-swipe-batch-summary');
+      const tabCountEl = document.getElementById('task-swipe-batched-count-tab');
+      const deckPane = document.getElementById('task-swipe-deck-pane');
+      const batchesPane = document.getElementById('task-swipe-batches-pane');
+      const tabDeckBtn = document.getElementById('task-swipe-tab-deck');
+      const tabBatchesBtn = document.getElementById('task-swipe-tab-batches');
+
+      const batchedCount = taskSwipeSession.batched.length;
+      if (undoBtn) undoBtn.disabled = taskSwipeSession.history.length === 0;
+      if (applyBtn) {
+        applyBtn.disabled = batchedCount === 0;
+        applyBtn.textContent =
+          batchedCount > 0
+            ? `Apply ${batchedCount} Batched ${batchedCount === 1 ? 'Task' : 'Tasks'} to Timeline`
+            : 'Apply Batches to Timeline';
+      }
+      if (summaryEl) {
+        const dayLabel = CalLogic.formatHumanDate(state.selectedDate || getTodayDateKey(), 'weekday-compact');
+        summaryEl.textContent = `${batchedCount} batched · ${taskSwipeSession.deck.length} remaining · ${dayLabel}`;
+      }
+      if (tabCountEl) tabCountEl.textContent = String(batchedCount);
+
+      // Mobile tab visibility (desktop lg: always shows both side by side)
+      const isMobileBatches = taskSwipeSession.mobileTab === 'batches';
+      if (deckPane) {
+        deckPane.classList.toggle('hidden', isMobileBatches);
+        deckPane.classList.add('lg:flex');
+      }
+      if (batchesPane) {
+        batchesPane.classList.toggle('hidden', !isMobileBatches);
+        batchesPane.classList.toggle('flex', isMobileBatches);
+        batchesPane.classList.add('lg:flex');
+      }
+      if (tabDeckBtn && tabBatchesBtn) {
+        tabDeckBtn.className = `px-2.5 py-1 rounded-lg whitespace-nowrap ${
+          !isMobileBatches ? 'bg-coral text-onaccent' : 'text-secondarytext'
+        }`;
+        tabBatchesBtn.className = `px-2.5 py-1 rounded-lg whitespace-nowrap ${
+          isMobileBatches ? 'bg-coral text-onaccent' : 'text-secondarytext'
+        }`;
+      }
+
+      // Render 4-Way Swipe Card Stack
+      if (stage) {
+        if (taskSwipeSession.deck.length === 0) {
+          stage.innerHTML = `
+            <div class="w-full h-[240px] rounded-[26px] bg-cardbg border border-dashed border-borderline flex flex-col items-center justify-center p-5 text-center space-y-2.5">
+              <p class="font-display text-base font-bold text-primarytext">
+                ${batchedCount > 0 ? 'All Tasks Batched' : 'Deck Empty'}
+              </p>
+              <p class="text-xs text-secondarytext max-w-[230px]">
+                ${
+                  batchedCount > 0
+                    ? 'Review your 4 batches and apply them directly to your timeline.'
+                    : 'Queue a task above or pocket thoughts into Schedule from Brain Dump Carrom.'
+                }
+              </p>
+              ${
+                batchedCount > 0
+                  ? `<button type="button" onclick="applyBatchedTasksToTimeline()" class="tactile-btn px-4 py-2 rounded-xl bg-coral text-onaccent text-xs font-bold">Apply to Timeline</button>`
+                  : ''
+              }
+            </div>
+          `;
+        } else {
+          const visible = taskSwipeSession.deck.slice(0, 3).reverse();
+          stage.innerHTML = visible
+            .map((item, revIdx) => {
+              const depth = visible.length - 1 - revIdx;
+              const isTop = depth === 0;
+              const scale = 1 - depth * 0.045;
+              const offsetY = depth * 10;
+              return `
+                <div
+                  ${
+                    isTop
+                      ? `onpointerdown="handleTaskSwipeCardDown(event)" onpointermove="handleTaskSwipeCardMove(event)" onpointerup="handleTaskSwipeCardUp(event)" onpointercancel="handleTaskSwipeCardUp(event)"`
+                      : ''
+                  }
+                  style="touch-action: none; transform: translateY(${offsetY}px) scale(${scale}); z-index: ${20 - depth};"
+                  class="tinder-card absolute inset-x-0 top-2 h-[246px] rounded-[26px] bg-cardbg border ${
+                    isTop ? 'border-borderline cursor-grab active:cursor-grabbing shadow-lg' : 'border-borderline/60 opacity-70 pointer-events-none'
+                  } p-5 flex flex-col justify-between select-none"
+                >
+                  <div class="flex items-center justify-between gap-2 text-xs text-secondarytext">
+                    <span class="font-semibold text-primarytext truncate">${escapeHtml(item.source === 'queue' ? 'Unscheduled Queue' : 'Today Task')}</span>
+                    <span class="tabular-nums whitespace-nowrap">${taskSwipeSession.deck.length - depth} left</span>
+                  </div>
+
+                  <div class="relative my-auto py-2">
+                    <span data-batch-stamp="up" style="opacity:0; border-color:#F6C244; color:#F6C244;" class="pointer-events-none absolute -top-5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-lg border-2 text-[11px] font-extrabold uppercase tracking-wider whitespace-nowrap">
+                      ↑ Urgency
+                    </span>
+                    <span data-batch-stamp="right" style="opacity:0; border-color:#F28B82; color:#F28B82;" class="pointer-events-none absolute -top-3 left-0 px-2.5 py-0.5 rounded-lg border-2 text-[11px] font-extrabold uppercase tracking-wider -rotate-6 whitespace-nowrap">
+                      Location / Route →
+                    </span>
+                    <span data-batch-stamp="left" style="opacity:0; border-color:#81C953; color:#81C953;" class="pointer-events-none absolute -top-3 right-0 px-2.5 py-0.5 rounded-lg border-2 text-[11px] font-extrabold uppercase tracking-wider rotate-6 whitespace-nowrap">
+                      ← Energy
+                    </span>
+                    <span data-batch-stamp="down" style="opacity:0; border-color:#6EA8D8; color:#6EA8D8;" class="pointer-events-none absolute -bottom-5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-lg border-2 text-[11px] font-extrabold uppercase tracking-wider whitespace-nowrap">
+                      ↓ Time
+                    </span>
+
+                    <p class="font-display text-lg sm:text-xl font-bold text-primarytext leading-snug line-clamp-3">
+                      ${escapeHtml(item.title)}
+                    </p>
+                    <p class="text-xs text-secondarytext mt-1.5 truncate">
+                      ${escapeHtml(item.metaLabel)}
+                    </p>
+                  </div>
+
+                  <div class="flex items-center justify-between text-[11px] text-mutedtext pt-2 border-t border-borderline/70">
+                    <span>Drag in any of 4 directions</span>
+                    <span class="hidden sm:inline">Arrow keys supported</span>
+                  </div>
+                </div>
+              `;
+            })
+            .join('');
+        }
+      }
+
+      // Render 4 Batches Panel
+      if (batchesList && logic) {
+        const groups = logic.groupBatchedItems(taskSwipeSession.batched);
+        const batchOrder = [
+          { key: 'urgency', arrow: '↑' },
+          { key: 'location', arrow: '→' },
+          { key: 'time', arrow: '↓' },
+          { key: 'energy', arrow: '←' },
+        ];
+
+        batchesList.innerHTML = batchOrder
+          .map(({ key, arrow }) => {
+            const meta = logic.BATCH_META_BY_KEY[key];
+            const list = groups[key] || [];
+            return `
+              <div class="rounded-2xl bg-cardbg border border-borderline p-3 space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-2 min-w-0">
+                    <span class="text-xs font-bold" style="color:${meta.hex};">${arrow}</span>
+                    <span class="text-xs font-bold text-primarytext truncate">${meta.label}</span>
+                  </div>
+                  <span class="text-[11px] font-bold tabular-nums" style="color:${meta.hex};">${list.length}</span>
+                </div>
+                ${
+                  list.length === 0
+                    ? `<p class="text-[11px] text-mutedtext">${meta.hint}</p>`
+                    : `<div class="space-y-1.5">
+                        ${list
+                          .map(
+                            (it) => `
+                            <div class="flex items-center justify-between gap-2 rounded-xl bg-pillbg border border-borderline/70 px-2.5 py-1.5">
+                              <span class="text-xs font-medium text-primarytext truncate">${escapeHtml(it.title)}</span>
+                              <button
+                                type="button"
+                                onclick="removeFromTaskBatch(${JSON.stringify(it.uid)})"
+                                title="Return to swipe deck"
+                                class="text-mutedtext hover:text-coral p-0.5 flex-shrink-0"
+                              >
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                              </button>
+                            </div>
+                          `
+                          )
+                          .join('')}
+                      </div>`
+                }
+              </div>
+            `;
+          })
+          .join('');
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (!taskSwipeSession.open) return;
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      if (e.key === 'Escape') {
+        closeTaskSwipeScheduler();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        triggerTaskBatchSwipe('up');
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        triggerTaskBatchSwipe('right');
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        triggerTaskBatchSwipe('down');
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        triggerTaskBatchSwipe('left');
+      } else if (e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        undoLastTaskBatchSwipe();
+      }
+    });
 
     // =========================================================================
     // HABITS & MATTE CARDSTOCK PUNCH CARDS + MECHANICAL HOLE-PUNCHER ANIMATION
@@ -20430,7 +22026,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (tab !== 'journal') {
         closeJournalToolModal();
       }
+      if (tab !== 'inbox') {
+        stopCarromLoop();
+      }
       if (tab === 'timeline') {
+        syncTimelineScheduleBadge();
         renderTimeline();
         if (state.timelineViewMode === 'projects') {
           requestAnimationFrame(() => scrollProjectsTimelineToToday(false));
@@ -21241,6 +22841,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           </div>
 
           <div class="mt-auto pt-3 border-t border-borderline/70 space-y-2">
+            <button type="button" onclick="openTaskSwipeScheduler()" class="tactile-btn w-full py-2.5 px-3 rounded-xl bg-coral text-onaccent text-xs font-bold flex items-center justify-center gap-1.5">
+              <span>Schedule &amp; Swipe Batch</span>
+            </button>
             <div class="grid grid-cols-2 gap-2">
               <button type="button" onclick="openTaskModal()" class="tactile-btn py-2.5 px-3 rounded-xl bg-cardbg border border-borderline hover:border-coral/60 text-xs font-semibold text-primarytext flex items-center justify-center gap-1.5">
                 <span class="text-coral font-bold">+</span><span>New Task</span>
@@ -21429,20 +23032,20 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             `
             )
             .join('')
-        : `<p class="text-xs text-mutedtext leading-relaxed">Swipe cards right to queue thoughts here for quick time-blocking.</p>`;
+        : `<p class="text-xs text-mutedtext leading-relaxed">Pocket Carrom coins into the top-left Schedule pocket to queue them for 4-way batch scheduling.</p>`;
 
       pane.innerHTML = `
         <div class="p-5 space-y-5 flex-1 flex flex-col">
           <div class="space-y-2.5">
-            <p class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Capture Overview</p>
+            <p class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Carrom Overview</p>
             <div class="grid grid-cols-3 gap-2">
               <div class="rounded-xl bg-cardbg border border-borderline p-3 text-center">
                 <p class="font-display text-lg font-bold text-primarytext tabular-nums">${(state.inboxItems || []).length}</p>
-                <p class="text-[10.5px] text-secondarytext">In Deck</p>
+                <p class="text-[10.5px] text-secondarytext">On Board</p>
               </div>
               <div class="rounded-xl bg-cardbg border border-borderline p-3 text-center">
                 <p class="font-display text-lg font-bold text-coral tabular-nums">${queue.length}</p>
-                <p class="text-[10.5px] text-secondarytext">Queued</p>
+                <p class="text-[10.5px] text-secondarytext">Schedule</p>
               </div>
               <div class="rounded-xl bg-cardbg border border-borderline p-3 text-center">
                 <p class="font-display text-lg font-bold text-secondarytext tabular-nums">${(state.archivedDumps || []).length}</p>
@@ -21452,7 +23055,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           </div>
 
           <div class="space-y-2.5">
-            <p class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Ready to Schedule</p>
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Ready to Schedule</p>
+              <button type="button" onclick="openTaskSwipeScheduler()" class="tactile-btn text-[11px] font-semibold text-coral hover:underline whitespace-nowrap">
+                Swipe Batch
+              </button>
+            </div>
             <div class="space-y-2">${queueHtml}</div>
           </div>
         </div>
@@ -22440,6 +24048,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       setMode('docked');
     })();
   </script>
+  <script type="module" src="/carrom-braindump-logic.js"></script>
+  <script type="module" src="/task-batch-swipe-logic.js"></script>
   <script type="module" src="/habit-task-link-logic.js"></script>
   <script type="module" src="/routines-automation-logic.js"></script>
   <script type="module" src="/google-integrations.js"></script>
