@@ -1844,11 +1844,11 @@
         <div id="hourly-grid-container" class="hidden relative select-none lg:max-w-[740px] lg:mx-auto"></div>
       </section>
 
-      <!-- VIEW 2: BRAIN DUMP (Unified Playable 4-Pocket Carrom Card + Collapsible Archive Footer) -->
+      <!-- VIEW 2: BRAIN DUMP (Flat Embedded 4-Pocket Carrom + Collapsible Archive Footer) -->
       <section id="view-inbox" class="hidden relative z-10 flex-1 overflow-y-auto no-scrollbar px-4 lg:px-8 pb-24 lg:pb-14 pt-3 lg:pt-5">
-        <div class="max-w-[440px] mx-auto rounded-[26px] bg-cardbg border border-borderline overflow-hidden">
-          <!-- Top: Active Coin Readout -->
-          <div id="carrom-active-coin-bar" class="px-4 py-3.5 border-b border-borderline/70">
+        <div class="max-w-[440px] mx-auto">
+          <!-- Top: Active Coin Readout (Flush on sheet) -->
+          <div id="carrom-active-coin-bar" class="px-1 pb-3 border-b border-borderline/50">
             <div class="flex items-start justify-between gap-2.5">
               <div class="min-w-0">
                 <p id="carrom-active-coin-meta" class="text-[11px] font-semibold text-secondarytext">Active Coin</p>
@@ -1859,17 +1859,17 @@
             </div>
           </div>
 
-          <!-- Middle: Inset Theme-Matched Carrom Board -->
-          <div class="p-2.5 bg-appbg/35">
+          <!-- Middle: Recessed Theme-Matched Carrom Board (Flush outer margin) -->
+          <div class="py-2">
             <div class="relative w-full aspect-square select-none">
               <canvas
                 id="carrom-board-canvas"
                 width="420"
                 height="420"
                 style="touch-action: none;"
-                class="w-full h-full rounded-[18px] block cursor-crosshair"
+                class="w-full h-full block cursor-crosshair"
               ></canvas>
-              <div id="carrom-empty-overlay" class="hidden absolute inset-4 rounded-2xl bg-appbg/92 backdrop-blur-sm border border-borderline flex flex-col items-center justify-center p-5 text-center space-y-2.5">
+              <div id="carrom-empty-overlay" class="hidden absolute inset-5 rounded-2xl bg-sheetbg/94 backdrop-blur-sm border border-borderline/70 flex flex-col items-center justify-center p-5 text-center space-y-2.5">
                 <p class="font-display text-base font-bold text-primarytext">Brain Dump Cleared</p>
                 <p class="text-xs text-secondarytext max-w-[230px]">Tap + to drop a thought onto the board or open Schedule to batch queued tasks.</p>
                 <button
@@ -1883,13 +1883,13 @@
             </div>
           </div>
 
-          <!-- Below Board: Integrated Pocket Action Strip -->
-          <div id="carrom-pocket-actions" class="px-2.5 py-2.5 border-t border-borderline/70 grid grid-cols-4 gap-1.5">
+          <!-- Below Board: Flat Pocket Action Strip -->
+          <div id="carrom-pocket-actions" class="pt-2.5 pb-3 border-t border-borderline/50 grid grid-cols-4 gap-1.5">
             <button
               type="button"
               data-carrom-flick="scheduling"
               onclick="flickSelectedCoinToPocket('scheduling')"
-              class="tactile-btn py-2 px-2 rounded-xl bg-pillbg border border-borderline/80 hover:border-coral text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
+              class="tactile-btn py-2 px-2 rounded-xl bg-appbg/55 border border-borderline/65 hover:border-coral text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
             >
               <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#F28B82;"></span>
               <span>Schedule</span>
@@ -1898,7 +1898,7 @@
               type="button"
               data-carrom-flick="notes"
               onclick="flickSelectedCoinToPocket('notes')"
-              class="tactile-btn py-2 px-2 rounded-xl bg-pillbg border border-borderline/80 hover:border-sky text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
+              class="tactile-btn py-2 px-2 rounded-xl bg-appbg/55 border border-borderline/65 hover:border-sky text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
             >
               <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#6EA8D8;"></span>
               <span>Notes</span>
@@ -1907,7 +1907,7 @@
               type="button"
               data-carrom-flick="archive"
               onclick="flickSelectedCoinToPocket('archive')"
-              class="tactile-btn py-2 px-2 rounded-xl bg-pillbg border border-borderline/80 hover:border-secondarytext text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
+              class="tactile-btn py-2 px-2 rounded-xl bg-appbg/55 border border-borderline/65 hover:border-secondarytext text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
             >
               <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#9A9AA0;"></span>
               <span>Archive</span>
@@ -1916,7 +1916,7 @@
               type="button"
               data-carrom-flick="journal"
               onclick="flickSelectedCoinToPocket('journal')"
-              class="tactile-btn py-2 px-2 rounded-xl bg-pillbg border border-borderline/80 hover:border-lime text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
+              class="tactile-btn py-2 px-2 rounded-xl bg-appbg/55 border border-borderline/65 hover:border-lime text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
             >
               <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#81C953;"></span>
               <span>Journal</span>
@@ -1924,16 +1924,16 @@
           </div>
 
           <!-- Collapsible Archived Footer Row -->
-          <div id="carrom-archive-footer" class="border-t border-borderline/70">
+          <div id="carrom-archive-footer" class="border-t border-borderline/50">
             <button
               type="button"
               id="inbox-archive-toggle-btn"
               onclick="toggleInboxArchiveFooter()"
               aria-expanded="false"
               aria-controls="inbox-archive-drawer"
-              class="w-full px-4 py-2.5 flex items-center justify-between gap-2 text-left hover:bg-pillbg/45 transition-colors"
+              class="w-full px-1 py-2.5 flex items-center justify-between gap-2 text-left text-secondarytext hover:text-primarytext transition-colors"
             >
-              <span class="text-[11px] font-semibold uppercase tracking-wider text-secondarytext">Archived</span>
+              <span class="text-[11px] font-semibold uppercase tracking-wider">Archived</span>
               <span class="flex items-center gap-2">
                 <span id="archive-count-label" class="text-[11px] font-medium text-mutedtext tabular-nums">0 items</span>
                 <svg
@@ -1950,7 +1950,7 @@
                 </svg>
               </span>
             </button>
-            <div id="inbox-archive-drawer" class="hidden px-3 pb-3 pt-0.5">
+            <div id="inbox-archive-drawer" class="hidden pb-2 pt-0.5">
               <div id="archived-dump-list" class="space-y-1.5 max-h-[220px] overflow-y-auto no-scrollbar"></div>
             </div>
           </div>
@@ -15547,16 +15547,16 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       ctx.clearRect(0, 0, S, S);
 
-      // 1. Matte Theme-Matched Outer Frame
-      ctx.fillStyle = pal.appBg;
+      // 1. Flush Outer Margin (blends directly into the page sheet surface)
+      ctx.fillStyle = pal.sheetBg;
       ctx.fillRect(0, 0, S, S);
 
-      // 2. Playing Surface (Sheet surface inset cleanly inside frame)
+      // 2. Playing Surface (Gently recessed into the page)
       drawRoundedRectPath(ctx, P0, P0, P1 - P0, P1 - P0, 18);
-      ctx.fillStyle = pal.sheetBg;
+      ctx.fillStyle = pal.appBg;
       ctx.fill();
-      ctx.strokeStyle = pal.border;
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = pal.borderSoft;
+      ctx.lineWidth = 1.25;
       ctx.stroke();
 
       // 3. Minimal Architectural Center Reticle (Dead-Center)
