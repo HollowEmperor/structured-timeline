@@ -2998,25 +2998,25 @@
         </div>
 
         <form id="task-modal-form" onsubmit="handleSaveTask(event)" class="space-y-5">
-          <!-- Mode Switcher: Future (To Do Later) vs Completed (Direct to Memo Spike) -->
+          <!-- Mode Switcher: Completed (Default, Direct to Memo Spike) vs Upcoming -->
           <div id="modal-task-mode-switch" class="grid grid-cols-2 bg-cardbg border border-borderline rounded-2xl p-1 gap-1">
-            <button
-              type="button"
-              id="modal-mode-future-btn"
-              onclick="setModalTaskMode('future')"
-              class="tactile-btn py-2 px-3 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 bg-coral text-onaccent"
-            >
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v5l3 2"/></svg>
-              <span>Future</span>
-            </button>
             <button
               type="button"
               id="modal-mode-completed-btn"
               onclick="setModalTaskMode('completed')"
-              class="tactile-btn py-2 px-3 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 text-secondarytext hover:text-primarytext"
+              class="tactile-btn py-2 px-3 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 bg-coral text-onaccent"
             >
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
               <span>Completed</span>
+            </button>
+            <button
+              type="button"
+              id="modal-mode-future-btn"
+              onclick="setModalTaskMode('future')"
+              class="tactile-btn py-2 px-3 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 text-secondarytext hover:text-primarytext"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v5l3 2"/></svg>
+              <span>Upcoming</span>
             </button>
           </div>
           <div class="space-y-2">
@@ -7797,7 +7797,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       modalAlertStart: true,
       modalAlertEnd: false,
       modalPinned: false,
-      modalTaskMode: 'future',
+      modalTaskMode: 'completed',
       modalLocationPlaceId: '',
       modalLocationLat: null,
       modalLocationLng: null,
@@ -9649,10 +9649,17 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     const HOUR_END = 23;
     const PX_PER_HOUR = 140;
 
+    const TIMELINE_DRAG_HOLD_MS = 350;
+
     const timelineDrag = {
       taskId: null,
+      pointerId: null,
+      rowEl: null,
+      holdTimer: null,
+      holdArmed: false,
       startX: 0,
       startY: 0,
+      lastClientY: 0,
       origStartMin: 0,
       liveStartMin: 0,
       anchorViewportY: 0,
@@ -9661,6 +9668,16 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       overTrash: false,
       didMove: false,
     };
+
+    window.addEventListener(
+      'touchmove',
+      (ev) => {
+        if (timelineDrag.active) {
+          ev.preventDefault();
+        }
+      },
+      { passive: false }
+    );
 
     const timelineSwipe = {
       active: false,
@@ -10489,13 +10506,19 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function scrollProjectsTimelineToToday(smooth = false) {
-      const todayRow = document.getElementById('projects-today-row');
-      if (!todayRow) return;
+      const scrollEl = document.getElementById('projects-matrix-scroll');
+      const todayCol = document.getElementById('projects-today-col');
+      if (!scrollEl || !todayCol) return;
       try {
-        todayRow.scrollIntoView({
+        const stickyColWidth = 148;
+        const visibleTrackWidth = Math.max(0, scrollEl.clientWidth - stickyColWidth);
+        const targetLeft = Math.max(
+          0,
+          todayCol.offsetLeft - stickyColWidth - Math.max(0, (visibleTrackWidth - todayCol.offsetWidth) / 2)
+        );
+        scrollEl.scrollTo({
+          left: targetLeft,
           behavior: smooth ? 'smooth' : 'auto',
-          block: 'center',
-          inline: 'nearest',
         });
       } catch (_) {}
     }
@@ -10608,21 +10631,76 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
 
       const timeline = CalLogic.buildSharedProjectTimeline(projects, state.tasks || [], todayKey);
-      const colMinWidth = timeline.projects.length === 1 ? 'minmax(240px, 1fr)' : 'minmax(146px, 1fr)';
-      const gridColsStyle = `grid-template-columns: 52px repeat(${timeline.projects.length}, ${colMinWidth});`;
+      const dateCols = timeline.rows || [];
+      const gridColsStyle = `grid-template-columns: 148px repeat(${Math.max(1, dateCols.length)}, minmax(126px, 1fr));`;
+      const remainingTodayLabel = formatRemainingShort(1440 - liveNow.nowMinFloat);
+      const mutedDashBg = `repeating-linear-gradient(to right, rgb(var(--color-mutedtext) / 0.42) 0px, rgb(var(--color-mutedtext) / 0.42) 5px, transparent 5px, transparent 10px)`;
 
-      const headerCellsHtml = timeline.projects
-        .map((p) => {
+      // Horizontal Date Headers across the top
+      const dateHeaderCellsHtml = dateCols
+        .map((row) => {
+          const dObj = CalLogic.parseDateKey(row.dateKey);
+          const monthShort = CalLogic.MONTH_NAMES_SHORT[dObj.getMonth()];
+          const dayNum = dObj.getDate();
+          const weekdayShort = CalLogic.WEEKDAY_NAMES_SHORT[dObj.getDay()];
+          const isSelectedDate = row.dateKey === state.selectedDate;
+
+          return `
+            <div
+              ${row.isToday ? 'id="projects-today-col"' : ''}
+              data-projects-date-col="${row.dateKey}"
+              class="relative px-1.5 pb-2 pt-1 flex flex-col items-center justify-end border-l border-borderline/25 ${
+                row.isToday ? 'bg-coral/[0.05]' : ''
+              }"
+            >
+              ${
+                row.isToday
+                  ? `<div class="pointer-events-none absolute inset-y-0 w-[1.5px] bg-coral/55 z-0" style="left:${liveNow.todayPct}%;"></div>`
+                  : ''
+              }
+              <button
+                type="button"
+                onclick="selectCalendarDate('${row.dateKey}')"
+                class="relative z-10 flex flex-col items-center justify-center text-center group"
+                title="Jump calendar to ${CalLogic.formatHumanDate(row.dateKey, 'compact-year')}"
+              >
+                ${
+                  row.isToday
+                    ? `<span class="px-1.5 py-0.5 rounded bg-coral text-onaccent text-[8.5px] font-extrabold uppercase tracking-wider leading-none mb-1">TODAY</span>`
+                    : `<span class="text-[9px] font-medium text-mutedtext leading-tight mb-0.5">${weekdayShort}</span>`
+                }
+                <span class="text-[11px] font-bold leading-tight whitespace-nowrap ${
+                  row.isToday || isSelectedDate ? 'text-coral' : row.isPast ? 'text-secondarytext' : 'text-primarytext'
+                } group-hover:text-coral transition">
+                  ${monthShort} ${dayNum}
+                </span>
+                ${
+                  row.isToday
+                    ? `<span class="text-[9.5px] font-bold text-primarytext tabular-nums leading-tight mt-0.5">${liveNow.clockLabel}</span>`
+                    : ''
+                }
+              </button>
+            </div>
+          `;
+        })
+        .join('');
+
+      // Horizontal Project Rows (Sticky Left Name Column + Date Track Cells)
+      const projectRowsHtml = timeline.projects
+        .map((p, pIdx) => {
           const c = CAPSULE_COLORS[p.color] || CAPSULE_COLORS.coral;
+          const rgb = hexToRgbTriplet(c.hex);
           const pct = p.totalCount > 0 ? Math.round((p.doneCount / p.totalCount) * 100) : 0;
           const timeProg = computeProjectLiveTimeProgress(p.startDate, p.endDate, todayKey, liveNow.todayFraction);
           const isFocused = state.focusedProjectId != null && String(state.focusedProjectId) === String(p.id);
           const cardStyle = isFocused
-            ? `border: 1.5px solid ${c.hex}; border-top: 3px solid ${c.hex};`
-            : `border-top: 3px solid ${c.hex};`;
+            ? `border: 1.5px solid ${c.hex}; border-left: 3.5px solid ${c.hex};`
+            : `border-left: 3.5px solid ${c.hex};`;
           const timeStatusColor = timeProg.state === 'active' ? c.hex : 'rgb(var(--color-mutedtext))';
-          return `
-            <div class="px-1 pb-1.5">
+          const colorDashBg = `repeating-linear-gradient(to right, ${c.hex} 0px, ${c.hex} 5px, transparent 5px, transparent 10px)`;
+
+          const stickyProjectCellHtml = `
+            <div class="sticky left-0 z-30 bg-sheetbg border-r border-borderline/80 shadow-[6px_0_12px_-8px_rgba(0,0,0,0.45)] pr-2 pl-0.5 py-2.5 flex items-center">
               <button
                 type="button"
                 data-project-header-id="${escapeHtml(p.id)}"
@@ -10633,7 +10711,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 title="${isFocused ? 'Click to stop highlight • Double-click to edit project' : 'Click to highlight timeframe • Double-click to edit project'}"
               >
                 <div class="flex items-start justify-between gap-1">
-                  <p class="font-display text-[11.5px] font-bold text-primarytext leading-tight truncate">${escapeHtml(p.title)}</p>
+                  <p class="font-display text-[11.5px] font-bold text-primarytext leading-tight line-clamp-2">${escapeHtml(p.title)}</p>
                   <span
                     style="color:${c.hex};"
                     class="text-[9.5px] font-bold tabular-nums whitespace-nowrap flex-shrink-0"
@@ -10641,62 +10719,47 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                     ${p.doneCount}/${p.totalCount}
                   </span>
                 </div>
-                <div class="flex items-center justify-between gap-1 text-[9.5px] font-medium">
+                <div class="flex items-center justify-between gap-1 text-[9px] font-medium">
                   <span class="text-secondarytext truncate">
                     ${CalLogic.formatHumanDate(p.startDate, 'compact')} – ${CalLogic.formatHumanDate(p.endDate, 'compact')}
                   </span>
-                  <span style="color:${timeStatusColor};" class="font-semibold tabular-nums whitespace-nowrap flex-shrink-0">
+                </div>
+                <div class="flex items-center justify-between gap-1.5">
+                  <div class="flex-1 space-y-1">
+                    <div class="w-full h-1 rounded-full bg-pillbg overflow-hidden relative" title="Time elapsed: ${timeProg.pct}%">
+                      <div class="h-full rounded-full transition-all duration-500" style="width:${timeProg.pct}%; background-color:${c.hex}; opacity:0.9;"></div>
+                    </div>
+                    ${
+                      p.totalCount > 0
+                        ? `<div class="w-full h-[3px] rounded-full bg-pillbg/80 overflow-hidden" title="Checkpoints done: ${pct}%">
+                             <div class="h-full rounded-full transition-all" style="width:${pct}%; background-color:${c.hex}; opacity:0.55;"></div>
+                           </div>`
+                        : ''
+                    }
+                  </div>
+                  <span style="color:${timeStatusColor};" class="text-[9px] font-semibold tabular-nums whitespace-nowrap flex-shrink-0">
                     ${timeProg.label}
                   </span>
-                </div>
-                <div class="space-y-1">
-                  <div class="w-full h-1 rounded-full bg-pillbg overflow-hidden relative" title="Time elapsed: ${timeProg.pct}%">
-                    <div class="h-full rounded-full transition-all duration-500" style="width:${timeProg.pct}%; background-color:${c.hex}; opacity:0.9;"></div>
-                  </div>
-                  ${
-                    p.totalCount > 0
-                      ? `<div class="w-full h-[3px] rounded-full bg-pillbg/80 overflow-hidden" title="Checkpoints done: ${pct}%">
-                           <div class="h-full rounded-full transition-all" style="width:${pct}%; background-color:${c.hex}; opacity:0.55;"></div>
-                         </div>`
-                      : ''
-                  }
                 </div>
               </button>
             </div>
           `;
-        })
-        .join('');
 
-      const mutedDashBg = `repeating-linear-gradient(to bottom, rgb(var(--color-mutedtext) / 0.42) 0px, rgb(var(--color-mutedtext) / 0.42) 5px, transparent 5px, transparent 10px)`;
-
-      const rowsHtml = timeline.rows
-        .map((row) => {
-          const dObj = CalLogic.parseDateKey(row.dateKey);
-          const monthShort = CalLogic.MONTH_NAMES_SHORT[dObj.getMonth()];
-          const dayNum = dObj.getDate();
-          const weekdayShort = CalLogic.WEEKDAY_NAMES_SHORT[dObj.getDay()];
-          const isSelectedDate = row.dateKey === state.selectedDate;
-          const remainingTodayLabel = formatRemainingShort(1440 - liveNow.nowMinFloat);
-
-          const cellsHtml = row.cells
-            .map((cell, pIdx) => {
-              const proj = timeline.projects[pIdx];
-              const c = CAPSULE_COLORS[cell.color] || CAPSULE_COLORS.coral;
-              const rgb = hexToRgbTriplet(c.hex);
-              const colorDashBg = `repeating-linear-gradient(to bottom, ${c.hex} 0px, ${c.hex} 5px, transparent 5px, transparent 10px)`;
-
+          const trackCellsHtml = dateCols
+            .map((row) => {
+              const cell = row.cells[pIdx];
               const spinePosStyle = cell.isStart && cell.isEnd
                 ? 'display:none;'
                 : cell.isStart
-                  ? 'top: 50%; bottom: -4px;'
+                  ? 'left: 50%; right: -2px;'
                   : cell.isEnd
-                    ? 'top: -4px; bottom: 50%;'
-                    : 'top: -4px; bottom: -4px;';
+                    ? 'left: -2px; right: 50%;'
+                    : 'left: -2px; right: -2px;';
 
               let spineHtml = '';
               if (cell.inSpan && !(cell.isStart && cell.isEnd)) {
                 if (row.isPast) {
-                  spineHtml = `<div class="pointer-events-none absolute left-1/2 -translate-x-1/2 w-[3px] z-0" style="${spinePosStyle} background-image: ${colorDashBg};"></div>`;
+                  spineHtml = `<div class="pointer-events-none absolute top-1/2 -translate-y-1/2 h-[3px] z-0" style="${spinePosStyle} background-image: ${colorDashBg};"></div>`;
                 } else if (row.isToday) {
                   let fillPct = liveNow.todayPct;
                   if (cell.isStart) {
@@ -10705,18 +10768,18 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                     fillPct = liveNow.todayPct >= 50 ? 100 : Math.max(0, (liveNow.todayPct / 50) * 100);
                   }
                   spineHtml = `
-                    <div class="pointer-events-none absolute left-1/2 -translate-x-1/2 w-[3px] z-0 overflow-hidden" style="${spinePosStyle} background-image: ${mutedDashBg};">
-                      <div class="w-full" style="height:${fillPct.toFixed(1)}%; background-image: ${colorDashBg};"></div>
+                    <div class="pointer-events-none absolute top-1/2 -translate-y-1/2 h-[3px] z-0 overflow-hidden" style="${spinePosStyle} background-image: ${mutedDashBg};">
+                      <div class="h-full" style="width:${fillPct.toFixed(1)}%; background-image: ${colorDashBg};"></div>
                     </div>
                   `;
                 } else {
-                  spineHtml = `<div class="pointer-events-none absolute left-1/2 -translate-x-1/2 w-[3px] z-0" style="${spinePosStyle} background-image: ${mutedDashBg};"></div>`;
+                  spineHtml = `<div class="pointer-events-none absolute top-1/2 -translate-y-1/2 h-[3px] z-0" style="${spinePosStyle} background-image: ${mutedDashBg};"></div>`;
                 }
               }
 
               let contentHtml = '';
               if (cell.checkpoints.length > 0) {
-                contentHtml = cell.checkpoints
+                contentHtml = `<div class="relative z-10 space-y-1.5 w-full">${cell.checkpoints
                   .map((cp) => {
                     const isDue = cp.isDue;
                     const isDone = Boolean(cp.done);
@@ -10746,15 +10809,15 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                       nodeInnerHtml = `<span class="relative z-10">${cp.number}</span>`;
                     }
 
-                    const cardStyle = isDue
+                    const cpCardStyle = isDue
                       ? `border: 1.5px solid ${c.hex}; background-color:rgb(var(--color-cardbg));`
                       : `border-color:rgb(var(--color-borderline)); background-color:rgb(var(--color-cardbg));`;
                     const statusBadge = isDone
                       ? `<span class="text-[8.5px] font-bold uppercase tracking-wider text-mutedtext">Done</span>`
                       : cp.status === 'due-today'
-                        ? `<span class="inline-flex items-center gap-1"><span class="text-[8.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded" style="background-color:${c.hex}; color:${c.text};">Due Today</span><span class="text-[8.5px] font-semibold tabular-nums" style="color:${c.hex};">${remainingTodayLabel} left</span></span>`
+                        ? `<span class="inline-flex items-center gap-1 flex-wrap"><span class="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded" style="background-color:${c.hex}; color:${c.text};">Due Today</span><span class="text-[8px] font-semibold tabular-nums" style="color:${c.hex};">${remainingTodayLabel}</span></span>`
                         : cp.status === 'overdue'
-                          ? `<span class="text-[8.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded" style="background-color:${c.hex}; color:${c.text};">Overdue</span>`
+                          ? `<span class="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded" style="background-color:${c.hex}; color:${c.text};">Overdue</span>`
                           : '';
 
                     return `
@@ -10762,28 +10825,28 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                         type="button"
                         data-project-cp="${escapeHtml(cp.id)}"
                         data-cp-status="${cp.status}"
-                        onclick="toggleProjectCheckpointDone('${escapeHtml(proj.id)}', '${escapeHtml(cp.id)}')"
-                        style="${cardStyle}"
-                        class="tactile-btn relative z-10 w-full rounded-2xl border px-2 py-2 text-left transition flex items-start gap-2"
+                        onclick="toggleProjectCheckpointDone('${escapeHtml(p.id)}', '${escapeHtml(cp.id)}')"
+                        style="${cpCardStyle}"
+                        class="tactile-btn w-full rounded-xl border px-2 py-1.5 text-left transition flex items-start gap-1.5"
                         title="Tap to mark checkpoint complete"
                       >
                         <span
                           style="${nodeStyle}"
-                          class="relative overflow-hidden w-5 h-5 rounded-full border-2 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5 transition"
+                          class="relative overflow-hidden w-4 h-4 rounded-full border-[1.8px] text-[9px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5 transition"
                         >
                           ${nodeInnerHtml}
                         </span>
                         <span class="min-w-0 flex-1 space-y-0.5">
-                          <span class="block text-[11px] font-semibold leading-snug ${isDone ? 'line-through text-mutedtext' : 'text-primarytext'}">
+                          <span class="block text-[10.5px] font-semibold leading-snug line-clamp-2 ${isDone ? 'line-through text-mutedtext' : 'text-primarytext'}">
                             ${escapeHtml(cp.title)}
                           </span>
-                          ${cp.note ? `<span class="block text-[9.5px] ${isDone ? 'text-mutedtext/75' : 'text-secondarytext'} leading-snug line-clamp-2">${escapeHtml(cp.note)}</span>` : ''}
+                          ${cp.note ? `<span class="block text-[9px] ${isDone ? 'text-mutedtext/75' : 'text-secondarytext'} leading-snug line-clamp-1">${escapeHtml(cp.note)}</span>` : ''}
                           ${statusBadge ? `<span class="inline-block pt-0.5">${statusBadge}</span>` : ''}
                         </span>
                       </button>
                     `;
                   })
-                  .join('');
+                  .join('')}</div>`;
               } else if (cell.isStart || cell.isEnd) {
                 const markerLabel = cell.isStart && cell.isEnd ? 'Start / End' : cell.isStart ? 'Start' : 'Target End';
                 const markerElapsed = row.isPast || (row.isToday && cell.isStart);
@@ -10795,7 +10858,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   <div class="relative z-10 flex items-center justify-center py-1">
                     <span
                       style="${pillStyle}"
-                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-wider"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-wider whitespace-nowrap"
                     >
                       <span class="w-1.5 h-1.5 rounded-full" style="background-color:${dotColor};"></span>
                       <span>${markerLabel}</span>
@@ -10804,7 +10867,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 `;
               } else if (cell.inSpan && row.isToday) {
                 contentHtml = `
-                  <div class="pointer-events-none absolute left-1/2 -translate-x-1/2 -translate-y-1/2 z-20" style="top:${liveNow.todayPct}%;">
+                  <div class="pointer-events-none absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-20" style="left:${liveNow.todayPct}%;">
                     <span
                       style="background-color:${c.hex}; box-shadow: 0 0 0 3px rgb(var(--color-sheetbg)), 0 0 8px rgba(${rgb}, 0.55);"
                       class="block w-2.5 h-2.5 rounded-full"
@@ -10815,7 +10878,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
               const linkedTasksHtml =
                 cell.tasks.length > 0
-                  ? `<div class="relative z-10 space-y-1 mt-1">
+                  ? `<div class="relative z-10 space-y-1 mt-1 w-full">
                       ${cell.tasks
                         .map((t) => {
                           const doneT = isTaskDoneOnDay(t, row.dateKey);
@@ -10841,7 +10904,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   : '';
 
               return `
-                <div class="relative px-1 py-2 min-h-[48px] flex flex-col justify-center">
+                <div class="relative px-1.5 py-2.5 min-h-[82px] flex flex-col items-center justify-center border-l border-borderline/25 ${
+                  row.isToday ? 'bg-coral/[0.05]' : ''
+                }">
+                  ${
+                    row.isToday
+                      ? `<div class="pointer-events-none absolute inset-y-0 w-[1.5px] bg-coral/55 z-0" style="left:${liveNow.todayPct}%;"></div>`
+                      : ''
+                  }
                   ${spineHtml}
                   ${contentHtml}
                   ${linkedTasksHtml}
@@ -10852,39 +10922,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
           return `
             <div
-              ${row.isToday ? 'id="projects-today-row"' : ''}
-              data-projects-date-row="${row.dateKey}"
+              data-projects-row-id="${escapeHtml(p.id)}"
               style="${gridColsStyle}"
               class="grid items-stretch relative"
             >
-              ${
-                row.isToday
-                  ? `<div class="pointer-events-none absolute inset-x-0 h-[1.5px] bg-coral/65 z-10" style="top:${liveNow.todayPct}%;"></div>`
-                  : ''
-              }
-              <button
-                type="button"
-                onclick="selectCalendarDate('${row.dateKey}')"
-                class="relative z-20 pr-1.5 py-2 flex flex-col items-end justify-center text-right group"
-                title="Jump calendar to ${CalLogic.formatHumanDate(row.dateKey, 'compact-year')}"
-              >
-                ${
-                  row.isToday
-                    ? `<span class="px-1.5 py-0.5 rounded bg-coral text-onaccent text-[8.5px] font-extrabold uppercase tracking-wider leading-none mb-0.5">TODAY</span>`
-                    : ''
-                }
-                <span class="text-[10.5px] font-bold leading-tight whitespace-nowrap ${
-                  row.isToday || isSelectedDate ? 'text-coral' : row.isPast ? 'text-secondarytext' : 'text-primarytext'
-                } group-hover:text-coral transition">
-                  ${monthShort} ${dayNum}
-                </span>
-                ${
-                  row.isToday
-                    ? `<span class="text-[9.5px] font-bold text-primarytext tabular-nums leading-tight">${liveNow.clockLabel}</span>`
-                    : `<span class="text-[9px] font-medium text-mutedtext leading-tight">${weekdayShort}</span>`
-                }
-              </button>
-              ${cellsHtml}
+              ${stickyProjectCellHtml}
+              ${trackCellsHtml}
             </div>
           `;
         })
@@ -10892,17 +10935,18 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       container.innerHTML = `
         <div class="space-y-2 pb-6 pt-1">
-          <!-- Parallel Side-by-Side Projects Timeline Matrix -->
+          <!-- Horizontal Projects Timeline Matrix with Sticky Left Project Names -->
           <div id="projects-matrix-scroll" class="overflow-x-auto no-scrollbar -mx-1 px-1">
             <div class="min-w-full inline-block align-top">
-              <div style="${gridColsStyle}" class="grid items-end pb-1">
-                <div class="pr-1.5 pb-2.5 text-right">
-                  <span class="text-[9px] font-bold uppercase tracking-wider text-mutedtext">Dates</span>
+              <div style="${gridColsStyle}" class="grid items-stretch border-b border-borderline/60">
+                <div class="sticky left-0 z-30 bg-sheetbg border-r border-borderline/80 shadow-[6px_0_12px_-8px_rgba(0,0,0,0.45)] pr-2 pl-1 pb-2 pt-1 flex items-end justify-between">
+                  <span class="text-[9.5px] font-bold uppercase tracking-wider text-mutedtext">Projects</span>
+                  <span class="text-[9px] font-semibold text-mutedtext/80">Dates →</span>
                 </div>
-                ${headerCellsHtml}
+                ${dateHeaderCellsHtml}
               </div>
               <div class="divide-y divide-borderline/35">
-                ${rowsHtml}
+                ${projectRowsHtml}
               </div>
             </div>
           </div>
@@ -11310,8 +11354,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             onpointermove="handleTimelineDragMove(event, ${task.id})"
             onpointerup="handleTimelineDragEnd(event, ${task.id})"
             onpointercancel="handleTimelineDragCancel(event, ${task.id})"
-            style="touch-action: none;"
-            class="timeline-capsule group grid ${state.showTimes ? 'grid-cols-[44px_64px_1fr]' : 'grid-cols-[64px_1fr]'} items-center pr-2 select-none cursor-grab active:cursor-grabbing relative ${
+            oncontextmenu="if (timelineDrag.holdArmed || timelineDrag.active) event.preventDefault()"
+            style="touch-action: pan-y;"
+            class="timeline-capsule group grid ${state.showTimes ? 'grid-cols-[44px_64px_1fr]' : 'grid-cols-[64px_1fr]'} items-center pr-2 select-none cursor-pointer relative ${
               isOverlapping ? '-mt-3.5 pt-1' : 'py-0.5'
             }"
           >
@@ -11565,15 +11610,35 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
     }
 
+    function clearTimelineDragHoldTimer() {
+      if (timelineDrag.holdTimer !== null) {
+        clearTimeout(timelineDrag.holdTimer);
+        timelineDrag.holdTimer = null;
+      }
+    }
+
+    function setTimelineScrollLocked(locked) {
+      const viewEl = document.getElementById('view-timeline');
+      if (!viewEl) return;
+      viewEl.style.touchAction = locked ? 'none' : '';
+      viewEl.style.overflowY = locked ? 'hidden' : '';
+    }
+
     function handleTimelineDragStart(e, id) {
       if (e.button !== undefined && e.button !== 0) return;
       const task = state.tasks.find((t) => t.id === id);
       if (!task) return;
 
-      const rowRect = e.currentTarget.getBoundingClientRect();
+      clearTimelineDragHoldTimer();
+      const rowEl = e.currentTarget;
+      const rowRect = rowEl.getBoundingClientRect();
       timelineDrag.taskId = id;
+      timelineDrag.pointerId = e.pointerId;
+      timelineDrag.rowEl = rowEl;
+      timelineDrag.holdArmed = false;
       timelineDrag.startX = e.clientX;
       timelineDrag.startY = e.clientY;
+      timelineDrag.lastClientY = e.clientY;
       timelineDrag.origStartMin = task.startMin;
       timelineDrag.liveStartMin = task.startMin;
       timelineDrag.anchorViewportY = rowRect.top;
@@ -11582,9 +11647,27 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       timelineDrag.overTrash = false;
       timelineDrag.didMove = false;
 
-      try {
-        e.currentTarget.setPointerCapture(e.pointerId);
-      } catch (_) {}
+      // Require press-and-hold before unlocking vertical time-reschedule dragging
+      timelineDrag.holdTimer = setTimeout(() => {
+        timelineDrag.holdTimer = null;
+        if (timelineDrag.taskId !== id || timelineDrag.didMove || timelineDrag.axisLock !== null) return;
+        timelineDrag.holdArmed = true;
+        timelineDrag.active = true;
+        timelineDrag.axisLock = 'y';
+        timelineDrag.startY = timelineDrag.lastClientY;
+        setTimelineScrollLocked(true);
+        try {
+          timelineDrag.rowEl?.setPointerCapture(timelineDrag.pointerId);
+        } catch (_) {}
+        try {
+          if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+            navigator.vibrate(12);
+          }
+        } catch (_) {}
+        playSfx('tick');
+        setFabTrashMode(true, false);
+        enterDeeperHourlyTimeline(id, timelineDrag.origStartMin);
+      }, TIMELINE_DRAG_HOLD_MS);
     }
 
     function enterDeeperHourlyTimeline(draggedId, startMin) {
@@ -11654,30 +11737,36 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
     function handleTimelineDragMove(e, id) {
       if (timelineDrag.taskId !== id) return;
+      timelineDrag.lastClientY = e.clientY;
       const dx = e.clientX - timelineDrag.startX;
       const dy = e.clientY - timelineDrag.startY;
 
-      if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
-        timelineDrag.didMove = true;
-      }
+      if (!timelineDrag.holdArmed && !timelineDrag.active) {
+        if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+          timelineDrag.didMove = true;
+          clearTimelineDragHoldTimer();
+        }
 
-      if (timelineDrag.axisLock === null && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
-        timelineDrag.axisLock = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
-      }
+        // If scrolling vertically before hold completes, yield immediately to native scrolling
+        if (timelineDrag.axisLock === null && Math.abs(dy) > 8 && Math.abs(dy) >= Math.abs(dx)) {
+          timelineDrag.taskId = null;
+          timelineDrag.rowEl = null;
+          return;
+        }
 
-      if (timelineDrag.axisLock === 'x') {
-        const clampedX = Math.max(-42, Math.min(42, dx));
-        e.currentTarget.style.transition = 'none';
-        e.currentTarget.style.transform = `translateX(${clampedX}px)`;
+        if (timelineDrag.axisLock === null && Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
+          timelineDrag.axisLock = 'x';
+          try {
+            e.currentTarget.setPointerCapture(e.pointerId);
+          } catch (_) {}
+        }
+
+        if (timelineDrag.axisLock === 'x') {
+          const clampedX = Math.max(-42, Math.min(42, dx));
+          e.currentTarget.style.transition = 'none';
+          e.currentTarget.style.transform = `translateX(${clampedX}px)`;
+        }
         return;
-      }
-
-      if (timelineDrag.axisLock !== 'y') return;
-
-      if (!timelineDrag.active && Math.abs(dy) > 10) {
-        timelineDrag.active = true;
-        setFabTrashMode(true, false);
-        enterDeeperHourlyTimeline(id, timelineDrag.origStartMin);
       }
 
       if (!timelineDrag.active) return;
@@ -11706,6 +11795,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
     function handleTimelineDragEnd(e, id) {
       if (timelineDrag.taskId !== id) return;
+      clearTimelineDragHoldTimer();
+      setTimelineScrollLocked(false);
+
       const axisLock = timelineDrag.axisLock;
       const dx = e.clientX - timelineDrag.startX;
       const dy = e.clientY - timelineDrag.startY;
@@ -11715,6 +11807,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const didMove = timelineDrag.didMove || Math.abs(dx) > 8 || Math.abs(dy) > 8;
 
       timelineDrag.taskId = null;
+      timelineDrag.pointerId = null;
+      timelineDrag.rowEl = null;
+      timelineDrag.holdArmed = false;
       timelineDrag.axisLock = null;
       timelineDrag.active = false;
       timelineDrag.overTrash = false;
@@ -11766,14 +11861,29 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
     function handleTimelineDragCancel(e, id) {
       if (timelineDrag.taskId !== id) return;
+      clearTimelineDragHoldTimer();
+      setTimelineScrollLocked(false);
+
+      const wasActive = timelineDrag.active;
+      const wasAxisX = timelineDrag.axisLock === 'x';
       timelineDrag.taskId = null;
+      timelineDrag.pointerId = null;
+      timelineDrag.rowEl = null;
+      timelineDrag.holdArmed = false;
       timelineDrag.axisLock = null;
       timelineDrag.active = false;
+      timelineDrag.overTrash = false;
       timelineDrag.didMove = false;
-      e.currentTarget.style.transform = '';
-      setFabTrashMode(false, false);
-      exitDeeperHourlyTimeline();
-      renderTimeline();
+
+      if (wasAxisX) {
+        e.currentTarget.style.transform = '';
+      }
+      if (wasActive) {
+        e.currentTarget.style.transform = '';
+        setFabTrashMode(false, false);
+        exitDeeperHourlyTimeline();
+        renderTimeline();
+      }
     }
 
     // =========================================================================
@@ -12266,7 +12376,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (postInput) postInput.value = '';
 
       state.modalDateKey = state.selectedDate || getTodayDateKey();
-      state.modalTaskMode = 'future';
+      state.modalTaskMode = 'completed';
       state.modalProjectId = null;
       state.modalHabitId = null;
       const taskColorKeys = Object.keys(CAPSULE_COLORS);
@@ -12283,7 +12393,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       state.modalRepeat = 'once';
       const curWeekday = CalLogic.getWeekdayShort(state.modalDateKey);
       state.modalWeekDays = [curWeekday];
-      state.modalAlertStart = true;
+      state.modalAlertStart = false;
       state.modalAlertEnd = false;
       state.modalPinned = false;
       state.modalLocationPlaceId = '';
@@ -12293,14 +12403,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       state.modalLocationVerifyMode = 'prompt';
       state.modalDriveFiles = [];
 
-      const modalTitleEl = document.getElementById('modal-title');
-      if (modalTitleEl) {
-        modalTitleEl.innerHTML = `<span class="text-primarytext">New</span><span class="text-coral ml-1">Task</span>`;
-      }
-      const submitBtn = document.getElementById('modal-submit-btn');
-      if (submitBtn) {
-        submitBtn.textContent = 'Create Task';
-      }
+      clampModalCompletedDateTime(true);
+
       const deleteBtn = document.getElementById('modal-delete-btn');
       if (deleteBtn) {
         deleteBtn.classList.add('hidden');
@@ -12407,12 +12511,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (!qItem) return;
       openTaskModal();
       state.schedulingQueueItemId = queueId;
+      state.modalTaskMode = 'future';
+      state.modalAlertStart = true;
       const titleInput = document.getElementById('modal-task-title');
       if (titleInput) titleInput.value = qItem.text;
-      const modalTitleEl = document.getElementById('modal-title');
-      if (modalTitleEl) {
-        modalTitleEl.innerHTML = `<span class="text-primarytext">Schedule</span><span class="text-coral ml-1">Task</span>`;
-      }
+      syncModalControls();
     }
 
     function parseHexToRgbTuple(hex) {
@@ -12459,36 +12562,18 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const activeColor = CAPSULE_COLORS[colorKey] || CAPSULE_COLORS[state.accentKey] || CAPSULE_COLORS.coral;
       const accentRgb = parseHexToRgbTuple(activeColor.hex);
       const onAccentRgb = parseHexToRgbTuple(activeColor.text);
-      const rootStyle = getComputedStyle(document.documentElement);
-      const appRgb = parseCssRgbTuple(rootStyle.getPropertyValue('--color-appbg'), [20, 20, 20]);
-      const cardRgb = parseCssRgbTuple(rootStyle.getPropertyValue('--color-cardbg'), [43, 43, 46]);
-      const pillRgb = parseCssRgbTuple(rootStyle.getPropertyValue('--color-pillbg'), [51, 51, 55]);
-      const borderRgb = parseCssRgbTuple(rootStyle.getPropertyValue('--color-borderline'), [58, 58, 63]);
-      const isLight = (appRgb[0] + appRgb[1] + appRgb[2]) / 3 > 140;
 
       modal.style.setProperty('--color-accent', `${accentRgb[0]} ${accentRgb[1]} ${accentRgb[2]}`);
       modal.style.setProperty('--color-on-accent', `${onAccentRgb[0]} ${onAccentRgb[1]} ${onAccentRgb[2]}`);
       modal.style.setProperty('--color-accent-hex', activeColor.hex);
-      modal.style.setProperty('--color-appbg', blendRgbTuple(appRgb, accentRgb, isLight ? 0.14 : 0.13));
-      modal.style.setProperty('--color-cardbg', blendRgbTuple(cardRgb, accentRgb, isLight ? 0.18 : 0.18));
-      modal.style.setProperty('--color-pillbg', blendRgbTuple(pillRgb, accentRgb, isLight ? 0.22 : 0.22));
-      modal.style.setProperty('--color-borderline', blendRgbTuple(borderRgb, accentRgb, isLight ? 0.44 : 0.42));
-      modal.style.backgroundImage = `radial-gradient(circle at 50% 0%, rgba(${accentRgb[0]}, ${accentRgb[1]}, ${accentRgb[2]}, ${isLight ? 0.18 : 0.15}), transparent 60%)`;
     }
 
     function resetTaskModalColorTheme() {
       const modal = document.getElementById('task-modal');
       if (!modal) return;
-      [
-        '--color-accent',
-        '--color-on-accent',
-        '--color-accent-hex',
-        '--color-appbg',
-        '--color-cardbg',
-        '--color-pillbg',
-        '--color-borderline',
-      ].forEach((prop) => modal.style.removeProperty(prop));
-      modal.style.backgroundImage = '';
+      ['--color-accent', '--color-on-accent', '--color-accent-hex'].forEach((prop) =>
+        modal.style.removeProperty(prop)
+      );
     }
 
     function getCurrentLocalMinutes() {
@@ -12518,12 +12603,16 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
     function setModalTaskMode(mode) {
       if (state.editingTaskId !== null) return;
-      state.modalTaskMode = mode === 'completed' ? 'completed' : 'future';
-      if (state.modalTaskMode === 'completed') {
+      const nextMode = mode === 'completed' ? 'completed' : 'future';
+      const prevMode = state.modalTaskMode;
+      state.modalTaskMode = nextMode;
+      if (nextMode === 'completed') {
         state.modalRepeat = 'once';
         state.modalAlertStart = false;
         state.modalAlertEnd = false;
         clampModalCompletedDateTime(true);
+      } else if (prevMode === 'completed') {
+        state.modalAlertStart = true;
       }
       playSfx('tick');
       syncModalControls();
@@ -12532,7 +12621,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function closeTaskModal() {
       state.editingTaskId = null;
       state.schedulingQueueItemId = null;
-      state.modalTaskMode = 'future';
+      state.modalTaskMode = 'completed';
       resetTaskModalColorTheme();
       document.getElementById('task-modal')?.classList.add('hidden');
       toggleModalIconPicker(false);
