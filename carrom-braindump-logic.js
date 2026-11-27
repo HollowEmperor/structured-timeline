@@ -98,9 +98,9 @@ export function layoutBrainDumpCoins(items, existingCoins = [], opts = {}) {
   const prevById = new Map((existingCoins || []).map((c) => [String(c.id), c]));
   const coins = [];
 
-  // Hex-like rings centered slightly above middle so striker baseline stays clear
+  // In singleCoin mode, place the active dumped coin dead-center on the board
   const centerX = PLAY_CENTER;
-  const centerY = PLAY_CENTER - 14;
+  const centerY = opts && opts.singleCoin ? PLAY_CENTER : PLAY_CENTER - 14;
   const spacing = COIN_RADIUS * 2 + 5;
 
   const slots = [{ x: centerX, y: centerY }];

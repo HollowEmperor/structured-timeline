@@ -1669,19 +1669,6 @@
           <span id="hourly-mode-badge" class="hidden text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-coral/20 text-coral border border-coral/40 whitespace-nowrap flex-shrink-0">
             Hourly Depth
           </span>
-          <button
-            type="button"
-            id="timeline-schedule-btn"
-            onclick="openTaskSwipeScheduler()"
-            title="Schedule & batch tasks with 4-way swipe"
-            class="tactile-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-coral text-onaccent text-xs font-semibold whitespace-nowrap shrink-0"
-          >
-            <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 003.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0120.25 6v1.5m0 9V18A2.25 2.25 0 0118 20.25h-1.5m-9 0H6A2.25 2.25 0 013.75 18v-1.5M12 7.5v9m-4.5-4.5h9"/>
-            </svg>
-            <span>Schedule</span>
-            <span id="timeline-schedule-queue-count" class="hidden text-[10.5px] font-bold opacity-90 tabular-nums"></span>
-          </button>
         </div>
       </div>
 
@@ -1810,21 +1797,6 @@
                     Open Schedule
                   </button>
                 </div>
-              </div>
-
-              <!-- Minimal Striker Baseline Position Slider -->
-              <div class="px-1">
-                <input
-                  id="carrom-striker-slider"
-                  type="range"
-                  min="94"
-                  max="326"
-                  step="1"
-                  value="210"
-                  oninput="handleCarromStrikerSlider(this.value)"
-                  class="w-full accent-coral cursor-pointer"
-                  aria-label="Position striker along baseline"
-                />
               </div>
             </div>
           </div>
@@ -2635,23 +2607,11 @@
         </button>
       </div>
 
-      <!-- Floating Tasks + Action Menu (New Task / New Project / Schedule & Batch) -->
+      <!-- Floating Tasks + Action Menu (New Task / New Project) -->
       <div
         id="timeline-fab-menu"
         class="hidden absolute right-5 lg:right-7 bottom-[142px] lg:bottom-[90px] z-40 bg-cardbg border border-borderline rounded-2xl p-1.5 theme-popover-shadow space-y-1 min-w-[204px]"
       >
-        <button
-          type="button"
-          onclick="handleTimelineFabOption('schedule')"
-          class="tactile-btn w-full px-3.5 py-2.5 rounded-xl hover:bg-pillbg flex items-center justify-between gap-3 text-left text-xs font-semibold text-primarytext"
-        >
-          <span class="flex items-center gap-2.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-amber flex-shrink-0"></span>
-            <span>Schedule &amp; Batch</span>
-          </span>
-          <span class="text-[10px] font-medium text-secondarytext">4-Way Swipe</span>
-        </button>
-        <div class="border-t border-borderline/70 my-0.5"></div>
         <button
           type="button"
           onclick="handleTimelineFabOption('task')"
@@ -3012,7 +2972,7 @@
     ></aside>
 
     <!-- Structured-Style Full-Height "New Task" / "Schedule Task" Screen -->
-    <div id="task-modal" class="hidden absolute inset-0 z-50 bg-appbg flex flex-col justify-between p-5">
+    <div id="task-modal" class="hidden absolute inset-0 z-50 bg-appbg flex flex-col justify-between p-5 transition-colors duration-200">
       <div class="space-y-5 overflow-y-auto no-scrollbar pb-6">
         <div class="flex items-center justify-between pt-1">
           <div class="flex items-center gap-3">
@@ -3038,6 +2998,27 @@
         </div>
 
         <form id="task-modal-form" onsubmit="handleSaveTask(event)" class="space-y-5">
+          <!-- Mode Switcher: Future (To Do Later) vs Completed (Direct to Memo Spike) -->
+          <div id="modal-task-mode-switch" class="grid grid-cols-2 bg-cardbg border border-borderline rounded-2xl p-1 gap-1">
+            <button
+              type="button"
+              id="modal-mode-future-btn"
+              onclick="setModalTaskMode('future')"
+              class="tactile-btn py-2 px-3 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 bg-coral text-onaccent"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v5l3 2"/></svg>
+              <span>Future</span>
+            </button>
+            <button
+              type="button"
+              id="modal-mode-completed-btn"
+              onclick="setModalTaskMode('completed')"
+              class="tactile-btn py-2 px-3 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 text-secondarytext hover:text-primarytext"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span>Completed</span>
+            </button>
+          </div>
           <div class="space-y-2">
             <div class="flex items-center gap-3 border-b border-borderline pb-2.5">
               <button
@@ -3215,7 +3196,7 @@
             <div id="modal-color-swatches" class="bg-cardbg border border-borderline rounded-2xl px-3 py-2.5 flex items-center justify-between gap-2"></div>
           </div>
 
-          <div class="space-y-2.5">
+          <div id="modal-repeat-section" class="space-y-2.5">
             <div class="flex items-center justify-between">
               <span class="text-sm font-semibold text-primarytext">How often?</span>
               <span id="modal-repeat-summary" class="text-xs text-secondarytext">One-time</span>
@@ -3224,7 +3205,7 @@
             <div id="modal-weekly-days" class="hidden grid grid-cols-7 gap-1 pt-1"></div>
           </div>
 
-          <div class="space-y-2">
+          <div id="modal-alerts-section" class="space-y-2">
             <span class="text-sm font-semibold text-primarytext block">Needs alerts?</span>
             <div class="space-y-2">
               <button
@@ -3523,35 +3504,13 @@
             Schedule <span class="text-coral">&amp; Batch</span>
           </h3>
         </div>
-
-        <div class="flex items-center gap-2 flex-shrink-0">
-          <!-- Mobile Switcher: Swipe vs Batches -->
-          <div class="lg:hidden flex items-center rounded-xl bg-cardbg border border-borderline p-0.5 text-xs font-semibold">
-            <button
-              type="button"
-              id="task-swipe-tab-deck"
-              onclick="setTaskSwipeTab('deck')"
-              class="px-2.5 py-1 rounded-lg bg-coral text-onaccent whitespace-nowrap"
-            >
-              Swipe
-            </button>
-            <button
-              type="button"
-              id="task-swipe-tab-batches"
-              onclick="setTaskSwipeTab('batches')"
-              class="px-2.5 py-1 rounded-lg text-secondarytext whitespace-nowrap"
-            >
-              Batches <span id="task-swipe-batched-count-tab" class="tabular-nums">0</span>
-            </button>
-          </div>
-        </div>
       </div>
 
-      <!-- Body -->
+      <!-- Body: Single Unified Column (Swipe Deck Above, Batches Below) -->
       <div class="flex-1 min-h-0 overflow-y-auto no-scrollbar p-4 lg:p-6">
-        <div class="max-w-5xl mx-auto h-full flex flex-col lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(300px,0.9fr)] gap-6 items-center lg:items-stretch">
-          <!-- Left / Primary: Clean Dating-App Style Swipe Deck -->
-          <div id="task-swipe-deck-pane" class="w-full max-w-[390px] lg:max-w-none mx-auto flex flex-col justify-center items-center py-4 space-y-6">
+        <div class="max-w-xl mx-auto flex flex-col gap-6 items-center pb-6">
+          <!-- Primary: Clean Dating-App Style Swipe Deck -->
+          <div id="task-swipe-deck-pane" class="w-full max-w-[390px] mx-auto flex flex-col justify-center items-center pt-2 pb-1 space-y-6">
             <div id="task-swipe-deck-stage" class="relative w-full max-w-[360px] h-[306px] flex items-center justify-center"></div>
 
             <!-- Minimal Circular Swipe Action Buttons (Left Energy · Up Urgency · Undo · Down Time · Right Route) -->
@@ -3589,7 +3548,7 @@
                   onclick="undoLastTaskBatchSwipe()"
                   disabled
                   title="Undo last swipe"
-                  class="tactile-btn w-10 h-10 rounded-full bg-cardbg border border-borderline text-coral flex items-center justify-center disabled:opacity-35"
+                  class="tactile-btn w-10 h-10 rounded-full bg-cardbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center disabled:opacity-35"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/></svg>
                 </button>
@@ -3614,7 +3573,8 @@
                   type="button"
                   onclick="triggerTaskBatchSwipe('right')"
                   title="Batch by Location / Route (Right)"
-                  class="tactile-btn w-12 h-12 rounded-full bg-coral text-onaccent flex items-center justify-center"
+                  class="tactile-btn w-12 h-12 rounded-full bg-cardbg border border-borderline hover:border-coral flex items-center justify-center"
+                  style="color:#F28B82;"
                 >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
                 </button>
@@ -3623,8 +3583,8 @@
             </div>
           </div>
 
-          <!-- Right / Batches Summary & Apply Panel -->
-          <div id="task-swipe-batches-pane" class="hidden lg:flex flex-col rounded-[26px] bg-sheetbg border border-borderline p-4 space-y-3.5 min-h-0">
+          <!-- Batches Summary & Apply Panel (Directly Below Swipe Deck) -->
+          <div id="task-swipe-batches-pane" class="w-full flex flex-col rounded-[26px] bg-sheetbg border border-borderline p-4 space-y-3.5">
             <div class="flex items-center justify-between gap-2">
               <div>
                 <h4 class="font-display text-sm font-bold text-primarytext">Batched Schedule Plan</h4>
@@ -3645,7 +3605,7 @@
               </label>
             </div>
 
-            <div id="task-swipe-batches-list" class="flex-1 overflow-y-auto no-scrollbar space-y-2.5"></div>
+            <div id="task-swipe-batches-list" class="space-y-2.5"></div>
 
             <div class="pt-2 border-t border-borderline/70 flex items-center gap-2">
               <button
@@ -7837,6 +7797,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       modalAlertStart: true,
       modalAlertEnd: false,
       modalPinned: false,
+      modalTaskMode: 'future',
       modalLocationPlaceId: '',
       modalLocationLat: null,
       modalLocationLng: null,
@@ -11987,9 +11948,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
     function handleTimelineFabOption(choice) {
       toggleTimelineFabMenu(false);
-      if (choice === 'schedule') {
-        openTaskSwipeScheduler();
-      } else if (choice === 'task') {
+      if (choice === 'task') {
         openTaskModal();
       } else if (choice === 'project') {
         openProjectModal();
@@ -12307,6 +12266,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (postInput) postInput.value = '';
 
       state.modalDateKey = state.selectedDate || getTodayDateKey();
+      state.modalTaskMode = 'future';
       state.modalProjectId = null;
       state.modalHabitId = null;
       const taskColorKeys = Object.keys(CAPSULE_COLORS);
@@ -12455,16 +12415,138 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
     }
 
+    function parseHexToRgbTuple(hex) {
+      const clean = String(hex || '').replace('#', '').trim();
+      if (clean.length === 3) {
+        return [
+          parseInt(clean[0] + clean[0], 16) || 0,
+          parseInt(clean[1] + clean[1], 16) || 0,
+          parseInt(clean[2] + clean[2], 16) || 0,
+        ];
+      }
+      if (clean.length === 6) {
+        return [
+          parseInt(clean.slice(0, 2), 16) || 0,
+          parseInt(clean.slice(2, 4), 16) || 0,
+          parseInt(clean.slice(4, 6), 16) || 0,
+        ];
+      }
+      return [242, 139, 130];
+    }
+
+    function parseCssRgbTuple(raw, fallback) {
+      const parts = String(raw || '')
+        .trim()
+        .split(/[\s,]+/)
+        .map((n) => Number(n));
+      if (parts.length >= 3 && parts.slice(0, 3).every((n) => Number.isFinite(n))) {
+        return [parts[0], parts[1], parts[2]];
+      }
+      return fallback;
+    }
+
+    function blendRgbTuple(base, tint, weight) {
+      const w = Math.max(0, Math.min(1, weight));
+      const r = Math.round(base[0] * (1 - w) + tint[0] * w);
+      const g = Math.round(base[1] * (1 - w) + tint[1] * w);
+      const b = Math.round(base[2] * (1 - w) + tint[2] * w);
+      return `${r} ${g} ${b}`;
+    }
+
+    function applyTaskModalColorTheme(colorKey) {
+      const modal = document.getElementById('task-modal');
+      if (!modal) return;
+      const activeColor = CAPSULE_COLORS[colorKey] || CAPSULE_COLORS[state.accentKey] || CAPSULE_COLORS.coral;
+      const accentRgb = parseHexToRgbTuple(activeColor.hex);
+      const onAccentRgb = parseHexToRgbTuple(activeColor.text);
+      const rootStyle = getComputedStyle(document.documentElement);
+      const appRgb = parseCssRgbTuple(rootStyle.getPropertyValue('--color-appbg'), [20, 20, 20]);
+      const cardRgb = parseCssRgbTuple(rootStyle.getPropertyValue('--color-cardbg'), [43, 43, 46]);
+      const pillRgb = parseCssRgbTuple(rootStyle.getPropertyValue('--color-pillbg'), [51, 51, 55]);
+      const borderRgb = parseCssRgbTuple(rootStyle.getPropertyValue('--color-borderline'), [58, 58, 63]);
+      const isLight = (appRgb[0] + appRgb[1] + appRgb[2]) / 3 > 140;
+
+      modal.style.setProperty('--color-accent', `${accentRgb[0]} ${accentRgb[1]} ${accentRgb[2]}`);
+      modal.style.setProperty('--color-on-accent', `${onAccentRgb[0]} ${onAccentRgb[1]} ${onAccentRgb[2]}`);
+      modal.style.setProperty('--color-accent-hex', activeColor.hex);
+      modal.style.setProperty('--color-appbg', blendRgbTuple(appRgb, accentRgb, isLight ? 0.14 : 0.13));
+      modal.style.setProperty('--color-cardbg', blendRgbTuple(cardRgb, accentRgb, isLight ? 0.18 : 0.18));
+      modal.style.setProperty('--color-pillbg', blendRgbTuple(pillRgb, accentRgb, isLight ? 0.22 : 0.22));
+      modal.style.setProperty('--color-borderline', blendRgbTuple(borderRgb, accentRgb, isLight ? 0.44 : 0.42));
+      modal.style.backgroundImage = `radial-gradient(circle at 50% 0%, rgba(${accentRgb[0]}, ${accentRgb[1]}, ${accentRgb[2]}, ${isLight ? 0.18 : 0.15}), transparent 60%)`;
+    }
+
+    function resetTaskModalColorTheme() {
+      const modal = document.getElementById('task-modal');
+      if (!modal) return;
+      [
+        '--color-accent',
+        '--color-on-accent',
+        '--color-accent-hex',
+        '--color-appbg',
+        '--color-cardbg',
+        '--color-pillbg',
+        '--color-borderline',
+      ].forEach((prop) => modal.style.removeProperty(prop));
+      modal.style.backgroundImage = '';
+    }
+
+    function getCurrentLocalMinutes() {
+      const now = new Date();
+      return now.getHours() * 60 + now.getMinutes();
+    }
+
+    function clampModalCompletedDateTime(adjustToFinishedNow = false) {
+      if (state.editingTaskId !== null || state.modalTaskMode !== 'completed') return;
+      const todayKey = getTodayDateKey();
+      if (!CalLogic.isValidDateKey(state.modalDateKey) || CalLogic.compareDateKeys(state.modalDateKey, todayKey) > 0) {
+        state.modalDateKey = todayKey;
+      }
+      if (state.modalDateKey === todayKey) {
+        const nowMin = getCurrentLocalMinutes();
+        if (adjustToFinishedNow && state.modalStartMin + state.modalDurationMin > nowMin) {
+          state.modalStartMin = Math.max(0, nowMin - Math.min(state.modalDurationMin, nowMin));
+        } else if (state.modalStartMin > nowMin) {
+          state.modalStartMin = nowMin;
+        }
+        if (!state.modalAllDay && state.modalStartMin + state.modalDurationMin > nowMin) {
+          const maxDur = Math.max(0, nowMin - state.modalStartMin);
+          state.modalDurationMin = maxDur >= 15 ? Math.floor(maxDur / 15) * 15 : maxDur;
+        }
+      }
+    }
+
+    function setModalTaskMode(mode) {
+      if (state.editingTaskId !== null) return;
+      state.modalTaskMode = mode === 'completed' ? 'completed' : 'future';
+      if (state.modalTaskMode === 'completed') {
+        state.modalRepeat = 'once';
+        state.modalAlertStart = false;
+        state.modalAlertEnd = false;
+        clampModalCompletedDateTime(true);
+      }
+      playSfx('tick');
+      syncModalControls();
+    }
+
     function closeTaskModal() {
       state.editingTaskId = null;
       state.schedulingQueueItemId = null;
+      state.modalTaskMode = 'future';
+      resetTaskModalColorTheme();
       document.getElementById('task-modal')?.classList.add('hidden');
       toggleModalIconPicker(false);
     }
 
     function syncModalTaskDate(dateVal) {
       if (!CalLogic.isValidDateKey(dateVal)) return;
-      state.modalDateKey = dateVal;
+      if (state.editingTaskId === null && state.modalTaskMode === 'completed') {
+        const todayKey = getTodayDateKey();
+        state.modalDateKey = CalLogic.compareDateKeys(dateVal, todayKey) > 0 ? todayKey : dateVal;
+        clampModalCompletedDateTime(false);
+      } else {
+        state.modalDateKey = dateVal;
+      }
       syncModalControls();
     }
 
@@ -12552,6 +12634,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const [hh, mm] = timeStr.split(':').map(Number);
       if (!Number.isNaN(hh) && !Number.isNaN(mm)) {
         state.modalStartMin = hh * 60 + mm;
+        clampModalCompletedDateTime(false);
         syncModalControls();
       }
     }
@@ -12560,9 +12643,17 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (!timeStr) return;
       const [hh, mm] = timeStr.split(':').map(Number);
       if (!Number.isNaN(hh) && !Number.isNaN(mm)) {
-        const endMin = hh * 60 + mm;
+        let endMin = hh * 60 + mm;
+        if (
+          state.editingTaskId === null &&
+          state.modalTaskMode === 'completed' &&
+          state.modalDateKey === getTodayDateKey()
+        ) {
+          endMin = Math.min(endMin, getCurrentLocalMinutes());
+        }
         const diff = endMin - state.modalStartMin;
         state.modalDurationMin = diff > 0 ? Math.min(240, diff) : 15;
+        clampModalCompletedDateTime(false);
         syncModalControls();
       }
     }
@@ -12574,6 +12665,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / Math.max(1, rect.width)));
       const snapped = Math.round((ratio * 240) / 15) * 15;
       state.modalDurationMin = snapped;
+      clampModalCompletedDateTime(false);
       syncModalControls();
     }
 
@@ -12628,6 +12720,52 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function syncModalControls() {
+      const isNewTask = state.editingTaskId === null;
+      const isCompletedMode = isNewTask && state.modalTaskMode === 'completed';
+
+      // Apply full-modal live color theme based on chosen color swatch
+      applyTaskModalColorTheme(state.modalColor);
+
+      const modeSwitch = document.getElementById('modal-task-mode-switch');
+      const futureModeBtn = document.getElementById('modal-mode-future-btn');
+      const completedModeBtn = document.getElementById('modal-mode-completed-btn');
+      if (modeSwitch) modeSwitch.classList.toggle('hidden', !isNewTask);
+      if (futureModeBtn && completedModeBtn) {
+        futureModeBtn.className = `tactile-btn py-2 px-3 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 ${
+          !isCompletedMode ? 'bg-coral text-onaccent' : 'text-secondarytext hover:text-primarytext'
+        }`;
+        completedModeBtn.className = `tactile-btn py-2 px-3 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 ${
+          isCompletedMode ? 'bg-coral text-onaccent' : 'text-secondarytext hover:text-primarytext'
+        }`;
+      }
+
+      if (isNewTask) {
+        const modalTitleEl = document.getElementById('modal-title');
+        if (modalTitleEl) {
+          if (isCompletedMode) {
+            modalTitleEl.innerHTML = `<span class="text-primarytext">Completed</span><span class="text-coral ml-1">Task</span>`;
+          } else if (state.schedulingQueueItemId !== null) {
+            modalTitleEl.innerHTML = `<span class="text-primarytext">Schedule</span><span class="text-coral ml-1">Task</span>`;
+          } else {
+            modalTitleEl.innerHTML = `<span class="text-primarytext">New</span><span class="text-coral ml-1">Task</span>`;
+          }
+        }
+        const submitBtn = document.getElementById('modal-submit-btn');
+        if (submitBtn) {
+          submitBtn.textContent = isCompletedMode ? 'Punch to Spike' : 'Create Task';
+        }
+      }
+
+      const repeatSection = document.getElementById('modal-repeat-section');
+      const alertsSection = document.getElementById('modal-alerts-section');
+      if (repeatSection) repeatSection.classList.toggle('hidden', isCompletedMode);
+      if (alertsSection) alertsSection.classList.toggle('hidden', isCompletedMode);
+      if (isCompletedMode) {
+        state.modalRepeat = 'once';
+        state.modalAlertStart = false;
+        state.modalAlertEnd = false;
+      }
+
       const badge = document.getElementById('modal-icon-badge');
       if (badge) badge.innerHTML = ICONS[state.modalIcon] || ICONS.at;
 
@@ -12640,7 +12778,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         ? state.modalDateKey
         : (state.selectedDate || getTodayDateKey());
       state.modalDateKey = modalDateKey;
-      const modalDayNum = CalLogic.parseDateKey(modalDateKey).getDate();
+      if (isCompletedMode) {
+        clampModalCompletedDateTime(false);
+      }
+      const effectiveDateKey = state.modalDateKey;
+      const modalDayNum = CalLogic.parseDateKey(effectiveDateKey).getDate();
 
       const calNum = document.getElementById('gym-icon-cal');
       if (calNum) calNum.textContent = String(modalDayNum);
@@ -12664,15 +12806,38 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const startInput = document.getElementById('modal-task-time');
       const endInput = document.getElementById('modal-task-end-time');
 
-      const humanDate = CalLogic.formatHumanDate(modalDateKey, 'short');
+      const todayKey = getTodayDateKey();
+      const humanDate = CalLogic.formatHumanDate(effectiveDateKey, 'short');
       if (startDateEl) startDateEl.textContent = humanDate;
       if (endDateEl) endDateEl.textContent = humanDate;
-      if (startDateInput) startDateInput.value = modalDateKey;
-      if (endDateInput) endDateInput.value = modalDateKey;
+      if (startDateInput) {
+        startDateInput.value = effectiveDateKey;
+        if (isCompletedMode) startDateInput.max = todayKey;
+        else startDateInput.removeAttribute('max');
+      }
+      if (endDateInput) {
+        endDateInput.value = effectiveDateKey;
+        if (isCompletedMode) endDateInput.max = todayKey;
+        else endDateInput.removeAttribute('max');
+      }
       if (startTimeEl) startTimeEl.textContent = formatTime12(state.modalStartMin).toLowerCase();
       if (endTimeEl) endTimeEl.textContent = formatTime12(state.modalStartMin + state.modalDurationMin).toLowerCase();
-      if (startInput) startInput.value = formatTimeInputVal(state.modalStartMin);
-      if (endInput) endInput.value = formatTimeInputVal(state.modalStartMin + state.modalDurationMin);
+      if (startInput) {
+        startInput.value = formatTimeInputVal(state.modalStartMin);
+        if (isCompletedMode && effectiveDateKey === todayKey) {
+          startInput.max = formatTimeInputVal(getCurrentLocalMinutes());
+        } else {
+          startInput.removeAttribute('max');
+        }
+      }
+      if (endInput) {
+        endInput.value = formatTimeInputVal(state.modalStartMin + state.modalDurationMin);
+        if (isCompletedMode && effectiveDateKey === todayKey) {
+          endInput.max = formatTimeInputVal(getCurrentLocalMinutes());
+        } else {
+          endInput.removeAttribute('max');
+        }
+      }
 
       const segBar = document.getElementById('gym-segmented-bar');
       if (segBar) {
@@ -12875,10 +13040,20 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const intraPrompts = document.getElementById('modal-intra-prompts')?.value.trim() || '';
       const postPrompts = document.getElementById('modal-post-prompts')?.value.trim() || '';
 
-      const resolvedDateKey = CalLogic.isValidDateKey(state.modalDateKey)
+      const isNewCompletedTask = state.editingTaskId === null && state.modalTaskMode === 'completed';
+      if (isNewCompletedTask) {
+        clampModalCompletedDateTime(false);
+      }
+
+      const todayKey = getTodayDateKey();
+      let resolvedDateKey = CalLogic.isValidDateKey(state.modalDateKey)
         ? state.modalDateKey
-        : (state.selectedDate || getTodayDateKey());
+        : (state.selectedDate || todayKey);
+      if (isNewCompletedTask && CalLogic.compareDateKeys(resolvedDateKey, todayKey) > 0) {
+        resolvedDateKey = todayKey;
+      }
       const resolvedDay = CalLogic.parseDateKey(resolvedDateKey).getDate();
+      let punchedTaskId = null;
 
       if (state.editingTaskId !== null) {
         const existingTask = state.tasks.find((t) => t.id === state.editingTaskId);
@@ -12917,8 +13092,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         }
         state.editingTaskId = null;
       } else {
+        const nowTs = Date.now();
         const newTask = {
-          id: Date.now(),
+          id: nowTs,
           title,
           dateKey: resolvedDateKey,
           day: resolvedDay,
@@ -12928,13 +13104,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           durationMin: state.modalAllDay ? 0 : state.modalDurationMin,
           color: state.modalColor,
           icon: state.modalIcon,
-          recurring: state.modalRepeat !== 'once',
-          repeat: state.modalRepeat,
-          weekDays: state.modalRepeat === 'weekly' ? [...state.modalWeekDays] : null,
+          recurring: isNewCompletedTask ? false : state.modalRepeat !== 'once',
+          repeat: isNewCompletedTask ? 'once' : state.modalRepeat,
+          weekDays: isNewCompletedTask ? null : (state.modalRepeat === 'weekly' ? [...state.modalWeekDays] : null),
           energy: state.modalEnergyTier,
           priority: state.modalPriority,
-          alertStart: state.modalAlertStart,
-          alertEnd: state.modalAlertEnd,
+          alertStart: isNewCompletedTask ? false : state.modalAlertStart,
+          alertEnd: isNewCompletedTask ? false : state.modalAlertEnd,
           pinned: state.modalPinned,
           location,
           locationPlaceId: location ? state.modalLocationPlaceId || '' : '',
@@ -12950,12 +13126,20 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           intraPrompts,
           postPrompts,
           subtasks: null,
-          done: false,
-          doneDays: {},
+          done: isNewCompletedTask,
+          doneDays: isNewCompletedTask ? { [resolvedDateKey]: true } : {},
+          ...(isNewCompletedTask ? { completedAt: nowTs } : {}),
           compartment: inferCompartment(state.modalStartMin),
         };
 
         state.tasks.push(newTask);
+
+        if (isNewCompletedTask) {
+          punchedTaskId = newTask.id;
+          if (typeof syncHabitAutoPunchFromTask === 'function') {
+            syncHabitAutoPunchFromTask(newTask, resolvedDateKey, true);
+          }
+        }
 
         if (state.schedulingQueueItemId !== null) {
           state.unscheduledQueue = state.unscheduledQueue.filter((q) => q.id !== state.schedulingQueueItemId);
@@ -12975,11 +13159,23 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         }
       }
 
+      if (punchedTaskId !== null) {
+        state.compartmentFilter = 'completed';
+        state.newlyCompletedTaskId = punchedTaskId;
+        state.inspectedMemoTaskId = null;
+        state.memoSpikeJustEntered = false;
+      }
+
       saveState();
-      playSfx('create');
+      playSfx(punchedTaskId !== null ? 'paperStab' : 'create');
       computeSelectedDayRings();
       renderUnifiedCalendar();
-      renderTimeline();
+      if (punchedTaskId !== null && state.activeTab !== 'timeline') {
+        switchBottomTab('timeline');
+      } else {
+        if (typeof renderCompartmentBar === 'function') renderCompartmentBar();
+        renderTimeline();
+      }
       if (state.activeTab === 'habit') renderHabits();
       closeTaskModal();
     }
@@ -13232,12 +13428,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     // =========================================================================
     const carromGame = {
       coins: [],
-      striker: null,
       selectedCoinId: null,
       aiming: false,
-      aimTarget: null, // 'striker' | coinId
+      aimTarget: null, // coinId
+      dragMode: 'coin', // 'coin' | 'board'
+      dragStartX: 210,
+      dragStartY: 210,
       pointerX: 210,
-      pointerY: 330,
+      pointerY: 210,
       rafId: null,
       particles: [],
       popups: [],
@@ -13293,9 +13491,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function syncCarromCoinsFromState(forceRelayout = false) {
       const logic = getCarromLogic();
       if (!logic) return;
-      if (!carromGame.striker) {
-        carromGame.striker = logic.createInitialStriker();
-      }
       const prevHeadId = carromGame.coins[0] ? String(carromGame.coins[0].id) : null;
       carromGame.coins = logic.layoutBrainDumpCoins(
         state.inboxItems || [],
@@ -13429,13 +13624,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       spawnCarromPocketBurst(pocket.x, pocket.y, pocket.color, `+ ${pocket.label.toUpperCase()}`);
 
-      // Drop the next queued thought coin cleanly onto center of the board
-      const logic = getCarromLogic();
-      if (logic) {
-        const slider = document.getElementById('carrom-striker-slider');
-        const nextX = slider ? Number(slider.value) : logic.PLAY_CENTER;
-        carromGame.striker = logic.createInitialStriker(nextX);
-      }
+      // Drop the next queued thought coin cleanly onto the center of the board
       syncCarromCoinsFromState(true);
 
       saveState();
@@ -13485,24 +13674,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function resetCarromBoardLayout() {
       const logic = getCarromLogic();
       if (!logic) return;
-      carromGame.striker = logic.createInitialStriker();
       syncCarromCoinsFromState(true);
-      const slider = document.getElementById('carrom-striker-slider');
-      if (slider) slider.value = String(Math.round(carromGame.striker.x));
       playSfx('select');
       ensureCarromLoop();
       updateCarromHudAndArchive();
-    }
-
-    function handleCarromStrikerSlider(val) {
-      const logic = getCarromLogic();
-      if (!logic) return;
-      if (!carromGame.striker) carromGame.striker = logic.createInitialStriker();
-      if (carromGame.striker.inMotion) return;
-      carromGame.striker.x = logic.clamp(Number(val) || logic.PLAY_CENTER, logic.STRIKER_MIN_X, logic.STRIKER_MAX_X);
-      carromGame.striker.y = logic.STRIKER_BASELINE_Y;
-      carromGame.striker.scratched = false;
-      drawCarromBoard();
     }
 
     function selectCarromCoin(id) {
@@ -13548,46 +13723,25 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       canvas.addEventListener('pointerdown', (e) => {
         const logic = getCarromLogic();
-        if (!logic) return;
+        if (!logic || carromGame.coins.length === 0) return;
+        const coin = carromGame.coins[0];
+        if (!coin) return;
+        // Wait until the dumped coin settles before aiming the next flick
+        if (Math.hypot(coin.vx || 0, coin.vy || 0) > 0.25) return;
+
         const pt = getCanvasBoardCoords(canvas, e.clientX, e.clientY);
         carromGame.pointerX = pt.x;
         carromGame.pointerY = pt.y;
 
-        if (!carromGame.striker) carromGame.striker = logic.createInitialStriker();
-
-        // Check if user grabbed striker
-        if (!carromGame.striker.inMotion && !carromGame.striker.scratched) {
-          const distStriker = Math.hypot(pt.x - carromGame.striker.x, pt.y - carromGame.striker.y);
-          if (distStriker <= logic.STRIKER_RADIUS + 20) {
-            carromGame.aiming = true;
-            carromGame.aimTarget = 'striker';
-            try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
-            ensureCarromLoop();
-            return;
-          }
-        }
-
-        // Check if user grabbed the active coin directly for a slingshot flick
-        for (let i = carromGame.coins.length - 1; i >= 0; i -= 1) {
-          const c = carromGame.coins[i];
-          if (Math.hypot(pt.x - c.x, pt.y - c.y) <= c.r + 14) {
-            carromGame.selectedCoinId = c.id;
-            carromGame.aiming = true;
-            carromGame.aimTarget = c.id;
-            try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
-            ensureCarromLoop();
-            return;
-          }
-        }
-
-        // Slide striker directly if tapping along the baseline strip
-        if (!carromGame.striker.inMotion && Math.abs(pt.y - logic.STRIKER_BASELINE_Y) <= 30) {
-          carromGame.striker.x = logic.clamp(pt.x, logic.STRIKER_MIN_X, logic.STRIKER_MAX_X);
-          carromGame.striker.y = logic.STRIKER_BASELINE_Y;
-          const slider = document.getElementById('carrom-striker-slider');
-          if (slider) slider.value = String(Math.round(carromGame.striker.x));
+        const distCoin = Math.hypot(pt.x - coin.x, pt.y - coin.y);
+        const insideBoard = pt.x >= logic.PLAY_MIN && pt.x <= logic.PLAY_MAX && pt.y >= logic.PLAY_MIN && pt.y <= logic.PLAY_MAX;
+        if (distCoin <= coin.r + 34 || insideBoard) {
+          carromGame.selectedCoinId = coin.id;
           carromGame.aiming = true;
-          carromGame.aimTarget = 'striker';
+          carromGame.aimTarget = coin.id;
+          carromGame.dragMode = distCoin <= coin.r + 34 ? 'coin' : 'board';
+          carromGame.dragStartX = pt.x;
+          carromGame.dragStartY = pt.y;
           try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
           ensureCarromLoop();
         }
@@ -13605,42 +13759,28 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         if (!carromGame.aiming) return;
         const logic = getCarromLogic();
         const target = carromGame.aimTarget;
+        const mode = carromGame.dragMode || 'coin';
         carromGame.aiming = false;
         carromGame.aimTarget = null;
         if (!logic) return;
 
-        if (target === 'striker' && carromGame.striker) {
+        const coin = carromGame.coins.find((c) => String(c.id) === String(target)) || carromGame.coins[0];
+        if (coin) {
+          const originX = mode === 'board' ? carromGame.dragStartX : coin.x;
+          const originY = mode === 'board' ? carromGame.dragStartY : coin.y;
           const shot = logic.computeStrikerShotVelocity(
-            carromGame.striker.x,
-            carromGame.striker.y,
+            originX,
+            originY,
             carromGame.pointerX,
-            carromGame.pointerY
+            carromGame.pointerY,
+            105
           );
           if (shot.power > 0.05) {
-            carromGame.striker.vx = shot.vx;
-            carromGame.striker.vy = shot.vy;
-            carromGame.striker.inMotion = true;
+            coin.vx = shot.vx;
+            coin.vy = shot.vy;
             playSfx('tick');
             ensureCarromLoop();
             return;
-          }
-        } else if (target != null) {
-          const coin = carromGame.coins.find((c) => String(c.id) === String(target));
-          if (coin) {
-            const shot = logic.computeStrikerShotVelocity(
-              coin.x,
-              coin.y,
-              carromGame.pointerX,
-              carromGame.pointerY,
-              96
-            );
-            if (shot.power > 0.06) {
-              coin.vx = shot.vx * 0.9;
-              coin.vy = shot.vy * 0.9;
-              playSfx('tick');
-              ensureCarromLoop();
-              return;
-            }
           }
         }
         drawCarromBoard();
@@ -13653,9 +13793,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function stepAndDrawCarromBoard() {
       const logic = getCarromLogic();
       if (!logic) return false;
-      if (!carromGame.striker) carromGame.striker = logic.createInitialStriker();
 
-      const res = logic.stepCarromPhysics(carromGame.coins, carromGame.striker);
+      const res = logic.stepCarromPhysics(carromGame.coins, null);
 
       if ((res.collisions > 0 || res.wallHits > 0) && Date.now() - carromGame.lastClackMs > 55) {
         carromGame.lastClackMs = Date.now();
@@ -13670,16 +13809,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       if (carromGame.spawnScale < 1) {
         carromGame.spawnScale = Math.min(1, carromGame.spawnScale + 0.14);
-      }
-
-      // Reset striker cleanly to baseline once all pieces settle
-      if (res.allStopped && (carromGame.striker.inMotion || carromGame.striker.scratched)) {
-        const slider = document.getElementById('carrom-striker-slider');
-        const nextX = slider ? Number(slider.value) : logic.PLAY_CENTER;
-        carromGame.striker = logic.createInitialStriker(nextX);
-        if (res.strikerScratched) {
-          spawnCarromPocketBurst(logic.PLAY_CENTER, logic.STRIKER_BASELINE_Y, '#F6C244', 'STRIKER RESET');
-        }
       }
 
       // Step particles & floating popups
@@ -13748,13 +13877,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
-      // 3. Minimal Architectural Center Reticle
+      // 3. Minimal Architectural Center Reticle (Dead-Center)
       ctx.save();
-      ctx.translate(C, C - 14);
+      ctx.translate(C, C);
       ctx.strokeStyle = pal.border;
       ctx.lineWidth = 1.2;
       ctx.beginPath();
-      ctx.arc(0, 0, 54, 0, Math.PI * 2);
+      ctx.arc(0, 0, 56, 0, Math.PI * 2);
       ctx.stroke();
 
       ctx.strokeStyle = pal.borderSoft;
@@ -13766,14 +13895,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       // Subtle crosshair ticks
       ctx.strokeStyle = pal.borderSoft;
       ctx.beginPath();
-      ctx.moveTo(-62, 0);
-      ctx.lineTo(-38, 0);
-      ctx.moveTo(38, 0);
-      ctx.lineTo(62, 0);
-      ctx.moveTo(0, -62);
-      ctx.lineTo(0, -38);
-      ctx.moveTo(0, 38);
-      ctx.lineTo(0, 62);
+      ctx.moveTo(-64, 0);
+      ctx.lineTo(-40, 0);
+      ctx.moveTo(40, 0);
+      ctx.lineTo(64, 0);
+      ctx.moveTo(0, -64);
+      ctx.lineTo(0, -40);
+      ctx.moveTo(0, 40);
+      ctx.lineTo(0, 64);
       ctx.stroke();
 
       ctx.fillStyle = pal.accentSoft;
@@ -13791,12 +13920,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       ctx.lineWidth = 1.25;
       logic.CARROM_POCKETS.forEach((p) => {
         const dx = p.x - C;
-        const dy = p.y - (C - 14);
+        const dy = p.y - C;
         const len = Math.hypot(dx, dy) || 1;
         const ux = dx / len;
         const uy = dy / len;
-        const sx = C + ux * 66;
-        const sy = C - 14 + uy * 66;
+        const sx = C + ux * 68;
+        const sy = C + uy * 68;
         const ex = p.x - ux * 32;
         const ey = p.y - uy * 32;
         ctx.beginPath();
@@ -13814,28 +13943,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         ctx.stroke();
       });
 
-      // 5. Minimal Striker Baseline Track
-      const by = logic.STRIKER_BASELINE_Y;
-      ctx.strokeStyle = pal.border;
-      ctx.lineWidth = 1.35;
-      ctx.beginPath();
-      ctx.moveTo(logic.STRIKER_MIN_X, by - 10);
-      ctx.lineTo(logic.STRIKER_MAX_X, by - 10);
-      ctx.moveTo(logic.STRIKER_MIN_X, by + 10);
-      ctx.lineTo(logic.STRIKER_MAX_X, by + 10);
-      ctx.stroke();
-
-      [logic.STRIKER_MIN_X, logic.STRIKER_MAX_X].forEach((bx) => {
-        ctx.fillStyle = pal.cardBg;
-        ctx.beginPath();
-        ctx.arc(bx, by, 9, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = pal.accentMid;
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-      });
-
-      // 6. Four Corner Pockets (strictly inside playing field) + Clean Outer Frame Labels
+      // 5. Four Corner Pockets (strictly inside playing field) + Clean Outer Frame Labels
       logic.CARROM_POCKETS.forEach((p) => {
         const rimR = logic.POCKET_RIM_RADIUS || (logic.POCKET_RADIUS + 2);
 
@@ -13871,42 +13979,40 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         ctx.fillText(p.shortLabel, textX, labelY + 0.5);
       });
 
-      // 7. Aiming Slingshot Vector
-      if (carromGame.aiming) {
-        let origin = null;
-        let maxPull = 115;
-        if (carromGame.aimTarget === 'striker' && carromGame.striker) {
-          origin = carromGame.striker;
-        } else if (carromGame.aimTarget != null) {
-          origin = carromGame.coins.find((c) => String(c.id) === String(carromGame.aimTarget)) || null;
-          maxPull = 96;
-        }
-        if (origin) {
+      // 6. Direct Thought Coin Aiming Slingshot Vector
+      if (carromGame.aiming && carromGame.coins.length > 0) {
+        const coin = carromGame.coins.find((c) => String(c.id) === String(carromGame.aimTarget)) || carromGame.coins[0];
+        if (coin) {
+          const originX = carromGame.dragMode === 'board' ? carromGame.dragStartX : coin.x;
+          const originY = carromGame.dragMode === 'board' ? carromGame.dragStartY : coin.y;
           const shot = logic.computeStrikerShotVelocity(
-            origin.x,
-            origin.y,
+            originX,
+            originY,
             carromGame.pointerX,
             carromGame.pointerY,
-            maxPull
+            105
           );
           if (shot.power > 0.05) {
-            const aimLen = 45 + shot.power * 165;
-            const tx = origin.x + Math.cos(shot.angle) * aimLen;
-            const ty = origin.y + Math.sin(shot.angle) * aimLen;
+            const aimLen = 48 + shot.power * 175;
+            const tx = coin.x + Math.cos(shot.angle) * aimLen;
+            const ty = coin.y + Math.sin(shot.angle) * aimLen;
+            const pullBackLen = 18 + shot.power * 58;
+            const px = coin.x - Math.cos(shot.angle) * pullBackLen;
+            const py = coin.y - Math.sin(shot.angle) * pullBackLen;
 
             ctx.save();
             ctx.strokeStyle = pal.accentMid;
             ctx.lineWidth = 1.8;
             ctx.beginPath();
-            ctx.moveTo(origin.x, origin.y);
-            ctx.lineTo(carromGame.pointerX, carromGame.pointerY);
+            ctx.moveTo(coin.x, coin.y);
+            ctx.lineTo(px, py);
             ctx.stroke();
 
             ctx.setLineDash([5, 5]);
             ctx.strokeStyle = pal.primaryText;
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(origin.x, origin.y);
+            ctx.moveTo(coin.x, coin.y);
             ctx.lineTo(tx, ty);
             ctx.stroke();
             ctx.setLineDash([]);
@@ -13914,26 +14020,26 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             ctx.strokeStyle = pal.accent;
             ctx.lineWidth = 2.6;
             ctx.beginPath();
-            ctx.arc(origin.x, origin.y, origin.r + 5.5, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * shot.power);
+            ctx.arc(coin.x, coin.y, coin.r + 6, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * shot.power);
             ctx.stroke();
             ctx.restore();
           }
         }
       }
 
-      // 8. Active Thought Coin (Sleek App-Theme Matte Puck)
+      // 7. Single Active Thought Coin (Directly Controllable Matte Puck)
       carromGame.coins.forEach((coin) => {
         const r = coin.r * carromGame.spawnScale;
 
         // Soft drop shadow
         ctx.beginPath();
-        ctx.arc(coin.x + 1, coin.y + 2.5, r, 0, Math.PI * 2);
-        ctx.fillStyle = pal.isLight ? 'rgba(20, 20, 24, 0.14)' : 'rgba(0, 0, 0, 0.36)';
+        ctx.arc(coin.x + 1.2, coin.y + 2.8, r, 0, Math.PI * 2);
+        ctx.fillStyle = pal.isLight ? 'rgba(20, 20, 24, 0.16)' : 'rgba(0, 0, 0, 0.38)';
         ctx.fill();
 
         // Subtle outer glow ring
         ctx.beginPath();
-        ctx.arc(coin.x, coin.y, r + 3, 0, Math.PI * 2);
+        ctx.arc(coin.x, coin.y, r + 3.5, 0, Math.PI * 2);
         ctx.strokeStyle = pal.accentSoft;
         ctx.lineWidth = 2;
         ctx.stroke();
@@ -13944,7 +14050,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         ctx.fillStyle = pal.cardBg;
         ctx.fill();
         ctx.strokeStyle = pal.accent;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 2.2;
         ctx.stroke();
 
         // Inner concentric precision ring
@@ -13958,43 +14064,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
         // Crisp monogram letter from active thought
         const initial = String(coin.text || '•').trim().charAt(0).toUpperCase() || '•';
-        ctx.font = `700 ${Math.max(8, Math.round(11 * carromGame.spawnScale))}px "Plus Jakarta Sans", sans-serif`;
+        ctx.font = `700 ${Math.max(8, Math.round(11.5 * carromGame.spawnScale))}px "Plus Jakarta Sans", sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = pal.primaryText;
         ctx.fillText(initial, coin.x, coin.y + 0.5);
       });
 
-      // 9. Striker Disc (High-Contrast Theme Accent Striker)
-      if (carromGame.striker && !carromGame.striker.scratched) {
-        const st = carromGame.striker;
-        ctx.beginPath();
-        ctx.arc(st.x + 1.5, st.y + 3, st.r, 0, Math.PI * 2);
-        ctx.fillStyle = pal.isLight ? 'rgba(20, 20, 24, 0.16)' : 'rgba(0, 0, 0, 0.4)';
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
-        ctx.fillStyle = pal.accent;
-        ctx.fill();
-        ctx.strokeStyle = pal.primaryText;
-        ctx.lineWidth = 1.6;
-        ctx.stroke();
-
-        // Inner reticle ring
-        ctx.beginPath();
-        ctx.arc(st.x, st.y, st.r - 6, 0, Math.PI * 2);
-        ctx.strokeStyle = pal.onAccent;
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(st.x, st.y, 3.2, 0, Math.PI * 2);
-        ctx.fillStyle = pal.onAccent;
-        ctx.fill();
-      }
-
-      // 10. Pocket Celebration Particles & Floating Labels
+      // 8. Pocket Celebration Particles & Floating Labels
       carromGame.particles.forEach((p) => {
         ctx.save();
         ctx.globalAlpha = Math.max(0, p.life);
@@ -14473,27 +14550,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         const dayLabel = CalLogic.formatHumanDate(state.selectedDate || getTodayDateKey(), 'weekday-compact');
         summaryEl.textContent = `${batchedCount} batched · ${taskSwipeSession.deck.length} remaining · ${dayLabel}`;
       }
-      if (tabCountEl) tabCountEl.textContent = String(batchedCount);
-
-      // Mobile tab visibility (desktop lg: always shows both side by side)
-      const isMobileBatches = taskSwipeSession.mobileTab === 'batches';
-      if (deckPane) {
-        deckPane.classList.toggle('hidden', isMobileBatches);
-        deckPane.classList.add('lg:flex');
-      }
-      if (batchesPane) {
-        batchesPane.classList.toggle('hidden', !isMobileBatches);
-        batchesPane.classList.toggle('flex', isMobileBatches);
-        batchesPane.classList.add('lg:flex');
-      }
-      if (tabDeckBtn && tabBatchesBtn) {
-        tabDeckBtn.className = `px-2.5 py-1 rounded-lg whitespace-nowrap ${
-          !isMobileBatches ? 'bg-coral text-onaccent' : 'text-secondarytext'
-        }`;
-        tabBatchesBtn.className = `px-2.5 py-1 rounded-lg whitespace-nowrap ${
-          isMobileBatches ? 'bg-coral text-onaccent' : 'text-secondarytext'
-        }`;
-      }
 
       // Render Clean Dating-App Style Swipe Card Stack
       if (stage) {
@@ -14567,7 +14623,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   <div class="flex items-center justify-between text-[11px] text-mutedtext">
                     <span>← Energy</span>
                     <span>↑ Urgent · ↓ Time</span>
-                    <span class="text-coral font-medium">Route →</span>
+                    <span>Route →</span>
                   </div>
                 </div>
               `;
@@ -14924,31 +14980,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         .map((slot) => renderHabitPunchSlotHtml(h, slot, { ...options, isStale }))
         .join('');
 
-      const punchBtnHtml = h.done
-        ? `<button
-            type="button"
-            ${interactive ? `onclick="toggleHabitToday(${h.id})"` : 'tabindex="-1"'}
-            data-habit-punch-btn="${h.id}"
-            class="tactile-btn px-3 py-1.5 rounded-xl bg-pillbg border border-borderline text-[11px] font-semibold text-secondarytext hover:text-primarytext whitespace-nowrap shrink-0 flex items-center gap-1"
-            title="Tap to uncheck today"
-          >
-            <svg class="w-3 h-3 text-coral" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            <span>Punched</span>
-          </button>`
-        : `<button
-            type="button"
-            ${interactive ? `onclick="toggleHabitToday(${h.id})"` : 'tabindex="-1"'}
-            data-habit-punch-btn="${h.id}"
-            class="tactile-btn px-3 py-1.5 rounded-xl ${
-              isStale
-                ? 'bg-pillbg border border-borderline text-secondarytext font-semibold'
-                : 'bg-coral text-onaccent font-bold'
-            } text-[11px] whitespace-nowrap shrink-0 flex items-center gap-1.5"
-            title="Punch today's habit slot"
-          >
-            <span>Punch Today</span>
-          </button>`;
-
       const cardAttr = interactive ? `data-habit-card-id="${h.id}"` : `data-habit-clone-id="${h.id}"`;
       const fillColor = isStale ? 'rgb(var(--color-mutedtext) / 0.75)' : 'rgb(var(--color-accent))';
       const trackColor = isStale ? 'rgb(var(--color-borderline) / 0.55)' : 'rgb(var(--color-borderline) / 0.85)';
@@ -14975,8 +15006,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         state.desktopSelectedHabitId === h.id;
       const selectedRingCls = isDesktopSelected ? ' ring-1 ring-coral/70 ring-offset-2 ring-offset-sheetbg' : '';
 
-      const scheduleStripHtml = buildHabitCardScheduleStripHtml(h, interactive);
-
       return `
         <article ${cardAttr} ${isStale ? 'data-habit-stale="true"' : ''} class="relative rounded-[22px] p-[2.5px] ${staleCardCls}${selectedRingCls}" style="${borderProgressStyle}${hiddenStyle}">
           ${divisionTicksHtml}
@@ -14999,11 +15028,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   </p>
                 </div>
               </button>
-
-              ${punchBtnHtml}
             </div>
-
-            ${scheduleStripHtml}
 
             <div data-habit-slots-grid="${h.id}" class="grid grid-cols-7 gap-y-2 gap-x-1 pt-0.5 pb-0.5">
               ${slotsHtml}

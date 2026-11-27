@@ -26,7 +26,7 @@ test('CARROM_POCKETS defines all 4 brain dump destinations strictly inside playi
   }
 });
 
-test('layoutBrainDumpCoins singleCoin mode spawns only the active head thought at center', () => {
+test('layoutBrainDumpCoins singleCoin mode spawns only the active head thought at exact center', () => {
   const items = [
     { id: 101, text: 'First thought' },
     { id: 102, text: 'Second thought' },
@@ -34,6 +34,27 @@ test('layoutBrainDumpCoins singleCoin mode spawns only the active head thought a
   const coins = layoutBrainDumpCoins(items, [], { singleCoin: true });
   assert.equal(coins.length, 1);
   assert.equal(coins[0].id, 101);
+  assert.equal(coins[0].x, (PLAY_MIN + PLAY_MAX) / 2);
+  assert.equal(coins[0].y, (PLAY_MIN + PLAY_MAX) / 2);
+});
+
+test('direct single thought coin flick pockets cleanly with striker = null', () => {
+  const coins = layoutBrainDumpCoins([{ id: 77, text: 'Journal entry' }], [], { singleCoin: true });
+  const impulse = computeAssistedPocketImpulse(coins[0], 'journal', 16);
+  coins[0].vx = impulse.vx;
+  coins[0].vy = impulse.vy;
+
+  let captured = null;
+  for (let tick = 0; tick < 120; tick += 1) {
+    const res = stepCarromPhysics(coins, null);
+    if (res.pocketed.length > 0) {
+      captured = res.pocketed[0];
+      break;
+    }
+  }
+  assert.ok(captured, 'dumped thought coin should pocket directly without a striker');
+  assert.equal(captured.pocket.id, 'journal');
+  assert.equal(captured.coin.id, 77);
 });
 
 test('layoutBrainDumpCoins packs multiple items cleanly without overlapping', () => {
