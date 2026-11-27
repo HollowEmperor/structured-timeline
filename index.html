@@ -319,6 +319,12 @@
       --popover-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
       --surface-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.16);
       --surface-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.18);
+      --speed-dial-scrim: rgb(var(--color-outerbg) / 0.72);
+      --speed-dial-circle-bg: rgb(var(--color-cardbg));
+      --speed-dial-circle-hover-bg: rgb(var(--color-pillbg));
+      --speed-dial-circle-color: rgb(var(--color-accent));
+      --speed-dial-circle-border: rgb(var(--color-borderline));
+      --speed-dial-circle-shadow: var(--popover-shadow);
     }
     html[data-theme="paper"],
     html[data-theme-mode="light"] {
@@ -331,6 +337,12 @@
       --popover-shadow: 0 6px 16px rgba(28, 25, 23, 0.09);
       --surface-shadow-sm: 0 2px 8px rgba(28, 25, 23, 0.08);
       --surface-shadow-md: 0 4px 12px rgba(28, 25, 23, 0.1);
+      --speed-dial-scrim: rgba(28, 25, 23, 0.54);
+      --speed-dial-circle-bg: rgb(var(--color-sheetbg));
+      --speed-dial-circle-hover-bg: rgb(var(--color-cardbg));
+      --speed-dial-circle-color: rgb(var(--color-accent));
+      --speed-dial-circle-border: rgb(var(--color-borderline));
+      --speed-dial-circle-shadow: 0 6px 18px rgba(28, 25, 23, 0.18);
     }
     .theme-modal-scrim {
       background-color: var(--modal-scrim);
@@ -340,6 +352,139 @@
     }
     .theme-popover-shadow {
       box-shadow: var(--popover-shadow);
+    }
+
+    /* Speed-Dial + Action Overlay, Rotating FAB & Staggered Floating Rows */
+    #fab-speed-dial-backdrop {
+      background-color: var(--speed-dial-scrim);
+      backdrop-filter: blur(1.5px);
+      -webkit-backdrop-filter: blur(1.5px);
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+      transition:
+        opacity 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0ms linear 220ms;
+    }
+    #fab-speed-dial-backdrop.is-open {
+      opacity: 1;
+      pointer-events: auto;
+      visibility: visible;
+      transition:
+        opacity 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0ms linear 0ms;
+    }
+    #fab-action-btn #fab-plus-icon {
+      transition: transform 240ms cubic-bezier(0.34, 1.38, 0.64, 1);
+      transform-origin: center;
+    }
+    #fab-action-btn.is-speed-dial-open {
+      z-index: 47 !important;
+    }
+    #fab-action-btn.is-speed-dial-open #fab-plus-icon {
+      transform: rotate(45deg);
+    }
+    #header-desktop-add-btn svg {
+      transition: transform 220ms cubic-bezier(0.34, 1.38, 0.64, 1);
+      transform-origin: center;
+    }
+    #header-desktop-add-btn.is-speed-dial-open svg {
+      transform: rotate(45deg);
+    }
+    .speed-dial-menu {
+      visibility: hidden;
+      pointer-events: none;
+      transition: visibility 0ms linear 210ms;
+    }
+    .speed-dial-menu.is-open {
+      visibility: visible;
+      transition: visibility 0ms linear 0ms;
+    }
+    .speed-dial-item {
+      opacity: 0;
+      pointer-events: none;
+      transform: translate3d(0, 14px, 0) scale(0.92);
+      transform-origin: right bottom;
+      will-change: transform, opacity;
+      transition:
+        opacity 150ms cubic-bezier(0.4, 0, 1, 1) var(--sd-out-delay, 0ms),
+        transform 170ms cubic-bezier(0.4, 0, 1, 1) var(--sd-out-delay, 0ms);
+    }
+    .speed-dial-menu.is-open .speed-dial-item {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate3d(0, 0, 0) scale(1);
+      transition:
+        opacity 210ms cubic-bezier(0.22, 1, 0.36, 1) var(--sd-in-delay, 0ms),
+        transform 280ms cubic-bezier(0.22, 1, 0.36, 1) var(--sd-in-delay, 0ms);
+    }
+    .speed-dial-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 9999px;
+      background-color: var(--speed-dial-circle-bg);
+      background-image: linear-gradient(
+        180deg,
+        rgb(var(--color-accent) / 0.11) 0%,
+        rgb(var(--color-accent) / 0.03) 100%
+      );
+      color: var(--speed-dial-circle-color);
+      border: 1.5px solid var(--speed-dial-circle-border);
+      box-shadow: var(--speed-dial-circle-shadow);
+      transform: scale(0.84);
+      transition:
+        transform 240ms cubic-bezier(0.34, 1.38, 0.64, 1) var(--sd-in-delay, 0ms),
+        border-color 140ms ease,
+        background-color 140ms ease;
+    }
+    .speed-dial-menu.is-open .speed-dial-circle {
+      transform: scale(1);
+    }
+    .speed-dial-item:hover .speed-dial-circle {
+      transform: scale(1.06);
+      background-color: var(--speed-dial-circle-hover-bg);
+      border-color: rgb(var(--color-accent) / 0.8);
+    }
+    .speed-dial-item:active .speed-dial-circle {
+      transform: scale(0.93);
+    }
+    .speed-dial-title {
+      color: #FFFFFF;
+      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.42);
+    }
+    .speed-dial-subtitle {
+      color: rgba(255, 255, 255, 0.82);
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.36);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #fab-speed-dial-backdrop,
+      #fab-action-btn #fab-plus-icon,
+      #header-desktop-add-btn svg,
+      .speed-dial-item,
+      .speed-dial-circle {
+        transition-duration: 90ms !important;
+        transition-delay: 0ms !important;
+      }
+      .speed-dial-item {
+        transform: none;
+      }
+      .speed-dial-circle {
+        transform: none;
+      }
+    }
+
+    @keyframes inboxQuickPanelEnter {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, 18px, 0) scale(0.985);
+      }
+      100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+    }
+    .inbox-quick-panel-enter {
+      animation: inboxQuickPanelEnter 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
     }
     select option {
       background-color: rgb(var(--color-cardbg));
@@ -1699,137 +1844,114 @@
         <div id="hourly-grid-container" class="hidden relative select-none lg:max-w-[740px] lg:mx-auto"></div>
       </section>
 
-      <!-- VIEW 2: BRAIN DUMP (Playable 4-Pocket Carrom Board Game + Archive) -->
-      <section id="view-inbox" class="hidden relative z-10 flex-1 overflow-y-auto no-scrollbar px-4 lg:px-8 pb-24 lg:pb-14 pt-3 lg:pt-5 space-y-4">
-        <div class="flex items-center justify-between gap-3">
-          <h2 class="font-display text-xl lg:text-2xl font-bold text-primarytext">Brain Dump</h2>
-          <div class="flex items-center gap-1.5 flex-shrink-0">
-            <button
-              type="button"
-              id="carrom-undo-btn"
-              onclick="undoLastCarromPocket()"
-              disabled
-              title="Undo last pocketed coin"
-              class="tactile-btn px-3 py-1.5 rounded-xl bg-cardbg border border-borderline text-xs font-semibold text-primarytext hover:border-coral disabled:opacity-35 whitespace-nowrap shrink-0 flex items-center gap-1.5"
-            >
-              <svg class="w-3.5 h-3.5 text-coral" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/></svg>
-              <span>Undo</span>
-            </button>
-            <button
-              type="button"
-              onclick="resetCarromBoardLayout()"
-              title="Center coin & striker"
-              class="tactile-btn px-3 py-1.5 rounded-xl bg-cardbg border border-borderline text-xs font-semibold text-secondarytext hover:text-primarytext hover:border-coral/60 whitespace-nowrap shrink-0"
-            >
-              Center
-            </button>
-          </div>
-        </div>
-
-        <div class="space-y-4 xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] xl:gap-7 xl:items-start xl:space-y-0">
-          <div class="space-y-3.5">
-            <form onsubmit="handleQuickInboxAdd(event)" class="flex items-center gap-2">
-              <input
-                id="quick-inbox-input"
-                type="text"
-                placeholder="Dump a thought onto the board..."
-                class="flex-1 bg-cardbg text-sm text-primarytext placeholder-mutedtext px-3.5 py-2.5 rounded-2xl border border-borderline focus:border-coral focus:outline-none"
-              />
-              <button type="submit" class="tactile-btn bg-coral text-onaccent font-semibold text-sm px-4 py-2.5 rounded-2xl whitespace-nowrap shrink-0">
-                Add
-              </button>
-            </form>
-
-            <!-- Active Coin Card (Top, directly above the board) -->
-            <div id="carrom-active-coin-bar" class="max-w-[440px] mx-auto rounded-2xl bg-cardbg border border-borderline p-3.5 space-y-2.5">
-              <div class="flex items-start justify-between gap-2.5">
-                <div class="min-w-0">
-                  <p id="carrom-active-coin-meta" class="text-[11px] font-semibold text-secondarytext">Active Coin</p>
-                  <p id="carrom-active-coin-text" class="font-display text-base font-bold text-primarytext leading-snug mt-0.5 break-words">No coins on board</p>
-                </div>
-                <span id="carrom-coins-remaining" class="text-[11px] font-semibold text-secondarytext tabular-nums whitespace-nowrap shrink-0">0 left</span>
+      <!-- VIEW 2: BRAIN DUMP (Unified Playable 4-Pocket Carrom Card + Collapsible Archive Footer) -->
+      <section id="view-inbox" class="hidden relative z-10 flex-1 overflow-y-auto no-scrollbar px-4 lg:px-8 pb-24 lg:pb-14 pt-3 lg:pt-5">
+        <div class="max-w-[440px] mx-auto rounded-[26px] bg-cardbg border border-borderline overflow-hidden">
+          <!-- Top: Active Coin Readout -->
+          <div id="carrom-active-coin-bar" class="px-4 py-3.5 border-b border-borderline/70">
+            <div class="flex items-start justify-between gap-2.5">
+              <div class="min-w-0">
+                <p id="carrom-active-coin-meta" class="text-[11px] font-semibold text-secondarytext">Active Coin</p>
+                <p id="carrom-active-coin-text" class="font-display text-base font-bold text-primarytext leading-snug mt-0.5 break-words">No coins on board</p>
+                <p id="carrom-active-coin-desc" class="hidden text-xs text-secondarytext leading-snug mt-1 break-words"></p>
               </div>
-              <div class="grid grid-cols-4 gap-1.5">
-                <button
-                  type="button"
-                  data-carrom-flick="scheduling"
-                  onclick="flickSelectedCoinToPocket('scheduling')"
-                  class="tactile-btn py-1.5 px-2 rounded-xl bg-pillbg border border-borderline hover:border-coral text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
-                >
-                  <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#F28B82;"></span>
-                  <span>Schedule</span>
-                </button>
-                <button
-                  type="button"
-                  data-carrom-flick="notes"
-                  onclick="flickSelectedCoinToPocket('notes')"
-                  class="tactile-btn py-1.5 px-2 rounded-xl bg-pillbg border border-borderline hover:border-sky text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
-                >
-                  <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#6EA8D8;"></span>
-                  <span>Notes</span>
-                </button>
-                <button
-                  type="button"
-                  data-carrom-flick="journal"
-                  onclick="flickSelectedCoinToPocket('journal')"
-                  class="tactile-btn py-1.5 px-2 rounded-xl bg-pillbg border border-borderline hover:border-lime text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
-                >
-                  <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#81C953;"></span>
-                  <span>Journal</span>
-                </button>
-                <button
-                  type="button"
-                  data-carrom-flick="archive"
-                  onclick="flickSelectedCoinToPocket('archive')"
-                  class="tactile-btn py-1.5 px-2 rounded-xl bg-pillbg border border-borderline hover:border-secondarytext text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
-                >
-                  <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#9A9AA0;"></span>
-                  <span>Archive</span>
-                </button>
-              </div>
+              <span id="carrom-coins-remaining" class="text-[11px] font-semibold text-secondarytext tabular-nums whitespace-nowrap shrink-0">0 left</span>
             </div>
+          </div>
 
-            <!-- Theme-Matched Carrom Board Stage -->
-            <div class="max-w-[440px] mx-auto space-y-2.5">
-              <div class="relative w-full aspect-square select-none">
-                <canvas
-                  id="carrom-board-canvas"
-                  width="420"
-                  height="420"
-                  style="touch-action: none;"
-                  class="w-full h-full rounded-[24px] block cursor-crosshair border border-borderline"
-                ></canvas>
-                <div id="carrom-empty-overlay" class="hidden absolute inset-5 rounded-2xl bg-appbg/92 backdrop-blur-sm border border-borderline flex flex-col items-center justify-center p-5 text-center space-y-2.5">
-                  <p class="font-display text-base font-bold text-primarytext">Brain Dump Cleared</p>
-                  <p class="text-xs text-secondarytext max-w-[230px]">Add a thought above or open Schedule to batch queued tasks.</p>
-                  <button
-                    type="button"
-                    onclick="openTaskSwipeScheduler()"
-                    class="tactile-btn mt-1 px-4 py-2 rounded-xl bg-coral text-onaccent text-xs font-semibold whitespace-nowrap"
-                  >
-                    Open Schedule
-                  </button>
-                </div>
+          <!-- Middle: Inset Theme-Matched Carrom Board -->
+          <div class="p-2.5 bg-appbg/35">
+            <div class="relative w-full aspect-square select-none">
+              <canvas
+                id="carrom-board-canvas"
+                width="420"
+                height="420"
+                style="touch-action: none;"
+                class="w-full h-full rounded-[18px] block cursor-crosshair"
+              ></canvas>
+              <div id="carrom-empty-overlay" class="hidden absolute inset-4 rounded-2xl bg-appbg/92 backdrop-blur-sm border border-borderline flex flex-col items-center justify-center p-5 text-center space-y-2.5">
+                <p class="font-display text-base font-bold text-primarytext">Brain Dump Cleared</p>
+                <p class="text-xs text-secondarytext max-w-[230px]">Tap + to drop a thought onto the board or open Schedule to batch queued tasks.</p>
+                <button
+                  type="button"
+                  onclick="openTaskSwipeScheduler()"
+                  class="tactile-btn mt-1 px-4 py-2 rounded-xl bg-coral text-onaccent text-xs font-semibold whitespace-nowrap"
+                >
+                  Open Schedule
+                </button>
               </div>
             </div>
           </div>
 
-          <!-- Right Column / Below: Up Next Queue + Archived List -->
-          <div class="pt-2 border-t border-borderline xl:border-t-0 xl:border-l xl:pl-6 xl:pt-0 space-y-4">
-            <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <p class="text-xs font-semibold uppercase tracking-wider text-secondarytext">Up Next</p>
-                <span id="carrom-board-roster-count" class="text-xs text-mutedtext tabular-nums">0</span>
-              </div>
-              <div id="carrom-coin-roster-list" class="space-y-1.5 max-h-[210px] overflow-y-auto no-scrollbar"></div>
-            </div>
+          <!-- Below Board: Integrated Pocket Action Strip -->
+          <div id="carrom-pocket-actions" class="px-2.5 py-2.5 border-t border-borderline/70 grid grid-cols-4 gap-1.5">
+            <button
+              type="button"
+              data-carrom-flick="scheduling"
+              onclick="flickSelectedCoinToPocket('scheduling')"
+              class="tactile-btn py-2 px-2 rounded-xl bg-pillbg border border-borderline/80 hover:border-coral text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
+            >
+              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#F28B82;"></span>
+              <span>Schedule</span>
+            </button>
+            <button
+              type="button"
+              data-carrom-flick="notes"
+              onclick="flickSelectedCoinToPocket('notes')"
+              class="tactile-btn py-2 px-2 rounded-xl bg-pillbg border border-borderline/80 hover:border-sky text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
+            >
+              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#6EA8D8;"></span>
+              <span>Notes</span>
+            </button>
+            <button
+              type="button"
+              data-carrom-flick="archive"
+              onclick="flickSelectedCoinToPocket('archive')"
+              class="tactile-btn py-2 px-2 rounded-xl bg-pillbg border border-borderline/80 hover:border-secondarytext text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
+            >
+              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#9A9AA0;"></span>
+              <span>Archive</span>
+            </button>
+            <button
+              type="button"
+              data-carrom-flick="journal"
+              onclick="flickSelectedCoinToPocket('journal')"
+              class="tactile-btn py-2 px-2 rounded-xl bg-pillbg border border-borderline/80 hover:border-lime text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
+            >
+              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#81C953;"></span>
+              <span>Journal</span>
+            </button>
+          </div>
 
-            <div class="pt-3 border-t border-borderline/70 space-y-2">
-              <div class="flex items-center justify-between">
-                <p class="text-xs font-semibold uppercase tracking-wider text-secondarytext">Archived</p>
-                <span id="archive-count-label" class="text-xs text-mutedtext">0 items</span>
-              </div>
-              <div id="archived-dump-list" class="space-y-2"></div>
+          <!-- Collapsible Archived Footer Row -->
+          <div id="carrom-archive-footer" class="border-t border-borderline/70">
+            <button
+              type="button"
+              id="inbox-archive-toggle-btn"
+              onclick="toggleInboxArchiveFooter()"
+              aria-expanded="false"
+              aria-controls="inbox-archive-drawer"
+              class="w-full px-4 py-2.5 flex items-center justify-between gap-2 text-left hover:bg-pillbg/45 transition-colors"
+            >
+              <span class="text-[11px] font-semibold uppercase tracking-wider text-secondarytext">Archived</span>
+              <span class="flex items-center gap-2">
+                <span id="archive-count-label" class="text-[11px] font-medium text-mutedtext tabular-nums">0 items</span>
+                <svg
+                  id="inbox-archive-chevron"
+                  class="w-4 h-4 text-secondarytext transition-transform duration-200"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </span>
+            </button>
+            <div id="inbox-archive-drawer" class="hidden px-3 pb-3 pt-0.5">
+              <div id="archived-dump-list" class="space-y-1.5 max-h-[220px] overflow-y-auto no-scrollbar"></div>
             </div>
           </div>
         </div>
@@ -2561,178 +2683,6 @@
         </div>
       </section>
 
-      <!-- Floating Journal + Action Menu (Add Journal Entry / Mood / Energy / Exercise) -->
-      <div
-        id="journal-fab-menu"
-        class="hidden absolute right-5 lg:right-7 bottom-[142px] lg:bottom-[90px] z-40 bg-cardbg border border-borderline rounded-2xl p-1.5 theme-popover-shadow space-y-1 min-w-[208px]"
-      >
-        <button
-          type="button"
-          onclick="handleJournalFabOption('entry')"
-          class="tactile-btn w-full px-3.5 py-2.5 rounded-xl hover:bg-pillbg flex items-center gap-2.5 text-left text-xs font-semibold text-primarytext"
-        >
-          <span class="w-6 h-6 rounded-lg bg-coral/15 text-coral flex items-center justify-center flex-shrink-0">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/>
-            </svg>
-          </span>
-          <span>Add Journal Entry</span>
-        </button>
-        <div class="border-t border-borderline/70 my-1"></div>
-        <button
-          type="button"
-          onclick="handleJournalFabOption('mood')"
-          class="tactile-btn w-full px-3.5 py-2.5 rounded-xl hover:bg-pillbg flex items-center gap-2.5 text-left text-xs font-semibold text-primarytext"
-        >
-          <span class="w-6 h-6 rounded-lg bg-lime/15 text-lime flex items-center justify-center flex-shrink-0">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="9"/>
-              <path stroke-linecap="round" d="M8.5 14.5s1.3 1.75 3.5 1.75 3.5-1.75 3.5-1.75"/>
-              <circle cx="9" cy="10" r="1" fill="currentColor"/>
-              <circle cx="15" cy="10" r="1" fill="currentColor"/>
-            </svg>
-          </span>
-          <span>Mood Tracker</span>
-        </button>
-        <button
-          type="button"
-          onclick="handleJournalFabOption('energy')"
-          class="tactile-btn w-full px-3.5 py-2.5 rounded-xl hover:bg-pillbg flex items-center gap-2.5 text-left text-xs font-semibold text-primarytext"
-        >
-          <span class="w-6 h-6 rounded-lg bg-sky/15 text-sky flex items-center justify-center flex-shrink-0">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/>
-            </svg>
-          </span>
-          <span>Energy Tracker</span>
-        </button>
-        <button
-          type="button"
-          onclick="handleJournalFabOption('exercise')"
-          class="tactile-btn w-full px-3.5 py-2.5 rounded-xl hover:bg-pillbg flex items-center gap-2.5 text-left text-xs font-semibold text-primarytext"
-        >
-          <span class="w-6 h-6 rounded-lg bg-plum/15 text-plum flex items-center justify-center flex-shrink-0">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
-            </svg>
-          </span>
-          <span>Exercise (CBT, DBT, ACT)</span>
-        </button>
-      </div>
-
-      <!-- Floating Tasks + Action Menu (New Task / New Project) -->
-      <div
-        id="timeline-fab-menu"
-        class="hidden absolute right-5 lg:right-7 bottom-[142px] lg:bottom-[90px] z-40 bg-cardbg border border-borderline rounded-2xl p-1.5 theme-popover-shadow space-y-1 min-w-[204px]"
-      >
-        <button
-          type="button"
-          onclick="handleTimelineFabOption('task')"
-          class="tactile-btn w-full px-3.5 py-2.5 rounded-xl hover:bg-pillbg flex items-center justify-between gap-3 text-left text-xs font-semibold text-primarytext"
-        >
-          <span class="flex items-center gap-2.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-coral flex-shrink-0"></span>
-            <span>New Task</span>
-          </span>
-          <span class="text-[10px] font-medium text-secondarytext">Day</span>
-        </button>
-        <div class="border-t border-borderline/70 my-0.5"></div>
-        <button
-          type="button"
-          onclick="handleTimelineFabOption('project')"
-          class="tactile-btn w-full px-3.5 py-2.5 rounded-xl hover:bg-pillbg flex items-center justify-between gap-3 text-left text-xs font-semibold text-primarytext"
-        >
-          <span class="flex items-center gap-2.5">
-            <span class="w-2.5 h-2.5 rounded-sm bg-sky flex-shrink-0"></span>
-            <span>New Project</span>
-          </span>
-          <span class="text-[10px] font-medium text-secondarytext">Timeline</span>
-        </button>
-      </div>
-
-      <!-- Journal Mood Tracker Modal -->
-      <div
-        id="journal-mood-modal"
-        class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
-        onclick="if (event.target === this) closeJournalToolModal('mood')"
-      >
-        <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 max-h-[88%] overflow-y-auto no-scrollbar">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-[10.5px] font-bold uppercase tracking-wider text-coral">Journal Check-In</p>
-              <h3 class="font-display text-base font-bold text-primarytext">Mood Tracker</h3>
-            </div>
-            <button type="button" onclick="closeJournalToolModal('mood')" class="tactile-btn w-8 h-8 rounded-full bg-cardbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center" title="Close">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-          </div>
-          <div id="journal-mood-modal-body" class="space-y-3.5"></div>
-        </div>
-      </div>
-
-      <!-- Journal Energy Tracker Modal -->
-      <div
-        id="journal-energy-modal"
-        class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
-        onclick="if (event.target === this) closeJournalToolModal('energy')"
-      >
-        <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 max-h-[88%] overflow-y-auto no-scrollbar">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-[10.5px] font-bold uppercase tracking-wider text-coral">Journal Check-In</p>
-              <h3 class="font-display text-base font-bold text-primarytext">Energy Tracker</h3>
-            </div>
-            <button type="button" onclick="closeJournalToolModal('energy')" class="tactile-btn w-8 h-8 rounded-full bg-cardbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center" title="Close">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-          </div>
-          <div id="journal-energy-modal-body" class="space-y-3.5"></div>
-        </div>
-      </div>
-
-      <!-- Journal Exercise (CBT, DBT, ACT) Modal -->
-      <div
-        id="journal-exercise-modal"
-        class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
-        onclick="if (event.target === this) closeJournalToolModal('exercise')"
-      >
-        <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 max-h-[90%] overflow-y-auto no-scrollbar">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-[10.5px] font-bold uppercase tracking-wider text-coral">Therapeutic Reflection</p>
-              <h3 class="font-display text-base font-bold text-primarytext">Mindset Exercise</h3>
-            </div>
-            <button type="button" onclick="closeJournalToolModal('exercise')" class="tactile-btn w-8 h-8 rounded-full bg-cardbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center" title="Close">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-          </div>
-
-          <div class="bg-cardbg border border-borderline rounded-2xl p-1 grid grid-cols-3 gap-1">
-            <button type="button" onclick="setJournalExerciseTab('cbt')" id="journal-ex-tab-cbt" class="tactile-btn py-2 px-2 rounded-xl text-xs font-bold bg-coral text-onaccent">CBT</button>
-            <button type="button" onclick="setJournalExerciseTab('dbt')" id="journal-ex-tab-dbt" class="tactile-btn py-2 px-2 rounded-xl text-xs font-medium text-secondarytext hover:text-primarytext">DBT</button>
-            <button type="button" onclick="setJournalExerciseTab('act')" id="journal-ex-tab-act" class="tactile-btn py-2 px-2 rounded-xl text-xs font-medium text-secondarytext hover:text-primarytext">ACT</button>
-          </div>
-
-          <div id="journal-exercise-modal-body" class="space-y-3.5"></div>
-        </div>
-      </div>
-
-      <!-- Floating + Action Button for Timeline, Habit & Journal -->
-      <button
-        id="fab-action-btn"
-        type="button"
-        onclick="handleFabAction()"
-        title="New Task"
-        class="tactile-btn absolute right-5 lg:right-7 bottom-[78px] lg:bottom-6 z-30 w-14 h-14 rounded-full bg-coral text-onaccent flex items-center justify-center theme-fab-shadow transition-all duration-150"
-      >
-        <svg id="fab-plus-icon" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-        </svg>
-        <svg id="fab-trash-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
-        </svg>
-      </button>
-
       <!-- Floating + Action Button for Topics List -->
       <button
         id="topics-list-fab"
@@ -2975,6 +2925,256 @@
         </button>
       </nav>
     </div>
+
+    <!-- Floating Journal Speed-Dial Rows (Journal Entry / Mood / Energy / Mindset Exercise) -->
+    <div
+      id="journal-fab-menu"
+      role="menu"
+      aria-label="Journal quick actions"
+      aria-hidden="true"
+      class="speed-dial-menu absolute right-5 lg:right-7 bottom-[150px] lg:bottom-[96px] z-[46] flex flex-col items-end gap-3.5 pr-[4px]"
+    >
+      <button
+        type="button"
+        role="menuitem"
+        onclick="handleJournalFabOption('entry')"
+        style="--sd-in-delay: 135ms; --sd-out-delay: 0ms;"
+        class="speed-dial-item group flex items-center gap-3.5 text-right focus:outline-none"
+      >
+        <span class="flex flex-col items-end">
+          <span class="speed-dial-title font-display text-[15px] font-bold tracking-tight leading-tight">Journal Entry</span>
+          <span class="speed-dial-subtitle text-[12px] font-medium leading-snug mt-0.5">Write today's reflection</span>
+        </span>
+        <span class="speed-dial-circle flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.95" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M20.24 12.24a6 6 0 00-8.49-8.49L5 10.5V19h8.5l6.74-6.76z"/>
+            <path d="M16 8L2 22"/>
+            <path d="M17.5 15H9"/>
+          </svg>
+        </span>
+      </button>
+
+      <button
+        type="button"
+        role="menuitem"
+        onclick="handleJournalFabOption('mood')"
+        style="--sd-in-delay: 90ms; --sd-out-delay: 20ms;"
+        class="speed-dial-item group flex items-center gap-3.5 text-right focus:outline-none"
+      >
+        <span class="flex flex-col items-end">
+          <span class="speed-dial-title font-display text-[15px] font-bold tracking-tight leading-tight">Mood Tracker</span>
+          <span class="speed-dial-subtitle text-[12px] font-medium leading-snug mt-0.5">Log how you're feeling</span>
+        </span>
+        <span class="speed-dial-circle flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.95" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M8.5 14.5s1.3 1.75 3.5 1.75 3.5-1.75 3.5-1.75"/>
+            <circle cx="9.25" cy="10" r="1" fill="currentColor" stroke="none"/>
+            <circle cx="14.75" cy="10" r="1" fill="currentColor" stroke="none"/>
+          </svg>
+        </span>
+      </button>
+
+      <button
+        type="button"
+        role="menuitem"
+        onclick="handleJournalFabOption('energy')"
+        style="--sd-in-delay: 45ms; --sd-out-delay: 40ms;"
+        class="speed-dial-item group flex items-center gap-3.5 text-right focus:outline-none"
+      >
+        <span class="flex flex-col items-end">
+          <span class="speed-dial-title font-display text-[15px] font-bold tracking-tight leading-tight">Energy Tracker</span>
+          <span class="speed-dial-subtitle text-[12px] font-medium leading-snug mt-0.5">Check your battery level</span>
+        </span>
+        <span class="speed-dial-circle flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.95" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <polygon points="13 2 4 14 12 14 11 22 20 10 12 10 13 2"/>
+          </svg>
+        </span>
+      </button>
+
+      <button
+        type="button"
+        role="menuitem"
+        onclick="handleJournalFabOption('exercise')"
+        style="--sd-in-delay: 0ms; --sd-out-delay: 60ms;"
+        class="speed-dial-item group flex items-center gap-3.5 text-right focus:outline-none"
+      >
+        <span class="flex flex-col items-end">
+          <span class="speed-dial-title font-display text-[15px] font-bold tracking-tight leading-tight">Mindset Exercise</span>
+          <span class="speed-dial-subtitle text-[12px] font-medium leading-snug mt-0.5">Guided CBT, DBT &amp; ACT tools</span>
+        </span>
+        <span class="speed-dial-circle flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.95" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
+          </svg>
+        </span>
+      </button>
+    </div>
+
+    <!-- Floating Timeline Speed-Dial Rows (Task / Project) -->
+    <div
+      id="timeline-fab-menu"
+      role="menu"
+      aria-label="Timeline quick actions"
+      aria-hidden="true"
+      class="speed-dial-menu absolute right-5 lg:right-7 bottom-[150px] lg:bottom-[96px] z-[46] flex flex-col items-end gap-3.5 pr-[4px]"
+    >
+      <button
+        type="button"
+        role="menuitem"
+        onclick="handleTimelineFabOption('task')"
+        style="--sd-in-delay: 50ms; --sd-out-delay: 0ms;"
+        class="speed-dial-item group flex items-center gap-3.5 text-right focus:outline-none"
+      >
+        <span class="flex flex-col items-end">
+          <span class="speed-dial-title font-display text-[15px] font-bold tracking-tight leading-tight">Task</span>
+          <span class="speed-dial-subtitle text-[12px] font-medium leading-snug mt-0.5">Schedule a single time block</span>
+        </span>
+        <span class="speed-dial-circle flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.95" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 7v5l3 2"/>
+          </svg>
+        </span>
+      </button>
+
+      <button
+        type="button"
+        role="menuitem"
+        onclick="handleTimelineFabOption('project')"
+        style="--sd-in-delay: 0ms; --sd-out-delay: 30ms;"
+        class="speed-dial-item group flex items-center gap-3.5 text-right focus:outline-none"
+      >
+        <span class="flex flex-col items-end">
+          <span class="speed-dial-title font-display text-[15px] font-bold tracking-tight leading-tight">Project</span>
+          <span class="speed-dial-subtitle text-[12px] font-medium leading-snug mt-0.5">Track a multi-day timeframe</span>
+        </span>
+        <span class="speed-dial-circle flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.95" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M6 4v16M18 4v16M6 8h5M13 14h5M6 16h4"/>
+          </svg>
+        </span>
+      </button>
+    </div>
+
+    <!-- Floating + / × Action Button for Timeline, Habit & Journal -->
+    <button
+      id="fab-action-btn"
+      type="button"
+      onclick="handleFabAction()"
+      title="New Task or Project"
+      aria-haspopup="menu"
+      aria-expanded="false"
+      class="tactile-btn absolute right-5 lg:right-7 bottom-[78px] lg:bottom-6 z-20 w-14 h-14 rounded-full bg-coral text-onaccent flex items-center justify-center theme-fab-shadow transition-all duration-150"
+    >
+      <svg id="fab-plus-icon" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+      </svg>
+      <svg id="fab-trash-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+      </svg>
+    </button>
+
+    <!-- Journal Mood Tracker Modal -->
+    <div
+      id="journal-mood-modal"
+      class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
+      onclick="if (event.target === this) closeJournalToolModal('mood')"
+    >
+      <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 max-h-[88%] overflow-y-auto no-scrollbar">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-[10.5px] font-bold uppercase tracking-wider text-coral">Journal Check-In</p>
+            <h3 class="font-display text-base font-bold text-primarytext">Mood Tracker</h3>
+          </div>
+          <button type="button" onclick="closeJournalToolModal('mood')" class="tactile-btn w-8 h-8 rounded-full bg-cardbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center" title="Close">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div id="journal-mood-modal-body" class="space-y-3.5"></div>
+      </div>
+    </div>
+
+    <!-- Journal Energy Tracker Modal -->
+    <div
+      id="journal-energy-modal"
+      class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
+      onclick="if (event.target === this) closeJournalToolModal('energy')"
+    >
+      <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 max-h-[88%] overflow-y-auto no-scrollbar">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-[10.5px] font-bold uppercase tracking-wider text-coral">Journal Check-In</p>
+            <h3 class="font-display text-base font-bold text-primarytext">Energy Tracker</h3>
+          </div>
+          <button type="button" onclick="closeJournalToolModal('energy')" class="tactile-btn w-8 h-8 rounded-full bg-cardbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center" title="Close">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div id="journal-energy-modal-body" class="space-y-3.5"></div>
+      </div>
+    </div>
+
+    <!-- Journal Exercise (CBT, DBT, ACT) Modal -->
+    <div
+      id="journal-exercise-modal"
+      class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
+      onclick="if (event.target === this) closeJournalToolModal('exercise')"
+    >
+      <div class="bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 space-y-4 max-h-[90%] overflow-y-auto no-scrollbar">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-[10.5px] font-bold uppercase tracking-wider text-coral">Therapeutic Reflection</p>
+            <h3 class="font-display text-base font-bold text-primarytext">Mindset Exercise</h3>
+          </div>
+          <button type="button" onclick="closeJournalToolModal('exercise')" class="tactile-btn w-8 h-8 rounded-full bg-cardbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center" title="Close">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <div class="bg-cardbg border border-borderline rounded-2xl p-1 grid grid-cols-3 gap-1">
+          <button type="button" onclick="setJournalExerciseTab('cbt')" id="journal-ex-tab-cbt" class="tactile-btn py-2 px-2 rounded-xl text-xs font-bold bg-coral text-onaccent">CBT</button>
+          <button type="button" onclick="setJournalExerciseTab('dbt')" id="journal-ex-tab-dbt" class="tactile-btn py-2 px-2 rounded-xl text-xs font-medium text-secondarytext hover:text-primarytext">DBT</button>
+          <button type="button" onclick="setJournalExerciseTab('act')" id="journal-ex-tab-act" class="tactile-btn py-2 px-2 rounded-xl text-xs font-medium text-secondarytext hover:text-primarytext">ACT</button>
+        </div>
+
+        <div id="journal-exercise-modal-body" class="space-y-3.5"></div>
+      </div>
+    </div>
+
+    <!-- Minimal Quick-Capture Mini Panel for Brain Dump (+) -->
+    <div
+      id="inbox-quick-add-modal"
+      class="hidden absolute inset-0 z-[48] flex flex-col justify-end theme-modal-scrim backdrop-blur-[1.5px]"
+      onclick="if (event.target === this) closeInboxQuickAddPanel()"
+    >
+      <form
+        id="inbox-quick-add-sheet"
+        onsubmit="handleQuickInboxAdd(event)"
+        class="inbox-quick-panel-enter w-full bg-sheetbg border-t border-borderline rounded-t-[26px] px-4 py-3.5 theme-popover-shadow lg:max-w-[440px] lg:mx-auto lg:mb-6 lg:rounded-[24px] lg:border"
+      >
+        <div class="flex items-center gap-2.5">
+          <input
+            id="quick-inbox-input"
+            type="text"
+            autocomplete="off"
+            placeholder="Capture a thought..."
+            class="flex-1 min-w-0 bg-transparent font-display text-[15px] font-semibold text-primarytext placeholder-mutedtext py-1.5 focus:outline-none"
+          />
+          <button
+            type="submit"
+            title="Add thought"
+            aria-label="Add thought"
+            class="tactile-btn w-10 h-10 rounded-full bg-coral text-onaccent flex items-center justify-center theme-fab-shadow flex-shrink-0"
+          >
+            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <path d="M12 19V5m0 0l-6 6m6-6l6 6"/>
+            </svg>
+          </button>
+        </div>
+      </form>
+    </div>
     </div><!-- /#workspace-center-col -->
 
     <!-- DESKTOP COLUMN 3: Right Contextual Inspector Pane (>=1024px only) -->
@@ -2983,6 +3183,14 @@
       aria-label="Contextual Inspector"
       class="hidden lg:flex w-[340px] xl:w-[390px] flex-shrink-0 bg-appbg border-l border-borderline flex-col overflow-y-auto no-scrollbar"
     ></aside>
+
+    <!-- Full-Viewport Dimmed Backdrop for Speed-Dial + Action Menus -->
+    <div
+      id="fab-speed-dial-backdrop"
+      aria-hidden="true"
+      onclick="event.stopPropagation(); closeAllFabMenus();"
+      class="absolute inset-0 z-[44]"
+    ></div>
 
     <!-- Structured-Style Full-Height "New Task" / "Schedule Task" Screen -->
     <div id="task-modal" class="hidden absolute inset-0 z-50 bg-appbg flex flex-col justify-between p-5 transition-colors duration-200">
@@ -12887,6 +13095,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (!fab || !plusIcon || !trashIcon) return;
 
       if (isTrash) {
+        if (state.timelineFabMenuOpen || state.journalFabMenuOpen) {
+          closeAllFabMenus({ silent: true });
+        }
         fab.classList.remove('bg-coral', 'text-onaccent');
         fab.classList.add('bg-[#DC2626]', 'text-white');
         fab.style.transform = isOver ? 'scale(1.16)' : 'scale(1.04)';
@@ -13320,15 +13531,72 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     // =========================================================================
     let gymSliderDragging = false;
 
-    function toggleJournalFabMenu(force) {
+    function getDefaultFabTitleForTab(tab) {
+      if (tab === 'habit') return 'New Habit';
+      if (tab === 'journal') return 'Add Journal Entry or Check-In';
+      if (tab === 'inbox') return 'Dump a thought';
+      return 'New Task or Project';
+    }
+
+    function syncFabSpeedDialUi() {
+      const backdrop = document.getElementById('fab-speed-dial-backdrop');
+      const journalMenu = document.getElementById('journal-fab-menu');
+      const timelineMenu = document.getElementById('timeline-fab-menu');
+      const fabBtn = document.getElementById('fab-action-btn');
+      const desktopAddBtn = document.getElementById('header-desktop-add-btn');
+
+      const journalOpen = Boolean(state.journalFabMenuOpen);
+      const timelineOpen = Boolean(state.timelineFabMenuOpen);
+      const anyOpen = journalOpen || timelineOpen;
+
+      if (backdrop) {
+        backdrop.classList.toggle('is-open', anyOpen);
+        backdrop.setAttribute('aria-hidden', String(!anyOpen));
+      }
+      if (journalMenu) {
+        journalMenu.classList.toggle('is-open', journalOpen);
+        journalMenu.setAttribute('aria-hidden', String(!journalOpen));
+      }
+      if (timelineMenu) {
+        timelineMenu.classList.toggle('is-open', timelineOpen);
+        timelineMenu.setAttribute('aria-hidden', String(!timelineOpen));
+      }
+      if (fabBtn) {
+        fabBtn.classList.toggle('is-speed-dial-open', anyOpen);
+        fabBtn.setAttribute('aria-expanded', String(anyOpen));
+        fabBtn.title = anyOpen ? 'Close menu' : getDefaultFabTitleForTab(state.activeTab);
+      }
+      if (desktopAddBtn) {
+        desktopAddBtn.classList.toggle('is-speed-dial-open', anyOpen);
+        desktopAddBtn.setAttribute('aria-expanded', String(anyOpen));
+      }
+    }
+
+    function closeAllFabMenus(opts = {}) {
+      const wasOpen = Boolean(state.journalFabMenuOpen || state.timelineFabMenuOpen);
+      state.journalFabMenuOpen = false;
+      state.timelineFabMenuOpen = false;
+      syncFabSpeedDialUi();
+      if (wasOpen && !opts.silent) {
+        playSfx('drawerClose');
+      }
+    }
+
+    function toggleJournalFabMenu(force, opts = {}) {
       const menu = document.getElementById('journal-fab-menu');
       if (!menu) return;
-      state.journalFabMenuOpen = typeof force === 'boolean' ? force : !state.journalFabMenuOpen;
-      menu.classList.toggle('hidden', !state.journalFabMenuOpen);
+      const nextOpen = typeof force === 'boolean' ? force : !state.journalFabMenuOpen;
+      const changed = nextOpen !== state.journalFabMenuOpen;
+      if (nextOpen) state.timelineFabMenuOpen = false;
+      state.journalFabMenuOpen = nextOpen;
+      syncFabSpeedDialUi();
+      if (changed && !opts.silent) {
+        playSfx(nextOpen ? 'drawerOpen' : 'drawerClose');
+      }
     }
 
     function handleJournalFabOption(choice) {
-      toggleJournalFabMenu(false);
+      toggleJournalFabMenu(false, { silent: true });
       if (choice === 'entry') {
         addNewJournalDayCard();
       } else if (choice === 'mood') {
@@ -13340,15 +13608,21 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
     }
 
-    function toggleTimelineFabMenu(force) {
+    function toggleTimelineFabMenu(force, opts = {}) {
       const menu = document.getElementById('timeline-fab-menu');
       if (!menu) return;
-      state.timelineFabMenuOpen = typeof force === 'boolean' ? force : !state.timelineFabMenuOpen;
-      menu.classList.toggle('hidden', !state.timelineFabMenuOpen);
+      const nextOpen = typeof force === 'boolean' ? force : !state.timelineFabMenuOpen;
+      const changed = nextOpen !== state.timelineFabMenuOpen;
+      if (nextOpen) state.journalFabMenuOpen = false;
+      state.timelineFabMenuOpen = nextOpen;
+      syncFabSpeedDialUi();
+      if (changed && !opts.silent) {
+        playSfx(nextOpen ? 'drawerOpen' : 'drawerClose');
+      }
     }
 
     function handleTimelineFabOption(choice) {
-      toggleTimelineFabMenu(false);
+      toggleTimelineFabMenu(false, { silent: true });
       if (choice === 'task') {
         openTaskModal();
       } else if (choice === 'project') {
@@ -13359,6 +13633,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function handleFabAction() {
       if (state.activeTab === 'habit') {
         openHabitModal();
+      } else if (state.activeTab === 'inbox') {
+        openInboxQuickAddPanel();
       } else if (state.activeTab === 'journal') {
         toggleJournalFabMenu();
       } else if (state.activeTab === 'timeline') {
@@ -15503,32 +15779,39 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function updateCarromHudAndArchive() {
-      const undoBtn = document.getElementById('carrom-undo-btn');
       const emptyOverlay = document.getElementById('carrom-empty-overlay');
       const archiveList = document.getElementById('archived-dump-list');
       const archiveCount = document.getElementById('archive-count-label');
-      const rosterList = document.getElementById('carrom-coin-roster-list');
-      const rosterCount = document.getElementById('carrom-board-roster-count');
       const activeMeta = document.getElementById('carrom-active-coin-meta');
       const activeText = document.getElementById('carrom-active-coin-text');
+      const activeDesc = document.getElementById('carrom-active-coin-desc');
       const remainingEl = document.getElementById('carrom-coins-remaining');
 
       const allItems = state.inboxItems || [];
       const activeCoin = carromGame.coins[0] || null;
 
-      if (undoBtn) undoBtn.disabled = !(Array.isArray(state.swipeHistory) && state.swipeHistory.length > 0);
       if (emptyOverlay) emptyOverlay.classList.toggle('hidden', allItems.length > 0);
 
       if (remainingEl) {
-        remainingEl.textContent = `${allItems.length} ${allItems.length === 1 ? 'left' : 'left'}`;
+        remainingEl.textContent = `${allItems.length} left`;
       }
       if (activeMeta && activeText) {
         if (activeCoin) {
+          const fullItem = allItems.find((it) => String(it.id) === String(activeCoin.id));
+          const descStr = fullItem && fullItem.desc ? String(fullItem.desc).trim() : '';
           activeMeta.textContent = `Current Coin · ${activeCoin.tag || 'Thought'}`;
           activeText.textContent = activeCoin.text;
+          if (activeDesc) {
+            activeDesc.textContent = descStr;
+            activeDesc.classList.toggle('hidden', !descStr);
+          }
         } else {
           activeMeta.textContent = 'Board clear';
-          activeText.textContent = 'Add a thought above to drop the next coin.';
+          activeText.textContent = 'Tap + to drop the next coin.';
+          if (activeDesc) {
+            activeDesc.textContent = '';
+            activeDesc.classList.add('hidden');
+          }
         }
       }
 
@@ -15537,50 +15820,25 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         btn.classList.toggle('opacity-40', !activeCoin);
       });
 
-      const upNext = allItems.slice(1);
-      if (rosterCount) rosterCount.textContent = String(upNext.length);
-      if (rosterList) {
-        rosterList.innerHTML =
-          upNext.length === 0
-            ? `<p class="text-xs text-mutedtext py-1">${allItems.length === 1 ? 'Last coin is on the board.' : 'No queued thoughts.'}</p>`
-            : upNext
-                .map((item, idx) => {
-                  const initial = String(item.text || '•').trim().charAt(0).toUpperCase() || '•';
-                  return `
-                    <button
-                      type="button"
-                      onclick="selectCarromCoin(${JSON.stringify(item.id)})"
-                      title="Bring to board now"
-                      class="w-full text-left rounded-xl px-3 py-2 border border-borderline bg-cardbg text-primarytext hover:border-coral/60 transition flex items-center gap-2.5"
-                    >
-                      <span class="w-6 h-6 rounded-full bg-pillbg border border-borderline flex items-center justify-center text-[10.5px] font-bold text-secondarytext flex-shrink-0">${initial}</span>
-                      <span class="text-xs font-medium truncate flex-1">${escapeHtml(item.text)}</span>
-                      <span class="text-[10px] text-mutedtext tabular-nums">#${idx + 2}</span>
-                    </button>
-                  `;
-                })
-                .join('');
-      }
-
       if (archiveCount) {
         archiveCount.textContent = `${state.archivedDumps.length} ${state.archivedDumps.length === 1 ? 'item' : 'items'}`;
       }
       if (archiveList) {
         archiveList.innerHTML =
           state.archivedDumps.length === 0
-            ? `<p class="text-xs text-mutedtext py-2">No archived thoughts yet.</p>`
+            ? `<p class="text-xs text-mutedtext px-1 py-1.5">No archived thoughts yet.</p>`
             : state.archivedDumps
                 .map(
                   (a) => `
-                  <div class="bg-cardbg border border-borderline rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-2.5">
+                  <div class="bg-sheetbg/75 border border-borderline/80 rounded-xl px-3 py-2 flex items-center justify-between gap-2.5">
                     <div class="min-w-0">
                       <p class="text-xs font-medium text-primarytext truncate">${escapeHtml(a.text)}</p>
-                      <p class="text-[11px] text-mutedtext">${escapeHtml(a.tag || 'Archived')}</p>
+                      <p class="text-[10.5px] text-mutedtext">${escapeHtml(a.tag || 'Archived')}</p>
                     </div>
                     <button
                       type="button"
                       onclick="restoreArchivedDump(${JSON.stringify(a.id)})"
-                      class="tactile-btn px-2.5 py-1 rounded-xl bg-pillbg border border-borderline hover:border-coral text-xs font-semibold text-coral whitespace-nowrap"
+                      class="tactile-btn px-2.5 py-1 rounded-lg bg-pillbg border border-borderline hover:border-coral text-[11px] font-semibold text-coral whitespace-nowrap"
                     >
                       Restore
                     </button>
@@ -15592,24 +15850,63 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (typeof renderDesktopInspector === 'function') renderDesktopInspector();
     }
 
+    let inboxArchiveExpanded = false;
+
+    function toggleInboxArchiveFooter(force) {
+      const drawer = document.getElementById('inbox-archive-drawer');
+      const chevron = document.getElementById('inbox-archive-chevron');
+      const btn = document.getElementById('inbox-archive-toggle-btn');
+      if (!drawer) return;
+      const next = typeof force === 'boolean' ? force : !inboxArchiveExpanded;
+      const changed = next !== inboxArchiveExpanded;
+      inboxArchiveExpanded = next;
+      drawer.classList.toggle('hidden', !inboxArchiveExpanded);
+      if (chevron) chevron.style.transform = inboxArchiveExpanded ? 'rotate(180deg)' : '';
+      if (btn) btn.setAttribute('aria-expanded', String(inboxArchiveExpanded));
+      if (changed) playSfx('tick');
+    }
+
+    function openInboxQuickAddPanel() {
+      const modal = document.getElementById('inbox-quick-add-modal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      playSfx('drawerOpen');
+      requestAnimationFrame(() => {
+        const input = document.getElementById('quick-inbox-input');
+        if (input) input.focus();
+      });
+    }
+
+    function closeInboxQuickAddPanel(opts = {}) {
+      const modal = document.getElementById('inbox-quick-add-modal');
+      if (!modal || modal.classList.contains('hidden')) return;
+      modal.classList.add('hidden');
+      if (!opts.silent) playSfx('drawerClose');
+    }
+
     function handleQuickInboxAdd(e) {
       e.preventDefault();
       const input = document.getElementById('quick-inbox-input');
       const text = input ? input.value.trim() : '';
-      if (!text) return;
+      if (!text) {
+        if (input) input.focus();
+        return;
+      }
 
       const newId = Date.now();
       state.inboxItems.unshift({
         id: newId,
         text,
-        tag: 'Captured',
+        tag: 'Thought',
         added: 'Just now',
       });
       carromGame.selectedCoinId = newId;
-      input.value = '';
       playSfx('create');
       saveState();
       renderInboxDeck(true);
+
+      if (input) input.value = '';
+      closeInboxQuickAddPanel({ silent: true });
     }
 
     function restoreArchivedDump(id) {
@@ -23319,8 +23616,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const changed = state.activeTab !== tab;
       state.activeTab = tab;
       if (changed) playSfx('tick');
-      toggleJournalFabMenu(false);
-      toggleTimelineFabMenu(false);
+      closeAllFabMenus({ silent: true });
 
       const views = {
         inbox: document.getElementById('view-inbox'),
@@ -23368,14 +23664,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       const fabBtn = document.getElementById('fab-action-btn');
       if (fabBtn) {
-        const showMainFab = tab === 'timeline' || tab === 'habit' || tab === 'journal';
+        const showMainFab = tab === 'timeline' || tab === 'habit' || tab === 'journal' || tab === 'inbox';
         fabBtn.classList.toggle('hidden', !showMainFab);
-        fabBtn.title =
-          tab === 'habit'
-            ? 'New Habit'
-            : tab === 'journal'
-              ? 'Add Journal Entry or Check-In'
-              : 'New Task or Project';
+        fabBtn.title = getDefaultFabTitleForTab(tab);
       }
 
       if (tab !== 'timeline') {
@@ -23391,6 +23682,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
       if (tab !== 'inbox') {
         stopCarromLoop();
+        closeInboxQuickAddPanel({ silent: true });
       }
       if (tab === 'timeline') {
         syncTimelineScheduleBadge();
@@ -23878,21 +24170,25 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
 
       document.addEventListener('pointerdown', (e) => {
+        if (!state.timelineFabMenuOpen && !state.journalFabMenuOpen) return;
         if (
-          state.timelineFabMenuOpen &&
-          !e.target.closest('#timeline-fab-menu') &&
-          !e.target.closest('#fab-action-btn') &&
-          !e.target.closest('#header-desktop-add-btn')
+          e.target.closest('#fab-speed-dial-backdrop') ||
+          e.target.closest('#timeline-fab-menu') ||
+          e.target.closest('#journal-fab-menu') ||
+          e.target.closest('#fab-action-btn') ||
+          e.target.closest('#header-desktop-add-btn')
         ) {
-          toggleTimelineFabMenu(false);
+          return;
         }
-        if (
-          state.journalFabMenuOpen &&
-          !e.target.closest('#journal-fab-menu') &&
-          !e.target.closest('#fab-action-btn') &&
-          !e.target.closest('#header-desktop-add-btn')
-        ) {
-          toggleJournalFabMenu(false);
+        closeAllFabMenus();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (state.timelineFabMenuOpen || state.journalFabMenuOpen) {
+            closeAllFabMenus();
+          }
+          closeInboxQuickAddPanel();
         }
       });
 
