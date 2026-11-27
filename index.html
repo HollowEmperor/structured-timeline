@@ -1565,9 +1565,16 @@
       onpointermove="handleCalendarHeaderMove(event)"
       onpointerup="handleCalendarHeaderUp(event)"
       onpointercancel="handleCalendarHeaderUp(event)"
-      class="px-5 lg:px-8 pt-2 lg:pt-4 pb-1.5 flex-shrink-0 select-none cursor-grab active:cursor-grabbing"
+      class="relative z-0 overflow-hidden px-5 lg:px-8 pt-2 lg:pt-4 pb-8 -mb-7 lg:pb-1.5 lg:mb-0 flex-shrink-0 select-none cursor-grab active:cursor-grabbing"
     >
-      <div class="min-h-[36px] flex items-center justify-between gap-2">
+      <!-- Theme-Matched Celestial & Horizon Silhouette Backdrop (Calendar Header) -->
+      <div
+        id="calendar-ambient-backdrop"
+        aria-hidden="true"
+        class="pointer-events-none select-none absolute inset-0 z-0 overflow-hidden transition-opacity duration-300"
+      ></div>
+
+      <div class="relative z-10 min-h-[36px] flex items-center justify-between gap-2">
         <div class="flex items-center gap-1.5 min-w-0 text-left">
           <h1
             id="main-header-title"
@@ -1643,7 +1650,7 @@
       </div>
 
       <!-- Unified 6-Row Calendar: Full dynamic month grid behind a cropped 1-week viewport mask -->
-      <div id="unified-calendar-container" style="touch-action: none;" class="mt-2.5 space-y-1">
+      <div id="unified-calendar-container" style="touch-action: none;" class="relative z-10 mt-2.5 space-y-1">
         <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-medium text-secondarytext pb-0.5 px-1.5">
           <span>SAT</span><span>SUN</span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span>
         </div>
@@ -1653,16 +1660,23 @@
       </div>
 
       <!-- Drag Handle Pill -->
-      <div id="calendar-drag-handle" style="touch-action: none;" onclick="toggleMonthCalendar()" title="Tap to toggle month calendar" class="pt-2 pb-1 flex justify-center cursor-pointer">
+      <div id="calendar-drag-handle" style="touch-action: none;" onclick="toggleMonthCalendar()" title="Tap to toggle month calendar" class="relative z-10 pt-2 pb-1 flex justify-center cursor-pointer">
         <span class="w-10 h-1 rounded-full bg-borderline hover:bg-coral transition"></span>
       </div>
     </header>
 
     <!-- Main Rounded Dark Sheet Container -->
-    <div class="flex-1 bg-sheetbg rounded-t-[30px] lg:rounded-none border-t border-borderline/70 flex flex-col min-h-0 relative overflow-hidden">
+    <div class="flex-1 bg-sheetbg rounded-t-[30px] lg:rounded-none border-t border-borderline/70 flex flex-col min-h-0 relative z-10 overflow-hidden">
+
+      <!-- Theme-Matched Full-Bleed Time-of-Day Silhouette Backdrop (Daily Tasks Timeline) -->
+      <div
+        id="timeline-ambient-backdrop"
+        aria-hidden="true"
+        class="pointer-events-none select-none absolute inset-0 z-0 overflow-hidden transition-opacity duration-300"
+      ></div>
 
       <!-- Compartment Filter Bar -->
-      <div id="compartment-bar" class="px-4 lg:px-8 pt-3.5 pb-2 flex items-center justify-between gap-2 flex-shrink-0">
+      <div id="compartment-bar" class="relative z-10 px-4 lg:px-8 pt-3.5 pb-2 flex items-center justify-between gap-2 flex-shrink-0">
         <div id="compartment-pills-list" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar min-w-0"></div>
 
         <div class="flex items-center gap-2 flex-shrink-0">
@@ -1679,7 +1693,7 @@
         onpointermove="handleTimelineSwipeMove(event)"
         onpointerup="handleTimelineSwipeEnd(event)"
         onpointercancel="handleTimelineSwipeCancel(event)"
-        class="flex-1 overflow-y-auto no-scrollbar px-3 lg:px-8 pb-24 lg:pb-16 pt-1 relative"
+        class="relative z-10 flex-1 overflow-y-auto no-scrollbar px-3 lg:px-8 pb-24 lg:pb-16 pt-1"
       >
         <div id="timeline-container" class="relative transition-transform duration-200 lg:max-w-[740px] lg:mx-auto"></div>
         <div id="projects-timeline-container" class="hidden relative"></div>
@@ -11144,6 +11158,653 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       });
     }
 
+    function resolveLiveCurrentTimeSceneKey() {
+      const nowInfo = typeof getLiveNowInfo === 'function' ? getLiveNowInfo() : { nowMinInt: new Date().getHours() * 60 + new Date().getMinutes() };
+      const nowMin = Number.isFinite(nowInfo.nowMinInt) ? nowInfo.nowMinInt : 720;
+      const comps = Array.isArray(state.compartments) ? state.compartments : [];
+      const dawnComp = comps.find((c) => c.id === 'dawn');
+      const eveningComp = comps.find((c) => c.id === 'evening');
+      const dawnStart = dawnComp && Number.isFinite(dawnComp.startMin) ? dawnComp.startMin : 330;
+      const eveningEnd = eveningComp && Number.isFinite(eveningComp.endMin) ? eveningComp.endMin : 1380;
+
+      if (nowMin < dawnStart || nowMin >= eveningEnd) {
+        return 'night';
+      }
+      const liveCompId = typeof getCurrentTimeCompartmentId === 'function' ? getCurrentTimeCompartmentId() : 'morning';
+      if (liveCompId === 'dawn' || liveCompId === 'morning' || liveCompId === 'afternoon' || liveCompId === 'evening') {
+        return liveCompId;
+      }
+      if (nowMin < 480) return 'dawn';
+      if (nowMin < 720) return 'morning';
+      if (nowMin < 1050) return 'afternoon';
+      return 'evening';
+    }
+
+    function resolveTimelineHorizonSceneKey(compartmentFilter) {
+      if (compartmentFilter === 'all' || compartmentFilter === 'completed' || !compartmentFilter) {
+        return resolveLiveCurrentTimeSceneKey();
+      }
+      if (
+        compartmentFilter === 'dawn' ||
+        compartmentFilter === 'morning' ||
+        compartmentFilter === 'afternoon' ||
+        compartmentFilter === 'evening' ||
+        compartmentFilter === 'night'
+      ) {
+        return compartmentFilter;
+      }
+      const comp = (state.compartments || []).find((c) => c.id === compartmentFilter);
+      if (comp && Number.isFinite(comp.startMin)) {
+        if (comp.startMin < 330 || comp.startMin >= 1380) return 'night';
+        if (comp.startMin < 480) return 'dawn';
+        if (comp.startMin < 720) return 'morning';
+        if (comp.startMin < 1050) return 'afternoon';
+        return 'evening';
+      }
+      return resolveLiveCurrentTimeSceneKey();
+    }
+
+    function getCalendarSilhouetteSceneSvg(sceneKey) {
+      let celestialHtml = '';
+      // Mobile-balanced 420x175 viewBox prevents side-clipping on phones; bottom ~28px tucks smoothly behind the rounded sheet
+      let ridgeBackPath = 'M-10 175 L-10 116 C56 96 118 104 182 122 C246 138 308 104 370 100 C394 98 412 104 430 112 L430 175 Z';
+      let ridgeFrontPath = 'M-10 175 L-10 138 C64 122 132 130 198 144 C266 156 332 124 430 130 L430 175 Z';
+
+      if (sceneKey === 'dawn') {
+        // Dawn: Rising sun tucked behind the left (East) hills + lingering stars
+        ridgeBackPath = 'M-10 175 L-10 116 C48 96 106 102 172 122 C238 140 304 106 368 102 C394 100 412 106 430 114 L430 175 Z';
+        celestialHtml = `
+          <circle cx="88" cy="108" r="64" fill="rgb(var(--color-accent))" opacity="0.06"/>
+          <circle cx="88" cy="108" r="40" fill="rgb(var(--color-accent))" opacity="0.11"/>
+          <circle cx="88" cy="108" r="22" fill="rgb(var(--color-accent))" opacity="0.22"/>
+          <path d="M248 24 L250 29.5 L255.5 31.5 L250 33.5 L248 39 L246 33.5 L240.5 31.5 L246 29.5 Z" fill="rgb(var(--color-borderline))" opacity="0.72"/>
+          <path d="M330 34 L331.8 38.5 L336.3 40.3 L331.8 42.1 L330 46.6 L328.2 42.1 L323.7 40.3 L328.2 38.5 Z" fill="rgb(var(--color-accent))" opacity="0.34"/>
+          <path d="M376 22 L377.4 25.8 L381.2 27.2 L377.4 28.6 L376 32.4 L374.6 28.6 L370.8 27.2 L374.6 25.8 Z" fill="rgb(var(--color-borderline))" opacity="0.62"/>
+          <circle cx="192" cy="36" r="1.8" fill="rgb(var(--color-borderline))" opacity="0.56"/>
+          <circle cx="294" cy="54" r="1.6" fill="rgb(var(--color-borderline))" opacity="0.48"/>
+          <circle cx="358" cy="60" r="1.8" fill="rgb(var(--color-accent))" opacity="0.3"/>
+          <rect x="276" y="78" width="66" height="8" rx="4" fill="rgb(var(--color-sheetbg))" opacity="0.46"/>
+        `;
+      } else if (sceneKey === 'morning') {
+        // Morning: Sun climbing higher in the East (left), tucked cleanly behind the hill, no stars
+        ridgeBackPath = 'M-10 175 L-10 118 C58 94 120 102 184 122 C248 140 310 104 372 100 C396 98 414 104 430 112 L430 175 Z';
+        celestialHtml = `
+          <circle cx="106" cy="92" r="66" fill="rgb(var(--color-accent))" opacity="0.06"/>
+          <circle cx="106" cy="92" r="42" fill="rgb(var(--color-accent))" opacity="0.11"/>
+          <circle cx="106" cy="92" r="23" fill="rgb(var(--color-accent))" opacity="0.22"/>
+          <rect x="258" y="30" width="68" height="10" rx="5" fill="rgb(var(--color-sheetbg))" opacity="0.52"/>
+          <rect x="334" y="46" width="52" height="8" rx="4" fill="rgb(var(--color-cardbg))" opacity="0.44"/>
+        `;
+      } else if (sceneKey === 'afternoon') {
+        // Afternoon / Noon: Bright harsh sun high at top center (clean concentric circles, no ray lines)
+        ridgeBackPath = 'M-10 175 L-10 120 C68 104 136 114 206 128 C274 140 340 104 430 112 L430 175 Z';
+        celestialHtml = `
+          <circle cx="210" cy="22" r="82" fill="rgb(var(--color-accent))" opacity="0.06"/>
+          <circle cx="210" cy="22" r="54" fill="rgb(var(--color-accent))" opacity="0.10"/>
+          <circle cx="210" cy="22" r="32" fill="rgb(var(--color-accent))" opacity="0.16"/>
+          <circle cx="210" cy="22" r="18" fill="rgb(var(--color-accent))" opacity="0.28"/>
+          <rect x="44" y="38" width="68" height="10" rx="5" fill="rgb(var(--color-sheetbg))" opacity="0.50"/>
+          <rect x="314" y="34" width="64" height="9" rx="4.5" fill="rgb(var(--color-cardbg))" opacity="0.46"/>
+        `;
+      } else if (sceneKey === 'evening') {
+        // Evening: Setting sun descending behind the right (West) hills
+        ridgeBackPath = 'M-10 175 L-10 122 C60 108 124 116 190 132 C254 144 306 98 360 98 C388 98 410 104 430 114 L430 175 Z';
+        celestialHtml = `
+          <circle cx="332" cy="108" r="68" fill="rgb(var(--color-accent))" opacity="0.07"/>
+          <circle cx="332" cy="108" r="42" fill="rgb(var(--color-accent))" opacity="0.12"/>
+          <circle cx="332" cy="108" r="23" fill="rgb(var(--color-accent))" opacity="0.24"/>
+          <rect x="52" y="40" width="68" height="9" rx="4.5" fill="rgb(var(--color-sheetbg))" opacity="0.48"/>
+          <rect x="134" y="58" width="50" height="7.5" rx="3.75" fill="rgb(var(--color-cardbg))" opacity="0.40"/>
+        `;
+      } else {
+        // Night (live late-night time): Crescent moon + stars
+        celestialHtml = `
+          <circle cx="334" cy="56" r="56" fill="rgb(var(--color-accent))" opacity="0.05"/>
+          <circle cx="334" cy="56" r="32" fill="rgb(var(--color-accent))" opacity="0.09"/>
+          <path d="M340 38 A19 19 0 1 0 350 69 A15 15 0 1 1 340 38 Z" fill="rgb(var(--color-accent))" opacity="0.25"/>
+          <path d="M96 30 L98 35.5 L103.5 37.5 L98 39.5 L96 45 L94 39.5 L88.5 37.5 L94 35.5 Z" fill="rgb(var(--color-borderline))" opacity="0.7"/>
+          <path d="M226 24 L227.6 28.2 L231.8 29.8 L227.6 31.4 L226 35.6 L224.4 31.4 L220.2 29.8 L224.4 28.2 Z" fill="rgb(var(--color-accent))" opacity="0.34"/>
+          <path d="M288 44 L289.4 47.6 L293 49 L289.4 50.4 L288 54 L286.6 50.4 L283 49 L286.6 47.6 Z" fill="rgb(var(--color-borderline))" opacity="0.62"/>
+          <circle cx="164" cy="40" r="1.8" fill="rgb(var(--color-borderline))" opacity="0.6"/>
+          <circle cx="378" cy="30" r="1.8" fill="rgb(var(--color-accent))" opacity="0.32"/>
+        `;
+      }
+
+      return `
+        <svg viewBox="0 0 420 175" preserveAspectRatio="xMidYMax slice" class="w-full h-full block">
+          ${celestialHtml}
+          <!-- Opaque base cuts cleanly mask the sun/moon behind the hills -->
+          <path d="${ridgeBackPath}" fill="rgb(var(--color-appbg))"/>
+          <path d="${ridgeBackPath}" fill="rgb(var(--color-sheetbg))" opacity="0.52"/>
+          <path d="${ridgeFrontPath}" fill="rgb(var(--color-appbg))"/>
+          <path d="${ridgeFrontPath}" fill="rgb(var(--color-sheetbg))" opacity="0.88"/>
+        </svg>
+      `;
+    }
+
+    function getTimelineSilhouetteSceneSvg(sceneKey) {
+      if (sceneKey === 'dawn') {
+        // Dawn: Layered pine woods, drifting mist, fern fronds, waking songbirds, and a quiet deer in the clearing
+        return `
+          <div class="absolute inset-x-0 top-[58px] h-[112px] overflow-hidden">
+            <svg viewBox="0 0 560 112" preserveAspectRatio="xMidYMin slice" class="w-full h-full block">
+              <!-- Drifting dawn mist ribbons well below the compartment pill bar -->
+              <rect x="66" y="42" width="108" height="8" rx="4" fill="rgb(var(--color-cardbg))" opacity="0.46"/>
+              <rect x="386" y="34" width="116" height="8" rx="4" fill="rgb(var(--color-cardbg))" opacity="0.44"/>
+              <rect x="420" y="52" width="68" height="6.5" rx="3.25" fill="rgb(var(--color-pillbg))" opacity="0.34"/>
+              <!-- Small waking flock of dawn birds taking flight -->
+              <g fill="none" stroke="rgb(var(--color-borderline))" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.56">
+                <path d="M188 38 Q194 32 200 37 Q206 32 212 38"/>
+                <path d="M220 26 Q225 21 230 25 Q235 21 240 26"/>
+                <path d="M248 42 Q252 38 256 41 Q260 38 264 42"/>
+                <path d="M352 30 Q357 25 362 29 Q367 25 372 30"/>
+              </g>
+            </svg>
+          </div>
+          <div class="absolute inset-x-0 bottom-0 h-[250px] sm:h-[290px] overflow-hidden">
+            <svg viewBox="0 0 560 280" preserveAspectRatio="xMidYMax slice" class="w-full h-full block">
+              <!-- Far misty woodland ridge -->
+              <path
+                d="M-20 280 L-20 156 C66 134 150 146 232 176 C318 206 404 164 486 138 C524 128 552 132 580 144 L580 280 Z"
+                fill="rgb(var(--color-cardbg))"
+                opacity="0.52"
+              />
+              <!-- Far pine treeline -->
+              <g fill="rgb(var(--color-cardbg))" opacity="0.72">
+                <polygon points="56,104 38,184 74,184"/>
+                <polygon points="56,82 42,142 70,142"/>
+                <polygon points="154,122 140,188 168,188"/>
+                <polygon points="154,102 144,150 164,150"/>
+                <polygon points="418,120 404,188 432,188"/>
+                <polygon points="418,100 408,150 428,150"/>
+                <polygon points="510,98 492,180 528,180"/>
+                <polygon points="510,76 496,136 524,136"/>
+              </g>
+              <!-- Dense mid-ground pine groves (left & right, mobile-safe x=74..486) -->
+              <g fill="rgb(var(--color-pillbg))" opacity="0.66">
+                <polygon points="90,94 68,194 112,194"/>
+                <polygon points="90,68 72,142 108,142"/>
+                <polygon points="128,116 110,202 146,202"/>
+                <polygon points="128,94 114,156 142,156"/>
+                <polygon points="184,142 170,204 198,204"/>
+                <polygon points="476,88 454,192 498,192"/>
+                <polygon points="476,62 458,138 494,138"/>
+                <polygon points="440,112 422,198 458,198"/>
+                <polygon points="440,90 426,154 454,154"/>
+                <polygon points="386,140 372,202 400,202"/>
+              </g>
+              <!-- Perched songbird on slender left pine branch -->
+              <g fill="rgb(var(--color-borderline))" opacity="0.68">
+                <path d="M142 142 Q162 135 180 133" fill="none" stroke="rgb(var(--color-pillbg))" stroke-width="2" stroke-linecap="round"/>
+                <ellipse cx="166" cy="127" rx="6.2" ry="4" transform="rotate(-12 166 127)"/>
+                <circle cx="172.5" cy="123.5" r="3"/>
+                <polygon points="175.5,122.5 181,121 176,125"/>
+                <path d="M160 129 L152 132 L154.5 127.5 Z"/>
+              </g>
+              <!-- Low valley mist strip -->
+              <rect x="196" y="168" width="124" height="8" rx="4" fill="rgb(var(--color-borderline))" opacity="0.30"/>
+              <!-- Quiet grazing deer silhouette in the clearing -->
+              <g fill="rgb(var(--color-pillbg))" opacity="0.76" transform="translate(324, 152) scale(0.92)">
+                <path d="M14 28 C20 22 40 21 52 25 C57 27 59 32 56 38 L52 38 L50 56 L46 56 L46 39 L26 39 L24 56 L20 56 L21 38 L16 56 L12 56 L15 36 C12 34 11 30 14 28 Z"/>
+                <path d="M55 28 Q61 27 60 32 Z"/>
+                <path d="M16 28 C12 20 11 13 13 8 C15 5 18 6 20 10 L23 24 Z"/>
+                <ellipse cx="10" cy="8" rx="6.5" ry="3.4" transform="rotate(-14 10 8)"/>
+                <path d="M14 5 L17 1 L17 6 Z"/>
+                <path d="M12 5 C11 -2 7 -6 4 -8 M9 -2 L13 -6 M14 4 C17 -2 21 -5 23 -7" fill="none" stroke="rgb(var(--color-pillbg))" stroke-width="1.5" stroke-linecap="round"/>
+              </g>
+              <!-- Mid misty meadow -->
+              <path
+                d="M-20 280 L-20 192 C72 170 162 198 256 218 C348 238 432 194 514 176 C542 170 564 174 580 184 L580 280 Z"
+                fill="rgb(var(--color-cardbg))"
+                opacity="0.88"
+              />
+              <!-- Foreground curving woodland mounds -->
+              <path
+                d="M-20 280 L-20 228 C70 206 156 226 254 246 C356 264 454 216 580 228 L580 280 Z"
+                fill="rgb(var(--color-pillbg))"
+                opacity="0.56"
+              />
+              <!-- Fern fronds & morning dew accents -->
+              <g fill="rgb(var(--color-borderline))" opacity="0.56">
+                <path d="M104 264 C98 238 86 218 68 202 C88 216 102 238 108 264 Z"/>
+                <ellipse cx="84" cy="226" rx="9.5" ry="3.5" transform="rotate(-38 84 226)"/>
+                <ellipse cx="102" cy="238" rx="9" ry="3.4" transform="rotate(24 102 238)"/>
+                <ellipse cx="90" cy="246" rx="9" ry="3.4" transform="rotate(-24 90 246)"/>
+                <path d="M460 262 C466 236 478 216 496 200 C476 214 462 236 456 262 Z"/>
+                <ellipse cx="480" cy="224" rx="9.5" ry="3.5" transform="rotate(38 480 224)"/>
+                <ellipse cx="462" cy="236" rx="9" ry="3.4" transform="rotate(-24 462 236)"/>
+                <ellipse cx="474" cy="246" rx="9" ry="3.4" transform="rotate(24 474 246)"/>
+              </g>
+              <!-- Subtle dawn dew droplets on fern tips -->
+              <g fill="rgb(var(--color-accent))" opacity="0.28">
+                <circle cx="70" cy="204" r="2.4"/>
+                <circle cx="494" cy="202" r="2.4"/>
+                <circle cx="176" cy="228" r="2"/>
+                <circle cx="392" cy="230" r="2"/>
+              </g>
+            </svg>
+          </div>
+        `;
+      }
+
+      if (sceneKey === 'morning') {
+        // Morning: Lush rolling hills, abundant rounded canopy trees, wildflowers, gliding birds & fluttering butterflies
+        return `
+          <div class="absolute inset-x-0 top-[58px] h-[118px] overflow-hidden">
+            <svg viewBox="0 0 560 118" preserveAspectRatio="xMidYMin slice" class="w-full h-full block">
+              <!-- Gentle overhanging leaf sprigs well below the pill bar -->
+              <g fill="rgb(var(--color-cardbg))" opacity="0.54">
+                <path d="M32 22 C56 20 78 32 96 52 C74 36 52 28 32 28 Z"/>
+                <ellipse cx="60" cy="22" rx="12" ry="5" transform="rotate(-16 60 22)"/>
+                <ellipse cx="76" cy="40" rx="11" ry="4.8" transform="rotate(32 76 40)"/>
+                <path d="M528 20 C504 18 482 30 464 50 C486 34 508 26 528 26 Z"/>
+                <ellipse cx="500" cy="20" rx="12" ry="5" transform="rotate(16 500 20)"/>
+                <ellipse cx="484" cy="38" rx="11" ry="4.8" transform="rotate(-32 484 38)"/>
+              </g>
+              <!-- Gliding morning birds -->
+              <g fill="none" stroke="rgb(var(--color-borderline))" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.58">
+                <path d="M174 36 Q181 29 188 35 Q195 29 202 36"/>
+                <path d="M366 30 Q373 23 380 29 Q387 23 394 30"/>
+                <path d="M400 46 Q405 41 410 45 Q415 41 420 46"/>
+              </g>
+              <!-- Upper fluttering butterfly silhouette -->
+              <g transform="translate(132, 66) rotate(-14)" fill="rgb(var(--color-accent))" opacity="0.24">
+                <ellipse cx="-5.5" cy="-3.5" rx="6" ry="4.2" transform="rotate(-24 -5.5 -3.5)"/>
+                <ellipse cx="5.5" cy="-3.5" rx="6" ry="4.2" transform="rotate(24 5.5 -3.5)"/>
+                <ellipse cx="-4" cy="3.5" rx="4" ry="3" transform="rotate(16 -4 3.5)"/>
+                <ellipse cx="4" cy="3.5" rx="4" ry="3" transform="rotate(-16 4 3.5)"/>
+                <rect x="-0.9" y="-5" width="1.8" height="10" rx="0.9"/>
+              </g>
+            </svg>
+          </div>
+          <div class="absolute inset-x-0 bottom-0 h-[250px] sm:h-[290px] overflow-hidden">
+            <svg viewBox="0 0 560 280" preserveAspectRatio="xMidYMax slice" class="w-full h-full block">
+              <!-- Sweeping far morning hills -->
+              <path
+                d="M-20 280 L-20 156 C68 118 158 130 240 180 C324 224 418 170 500 134 C534 120 560 124 580 136 L580 280 Z"
+                fill="rgb(var(--color-cardbg))"
+                opacity="0.56"
+              />
+              <!-- Far orchard trees -->
+              <g fill="rgb(var(--color-cardbg))" opacity="0.78">
+                <rect x="192" y="150" width="3.5" height="22" rx="1.75"/>
+                <path d="M194 118 C205 118 211 130 209 143 C207 151 201 155 194 155 C187 155 181 151 179 143 C177 130 183 118 194 118 Z"/>
+                <rect x="374" y="148" width="3.5" height="22" rx="1.75"/>
+                <path d="M376 116 C387 116 393 128 391 141 C389 149 383 153 376 153 C369 153 363 149 361 141 C359 128 365 116 376 116 Z"/>
+              </g>
+              <!-- Lush rounded geometric canopy trees (left grove, mobile-safe) -->
+              <g fill="rgb(var(--color-pillbg))" opacity="0.68">
+                <rect x="74" y="128" width="5.5" height="40" rx="2.75"/>
+                <path d="M77 72 C96 72 107 94 102 116 C98 131 89 138 77 138 C65 138 56 131 52 116 C47 94 58 72 77 72 Z"/>
+                <rect x="124" y="140" width="4.5" height="32" rx="2.25"/>
+                <path d="M126 92 C142 92 151 110 147 128 C144 140 136 146 126 146 C116 146 108 140 105 128 C101 110 110 92 126 92 Z"/>
+                <rect x="166" y="158" width="3.8" height="24" rx="1.9"/>
+                <path d="M168 124 C179 124 185 136 182 149 C180 158 175 162 168 162 C161 162 156 158 154 149 C151 136 157 124 168 124 Z"/>
+              </g>
+              <!-- Lush rounded geometric canopy trees (right grove, mobile-safe) -->
+              <g fill="rgb(var(--color-pillbg))" opacity="0.68">
+                <rect x="480" y="124" width="5.5" height="42" rx="2.75"/>
+                <path d="M483 68 C502 68 513 90 508 112 C504 127 495 134 483 134 C471 134 462 127 458 112 C453 90 464 68 483 68 Z"/>
+                <rect x="430" y="138" width="4.5" height="32" rx="2.25"/>
+                <path d="M432 90 C448 90 457 108 453 126 C450 138 442 144 432 144 C422 144 414 138 411 126 C407 108 416 90 432 90 Z"/>
+                <rect x="392" y="156" width="3.8" height="24" rx="1.9"/>
+                <path d="M394 122 C405 122 411 134 408 147 C406 156 401 160 394 160 C387 160 382 156 380 147 C377 134 383 122 394 122 Z"/>
+              </g>
+              <!-- Canopy light flecks -->
+              <g fill="rgb(var(--color-borderline))" opacity="0.46">
+                <circle cx="71" cy="96" r="5"/>
+                <circle cx="121" cy="112" r="4.5"/>
+                <circle cx="477" cy="92" r="5"/>
+                <circle cx="427" cy="110" r="4.5"/>
+              </g>
+              <!-- Meadow fluttering butterflies -->
+              <g transform="translate(226, 174) rotate(12)" fill="rgb(var(--color-borderline))" opacity="0.58">
+                <ellipse cx="-5" cy="-3" rx="5.4" ry="3.8" transform="rotate(-24 -5 -3)"/>
+                <ellipse cx="5" cy="-3" rx="5.4" ry="3.8" transform="rotate(24 5 -3)"/>
+                <ellipse cx="-3.6" cy="3" rx="3.6" ry="2.6" transform="rotate(16 -3.6 3)"/>
+                <ellipse cx="3.6" cy="3" rx="3.6" ry="2.6" transform="rotate(-16 3.6 3)"/>
+              </g>
+              <g transform="translate(342, 166) rotate(-18)" fill="rgb(var(--color-accent))" opacity="0.26">
+                <ellipse cx="-5" cy="-3" rx="5.4" ry="3.8" transform="rotate(-24 -5 -3)"/>
+                <ellipse cx="5" cy="-3" rx="5.4" ry="3.8" transform="rotate(24 5 -3)"/>
+                <ellipse cx="-3.6" cy="3" rx="3.6" ry="2.6" transform="rotate(16 -3.6 3)"/>
+                <ellipse cx="3.6" cy="3" rx="3.6" ry="2.6" transform="rotate(-16 3.6 3)"/>
+              </g>
+              <!-- Mid rolling meadow -->
+              <path
+                d="M-20 280 L-20 190 C62 164 142 182 224 214 C312 246 402 206 488 180 C526 168 556 174 580 186 L580 280 Z"
+                fill="rgb(var(--color-cardbg))"
+                opacity="0.88"
+              />
+              <!-- Foreground lush bush mounds -->
+              <path
+                d="M-16 280 L-16 226 C26 202 74 210 108 236 C142 216 182 224 212 250 C272 242 338 248 398 254 C432 224 474 218 508 240 C536 216 560 212 580 228 L580 280 Z"
+                fill="rgb(var(--color-pillbg))"
+                opacity="0.56"
+              />
+              <!-- Blooming meadow wildflowers & stems -->
+              <g stroke="rgb(var(--color-borderline))" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.54">
+                <path d="M132 260 Q130 244 136 230"/>
+                <path d="M190 264 Q194 250 188 238"/>
+                <path d="M376 262 Q372 248 378 236"/>
+                <path d="M436 258 Q440 242 432 228"/>
+              </g>
+              <g fill="rgb(var(--color-borderline))" opacity="0.56">
+                <circle cx="136" cy="226" r="3"/><circle cx="140.5" cy="230" r="3"/><circle cx="136" cy="234" r="3"/><circle cx="131.5" cy="230" r="3"/>
+                <circle cx="432" cy="224" r="3"/><circle cx="436.5" cy="228" r="3"/><circle cx="432" cy="232" r="3"/><circle cx="427.5" cy="228" r="3"/>
+              </g>
+              <g fill="rgb(var(--color-accent))" opacity="0.28">
+                <circle cx="136" cy="230" r="2.5"/>
+                <circle cx="188" cy="237" r="2.8"/>
+                <circle cx="378" cy="235" r="2.8"/>
+                <circle cx="432" cy="228" r="2.5"/>
+              </g>
+            </svg>
+          </div>
+        `;
+      }
+
+      if (sceneKey === 'afternoon') {
+        // Afternoon: Dense layered forest bushes, tall botanical fronds, soaring swallows, swaying reeds & dragonflies
+        return `
+          <div class="absolute inset-x-0 top-[58px] h-[118px] overflow-hidden">
+            <svg viewBox="0 0 560 118" preserveAspectRatio="xMidYMin slice" class="w-full h-full block">
+              <!-- Soft afternoon breeze clouds -->
+              <rect x="64" y="28" width="94" height="9" rx="4.5" fill="rgb(var(--color-cardbg))" opacity="0.48"/>
+              <rect x="404" y="30" width="98" height="9" rx="4.5" fill="rgb(var(--color-cardbg))" opacity="0.46"/>
+              <!-- Overhanging broad leafy fronds at upper edges -->
+              <g fill="rgb(var(--color-cardbg))" opacity="0.54">
+                <ellipse cx="42" cy="64" rx="22" ry="8.5" transform="rotate(24 42 64)"/>
+                <ellipse cx="518" cy="66" rx="22" ry="8.5" transform="rotate(-24 518 66)"/>
+              </g>
+              <!-- Soaring afternoon swallows -->
+              <g fill="rgb(var(--color-borderline))" opacity="0.58">
+                <path d="M188 42 C196 32 204 34 208 40 C212 34 220 32 228 42 C220 39 213 40 208 45 C203 40 196 39 188 42 Z"/>
+                <path d="M336 30 C343 22 350 24 353 29 C357 24 364 22 371 30 C364 28 358 28 353 33 C348 28 342 28 336 30 Z"/>
+                <path d="M378 52 C383 46 388 47 391 51 C394 47 399 46 404 52 C399 50 395 50 391 54 C387 50 383 50 378 52 Z"/>
+              </g>
+            </svg>
+          </div>
+          <div class="absolute inset-x-0 bottom-0 h-[250px] sm:h-[290px] overflow-hidden">
+            <svg viewBox="0 0 560 280" preserveAspectRatio="xMidYMax slice" class="w-full h-full block">
+              <!-- Deep layered forest canopy domes (back layer) -->
+              <path
+                d="M-20 280 L-20 150 C20 112 64 120 98 152 C128 130 168 140 194 176 C240 196 294 214 348 206 C400 198 434 162 472 140 C508 118 548 112 580 142 L580 280 Z"
+                fill="rgb(var(--color-cardbg))"
+                opacity="0.56"
+              />
+              <!-- Tall lush botanical branches & leafy fronds (left & right, mobile-safe) -->
+              <g fill="rgb(var(--color-pillbg))" opacity="0.60">
+                <!-- Left tall frond -->
+                <path d="M84 196 C82 138 70 96 52 60 C74 94 88 138 92 196 Z"/>
+                <ellipse cx="62" cy="100" rx="19" ry="7.8" transform="rotate(-34 62 100)"/>
+                <ellipse cx="94" cy="120" rx="18" ry="7.5" transform="rotate(24 94 120)"/>
+                <ellipse cx="74" cy="142" rx="17" ry="7.2" transform="rotate(-22 74 142)"/>
+                <ellipse cx="56" cy="76" rx="14" ry="6" transform="rotate(-44 56 76)"/>
+                <!-- Inner left frond -->
+                <path d="M144 200 C148 158 160 126 176 100 C158 126 144 160 138 200 Z"/>
+                <ellipse cx="164" cy="130" rx="14" ry="6" transform="rotate(28 164 130)"/>
+                <ellipse cx="138" cy="150" rx="13" ry="5.5" transform="rotate(-26 138 150)"/>
+                <!-- Right tall frond -->
+                <path d="M476 196 C482 138 494 96 512 60 C490 94 476 138 468 196 Z"/>
+                <ellipse cx="498" cy="98" rx="19" ry="7.8" transform="rotate(34 498 98)"/>
+                <ellipse cx="466" cy="120" rx="18" ry="7.5" transform="rotate(-24 466 120)"/>
+                <ellipse cx="486" cy="142" rx="17" ry="7.2" transform="rotate(22 486 142)"/>
+                <ellipse cx="504" cy="74" rx="14" ry="6" transform="rotate(44 504 74)"/>
+                <!-- Inner right frond -->
+                <path d="M416 200 C412 158 400 126 384 100 C402 126 416 160 422 200 Z"/>
+                <ellipse cx="396" cy="130" rx="14" ry="6" transform="rotate(-28 396 130)"/>
+                <ellipse cx="422" cy="150" rx="13" ry="5.5" transform="rotate(26 422 150)"/>
+              </g>
+              <!-- Swaying afternoon meadow reeds -->
+              <g stroke="rgb(var(--color-pillbg))" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.66">
+                <path d="M196 226 Q192 192 184 168"/>
+                <path d="M208 232 Q212 196 220 174"/>
+                <path d="M220 236 Q226 208 234 190"/>
+                <path d="M342 234 Q336 204 328 186"/>
+                <path d="M354 230 Q358 194 366 170"/>
+                <path d="M366 224 Q372 192 380 172"/>
+              </g>
+              <!-- Hovering dragonflies over the reeds -->
+              <g transform="translate(222, 156) rotate(-18)">
+                <line x1="-11" y1="0" x2="9" y2="0" stroke="rgb(var(--color-borderline))" stroke-width="1.8" stroke-linecap="round" opacity="0.72"/>
+                <ellipse cx="1" cy="-5.5" rx="7.2" ry="2.4" transform="rotate(-20 1 -5.5)" fill="rgb(var(--color-accent))" opacity="0.28"/>
+                <ellipse cx="-2" cy="-4.5" rx="6" ry="2" transform="rotate(-38 -2 -4.5)" fill="rgb(var(--color-borderline))" opacity="0.52"/>
+                <ellipse cx="1" cy="5.5" rx="7.2" ry="2.4" transform="rotate(20 1 5.5)" fill="rgb(var(--color-accent))" opacity="0.24"/>
+                <circle cx="10" cy="0" r="2" fill="rgb(var(--color-borderline))" opacity="0.74"/>
+              </g>
+              <g transform="translate(342, 150) rotate(16)">
+                <line x1="-9" y1="0" x2="11" y2="0" stroke="rgb(var(--color-borderline))" stroke-width="1.8" stroke-linecap="round" opacity="0.72"/>
+                <ellipse cx="-1" cy="-5.5" rx="7.2" ry="2.4" transform="rotate(20 -1 -5.5)" fill="rgb(var(--color-accent))" opacity="0.28"/>
+                <ellipse cx="2" cy="-4.5" rx="6" ry="2" transform="rotate(38 2 -4.5)" fill="rgb(var(--color-borderline))" opacity="0.52"/>
+                <ellipse cx="-1" cy="5.5" rx="7.2" ry="2.4" transform="rotate(-20 -1 5.5)" fill="rgb(var(--color-accent))" opacity="0.24"/>
+                <circle cx="-10" cy="0" r="2" fill="rgb(var(--color-borderline))" opacity="0.74"/>
+              </g>
+              <!-- Mid layered lush botanical bushes -->
+              <path
+                d="M-16 280 L-16 184 C14 156 54 158 78 190 C102 166 144 168 168 204 C198 194 228 210 244 240 C280 230 326 234 352 254 C380 216 420 204 454 224 C478 184 522 172 556 196 L580 206 L580 280 Z"
+                fill="rgb(var(--color-cardbg))"
+                opacity="0.86"
+              />
+              <!-- Foreground dense organic bush mounds -->
+              <path
+                d="M-10 280 L-10 222 C34 198 80 210 112 242 C142 226 176 232 198 258 C248 250 314 254 370 262 C406 236 450 232 486 254 C520 228 556 222 580 240 L580 280 Z"
+                fill="rgb(var(--color-pillbg))"
+                opacity="0.56"
+              />
+              <!-- Twin-leaf botanical highlights tucked into foreground mounds -->
+              <g fill="rgb(var(--color-borderline))" opacity="0.60">
+                <path d="M126 238 C115 228 108 219 114 212 C123 212 130 222 128 238 Z"/>
+                <path d="M130 238 C140 229 149 226 149 217 C140 217 132 226 130 238 Z"/>
+                <path d="M440 234 C429 224 424 215 429 208 C438 208 444 220 442 234 Z"/>
+                <path d="M444 234 C454 225 463 222 463 213 C454 213 446 222 444 234 Z"/>
+              </g>
+            </svg>
+          </div>
+        `;
+      }
+
+      if (sceneKey === 'evening') {
+        // Evening: Weeping willow & slender cypresses by a calm pond, returning roosting birds, cattails & glowing fireflies
+        return `
+          <div class="absolute inset-x-0 top-[58px] h-[112px] overflow-hidden">
+            <svg viewBox="0 0 560 112" preserveAspectRatio="xMidYMin slice" class="w-full h-full block">
+              <!-- Drooping willow strands well below the pill bar -->
+              <g stroke="rgb(var(--color-cardbg))" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.54">
+                <path d="M48 6 Q46 36 52 66"/>
+                <path d="M66 6 Q68 30 62 56"/>
+                <path d="M512 6 Q514 36 508 66"/>
+                <path d="M494 6 Q492 30 498 56"/>
+              </g>
+              <!-- Flock of birds returning home to roost at dusk -->
+              <g fill="none" stroke="rgb(var(--color-borderline))" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.56">
+                <path d="M312 36 Q318 30 324 35 Q330 30 336 36"/>
+                <path d="M346 26 Q351 21 356 25 Q361 21 366 26"/>
+                <path d="M376 40 Q381 35 386 39 Q391 35 396 40"/>
+                <path d="M404 30 Q408 26 412 29 Q416 26 420 30"/>
+              </g>
+            </svg>
+          </div>
+          <div class="absolute inset-x-0 bottom-0 h-[250px] sm:h-[290px] overflow-hidden">
+            <svg viewBox="0 0 560 280" preserveAspectRatio="xMidYMax slice" class="w-full h-full block">
+              <!-- Quiet dusk hills -->
+              <path
+                d="M-20 280 L-20 162 C66 140 150 156 234 190 C322 220 412 174 498 148 C532 140 558 144 580 154 L580 280 Z"
+                fill="rgb(var(--color-cardbg))"
+                opacity="0.54"
+              />
+              <!-- Left weeping willow silhouette (mobile-safe x=70..158) -->
+              <g fill="rgb(var(--color-pillbg))" opacity="0.68">
+                <path d="M98 214 C102 182 106 154 114 132 L123 134 C116 156 114 184 116 214 Z"/>
+                <path d="M64 134 C64 102 92 84 122 88 C154 92 172 114 168 140 C152 130 138 128 120 130 C100 132 82 138 64 134 Z"/>
+              </g>
+              <g stroke="rgb(var(--color-pillbg))" stroke-width="2.3" stroke-linecap="round" fill="none" opacity="0.58">
+                <path d="M74 128 Q68 158 70 186"/>
+                <path d="M88 122 Q84 158 86 192"/>
+                <path d="M140 124 Q146 158 144 190"/>
+                <path d="M156 130 Q162 158 160 186"/>
+                <path d="M128 120 Q132 152 130 178"/>
+              </g>
+              <!-- Right tall slender cypress grove (mobile-safe x=406..506) -->
+              <g fill="rgb(var(--color-pillbg))" opacity="0.68">
+                <ellipse cx="492" cy="128" rx="11.5" ry="50"/>
+                <ellipse cx="462" cy="142" rx="10" ry="44"/>
+                <ellipse cx="434" cy="156" rx="8.5" ry="34"/>
+                <ellipse cx="408" cy="170" rx="7" ry="24"/>
+              </g>
+              <!-- Pondside cattails & reeds -->
+              <g stroke="rgb(var(--color-pillbg))" stroke-width="1.9" stroke-linecap="round" opacity="0.72">
+                <line x1="176" y1="234" x2="170" y2="186"/>
+                <line x1="190" y1="238" x2="194" y2="194"/>
+                <line x1="204" y1="242" x2="210" y2="204"/>
+                <line x1="358" y1="240" x2="352" y2="200"/>
+                <line x1="372" y1="236" x2="376" y2="190"/>
+                <line x1="386" y1="232" x2="394" y2="194"/>
+              </g>
+              <g fill="rgb(var(--color-borderline))" opacity="0.62">
+                <rect x="167.8" y="192" width="4.5" height="13" rx="2.25" transform="rotate(-6 170 198)"/>
+                <rect x="191.8" y="198" width="4.4" height="12" rx="2.2" transform="rotate(4 194 204)"/>
+                <rect x="373.8" y="196" width="4.5" height="13" rx="2.25" transform="rotate(4 376 202)"/>
+                <rect x="391.8" y="200" width="4.2" height="11.5" rx="2.1" transform="rotate(8 394 205)"/>
+              </g>
+              <!-- Mid twilight banks framing the calm pond -->
+              <path
+                d="M-20 280 L-20 198 C72 178 158 206 234 226 C298 242 368 236 438 208 C492 188 538 182 580 190 L580 280 Z"
+                fill="rgb(var(--color-cardbg))"
+                opacity="0.88"
+              />
+              <!-- Calm pond water ripples in center valley -->
+              <g fill="rgb(var(--color-accent))" opacity="0.20">
+                <rect x="228" y="242" width="108" height="3.2" rx="1.6"/>
+                <rect x="252" y="253" width="66" height="2.6" rx="1.3"/>
+              </g>
+              <rect x="212" y="263" width="136" height="2.4" rx="1.2" fill="rgb(var(--color-borderline))" opacity="0.38"/>
+              <!-- Foreground dark shore banks -->
+              <path
+                d="M-20 280 L-20 234 C60 220 130 238 196 260 C254 278 324 278 382 260 C448 238 514 222 580 234 L580 280 Z"
+                fill="rgb(var(--color-pillbg))"
+                opacity="0.54"
+              />
+              <!-- Softly glowing evening fireflies in active theme accent -->
+              <g fill="rgb(var(--color-accent))">
+                <circle cx="144" cy="166" r="7.5" opacity="0.10"/><circle cx="144" cy="166" r="2" opacity="0.38"/>
+                <circle cx="216" cy="188" r="6.5" opacity="0.09"/><circle cx="216" cy="188" r="1.9" opacity="0.34"/>
+                <circle cx="282" cy="202" r="6" opacity="0.08"/><circle cx="282" cy="202" r="1.7" opacity="0.30"/>
+                <circle cx="348" cy="192" r="7" opacity="0.10"/><circle cx="348" cy="192" r="2" opacity="0.36"/>
+                <circle cx="404" cy="158" r="7.5" opacity="0.10"/><circle cx="404" cy="158" r="2" opacity="0.38"/>
+                <circle cx="464" cy="204" r="6.5" opacity="0.09"/><circle cx="464" cy="204" r="1.9" opacity="0.34"/>
+              </g>
+            </svg>
+          </div>
+        `;
+      }
+
+      // Night (late-night live time): Deep layered botanical mounds, overarching branches, perched owl & quiet fireflies
+      return `
+        <div class="absolute inset-x-0 top-[58px] h-[118px] overflow-hidden">
+          <svg viewBox="0 0 560 118" preserveAspectRatio="xMidYMin slice" class="w-full h-full block">
+            <!-- Left overarching nocturnal leafy branch -->
+            <g fill="rgb(var(--color-cardbg))" opacity="0.56">
+              <path d="M26 32 C62 30 96 42 126 64 C94 48 62 40 26 42 Z"/>
+              <ellipse cx="68" cy="26" rx="15" ry="6.2" transform="rotate(-14 68 26)"/>
+              <ellipse cx="94" cy="50" rx="14" ry="5.8" transform="rotate(28 94 50)"/>
+            </g>
+            <!-- Right sturdy overarching branch with perched owl silhouette (mobile-safe x=440..520) -->
+            <g fill="rgb(var(--color-cardbg))" opacity="0.62">
+              <path d="M538 66 C494 64 454 70 416 84 C454 76 496 72 538 76 Z"/>
+              <ellipse cx="496" cy="58" rx="14" ry="5.6" transform="rotate(14 496 58)"/>
+              <ellipse cx="512" cy="84" rx="13" ry="5.5" transform="rotate(-24 512 84)"/>
+            </g>
+            <!-- Quiet perched owl silhouette -->
+            <g transform="translate(446, 30) scale(0.92)">
+              <path
+                d="M14 44 C4 42 0 30 3 18 C5 10 9 7 10 2 L14 7 C17 6 21 6 24 7 L28 2 C29 7 33 10 35 18 C38 30 34 42 24 44 L21 50 L17 50 Z"
+                fill="rgb(var(--color-pillbg))"
+                opacity="0.74"
+              />
+              <path d="M7 22 C13 24 14 35 9 41" fill="none" stroke="rgb(var(--color-sheetbg))" stroke-width="1.6" opacity="0.5"/>
+              <circle cx="14.5" cy="15.5" r="2.1" fill="rgb(var(--color-accent))" opacity="0.38"/>
+              <circle cx="23.5" cy="15.5" r="2.1" fill="rgb(var(--color-accent))" opacity="0.38"/>
+              <polygon points="19,17 17.5,20 20.5,20" fill="rgb(var(--color-borderline))" opacity="0.65"/>
+            </g>
+          </svg>
+        </div>
+        <div class="absolute inset-x-0 bottom-0 h-[250px] sm:h-[290px] overflow-hidden">
+          <svg viewBox="0 0 560 280" preserveAspectRatio="xMidYMax slice" class="w-full h-full block">
+            <!-- Far organic nocturnal bush mounds -->
+            <path
+              d="M-20 280 L-20 156 C24 124 68 134 102 164 C132 146 168 158 192 188 C238 206 294 224 348 216 C400 208 436 178 476 156 C512 136 548 128 580 152 L580 280 Z"
+              fill="rgb(var(--color-cardbg))"
+              opacity="0.56"
+            />
+            <!-- Tall curving left & right botanical branches -->
+            <g fill="rgb(var(--color-pillbg))" opacity="0.56">
+              <path d="M84 176 C82 132 70 96 52 66 C74 94 88 132 92 176 Z"/>
+              <ellipse cx="64" cy="106" rx="16.5" ry="7.2" transform="rotate(-34 64 106)"/>
+              <ellipse cx="92" cy="124" rx="15.5" ry="6.8" transform="rotate(24 92 124)"/>
+              <ellipse cx="74" cy="142" rx="15" ry="6.5" transform="rotate(-22 74 142)"/>
+              <ellipse cx="56" cy="84" rx="13" ry="5.5" transform="rotate(-46 56 84)"/>
+              <path d="M476 180 C482 134 494 96 512 64 C490 94 476 134 468 180 Z"/>
+              <ellipse cx="496" cy="104" rx="16.5" ry="7.2" transform="rotate(34 496 104)"/>
+              <ellipse cx="468" cy="124" rx="15.5" ry="6.8" transform="rotate(-24 468 124)"/>
+              <ellipse cx="486" cy="144" rx="15" ry="6.5" transform="rotate(22 486 144)"/>
+              <ellipse cx="504" cy="80" rx="12.5" ry="5.5" transform="rotate(44 504 80)"/>
+            </g>
+            <!-- Mid layered organic mounds -->
+            <path
+              d="M-16 280 L-16 188 C16 162 56 164 80 194 C104 172 144 174 166 208 C196 198 226 214 242 244 C278 234 324 238 350 258 C378 220 418 208 452 228 C476 190 520 178 554 200 L580 212 L580 280 Z"
+              fill="rgb(var(--color-cardbg))"
+              opacity="0.86"
+            />
+            <!-- Foreground deep bush mounds -->
+            <path
+              d="M-10 280 L-10 224 C34 200 80 212 112 244 C142 228 176 234 198 260 C248 252 314 256 370 264 C406 238 450 234 486 256 C520 230 556 224 580 242 L580 280 Z"
+              fill="rgb(var(--color-pillbg))"
+              opacity="0.56"
+            />
+            <!-- Twin-leaf accents tucked into foreground mounds -->
+            <g fill="rgb(var(--color-borderline))" opacity="0.58">
+              <path d="M126 238 C115 228 108 219 114 212 C123 212 130 222 128 238 Z"/>
+              <path d="M130 238 C140 229 149 226 149 217 C140 217 132 226 130 238 Z"/>
+              <path d="M440 234 C429 224 424 215 429 208 C438 208 444 220 442 234 Z"/>
+              <path d="M444 234 C454 225 463 222 463 213 C454 213 446 222 444 234 Z"/>
+            </g>
+            <!-- Quiet nocturnal fireflies drifting low over the bushes -->
+            <g fill="rgb(var(--color-accent))">
+              <circle cx="144" cy="172" r="7.5" opacity="0.09"/><circle cx="144" cy="172" r="2" opacity="0.34"/>
+              <circle cx="236" cy="208" r="6.5" opacity="0.08"/><circle cx="236" cy="208" r="1.8" opacity="0.30"/>
+              <circle cx="344" cy="204" r="7" opacity="0.09"/><circle cx="344" cy="204" r="1.9" opacity="0.34"/>
+              <circle cx="430" cy="166" r="7.5" opacity="0.09"/><circle cx="430" cy="166" r="2" opacity="0.34"/>
+            </g>
+          </svg>
+        </div>
+      `;
+    }
+
+    function syncTimelineAmbientBackdrop() {
+      const sceneKey = resolveTimelineHorizonSceneKey(state.compartmentFilter || 'all');
+
+      const calBackdrop = document.getElementById('calendar-ambient-backdrop');
+      if (calBackdrop) {
+        const showCal = state.activeTab !== 'profile';
+        calBackdrop.classList.toggle('hidden', !showCal);
+        if (showCal && calBackdrop.dataset.sceneKey !== sceneKey) {
+          calBackdrop.dataset.sceneKey = sceneKey;
+          calBackdrop.innerHTML = getCalendarSilhouetteSceneSvg(sceneKey);
+        }
+      }
+
+      const tlBackdrop = document.getElementById('timeline-ambient-backdrop');
+      if (tlBackdrop) {
+        const showTl = state.activeTab === 'timeline' && state.timelineViewMode !== 'projects';
+        tlBackdrop.classList.toggle('hidden', !showTl);
+        if (showTl && tlBackdrop.dataset.sceneKey !== sceneKey) {
+          tlBackdrop.dataset.sceneKey = sceneKey;
+          tlBackdrop.innerHTML = getTimelineSilhouetteSceneSvg(sceneKey);
+        }
+      }
+    }
+
     function renderTimeline() {
       if (typeof syncTimelineScheduleBadge === 'function') syncTimelineScheduleBadge();
       const container = document.getElementById('timeline-container');
@@ -11153,6 +11814,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const isProjectsMode = state.timelineViewMode === 'projects';
       container.classList.toggle('hidden', isProjectsMode);
       if (projectsContainer) projectsContainer.classList.toggle('hidden', !isProjectsMode);
+      syncTimelineAmbientBackdrop();
 
       if (isProjectsMode) {
         if (projectsContainer) renderProjectsTimelineView(projectsContainer);
@@ -11295,7 +11957,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         } else {
           container.innerHTML = html + `
             <div class="text-center py-8 px-4 space-y-1.5">
-              <p class="text-xs font-semibold text-secondarytext">No daily time blocks scheduled for ${CalLogic.formatHumanDate(currentDateKey, 'compact')}</p>
+              <p class="text-sm font-semibold text-primarytext">No blocks scheduled for ${CalLogic.formatHumanDate(currentDateKey, 'weekday-compact')}</p>
+              <p class="text-xs text-secondarytext">Tap + below to add a task or project to this day.</p>
             </div>
           `;
         }
@@ -22198,6 +22861,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       const compBar = document.getElementById('compartment-bar');
       if (compBar) compBar.classList.toggle('hidden', tab !== 'timeline' || state.timelineViewMode === 'projects');
+      if (typeof syncTimelineAmbientBackdrop === 'function') syncTimelineAmbientBackdrop();
 
       const headerZone = document.getElementById('calendar-header-zone');
       if (headerZone) headerZone.classList.toggle('hidden', tab === 'profile');
@@ -22657,6 +23321,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       // Real-time timeline progression & Automations ticker
       let lastLiveTickTodayKey = getTodayDateKey();
       let lastObservedClockCompId = getCurrentTimeCompartmentId();
+      let lastObservedLiveSceneKey = typeof resolveLiveCurrentTimeSceneKey === 'function' ? resolveLiveCurrentTimeSceneKey() : '';
       const runLiveTimelineTick = () => {
         // Always evaluate scheduled Time & Compartment Automations regardless of active tab
         if (typeof evaluateTimeAutomations === 'function') {
@@ -22667,6 +23332,16 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           lastObservedClockCompId = liveClockCompId;
           if (typeof evaluateCompartmentAutomations === 'function') {
             evaluateCompartmentAutomations(liveClockCompId);
+          }
+          if (typeof syncTimelineAmbientBackdrop === 'function') {
+            syncTimelineAmbientBackdrop();
+          }
+        }
+        const liveSceneKey = typeof resolveLiveCurrentTimeSceneKey === 'function' ? resolveLiveCurrentTimeSceneKey() : '';
+        if (liveSceneKey !== lastObservedLiveSceneKey) {
+          lastObservedLiveSceneKey = liveSceneKey;
+          if (typeof syncTimelineAmbientBackdrop === 'function') {
+            syncTimelineAmbientBackdrop();
           }
         }
 
