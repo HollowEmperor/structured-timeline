@@ -9152,6 +9152,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       syncCalendarHeader();
       renderUnifiedCalendar();
       renderTimeline();
+      if (state.timelineViewMode === 'projects' && typeof syncProjectsTimelineScrollToDate === 'function') {
+        syncProjectsTimelineScrollToDate(dateKey, true);
+      }
       if (state.activeTab === 'profile') renderProfileEnergyBars();
     }
 
@@ -10505,22 +10508,160 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       renderTimeline();
     }
 
-    function scrollProjectsTimelineToToday(smooth = false) {
-      const scrollEl = document.getElementById('projects-matrix-scroll');
-      const todayCol = document.getElementById('projects-today-col');
-      if (!scrollEl || !todayCol) return;
+    let projectsTimelineLastAlignedWeekKey = null;
+    let projectsTimelineResizeBound = false;
+
+    function getProjectsCalendarAlignmentMetrics(scrollEl) {
+      const fallbackWidth = scrollEl && scrollEl.clientWidth >= 640 ? 92 : 45;
+      const fallbackInset = scrollEl && scrollEl.clientWidth >= 640 ? 38 : 26;
+      const fallbackSticky = scrollEl && scrollEl.clientWidth >= 640 ? 148 : 112;
+      const metrics = {
+        dayWidth: fallbackWidth,
+        gap: 4,
+        leftInset: fallbackInset,
+        stickyColWidth: fallbackSticky,
+      };
+      if (!scrollEl) return metrics;
       try {
-        const stickyColWidth = 148;
-        const visibleTrackWidth = Math.max(0, scrollEl.clientWidth - stickyColWidth);
-        const targetLeft = Math.max(
-          0,
-          todayCol.offsetLeft - stickyColWidth - Math.max(0, (visibleTrackWidth - todayCol.offsetWidth) / 2)
-        );
+        const scrollRect = scrollEl.getBoundingClientRect();
+        if (scrollRect.width > 0) {
+          metrics.stickyColWidth = scrollRect.width >= 640 ? 148 : 112;
+        }
+        const calBtns = document.querySelectorAll('#unified-calendar-rows .cal-week-row:first-child [data-cal-date]');
+        if (calBtns.length >= 2 && scrollRect.width > 0) {
+          const b0 = calBtns[0].getBoundingClientRect();
+          const b1 = calBtns[1].getBoundingClientRect();
+          if (b0.width > 12) {
+            metrics.dayWidth = b0.width;
+            metrics.gap = Math.max(0, b1.left - b0.right);
+            metrics.leftInset = Math.max(0, b0.left - scrollRect.left);
+          }
+        }
+      } catch (_) {}
+      return metrics;
+    }
+
+    function applyProjectsTimelineCalendarMetrics(targetDateKeyToAlign = null, smooth = false) {
+      const scrollEl = document.getElementById('projects-matrix-scroll');
+      if (!scrollEl) return;
+      const m = getProjectsCalendarAlignmentMetrics(scrollEl);
+      const leadSpacerW = Math.max(0, m.leftInset - m.gap);
+      scrollEl.style.setProperty('--proj-lead-w', `${leadSpacerW.toFixed(2)}px`);
+      scrollEl.style.setProperty('--proj-day-w', `${m.dayWidth.toFixed(2)}px`);
+      scrollEl.style.setProperty('--proj-day-gap', `${m.gap.toFixed(2)}px`);
+      scrollEl.style.setProperty('--proj-sticky-w', `${m.stickyColWidth}px`);
+      scrollEl.dataset.leftInset = m.leftInset.toFixed(2);
+      if (targetDateKeyToAlign) {
+        syncProjectsTimelineScrollToDate(targetDateKeyToAlign, smooth);
+      }
+    }
+
+    function syncProjectsTimelineScrollToDate(targetDateKey, smooth = false) {
+      const scrollEl = document.getElementById('projects-matrix-scroll');
+      if (!scrollEl) return;
+      const anchorKey = CalLogic.isValidDateKey(targetDateKey)
+        ? targetDateKey
+        : state.selectedDate || getTodayDateKey();
+      const weekStartKey = CalLogic.getMondayDateKey(anchorKey);
+      const targetCol =
+        scrollEl.querySelector(`[data-projects-date-col="${weekStartKey}"]`) ||
+        scrollEl.querySelector(`[data-projects-date-col="${anchorKey}"]`) ||
+        document.getElementById('projects-today-col');
+      if (!targetCol) return;
+      try {
+        const leftInset = parseFloat(scrollEl.dataset.leftInset || '26');
+        const targetLeft = Math.max(0, targetCol.offsetLeft - (Number.isFinite(leftInset) ? leftInset : 26));
         scrollEl.scrollTo({
           left: targetLeft,
           behavior: smooth ? 'smooth' : 'auto',
         });
+        projectsTimelineLastAlignedWeekKey = weekStartKey;
       } catch (_) {}
+    }
+
+    function scrollProjectsTimelineToToday(smooth = false) {
+      const targetKey = getTodayDateKey();
+      applyProjectsTimelineCalendarMetrics(targetKey, smooth);
+    }
+
+    function ensureProjectsTimelineResizeListener() {
+      if (projectsTimelineResizeBound) return;
+      projectsTimelineResizeBound = true;
+      let resizeRaf = null;
+      window.addEventListener('resize', () => {
+        if (state.timelineViewMode !== 'projects') return;
+        if (resizeRaf) cancelAnimationFrame(resizeRaf);
+        resizeRaf = requestAnimationFrame(() => {
+          resizeRaf = null;
+          applyProjectsTimelineCalendarMetrics(state.selectedDate || getTodayDateKey(), false);
+        });
+      });
+    }
+
+    function buildCalendarAlignedProjectDateColumns(timeline, selectedDateKey, todayKey) {
+      const enrichedProjects = timeline.projects || [];
+      const anchorKey = CalLogic.isValidDateKey(selectedDateKey) ? selectedDateKey : todayKey;
+      const anchorWeekStart = CalLogic.getMondayDateKey(anchorKey);
+      const todayWeekStart = CalLogic.getMondayDateKey(todayKey);
+
+      let minKey = CalLogic.compareDateKeys(anchorWeekStart, todayWeekStart) <= 0 ? anchorWeekStart : todayWeekStart;
+      let maxKey = CalLogic.compareDateKeys(anchorWeekStart, todayWeekStart) >= 0 ? anchorWeekStart : todayWeekStart;
+
+      for (const row of timeline.rows || []) {
+        if (!row || !CalLogic.isValidDateKey(row.dateKey)) continue;
+        if (CalLogic.compareDateKeys(row.dateKey, minKey) < 0) minKey = row.dateKey;
+        if (CalLogic.compareDateKeys(row.dateKey, maxKey) > 0) maxKey = row.dateKey;
+      }
+
+      // Snap bounds to whole SAT-FRI calendar weeks matching the top calendar strip
+      let startSat = CalLogic.getMondayDateKey(minKey);
+      let endFri = CalLogic.addDaysToDateKey(CalLogic.getMondayDateKey(maxKey), 6);
+
+      // Guard against huge multi-year spans by clamping to a generous window around the anchor week
+      const minAllowedSat = CalLogic.addDaysToDateKey(anchorWeekStart, -84);
+      const maxAllowedFri = CalLogic.addDaysToDateKey(anchorWeekStart, 118);
+      if (CalLogic.compareDateKeys(startSat, minAllowedSat) < 0) startSat = minAllowedSat;
+      if (CalLogic.compareDateKeys(endFri, maxAllowedFri) > 0) endFri = maxAllowedFri;
+
+      const cols = [];
+      let cursor = startSat;
+      let guard = 0;
+      while (CalLogic.compareDateKeys(cursor, endFri) <= 0 && guard < 224) {
+        const cmpToday = CalLogic.compareDateKeys(cursor, todayKey);
+        const cells = enrichedProjects.map((p) => {
+          const inSpan =
+            CalLogic.compareDateKeys(cursor, p.startDate) >= 0 &&
+            CalLogic.compareDateKeys(cursor, p.endDate) <= 0;
+          const isStart = cursor === p.startDate;
+          const isEnd = cursor === p.endDate;
+          const checkpoints = (p.checkpoints || []).filter((cp) => cp.date === cursor);
+          const tasksOnDate = (p.linkedTasks || [])
+            .filter((t) => (typeof isTaskOnDay === 'function' ? isTaskOnDay(t, cursor) : t.resolvedDateKey === cursor))
+            .sort((a, b) => (a.startMin || 0) - (b.startMin || 0) || (a.id || 0) - (b.id || 0));
+          const hasDueCheckpoint = checkpoints.some((cp) => cp.isDue);
+          return {
+            projectId: p.id,
+            color: p.color || 'coral',
+            inSpan,
+            isStart,
+            isEnd,
+            checkpoints,
+            tasks: tasksOnDate,
+            hasDueCheckpoint,
+          };
+        });
+        cols.push({
+          dateKey: cursor,
+          isToday: cursor === todayKey,
+          isPast: cmpToday < 0,
+          isFuture: cmpToday > 0,
+          isWeekStart: guard % 7 === 0,
+          cells,
+        });
+        cursor = CalLogic.addDaysToDateKey(cursor, 1);
+        guard += 1;
+      }
+      return cols;
     }
 
     function toggleProjectCheckpointDone(projectId, checkpointId) {
@@ -10602,11 +10743,15 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function renderProjectsTimelineView(container) {
+      ensureProjectsTimelineResizeListener();
       const liveNow = getLiveNowInfo();
       const todayKey = liveNow.todayKey;
+      const selectedDateKey = CalLogic.isValidDateKey(state.selectedDate) ? state.selectedDate : todayKey;
+      const selectedWeekStartKey = CalLogic.getMondayDateKey(selectedDateKey);
       const projects = state.projects || [];
 
       if (projects.length === 0) {
+        projectsTimelineLastAlignedWeekKey = null;
         container.innerHTML = `
           <div class="py-10 px-4">
             <div class="bg-cardbg border border-borderline rounded-[24px] p-6 text-center space-y-3">
@@ -10630,27 +10775,38 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         return;
       }
 
+      const prevScrollEl = document.getElementById('projects-matrix-scroll');
+      const prevScrollLeft = prevScrollEl ? prevScrollEl.scrollLeft : null;
+      const shouldAlignSelectedWeek = projectsTimelineLastAlignedWeekKey !== selectedWeekStartKey || prevScrollLeft === null;
+
       const timeline = CalLogic.buildSharedProjectTimeline(projects, state.tasks || [], todayKey);
-      const dateCols = timeline.rows || [];
-      const gridColsStyle = `grid-template-columns: 148px repeat(${Math.max(1, dateCols.length)}, minmax(126px, 1fr));`;
+      const dateCols = buildCalendarAlignedProjectDateColumns(timeline, selectedDateKey, todayKey);
+      const gridColsStyle = `grid-template-columns: var(--proj-lead-w, 22px) repeat(${Math.max(1, dateCols.length)}, var(--proj-day-w, 45px)) var(--proj-sticky-w, 112px); column-gap: var(--proj-day-gap, 4px);`;
       const remainingTodayLabel = formatRemainingShort(1440 - liveNow.nowMinFloat);
       const mutedDashBg = `repeating-linear-gradient(to right, rgb(var(--color-mutedtext) / 0.42) 0px, rgb(var(--color-mutedtext) / 0.42) 5px, transparent 5px, transparent 10px)`;
 
-      // Horizontal Date Headers across the top
+      // Horizontal Date Headers aligned 1:1 with the top SAT-FRI Calendar
       const dateHeaderCellsHtml = dateCols
         .map((row) => {
           const dObj = CalLogic.parseDateKey(row.dateKey);
           const monthShort = CalLogic.MONTH_NAMES_SHORT[dObj.getMonth()];
           const dayNum = dObj.getDate();
           const weekdayShort = CalLogic.WEEKDAY_NAMES_SHORT[dObj.getDay()];
-          const isSelectedDate = row.dateKey === state.selectedDate;
+          const isSelectedDate = row.dateKey === selectedDateKey;
+          const showMonthTag = dayNum === 1 || row.isWeekStart;
 
           return `
             <div
               ${row.isToday ? 'id="projects-today-col"' : ''}
               data-projects-date-col="${row.dateKey}"
-              class="relative px-1.5 pb-2 pt-1 flex flex-col items-center justify-end border-l border-borderline/25 ${
-                row.isToday ? 'bg-coral/[0.05]' : ''
+              class="relative px-0.5 pb-1.5 pt-1 flex flex-col items-center justify-end rounded-t-lg ${
+                row.isWeekStart ? 'border-l border-borderline/45' : ''
+              } ${
+                row.isToday
+                  ? 'bg-coral/[0.08]'
+                  : isSelectedDate
+                    ? 'bg-cardbg/70'
+                    : ''
               }"
             >
               ${
@@ -10661,31 +10817,32 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               <button
                 type="button"
                 onclick="selectCalendarDate('${row.dateKey}')"
-                class="relative z-10 flex flex-col items-center justify-center text-center group"
+                class="relative z-10 w-full flex flex-col items-center justify-center text-center group"
                 title="Jump calendar to ${CalLogic.formatHumanDate(row.dateKey, 'compact-year')}"
               >
                 ${
                   row.isToday
-                    ? `<span class="px-1.5 py-0.5 rounded bg-coral text-onaccent text-[8.5px] font-extrabold uppercase tracking-wider leading-none mb-1">TODAY</span>`
-                    : `<span class="text-[9px] font-medium text-mutedtext leading-tight mb-0.5">${weekdayShort}</span>`
+                    ? `<span class="px-1 py-[1px] rounded bg-coral text-onaccent text-[7.5px] font-extrabold uppercase tracking-wider leading-none mb-0.5">NOW</span>`
+                    : `<span class="text-[8px] font-semibold uppercase tracking-wide ${
+                        showMonthTag ? 'text-secondarytext' : 'text-mutedtext/85'
+                      } leading-tight">${showMonthTag ? monthShort : weekdayShort}</span>`
                 }
-                <span class="text-[11px] font-bold leading-tight whitespace-nowrap ${
-                  row.isToday || isSelectedDate ? 'text-coral' : row.isPast ? 'text-secondarytext' : 'text-primarytext'
+                <span class="text-[10.5px] font-bold leading-tight tabular-nums ${
+                  row.isToday || isSelectedDate
+                    ? 'text-coral'
+                    : row.isPast
+                      ? 'text-secondarytext'
+                      : 'text-primarytext'
                 } group-hover:text-coral transition">
-                  ${monthShort} ${dayNum}
+                  ${dayNum}
                 </span>
-                ${
-                  row.isToday
-                    ? `<span class="text-[9.5px] font-bold text-primarytext tabular-nums leading-tight mt-0.5">${liveNow.clockLabel}</span>`
-                    : ''
-                }
               </button>
             </div>
           `;
         })
         .join('');
 
-      // Horizontal Project Rows (Sticky Left Name Column + Date Track Cells)
+      // Horizontal Project Rows (Calendar-Aligned Track Cells + Sticky Right Project Name Column)
       const projectRowsHtml = timeline.projects
         .map((p, pIdx) => {
           const c = CAPSULE_COLORS[p.color] || CAPSULE_COLORS.coral;
@@ -10694,50 +10851,48 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           const timeProg = computeProjectLiveTimeProgress(p.startDate, p.endDate, todayKey, liveNow.todayFraction);
           const isFocused = state.focusedProjectId != null && String(state.focusedProjectId) === String(p.id);
           const cardStyle = isFocused
-            ? `border: 1.5px solid ${c.hex}; border-left: 3.5px solid ${c.hex};`
-            : `border-left: 3.5px solid ${c.hex};`;
+            ? `border: 1.5px solid ${c.hex}; border-right: 3.5px solid ${c.hex};`
+            : `border-right: 3.5px solid ${c.hex};`;
           const timeStatusColor = timeProg.state === 'active' ? c.hex : 'rgb(var(--color-mutedtext))';
           const colorDashBg = `repeating-linear-gradient(to right, ${c.hex} 0px, ${c.hex} 5px, transparent 5px, transparent 10px)`;
 
           const stickyProjectCellHtml = `
-            <div class="sticky left-0 z-30 bg-sheetbg border-r border-borderline/80 shadow-[6px_0_12px_-8px_rgba(0,0,0,0.45)] pr-2 pl-0.5 py-2.5 flex items-center">
+            <div class="sticky right-0 z-30 bg-sheetbg border-l border-borderline/80 shadow-[-6px_0_12px_-8px_rgba(0,0,0,0.45)] pl-2 pr-2 sm:pr-3 py-2 flex items-center">
               <button
                 type="button"
                 data-project-header-id="${escapeHtml(p.id)}"
                 data-project-focused="${isFocused ? 'true' : 'false'}"
                 onclick="handleProjectHeaderClick('${escapeHtml(p.id)}')"
                 style="${cardStyle}"
-                class="tactile-btn w-full bg-cardbg border border-borderline rounded-2xl p-2 text-left space-y-1 hover:border-coral/60 transition"
+                class="tactile-btn w-full bg-cardbg border border-borderline rounded-2xl p-1.5 sm:p-2 text-left space-y-1 hover:border-coral/60 transition"
                 title="${isFocused ? 'Click to stop highlight • Double-click to edit project' : 'Click to highlight timeframe • Double-click to edit project'}"
               >
                 <div class="flex items-start justify-between gap-1">
-                  <p class="font-display text-[11.5px] font-bold text-primarytext leading-tight line-clamp-2">${escapeHtml(p.title)}</p>
+                  <p class="font-display text-[10.5px] sm:text-[11.5px] font-bold text-primarytext leading-tight line-clamp-2">${escapeHtml(p.title)}</p>
                   <span
                     style="color:${c.hex};"
-                    class="text-[9.5px] font-bold tabular-nums whitespace-nowrap flex-shrink-0"
+                    class="text-[9px] font-bold tabular-nums whitespace-nowrap flex-shrink-0"
                   >
                     ${p.doneCount}/${p.totalCount}
                   </span>
                 </div>
-                <div class="flex items-center justify-between gap-1 text-[9px] font-medium">
-                  <span class="text-secondarytext truncate">
-                    ${CalLogic.formatHumanDate(p.startDate, 'compact')} – ${CalLogic.formatHumanDate(p.endDate, 'compact')}
-                  </span>
+                <div class="text-[8.5px] font-medium text-secondarytext truncate">
+                  ${CalLogic.formatHumanDate(p.startDate, 'compact')} – ${CalLogic.formatHumanDate(p.endDate, 'compact')}
                 </div>
-                <div class="flex items-center justify-between gap-1.5">
-                  <div class="flex-1 space-y-1">
+                <div class="flex items-center justify-between gap-1">
+                  <div class="flex-1 space-y-0.5">
                     <div class="w-full h-1 rounded-full bg-pillbg overflow-hidden relative" title="Time elapsed: ${timeProg.pct}%">
                       <div class="h-full rounded-full transition-all duration-500" style="width:${timeProg.pct}%; background-color:${c.hex}; opacity:0.9;"></div>
                     </div>
                     ${
                       p.totalCount > 0
-                        ? `<div class="w-full h-[3px] rounded-full bg-pillbg/80 overflow-hidden" title="Checkpoints done: ${pct}%">
+                        ? `<div class="w-full h-[2.5px] rounded-full bg-pillbg/80 overflow-hidden" title="Checkpoints done: ${pct}%">
                              <div class="h-full rounded-full transition-all" style="width:${pct}%; background-color:${c.hex}; opacity:0.55;"></div>
                            </div>`
                         : ''
                     }
                   </div>
-                  <span style="color:${timeStatusColor};" class="text-[9px] font-semibold tabular-nums whitespace-nowrap flex-shrink-0">
+                  <span style="color:${timeStatusColor};" class="text-[8.5px] font-semibold tabular-nums whitespace-nowrap flex-shrink-0">
                     ${timeProg.label}
                   </span>
                 </div>
@@ -10748,13 +10903,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           const trackCellsHtml = dateCols
             .map((row) => {
               const cell = row.cells[pIdx];
+              const isSelectedDate = row.dateKey === selectedDateKey;
               const spinePosStyle = cell.isStart && cell.isEnd
                 ? 'display:none;'
                 : cell.isStart
-                  ? 'left: 50%; right: -2px;'
+                  ? 'left: 50%; right: -3px;'
                   : cell.isEnd
-                    ? 'left: -2px; right: 50%;'
-                    : 'left: -2px; right: -2px;';
+                    ? 'left: -3px; right: 50%;'
+                    : 'left: -3px; right: -3px;';
 
               let spineHtml = '';
               if (cell.inSpan && !(cell.isStart && cell.isEnd)) {
@@ -10777,96 +10933,62 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 }
               }
 
-              let contentHtml = '';
+              // Spine Anchor Band (aligned vertically across every day column so the timeline line stays laser-straight)
+              let spineMarkerHtml = '';
               if (cell.checkpoints.length > 0) {
-                contentHtml = `<div class="relative z-10 space-y-1.5 w-full">${cell.checkpoints
-                  .map((cp) => {
-                    const isDue = cp.isDue;
-                    const isDone = Boolean(cp.done);
-                    const isTodayActive = row.isToday && !isDone;
-                    const isPastElapsed = row.isPast && !isDone;
-
-                    let nodeInnerHtml = '';
-                    let nodeStyle = '';
-                    if (isDone) {
-                      nodeStyle = `background-color:${c.hex}; border-color:${c.hex}; color:${c.text}; opacity:0.82;`;
-                      nodeInnerHtml = `<span class="relative z-10">✓</span>`;
-                    } else if (isPastElapsed) {
-                      nodeStyle = `background-color:${c.hex}; border-color:${c.hex}; color:${c.text};`;
-                      nodeInnerHtml = `<span class="relative z-10">${cp.number}</span>`;
-                    } else if (isTodayActive) {
-                      const textCol = liveNow.todayPct >= 58 ? c.text : c.hex;
-                      nodeStyle = `background-color:rgb(var(--color-pillbg)); border-color:${c.hex}; color:${textCol};`;
-                      nodeInnerHtml = `
-                        <span
-                          class="pointer-events-none absolute inset-x-0 top-0"
-                          style="height:${liveNow.todayPct}%; background: linear-gradient(to bottom, ${c.hex} 0%, rgba(${rgb}, 0.88) 72%, rgba(${rgb}, 0.42) 100%);"
-                        ></span>
-                        <span class="relative z-10">${cp.number}</span>
-                      `;
-                    } else {
-                      nodeStyle = `background-color:rgb(var(--color-pillbg)); border-color:${c.hex}99; color:${c.hex};`;
-                      nodeInnerHtml = `<span class="relative z-10">${cp.number}</span>`;
-                    }
-
-                    const cpCardStyle = isDue
-                      ? `border: 1.5px solid ${c.hex}; background-color:rgb(var(--color-cardbg));`
-                      : `border-color:rgb(var(--color-borderline)); background-color:rgb(var(--color-cardbg));`;
-                    const statusBadge = isDone
-                      ? `<span class="text-[8.5px] font-bold uppercase tracking-wider text-mutedtext">Done</span>`
-                      : cp.status === 'due-today'
-                        ? `<span class="inline-flex items-center gap-1 flex-wrap"><span class="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded" style="background-color:${c.hex}; color:${c.text};">Due Today</span><span class="text-[8px] font-semibold tabular-nums" style="color:${c.hex};">${remainingTodayLabel}</span></span>`
-                        : cp.status === 'overdue'
-                          ? `<span class="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded" style="background-color:${c.hex}; color:${c.text};">Overdue</span>`
-                          : '';
-
-                    return `
-                      <button
-                        type="button"
-                        data-project-cp="${escapeHtml(cp.id)}"
-                        data-cp-status="${cp.status}"
-                        onclick="toggleProjectCheckpointDone('${escapeHtml(p.id)}', '${escapeHtml(cp.id)}')"
-                        style="${cpCardStyle}"
-                        class="tactile-btn w-full rounded-xl border px-2 py-1.5 text-left transition flex items-start gap-1.5"
-                        title="Tap to mark checkpoint complete"
-                      >
-                        <span
-                          style="${nodeStyle}"
-                          class="relative overflow-hidden w-4 h-4 rounded-full border-[1.8px] text-[9px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5 transition"
-                        >
-                          ${nodeInnerHtml}
-                        </span>
-                        <span class="min-w-0 flex-1 space-y-0.5">
-                          <span class="block text-[10.5px] font-semibold leading-snug line-clamp-2 ${isDone ? 'line-through text-mutedtext' : 'text-primarytext'}">
-                            ${escapeHtml(cp.title)}
-                          </span>
-                          ${cp.note ? `<span class="block text-[9px] ${isDone ? 'text-mutedtext/75' : 'text-secondarytext'} leading-snug line-clamp-1">${escapeHtml(cp.note)}</span>` : ''}
-                          ${statusBadge ? `<span class="inline-block pt-0.5">${statusBadge}</span>` : ''}
-                        </span>
-                      </button>
-                    `;
-                  })
-                  .join('')}</div>`;
+                const cp = cell.checkpoints[0];
+                const isDone = Boolean(cp.done);
+                const isTodayActive = row.isToday && !isDone;
+                const isPastElapsed = row.isPast && !isDone;
+                let nodeInnerHtml = '';
+                let nodeStyle = '';
+                if (isDone) {
+                  nodeStyle = `background-color:${c.hex}; border-color:${c.hex}; color:${c.text}; opacity:0.85;`;
+                  nodeInnerHtml = `<span class="relative z-10">✓</span>`;
+                } else if (isPastElapsed) {
+                  nodeStyle = `background-color:${c.hex}; border-color:${c.hex}; color:${c.text};`;
+                  nodeInnerHtml = `<span class="relative z-10">${cp.number}</span>`;
+                } else if (isTodayActive) {
+                  const textCol = liveNow.todayPct >= 58 ? c.text : c.hex;
+                  nodeStyle = `background-color:rgb(var(--color-pillbg)); border-color:${c.hex}; color:${textCol};`;
+                  nodeInnerHtml = `
+                    <span
+                      class="pointer-events-none absolute inset-x-0 top-0"
+                      style="height:${liveNow.todayPct}%; background: linear-gradient(to bottom, ${c.hex} 0%, rgba(${rgb}, 0.88) 72%, rgba(${rgb}, 0.42) 100%);"
+                    ></span>
+                    <span class="relative z-10">${cp.number}</span>
+                  `;
+                } else {
+                  nodeStyle = `background-color:rgb(var(--color-pillbg)); border-color:${c.hex}; color:${c.hex};`;
+                  nodeInnerHtml = `<span class="relative z-10">${cp.number}</span>`;
+                }
+                spineMarkerHtml = `
+                  <button
+                    type="button"
+                    onclick="toggleProjectCheckpointDone('${escapeHtml(p.id)}', '${escapeHtml(cp.id)}')"
+                    style="${nodeStyle}"
+                    class="tactile-btn relative z-10 overflow-hidden w-5 h-5 rounded-full border-[1.8px] text-[9px] font-bold flex items-center justify-center transition"
+                    title="${escapeHtml(cp.title)} • Tap to toggle complete"
+                  >
+                    ${nodeInnerHtml}
+                  </button>
+                `;
               } else if (cell.isStart || cell.isEnd) {
-                const markerLabel = cell.isStart && cell.isEnd ? 'Start / End' : cell.isStart ? 'Start' : 'Target End';
+                const markerLabel = cell.isStart && cell.isEnd ? '1d' : cell.isStart ? 'Start' : 'End';
                 const markerElapsed = row.isPast || (row.isToday && cell.isStart);
                 const pillStyle = markerElapsed
                   ? `background-color:${c.hex}; border-color:${c.hex}; color:${c.text};`
-                  : `border-color:${c.hex}88; color:${c.hex}; background-color:rgb(var(--color-pillbg));`;
-                const dotColor = markerElapsed ? c.text : c.hex;
-                contentHtml = `
-                  <div class="relative z-10 flex items-center justify-center py-1">
-                    <span
-                      style="${pillStyle}"
-                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-wider whitespace-nowrap"
-                    >
-                      <span class="w-1.5 h-1.5 rounded-full" style="background-color:${dotColor};"></span>
-                      <span>${markerLabel}</span>
-                    </span>
-                  </div>
+                  : `border-color:${c.hex}99; color:${c.hex}; background-color:rgb(var(--color-pillbg));`;
+                spineMarkerHtml = `
+                  <span
+                    style="${pillStyle}"
+                    class="relative z-10 inline-flex items-center justify-center px-1.5 py-[2px] rounded-full border text-[7.5px] sm:text-[8.5px] font-extrabold uppercase tracking-wider whitespace-nowrap leading-none"
+                  >
+                    ${markerLabel}
+                  </span>
                 `;
               } else if (cell.inSpan && row.isToday) {
-                contentHtml = `
+                spineMarkerHtml = `
                   <div class="pointer-events-none absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-20" style="left:${liveNow.todayPct}%;">
                     <span
                       style="background-color:${c.hex}; box-shadow: 0 0 0 3px rgb(var(--color-sheetbg)), 0 0 8px rgba(${rgb}, 0.55);"
@@ -10876,45 +10998,97 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 `;
               }
 
+              // Aligned Checkpoint Labels & Linked Tasks directly below the spine in the exact calendar column
+              const checkpointChipsHtml =
+                cell.checkpoints.length > 0
+                  ? cell.checkpoints
+                      .map((cp) => {
+                        const isDue = cp.isDue;
+                        const isDone = Boolean(cp.done);
+                        const cpCardStyle = isDue
+                          ? `border: 1.5px solid ${c.hex}; background-color:rgb(var(--color-cardbg));`
+                          : `border-color:rgb(var(--color-borderline)); background-color:rgb(var(--color-cardbg));`;
+                        const statusText = isDone
+                          ? ''
+                          : cp.status === 'due-today'
+                            ? `<span class="block text-[7.5px] font-bold uppercase tracking-wide truncate" style="color:${c.hex};">Due • ${remainingTodayLabel}</span>`
+                            : cp.status === 'overdue'
+                              ? `<span class="block text-[7.5px] font-bold uppercase tracking-wide truncate" style="color:${c.hex};">Overdue</span>`
+                              : '';
+                        return `
+                          <button
+                            type="button"
+                            data-project-cp="${escapeHtml(cp.id)}"
+                            data-cp-status="${cp.status}"
+                            onclick="toggleProjectCheckpointDone('${escapeHtml(p.id)}', '${escapeHtml(cp.id)}')"
+                            style="${cpCardStyle}"
+                            class="tactile-btn w-full rounded-lg border px-1 py-0.5 text-left transition"
+                            title="${escapeHtml(cp.title)}${cp.note ? ' — ' + escapeHtml(cp.note) : ''} • Tap to toggle complete"
+                          >
+                            <span class="block text-[8.5px] sm:text-[9.5px] font-semibold leading-[1.15] line-clamp-2 break-words ${isDone ? 'line-through text-mutedtext' : 'text-primarytext'}">
+                              ${escapeHtml(cp.title)}
+                            </span>
+                            ${statusText}
+                          </button>
+                        `;
+                      })
+                      .join('')
+                  : '';
+
               const linkedTasksHtml =
                 cell.tasks.length > 0
-                  ? `<div class="relative z-10 space-y-1 mt-1 w-full">
-                      ${cell.tasks
-                        .map((t) => {
-                          const doneT = isTaskDoneOnDay(t, row.dateKey);
-                          const tEnd = t.startMin + (t.durationMin || 0);
-                          const tActive = row.isToday && t.durationMin > 0 && liveNow.nowMinFloat >= t.startMin && liveNow.nowMinFloat < tEnd;
-                          return `
-                            <button
-                              type="button"
-                              onclick="handleTaskDoubleClickTap(${t.id})"
-                              title="Double-click to edit task"
-                              style="border-left: 2.5px solid ${c.hex}; background-color: rgb(var(--color-pillbg));"
-                              class="tactile-btn w-full border border-borderline rounded-lg px-2 py-1 text-left text-[10px] font-medium flex items-center justify-between gap-1 ${
-                                doneT ? 'line-through text-mutedtext' : 'text-primarytext'
-                              }"
-                            >
-                              <span class="truncate">${escapeHtml(t.title)}</span>
-                              ${tActive ? `<span style="color:${c.hex};" class="text-[8.5px] font-bold flex-shrink-0">${formatRemainingShort(tEnd - liveNow.nowMinFloat)}</span>` : ''}
-                            </button>
-                          `;
-                        })
-                        .join('')}
-                    </div>`
+                  ? cell.tasks
+                      .map((t) => {
+                        const doneT = isTaskDoneOnDay(t, row.dateKey);
+                        const tEnd = t.startMin + (t.durationMin || 0);
+                        const tActive = row.isToday && t.durationMin > 0 && liveNow.nowMinFloat >= t.startMin && liveNow.nowMinFloat < tEnd;
+                        return `
+                          <button
+                            type="button"
+                            onclick="handleTaskDoubleClickTap(${t.id})"
+                            title="${escapeHtml(t.title)} • Double-click to edit task"
+                            style="border-left: 2.5px solid ${c.hex}; background-color: rgb(var(--color-pillbg));"
+                            class="tactile-btn w-full border border-borderline rounded-md px-1 py-0.5 text-left transition ${
+                              doneT ? 'line-through text-mutedtext opacity-75' : 'text-primarytext'
+                            }"
+                          >
+                            <span class="block text-[8.5px] sm:text-[9.5px] font-medium leading-[1.15] line-clamp-2 break-words">${escapeHtml(t.title)}</span>
+                            ${
+                              tActive
+                                ? `<span style="color:${c.hex};" class="block text-[7.5px] font-bold tabular-nums leading-tight mt-0.5">${formatRemainingShort(tEnd - liveNow.nowMinFloat)}</span>`
+                                : ''
+                            }
+                          </button>
+                        `;
+                      })
+                      .join('')
+                  : '';
+
+              const itemsStackHtml =
+                checkpointChipsHtml || linkedTasksHtml
+                  ? `<div class="relative z-10 w-full space-y-1 pb-1">${checkpointChipsHtml}${linkedTasksHtml}</div>`
                   : '';
 
               return `
-                <div class="relative px-1.5 py-2.5 min-h-[82px] flex flex-col items-center justify-center border-l border-borderline/25 ${
-                  row.isToday ? 'bg-coral/[0.05]' : ''
+                <div class="relative flex flex-col items-center justify-start py-1.5 min-h-[76px] ${
+                  row.isWeekStart ? 'border-l border-borderline/45' : ''
+                } ${
+                  row.isToday
+                    ? 'bg-coral/[0.06]'
+                    : isSelectedDate
+                      ? 'bg-cardbg/55'
+                      : ''
                 }">
                   ${
                     row.isToday
                       ? `<div class="pointer-events-none absolute inset-y-0 w-[1.5px] bg-coral/55 z-0" style="left:${liveNow.todayPct}%;"></div>`
                       : ''
                   }
-                  ${spineHtml}
-                  ${contentHtml}
-                  ${linkedTasksHtml}
+                  <div class="relative w-full h-[30px] flex items-center justify-center flex-shrink-0">
+                    ${spineHtml}
+                    ${spineMarkerHtml}
+                  </div>
+                  ${itemsStackHtml}
                 </div>
               `;
             })
@@ -10926,24 +11100,26 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               style="${gridColsStyle}"
               class="grid items-stretch relative"
             >
-              ${stickyProjectCellHtml}
+              <div class="pointer-events-none" aria-hidden="true"></div>
               ${trackCellsHtml}
+              ${stickyProjectCellHtml}
             </div>
           `;
         })
         .join('');
 
       container.innerHTML = `
-        <div class="space-y-2 pb-6 pt-1">
-          <!-- Horizontal Projects Timeline Matrix with Sticky Left Project Names -->
-          <div id="projects-matrix-scroll" class="overflow-x-auto no-scrollbar -mx-1 px-1">
+        <div class="pb-6 pt-0.5">
+          <!-- Calendar-Aligned Horizontal Projects Timeline Matrix with Sticky Right Project Names -->
+          <div id="projects-matrix-scroll" class="overflow-x-auto no-scrollbar -mx-3 lg:-mx-8">
             <div class="min-w-full inline-block align-top">
               <div style="${gridColsStyle}" class="grid items-stretch border-b border-borderline/60">
-                <div class="sticky left-0 z-30 bg-sheetbg border-r border-borderline/80 shadow-[6px_0_12px_-8px_rgba(0,0,0,0.45)] pr-2 pl-1 pb-2 pt-1 flex items-end justify-between">
-                  <span class="text-[9.5px] font-bold uppercase tracking-wider text-mutedtext">Projects</span>
-                  <span class="text-[9px] font-semibold text-mutedtext/80">Dates →</span>
-                </div>
+                <div class="pointer-events-none" aria-hidden="true"></div>
                 ${dateHeaderCellsHtml}
+                <div class="sticky right-0 z-30 bg-sheetbg border-l border-borderline/80 shadow-[-6px_0_12px_-8px_rgba(0,0,0,0.45)] pl-2 pr-2.5 sm:pr-3 pb-1.5 pt-1 flex items-end justify-between">
+                  <span class="text-[8.5px] font-semibold text-mutedtext/80">← Dates</span>
+                  <span class="text-[9px] font-bold uppercase tracking-wider text-mutedtext">Projects</span>
+                </div>
               </div>
               <div class="divide-y divide-borderline/35">
                 ${projectRowsHtml}
@@ -10952,6 +11128,20 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           </div>
         </div>
       `;
+
+      // Apply exact pixel metrics from the top 7-day calendar strip and align scroll
+      applyProjectsTimelineCalendarMetrics(shouldAlignSelectedWeek ? selectedDateKey : null, false);
+      if (!shouldAlignSelectedWeek && prevScrollLeft !== null) {
+        const nextScrollEl = document.getElementById('projects-matrix-scroll');
+        if (nextScrollEl) nextScrollEl.scrollLeft = prevScrollLeft;
+      }
+      requestAnimationFrame(() => {
+        applyProjectsTimelineCalendarMetrics(shouldAlignSelectedWeek ? selectedDateKey : null, false);
+        if (!shouldAlignSelectedWeek && prevScrollLeft !== null) {
+          const nextScrollEl = document.getElementById('projects-matrix-scroll');
+          if (nextScrollEl) nextScrollEl.scrollLeft = prevScrollLeft;
+        }
+      });
     }
 
     function renderTimeline() {
