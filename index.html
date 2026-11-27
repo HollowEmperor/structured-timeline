@@ -90,6 +90,7 @@
     /* Static Full-Month Grid Viewport Mask (Cropped to 1 week when collapsed, unmasked on pull-down) */
     #calendar-viewport-mask {
       overflow: hidden;
+      contain: layout paint;
       transition: height 0.34s cubic-bezier(0.22, 1, 0.36, 1);
     }
     #unified-calendar-rows {
@@ -272,15 +273,11 @@
       filter: brightness(0.95);
     }
     /* Smooth Calendar Drawer & Timeframe Highlight Spread Animations */
-    #calendar-viewport-mask {
-      will-change: height;
-    }
     #unified-calendar-rows {
       will-change: transform;
     }
     .cal-week-row {
-      transition: opacity 0.36s cubic-bezier(0.16, 1, 0.3, 1);
-      will-change: opacity;
+      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     @keyframes timeframeSpreadIn {
       0% {
@@ -323,7 +320,8 @@
       --surface-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.16);
       --surface-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.18);
     }
-    html[data-theme="paper"] {
+    html[data-theme="paper"],
+    html[data-theme-mode="light"] {
       --punch-hole-shadow-top: rgba(28, 25, 23, 0.24);
       --punch-hole-shadow-mid: rgba(28, 25, 23, 0.14);
       --punch-hole-rim-light: rgba(255, 255, 255, 0.72);
@@ -1560,18 +1558,19 @@
     <!-- Header Title & Anchor-Locked Pull-Down Calendar Drawer -->
     <header
       id="calendar-header-zone"
-      style="touch-action: none;"
+      style="touch-action: none; isolation: isolate; contain: layout paint;"
       onpointerdown="handleCalendarHeaderDown(event)"
       onpointermove="handleCalendarHeaderMove(event)"
       onpointerup="handleCalendarHeaderUp(event)"
       onpointercancel="handleCalendarHeaderUp(event)"
+      onwheel="handleCalendarHeaderWheel(event)"
       class="relative z-0 overflow-hidden px-5 lg:px-8 pt-2 lg:pt-4 pb-8 -mb-7 lg:pb-1.5 lg:mb-0 flex-shrink-0 select-none cursor-grab active:cursor-grabbing"
     >
       <!-- Theme-Matched Celestial & Horizon Silhouette Backdrop (Calendar Header) -->
       <div
         id="calendar-ambient-backdrop"
         aria-hidden="true"
-        class="pointer-events-none select-none absolute inset-0 z-0 overflow-hidden transition-opacity duration-300"
+        class="pointer-events-none select-none absolute inset-0 z-0 overflow-hidden transition-opacity duration-200"
       ></div>
 
       <div class="relative z-10 min-h-[36px] flex items-center justify-between gap-2">
@@ -1666,7 +1665,7 @@
     </header>
 
     <!-- Main Rounded Dark Sheet Container -->
-    <div class="flex-1 bg-sheetbg rounded-t-[30px] lg:rounded-none border-t border-borderline/70 flex flex-col min-h-0 relative z-10 overflow-hidden">
+    <div style="isolation: isolate; transform: translateZ(0); backface-visibility: hidden;" class="flex-1 bg-sheetbg rounded-t-[30px] lg:rounded-none border-t border-borderline/70 flex flex-col min-h-0 relative z-10 overflow-hidden">
 
       <!-- Theme-Matched Full-Bleed Time-of-Day Silhouette Backdrop (Daily Tasks Timeline) -->
       <div
@@ -1701,7 +1700,7 @@
       </section>
 
       <!-- VIEW 2: BRAIN DUMP (Playable 4-Pocket Carrom Board Game + Archive) -->
-      <section id="view-inbox" class="hidden flex-1 overflow-y-auto no-scrollbar px-4 lg:px-8 pb-24 lg:pb-14 pt-3 lg:pt-5 space-y-4">
+      <section id="view-inbox" class="hidden relative z-10 flex-1 overflow-y-auto no-scrollbar px-4 lg:px-8 pb-24 lg:pb-14 pt-3 lg:pt-5 space-y-4">
         <div class="flex items-center justify-between gap-3">
           <h2 class="font-display text-xl lg:text-2xl font-bold text-primarytext">Brain Dump</h2>
           <div class="flex items-center gap-1.5 flex-shrink-0">
@@ -2297,7 +2296,7 @@
                   <p class="text-[11px] font-semibold uppercase tracking-wider text-secondarytext">Appearance</p>
                   <span id="settings-theme-name" class="text-[11px] font-medium text-coral">Matte Charcoal</span>
                 </div>
-                <div id="settings-theme-grid" class="grid grid-cols-2 gap-2"></div>
+                <div id="settings-theme-grid" class="space-y-3"></div>
               </div>
 
               <div class="border-t border-borderline pt-3.5 space-y-2.5">
@@ -2305,7 +2304,7 @@
                   <p class="text-[11px] font-semibold uppercase tracking-wider text-secondarytext">Accent Color</p>
                   <span id="settings-accent-name" class="text-[11px] font-medium text-coral capitalize">Coral</span>
                 </div>
-                <div id="settings-accent-grid" class="bg-pillbg border border-borderline rounded-2xl px-3 py-2.5 flex items-center justify-between gap-2"></div>
+                <div id="settings-accent-grid" class="bg-pillbg border border-borderline rounded-2xl px-3 py-3 grid grid-cols-5 gap-2.5 place-items-center"></div>
               </div>
             </div>
           </div>
@@ -3207,7 +3206,7 @@
               <span class="text-sm font-semibold text-primarytext">What color?</span>
               <span id="modal-color-name" class="text-xs font-medium text-coral capitalize">Coral</span>
             </div>
-            <div id="modal-color-swatches" class="bg-cardbg border border-borderline rounded-2xl px-3 py-2.5 flex items-center justify-between gap-2"></div>
+            <div id="modal-color-swatches" class="bg-cardbg border border-borderline rounded-2xl px-3 py-3 grid grid-cols-5 gap-2.5 place-items-center"></div>
           </div>
 
           <div id="modal-repeat-section" class="space-y-2.5">
@@ -3394,7 +3393,7 @@
     </div>
 
     <!-- Structured-Style Full-Height "New / Edit Project" Screen (No Icons) -->
-    <div id="project-modal" class="hidden absolute inset-0 z-50 bg-appbg flex flex-col justify-between p-5">
+    <div id="project-modal" class="hidden absolute inset-0 z-50 bg-appbg flex flex-col justify-between p-5 transition-colors duration-200">
       <div class="space-y-5 overflow-y-auto no-scrollbar pb-6">
         <div class="flex items-center justify-between pt-1">
           <div class="flex items-center gap-3">
@@ -3462,7 +3461,7 @@
               <span class="text-sm font-semibold text-primarytext">Timeline Color</span>
               <span id="project-color-name" class="text-xs font-medium text-coral capitalize">Coral</span>
             </div>
-            <div id="project-color-swatches" class="bg-cardbg border border-borderline rounded-2xl px-3 py-2.5 flex items-center justify-between gap-2"></div>
+            <div id="project-color-swatches" class="bg-cardbg border border-borderline rounded-2xl px-3 py-3 grid grid-cols-5 gap-2.5 place-items-center"></div>
           </div>
 
           <div class="space-y-2.5">
@@ -4189,6 +4188,14 @@
               <span id="habit-cadence-summary" class="text-xs text-secondarytext">Every day</span>
             </div>
             <div id="habit-cadence-bar" class="grid grid-cols-3 bg-cardbg border border-borderline rounded-2xl p-1 gap-1"></div>
+          </div>
+
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-semibold text-primarytext">What color?</span>
+              <span id="habit-modal-color-name" class="text-xs font-medium text-coral capitalize">Coral</span>
+            </div>
+            <div id="habit-modal-color-swatches" class="bg-cardbg border border-borderline rounded-2xl px-3 py-3 grid grid-cols-5 gap-2.5 place-items-center"></div>
           </div>
 
           <!-- Connect & Auto-Schedule on Timeline -->
@@ -7419,12 +7426,16 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     // DATA, PALETTE & ICON DEFINITIONS
     // =========================================================================
     const CAPSULE_COLORS = {
-      coral: { hex: '#F28B82', text: '#141414' },
-      lime: { hex: '#81C953', text: '#141414' },
-      emerald: { hex: '#169859', text: '#F5F5F7' },
-      sky: { hex: '#6EA8D8', text: '#141414' },
-      amber: { hex: '#F6C244', text: '#141414' },
-      plum: { hex: '#C47B9B', text: '#141414' },
+      coral: { label: 'Coral', hex: '#F28B82', text: '#141414' },
+      terracotta: { label: 'Terracotta', hex: '#E07A5F', text: '#FFFFFF' },
+      amber: { label: 'Amber', hex: '#F6C244', text: '#141414' },
+      lime: { label: 'Lime', hex: '#81C953', text: '#141414' },
+      emerald: { label: 'Emerald', hex: '#169859', text: '#F5F5F7' },
+      teal: { label: 'Teal', hex: '#2DD4BF', text: '#0F1718' },
+      sky: { label: 'Sky', hex: '#6EA8D8', text: '#141414' },
+      indigo: { label: 'Indigo', hex: '#818CF8', text: '#FFFFFF' },
+      plum: { label: 'Plum', hex: '#C47B9B', text: '#141414' },
+      rose: { label: 'Rose', hex: '#F472B6', text: '#141414' },
     };
 
     const LIFE_AREAS = [
@@ -8585,17 +8596,21 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     const THEMES = {
       charcoal: {
         name: 'Matte Charcoal',
-        preview: ['#141414', '#232325', '#2B2B2E'],
+        mode: 'dark',
+        defaultAccent: 'coral',
+        preview: ['#141416', '#212124', '#2B2B2F'],
         vars: {
           '--color-outerbg': '13 13 14',
-          '--color-appbg': '20 20 20',
-          '--color-sheetbg': '35 35 37',
-          '--color-cardbg': '43 43 46',
-          '--color-pillbg': '51 51 55',
-          '--color-borderline': '58 58 63',
+          '--color-appbg': '20 20 22',
+          '--color-sheetbg': '33 33 36',
+          '--color-cardbg': '43 43 47',
+          '--color-pillbg': '53 53 58',
+          '--color-borderline': '66 66 73',
           '--color-primarytext': '245 245 247',
-          '--color-secondarytext': '154 154 160',
-          '--color-mutedtext': '110 110 117',
+          '--color-secondarytext': '161 161 170',
+          '--color-mutedtext': '116 116 125',
+          '--color-cal-hill-far': '38 38 42',
+          '--color-cal-hill-near': '49 49 54',
           '--color-ring-physical': '#169859',
           '--color-ring-mental': '#F28B82',
           '--color-ring-gained': '#81C953',
@@ -8603,17 +8618,21 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       },
       slate: {
         name: 'Midnight Slate',
-        preview: ['#0F172A', '#1E293B', '#334155'],
+        mode: 'dark',
+        defaultAccent: 'sky',
+        preview: ['#0F172A', '#18233A', '#1E2B44'],
         vars: {
           '--color-outerbg': '9 14 26',
           '--color-appbg': '15 23 42',
           '--color-sheetbg': '24 35 58',
-          '--color-cardbg': '30 41 59',
-          '--color-pillbg': '42 56 79',
-          '--color-borderline': '58 74 100',
+          '--color-cardbg': '30 43 68',
+          '--color-pillbg': '42 57 84',
+          '--color-borderline': '60 78 108',
           '--color-primarytext': '241 245 249',
-          '--color-secondarytext': '148 163 184',
-          '--color-mutedtext': '100 116 139',
+          '--color-secondarytext': '154 170 192',
+          '--color-mutedtext': '106 122 146',
+          '--color-cal-hill-far': '29 41 66',
+          '--color-cal-hill-near': '39 54 84',
           '--color-ring-physical': '#38BDF8',
           '--color-ring-mental': '#A78BFA',
           '--color-ring-gained': '#34D399',
@@ -8621,50 +8640,190 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       },
       espresso: {
         name: 'Warm Espresso',
+        mode: 'dark',
+        defaultAccent: 'amber',
         preview: ['#181412', '#26201D', '#322A26'],
         vars: {
           '--color-outerbg': '16 13 11',
           '--color-appbg': '24 20 18',
           '--color-sheetbg': '38 32 29',
           '--color-cardbg': '50 42 38',
-          '--color-pillbg': '62 52 47',
-          '--color-borderline': '78 66 60',
+          '--color-pillbg': '63 53 48',
+          '--color-borderline': '82 70 63',
           '--color-primarytext': '247 241 236',
-          '--color-secondarytext': '176 161 151',
-          '--color-mutedtext': '128 114 105',
+          '--color-secondarytext': '181 166 156',
+          '--color-mutedtext': '134 120 110',
+          '--color-cal-hill-far': '44 37 33',
+          '--color-cal-hill-near': '57 48 43',
           '--color-ring-physical': '#D97706',
           '--color-ring-mental': '#FB7185',
           '--color-ring-gained': '#A3E635',
         },
       },
+      forest: {
+        name: 'Deep Forest',
+        mode: 'dark',
+        defaultAccent: 'lime',
+        preview: ['#101A15', '#192821', '#21342B'],
+        vars: {
+          '--color-outerbg': '10 17 14',
+          '--color-appbg': '16 26 21',
+          '--color-sheetbg': '25 40 33',
+          '--color-cardbg': '33 52 43',
+          '--color-pillbg': '43 66 55',
+          '--color-borderline': '59 86 73',
+          '--color-primarytext': '238 246 241',
+          '--color-secondarytext': '152 178 164',
+          '--color-mutedtext': '106 132 119',
+          '--color-cal-hill-far': '29 47 39',
+          '--color-cal-hill-near': '39 62 51',
+          '--color-ring-physical': '#34D399',
+          '--color-ring-mental': '#81C953',
+          '--color-ring-gained': '#F6C244',
+        },
+      },
+      plum: {
+        name: 'Dusk Plum',
+        mode: 'dark',
+        defaultAccent: 'rose',
+        preview: ['#171320', '#231D30', '#2E273E'],
+        vars: {
+          '--color-outerbg': '15 12 20',
+          '--color-appbg': '23 19 32',
+          '--color-sheetbg': '35 29 48',
+          '--color-cardbg': '46 39 62',
+          '--color-pillbg': '58 49 77',
+          '--color-borderline': '77 66 99',
+          '--color-primarytext': '245 241 250',
+          '--color-secondarytext': '174 163 194',
+          '--color-mutedtext': '126 115 148',
+          '--color-cal-hill-far': '41 34 56',
+          '--color-cal-hill-near': '53 45 72',
+          '--color-ring-physical': '#A78BFA',
+          '--color-ring-mental': '#F472B6',
+          '--color-ring-gained': '#34D399',
+        },
+      },
+      obsidian: {
+        name: 'Obsidian OLED',
+        mode: 'dark',
+        defaultAccent: 'teal',
+        preview: ['#040406', '#0E0E11', '#17171B'],
+        vars: {
+          '--color-outerbg': '0 0 0',
+          '--color-appbg': '4 4 6',
+          '--color-sheetbg': '14 14 17',
+          '--color-cardbg': '23 23 27',
+          '--color-pillbg': '34 34 40',
+          '--color-borderline': '48 48 56',
+          '--color-primarytext': '248 248 250',
+          '--color-secondarytext': '156 156 166',
+          '--color-mutedtext': '108 108 118',
+          '--color-cal-hill-far': '20 20 25',
+          '--color-cal-hill-near': '31 31 38',
+          '--color-ring-physical': '#2DD4BF',
+          '--color-ring-mental': '#F28B82',
+          '--color-ring-gained': '#A3E635',
+        },
+      },
       paper: {
         name: 'Soft Paper',
-        preview: ['#F6F4F0', '#FFFFFF', '#ECE8E1'],
+        mode: 'light',
+        defaultAccent: 'terracotta',
+        preview: ['#F4F1EB', '#FFFFFF', '#E8E3DB'],
         vars: {
-          '--color-outerbg': '232 228 221',
-          '--color-appbg': '246 244 240',
+          '--color-outerbg': '230 225 217',
+          '--color-appbg': '244 241 235',
           '--color-sheetbg': '255 255 255',
-          '--color-cardbg': '243 240 235',
-          '--color-pillbg': '232 228 221',
-          '--color-borderline': '212 206 197',
+          '--color-cardbg': '243 240 234',
+          '--color-pillbg': '232 227 219',
+          '--color-borderline': '210 203 193',
           '--color-primarytext': '28 25 23',
-          '--color-secondarytext': '104 97 91',
-          '--color-mutedtext': '148 140 132',
+          '--color-secondarytext': '100 93 87',
+          '--color-mutedtext': '142 134 126',
+          '--color-cal-hill-far': '228 223 214',
+          '--color-cal-hill-near': '214 208 198',
           '--color-ring-physical': '#059669',
-          '--color-ring-mental': '#E11D48',
+          '--color-ring-mental': '#C85A3F',
+          '--color-ring-gained': '#65A30D',
+        },
+      },
+      linen: {
+        name: 'Warm Linen',
+        mode: 'light',
+        defaultAccent: 'amber',
+        preview: ['#F7F1E7', '#FDFAF5', '#E9DFD1'],
+        vars: {
+          '--color-outerbg': '233 224 210',
+          '--color-appbg': '247 241 231',
+          '--color-sheetbg': '253 250 245',
+          '--color-cardbg': '244 236 225',
+          '--color-pillbg': '233 223 209',
+          '--color-borderline': '213 199 181',
+          '--color-primarytext': '36 28 22',
+          '--color-secondarytext': '110 95 82',
+          '--color-mutedtext': '152 136 121',
+          '--color-cal-hill-far': '231 221 206',
+          '--color-cal-hill-near': '217 204 186',
+          '--color-ring-physical': '#D97706',
+          '--color-ring-mental': '#C4840A',
+          '--color-ring-gained': '#65A30D',
+        },
+      },
+      sage: {
+        name: 'Sage Mist',
+        mode: 'light',
+        defaultAccent: 'emerald',
+        preview: ['#EBF2ED', '#FBFEFC', '#DEE8E1'],
+        vars: {
+          '--color-outerbg': '219 228 222',
+          '--color-appbg': '235 242 237',
+          '--color-sheetbg': '251 254 252',
+          '--color-cardbg': '236 243 238',
+          '--color-pillbg': '222 232 225',
+          '--color-borderline': '196 211 201',
+          '--color-primarytext': '22 33 27',
+          '--color-secondarytext': '84 104 93',
+          '--color-mutedtext': '126 146 134',
+          '--color-cal-hill-far': '214 226 218',
+          '--color-cal-hill-near': '198 214 203',
+          '--color-ring-physical': '#059669',
+          '--color-ring-mental': '#0D9488',
           '--color-ring-gained': '#65A30D',
         },
       },
     };
 
     const ACCENT_RGB = {
-      coral: { rgb: '242 139 130', hex: '#F28B82', fg: '20 20 20' },
-      lime: { rgb: '129 201 83', hex: '#81C953', fg: '20 20 20' },
-      emerald: { rgb: '22 152 89', hex: '#169859', fg: '245 245 247' },
-      sky: { rgb: '110 168 216', hex: '#6EA8D8', fg: '20 20 20' },
-      amber: { rgb: '246 194 68', hex: '#F6C244', fg: '20 20 20' },
-      plum: { rgb: '196 123 155', hex: '#C47B9B', fg: '20 20 20' },
+      coral: { label: 'Coral', rgb: '242 139 130', hex: '#F28B82', fg: '20 20 20', lightRgb: '217 95 86', lightHex: '#D95F56', lightFg: '255 255 255' },
+      terracotta: { label: 'Terracotta', rgb: '224 122 95', hex: '#E07A5F', fg: '255 255 255', lightRgb: '200 90 63', lightHex: '#C85A3F', lightFg: '255 255 255' },
+      amber: { label: 'Amber', rgb: '246 194 68', hex: '#F6C244', fg: '20 20 20', lightRgb: '196 132 10', lightHex: '#C4840A', lightFg: '255 255 255' },
+      lime: { label: 'Lime', rgb: '129 201 83', hex: '#81C953', fg: '20 20 20', lightRgb: '78 150 34', lightHex: '#4E9622', lightFg: '255 255 255' },
+      emerald: { label: 'Emerald', rgb: '22 152 89', hex: '#169859', fg: '245 245 247', lightRgb: '17 128 75', lightHex: '#11804B', lightFg: '255 255 255' },
+      teal: { label: 'Teal', rgb: '45 212 191', hex: '#2DD4BF', fg: '15 23 24', lightRgb: '13 148 136', lightHex: '#0D9488', lightFg: '255 255 255' },
+      sky: { label: 'Sky', rgb: '110 168 216', hex: '#6EA8D8', fg: '20 20 20', lightRgb: '43 123 185', lightHex: '#2B7BB9', lightFg: '255 255 255' },
+      indigo: { label: 'Indigo', rgb: '129 140 248', hex: '#818CF8', fg: '255 255 255', lightRgb: '91 99 214', lightHex: '#5B63D6', lightFg: '255 255 255' },
+      plum: { label: 'Plum', rgb: '196 123 155', hex: '#C47B9B', fg: '20 20 20', lightRgb: '158 82 118', lightHex: '#9E5276', lightFg: '255 255 255' },
+      rose: { label: 'Rose', rgb: '244 114 182', hex: '#F472B6', fg: '20 20 20', lightRgb: '219 62 134', lightHex: '#DB3E86', lightFg: '255 255 255' },
     };
+
+    function getActiveAccentPalette(themeId = state.themeId, accentKey = state.accentKey) {
+      const theme = THEMES[themeId] || THEMES.charcoal;
+      const accent = ACCENT_RGB[accentKey] || ACCENT_RGB.coral;
+      const isLight = theme.mode === 'light';
+      return {
+        label: accent.label || accentKey,
+        rgb: isLight && accent.lightRgb ? accent.lightRgb : accent.rgb,
+        hex: isLight && accent.lightHex ? accent.lightHex : accent.hex,
+        fg: isLight && accent.lightFg ? accent.lightFg : accent.fg || '20 20 20',
+      };
+    }
+
+    function selectThemeWithPairedAccent(themeId) {
+      const theme = THEMES[themeId] || THEMES.charcoal;
+      const pairedAccent = theme.defaultAccent && ACCENT_RGB[theme.defaultAccent] ? theme.defaultAccent : state.accentKey || 'coral';
+      applyThemeAndAccent(themeId, pairedAccent);
+    }
 
     function getContrastTextForHex(hex) {
       const clean = String(hex || '#F28B82').replace('#', '');
@@ -8681,10 +8840,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       state.accentKey = ACCENT_RGB[accentKey] ? accentKey : 'coral';
 
       const theme = THEMES[state.themeId];
-      const accent = ACCENT_RGB[state.accentKey];
+      const accent = getActiveAccentPalette(state.themeId, state.accentKey);
       const root = document.documentElement;
-      const isLightTheme = state.themeId === 'paper';
+      const isLightTheme = theme.mode === 'light';
       root.dataset.theme = state.themeId;
+      root.dataset.themeMode = isLightTheme ? 'light' : 'dark';
       root.classList.toggle('dark', !isLightTheme);
       root.style.colorScheme = isLightTheme ? 'light' : 'dark';
 
@@ -8726,6 +8886,59 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       });
     }
 
+    function renderThemePreviewCardHtml(id, t, active, compact = false) {
+      const paired = getActiveAccentPalette(id, t.defaultAccent || 'coral');
+      const v = t.vars || {};
+      const sky = `rgb(${(v['--color-appbg'] || '20 20 22').replace(/\s+/g, ', ')})`;
+      const hill = `rgb(${(v['--color-cal-hill-near'] || v['--color-cardbg'] || '43 43 47').replace(/\s+/g, ', ')})`;
+      const sheet = `rgb(${(v['--color-sheetbg'] || '33 33 36').replace(/\s+/g, ', ')})`;
+      const card = `rgb(${(v['--color-cardbg'] || '43 43 47').replace(/\s+/g, ', ')})`;
+      const border = `rgb(${(v['--color-borderline'] || '66 66 73').replace(/\s+/g, ', ')})`;
+      const textMain = `rgb(${(v['--color-primarytext'] || '245 245 247').replace(/\s+/g, ', ')})`;
+      const textMuted = `rgb(${(v['--color-mutedtext'] || '116 116 125').replace(/\s+/g, ', ')})`;
+
+      return `
+        <button
+          type="button"
+          onclick="selectThemeWithPairedAccent('${id}')"
+          class="tactile-btn group text-left ${compact ? 'p-1.5 rounded-xl' : 'p-2 rounded-2xl'} border transition ${
+            active
+              ? 'bg-pillbg border-coral ring-1 ring-coral/40'
+              : 'bg-sheetbg border-borderline hover:border-secondarytext/70'
+          }"
+        >
+          <div
+            class="relative w-full ${compact ? 'h-[36px] rounded-lg' : 'h-[44px] rounded-xl'} overflow-hidden mb-1.5"
+            style="background-color:${sky}; border:1px solid ${border};"
+          >
+            <svg viewBox="0 0 120 44" preserveAspectRatio="none" class="absolute inset-0 w-full h-full block">
+              <circle cx="28" cy="14" r="7" fill="${paired.hex}" opacity="0.32"/>
+              <circle cx="28" cy="14" r="3.4" fill="${paired.hex}" opacity="0.72"/>
+              <path d="M0 44 L0 22 C28 14 54 20 82 26 C98 28 110 20 120 18 L120 44 Z" fill="${hill}" opacity="0.88"/>
+            </svg>
+            <div
+              class="absolute inset-x-1.5 bottom-0 h-[21px] rounded-t-lg px-2 py-1 flex items-center justify-between gap-1.5"
+              style="background-color:${sheet}; border-top:1px solid ${border};"
+            >
+              <div class="flex-1 space-y-1 min-w-0">
+                <div class="h-[3px] w-3/4 rounded-full" style="background-color:${textMain}; opacity:0.82;"></div>
+                <div class="h-[2.5px] w-1/2 rounded-full" style="background-color:${textMuted}; opacity:0.65;"></div>
+              </div>
+              <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color:${paired.hex}; box-shadow:0 0 0 2px ${card};"></span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between gap-1 px-0.5">
+            <p class="${compact ? 'text-[10.5px]' : 'text-[11px]'} font-semibold text-primarytext truncate">${escapeHtml(t.name)}</p>
+            ${
+              active
+                ? `<span class="w-2 h-2 rounded-full bg-coral flex-shrink-0"></span>`
+                : `<span class="w-2 h-2 rounded-full flex-shrink-0 opacity-75" style="background-color:${paired.hex};"></span>`
+            }
+          </div>
+        </button>
+      `;
+    }
+
     function renderSettingsThemeControls() {
       const themeGrid = document.getElementById('settings-theme-grid');
       const accentGrid = document.getElementById('settings-accent-grid');
@@ -8734,46 +8947,48 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const summaryEl = document.getElementById('settings-theme-summary');
 
       const activeTheme = THEMES[state.themeId] || THEMES.charcoal;
-      const capAccent = state.accentKey.charAt(0).toUpperCase() + state.accentKey.slice(1);
+      const activeAccentObj = ACCENT_RGB[state.accentKey] || ACCENT_RGB.coral;
+      const capAccent = activeAccentObj.label || (state.accentKey.charAt(0).toUpperCase() + state.accentKey.slice(1));
       if (themeNameEl) themeNameEl.textContent = activeTheme.name;
       if (accentNameEl) accentNameEl.textContent = capAccent;
       if (summaryEl) summaryEl.textContent = `${activeTheme.name} • ${capAccent}`;
 
       if (themeGrid) {
-        themeGrid.innerHTML = Object.entries(THEMES)
-          .map(([id, t]) => {
-            const active = id === state.themeId;
-            return `
-              <button
-                type="button"
-                onclick="applyThemeAndAccent('${id}', state.accentKey)"
-                class="tactile-btn text-left p-2.5 rounded-2xl border transition ${
-                  active ? 'bg-pillbg border-coral' : 'bg-sheetbg border-borderline hover:border-secondarytext'
-                }"
-              >
-                <div class="flex items-center gap-1 mb-2">
-                  ${t.preview.map((hex) => `<span class="w-4 h-4 rounded-full border border-borderline" style="background-color:${hex};"></span>`).join('')}
-                </div>
-                <p class="text-[11.5px] font-semibold text-primarytext truncate">${escapeHtml(t.name)}</p>
-              </button>
-            `;
-          })
-          .join('');
+        const darkEntries = Object.entries(THEMES).filter(([, t]) => t.mode !== 'light');
+        const lightEntries = Object.entries(THEMES).filter(([, t]) => t.mode === 'light');
+        themeGrid.innerHTML = `
+          <div class="space-y-1.5">
+            <p class="text-[10px] font-semibold uppercase tracking-wider text-mutedtext">Dark</p>
+            <div class="grid grid-cols-2 gap-2">
+              ${darkEntries.map(([id, t]) => renderThemePreviewCardHtml(id, t, id === state.themeId, false)).join('')}
+            </div>
+          </div>
+          <div class="space-y-1.5">
+            <p class="text-[10px] font-semibold uppercase tracking-wider text-mutedtext">Light</p>
+            <div class="grid grid-cols-3 gap-2">
+              ${lightEntries.map(([id, t]) => renderThemePreviewCardHtml(id, t, id === state.themeId, true)).join('')}
+            </div>
+          </div>
+        `;
       }
 
       if (accentGrid) {
+        const isLight = activeTheme.mode === 'light';
         accentGrid.innerHTML = Object.entries(ACCENT_RGB)
           .map(([key, val]) => {
             const active = key === state.accentKey;
+            const swatchHex = isLight && val.lightHex ? val.lightHex : val.hex;
+            const label = val.label || key;
             return `
               <button
                 type="button"
                 onclick="applyThemeAndAccent(state.themeId, '${key}')"
-                style="background-color:${val.hex};"
+                style="background-color:${swatchHex};"
                 class="tactile-btn w-7 h-7 rounded-full flex-shrink-0 transition ${
-                  active ? 'ring-2 ring-primarytext ring-offset-2 ring-offset-pillbg scale-110' : 'opacity-80 hover:opacity-100'
+                  active ? 'ring-2 ring-primarytext ring-offset-2 ring-offset-pillbg scale-110' : 'opacity-85 hover:opacity-100'
                 }"
-                title="${key}"
+                title="${escapeHtml(label)}"
+                aria-label="${escapeHtml(label)} accent"
               ></button>
             `;
           })
@@ -9059,6 +9274,63 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (state.activeTab === 'profile') renderProfileEnergyBars();
     }
 
+    function navigateCalendarWeek(deltaWeeks, opts = {}) {
+      const step = Number(deltaWeeks) || 0;
+      if (!step) return;
+      const baseKey = CalLogic.isValidDateKey(state.selectedDate) ? state.selectedDate : getTodayDateKey();
+      const nextDateKey = CalLogic.addDaysToDateKey(baseKey, step * 7);
+      const parsed = CalLogic.parseDateKey(nextDateKey);
+      const nextYear = parsed.getFullYear();
+      const nextMonth = parsed.getMonth();
+
+      state.selectedDate = nextDateKey;
+      state.selectedDay = parsed.getDate();
+      state.desktopMiniCalYear = nextYear;
+      state.desktopMiniCalMonth = nextMonth;
+
+      const hasInGrid = Array.isArray(state.monthCells) && state.monthCells.some((c) => c.dateKey === nextDateKey);
+      if (nextYear !== state.calendarYear || nextMonth !== state.calendarMonth || !hasInGrid) {
+        state.calendarYear = nextYear;
+        state.calendarMonth = nextMonth;
+        state.monthCells = CalLogic.buildMonthGrid(nextYear, nextMonth);
+      }
+
+      saveState();
+      if (!opts.silent) playSfx('tick');
+      computeSelectedDayRings();
+      syncCalendarHeader();
+      renderUnifiedCalendar();
+
+      if (opts.animateSlide) {
+        const rows = document.getElementById('unified-calendar-rows');
+        if (rows) {
+          const win = getCalendarExpansionWindow();
+          const offsetY = Math.round(-win.selectedRow * 56);
+          const startX = step > 0 ? 28 : -28;
+          rows.style.transition = 'none';
+          rows.style.transform = `translate3d(${startX}px, ${offsetY}px, 0)`;
+          void rows.offsetWidth;
+          rows.style.transition = 'transform 0.28s cubic-bezier(0.22, 1, 0.36, 1)';
+          rows.style.transform = `translate3d(0px, ${offsetY}px, 0)`;
+        }
+      }
+
+      if (state.activeTab === 'timeline' && state.timelineViewMode === 'projects') {
+        const scrollEl = document.getElementById('projects-matrix-scroll');
+        const nextWeekStart = CalLogic.getMondayDateKey(nextDateKey);
+        const weekCols = scrollEl ? [...scrollEl.querySelectorAll('[data-projects-week-start="true"]')] : [];
+        const targetIdx = weekCols.findIndex((el) => el.getAttribute('data-projects-date-col') === nextWeekStart);
+        if (scrollEl && targetIdx > 0 && targetIdx < weekCols.length - 1 && !opts.forceTimelineRender) {
+          syncProjectsTimelineScrollToDate(nextDateKey, Boolean(opts.smoothProjects));
+        } else {
+          renderTimeline();
+        }
+      } else {
+        renderTimeline();
+      }
+      if (state.activeTab === 'profile') renderProfileEnergyBars();
+    }
+
     function jumpCalendarToToday() {
       const todayKey = getTodayDateKey();
       const td = CalLogic.parseDateKey(todayKey);
@@ -9112,22 +9384,36 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       const p = win.canExpand ? Math.max(0, Math.min(1, progress)) : 0;
       const rowStride = 56;
-      const easeCurve = '0.44s cubic-bezier(0.16, 1, 0.3, 1)';
+      const easeCurve = '0.38s cubic-bezier(0.16, 1, 0.3, 1)';
 
-      mask.style.transition = immediate ? 'none' : `height ${easeCurve}`;
-      rows.style.transition = immediate ? 'none' : `transform ${easeCurve}`;
+      const nextMaskTransition = immediate ? 'none' : `height ${easeCurve}`;
+      const nextRowsTransition = immediate ? 'none' : `transform ${easeCurve}`;
+      if (mask.style.transition !== nextMaskTransition) mask.style.transition = nextMaskTransition;
+      if (rows.style.transition !== nextRowsTransition) rows.style.transition = nextRowsTransition;
 
-      const currentH = CAL_COLLAPSED_H + (win.expandedHeight - CAL_COLLAPSED_H) * p;
+      const currentH = Math.round(CAL_COLLAPSED_H + (win.expandedHeight - CAL_COLLAPSED_H) * p);
       const collapsedOffsetY = -win.selectedRow * rowStride;
       const expandedOffsetY = -win.expandedStartRow * rowStride;
-      const offsetY = collapsedOffsetY * (1 - p) + expandedOffsetY * p;
+      const offsetY = Math.round(collapsedOffsetY * (1 - p) + expandedOffsetY * p);
 
       mask.dataset.expansionMode = win.mode;
       mask.dataset.expandedStartRow = String(win.expandedStartRow);
       mask.dataset.expandedEndRow = String(win.expandedEndRow);
       mask.dataset.expandedRows = String(win.expandedRowCount);
-      mask.style.height = `${currentH.toFixed(1)}px`;
-      rows.style.transform = `translate3d(0px, ${offsetY.toFixed(1)}px, 0)`;
+
+      const nextHeightPx = `${currentH}px`;
+      const nextTransform = `translate3d(0px, ${offsetY}px, 0)`;
+      if (mask.style.height !== nextHeightPx) mask.style.height = nextHeightPx;
+      if (rows.style.transform !== nextTransform) rows.style.transform = nextTransform;
+
+      // Fade the 1-week horizon backdrop out cleanly while expanded so the SVG never stretches or flickers behind month rows
+      const calBackdrop = document.getElementById('calendar-ambient-backdrop');
+      if (calBackdrop) {
+        const nextBackdropOpacity = p > 0.12 ? '0' : '1';
+        if (calBackdrop.style.opacity !== nextBackdropOpacity) {
+          calBackdrop.style.opacity = nextBackdropOpacity;
+        }
+      }
 
       // Subtle fade on newly revealed week rows as the calendar glides open/shut
       const rowNodes = rows.querySelectorAll('[data-cal-week-row]');
@@ -9135,8 +9421,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         const idx = Number(rowEl.getAttribute('data-cal-week-row'));
         const isCollapsedVisible = idx === win.selectedRow;
         const isExpandedVisible = idx >= win.expandedStartRow && idx <= win.expandedEndRow;
-        const targetOpacity = p > 0.08 ? (isExpandedVisible ? 1 : 0.25) : (isCollapsedVisible ? 1 : 0.28);
-        rowEl.style.opacity = String(targetOpacity);
+        const targetOpacity = String(p > 0.08 ? (isExpandedVisible ? 1 : 0.25) : (isCollapsedVisible ? 1 : 0.28));
+        if (rowEl.style.opacity !== targetOpacity) {
+          rowEl.style.opacity = targetOpacity;
+        }
       });
     }
 
@@ -9518,6 +9806,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function toggleMonthCalendar(forceState, opts = {}) {
+      if (calDrag.suppressNextClick && !opts.fromDrag && typeof forceState !== 'boolean') {
+        calDrag.suppressNextClick = false;
+        return;
+      }
       const win = getCalendarExpansionWindow();
       if (!win.canExpand) {
         state.monthExpanded = false;
@@ -9547,6 +9839,21 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       axis: null,
       suppressNextClick: false,
     };
+
+    let calWheelCooldownUntil = 0;
+
+    function handleCalendarHeaderWheel(e) {
+      if (state.monthExpanded) return;
+      if (state.activeTab === 'habit' || state.activeTab === 'journal' || state.activeTab === 'profile') return;
+      const absX = Math.abs(e.deltaX || 0);
+      const absY = Math.abs(e.deltaY || 0);
+      if (absX < 18 || absX <= absY) return;
+      e.preventDefault();
+      const now = Date.now();
+      if (now < calWheelCooldownUntil) return;
+      calWheelCooldownUntil = now + 300;
+      navigateCalendarWeek(e.deltaX > 0 ? 1 : -1, { smoothProjects: true, animateSlide: true });
+    }
 
     function handleCalendarHeaderDown(e) {
       if (state.activeTab === 'habit' || state.activeTab === 'journal' || state.activeTab === 'profile') return;
@@ -9590,10 +9897,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         const rows = document.getElementById('unified-calendar-rows');
         if (rows) {
           const p = win.canExpand && state.monthExpanded ? 1 : 0;
-          const offsetY = -win.selectedRow * 56 * (1 - p) - win.expandedStartRow * 56 * p;
-          const clampedDx = Math.max(-72, Math.min(72, dx * 0.55));
+          const offsetY = Math.round(-win.selectedRow * 56 * (1 - p) - win.expandedStartRow * 56 * p);
+          const clampedDx = Math.round(Math.max(-72, Math.min(72, dx * 0.55)));
           rows.style.transition = 'none';
-          rows.style.transform = `translate3d(${clampedDx.toFixed(1)}px, ${offsetY.toFixed(1)}px, 0)`;
+          rows.style.transform = `translate3d(${clampedDx}px, ${offsetY}px, 0)`;
         }
         return;
       }
@@ -9629,7 +9936,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (calDrag.suppressNextClick) {
         setTimeout(() => {
           calDrag.suppressNextClick = false;
-        }, 80);
+        }, 120);
       }
 
       if (!axis) return;
@@ -9642,20 +9949,32 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       });
 
       if (axis === 'x') {
-        if (res.action === 'month-next') {
-          navigateCalendarMonth(1);
-        } else if (res.action === 'month-prev') {
-          navigateCalendarMonth(-1);
+        if (!state.monthExpanded) {
+          // Week Mode: scroll strictly week-to-week (left/right) and align Projects Timeline
+          if (res.action === 'month-next') {
+            navigateCalendarWeek(1, { smoothProjects: true, animateSlide: true });
+          } else if (res.action === 'month-prev') {
+            navigateCalendarWeek(-1, { smoothProjects: true, animateSlide: true });
+          } else {
+            applyCalendarProgress(0, false);
+          }
         } else {
-          applyCalendarProgress(state.monthExpanded ? 1 : 0, false);
+          // Expanded Full Calendar Mode: keep month-to-month navigation
+          if (res.action === 'month-next') {
+            navigateCalendarMonth(1);
+          } else if (res.action === 'month-prev') {
+            navigateCalendarMonth(-1);
+          } else {
+            applyCalendarProgress(1, false);
+          }
         }
         return;
       }
 
       if (!state.monthExpanded) {
-        toggleMonthCalendar(res.action === 'vertical-expand');
+        toggleMonthCalendar(res.action === 'vertical-expand', { fromDrag: true });
       } else {
-        toggleMonthCalendar(res.action !== 'vertical-collapse');
+        toggleMonthCalendar(res.action !== 'vertical-collapse', { fromDrag: true });
       }
     }
 
@@ -10525,6 +10844,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     let projectsTimelineLastAlignedWeekKey = null;
     let projectsTimelineLastStickySide = null;
     let projectsTimelineResizeBound = false;
+    let projectsTimelineProgrammaticScrollUntil = 0;
+    let projectsTimelineUserScrolling = false;
+    let projectsTimelineScrollSettleTimer = null;
 
     function getProjectsCalendarAlignmentMetrics(scrollEl) {
       const fallbackWidth = scrollEl && scrollEl.clientWidth >= 640 ? 92 : 45;
@@ -10604,6 +10926,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           const leftInset = parseFloat(scrollEl.dataset.leftInset || '26');
           desiredScrollLeft = Math.max(0, targetCol.offsetLeft - (Number.isFinite(leftInset) ? leftInset : 26));
         }
+        projectsTimelineProgrammaticScrollUntil = Date.now() + (smooth ? 480 : 120);
         if (smooth) {
           scrollEl.scrollTo({ left: desiredScrollLeft, behavior: 'smooth' });
         } else {
@@ -10611,6 +10934,108 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         }
         projectsTimelineLastAlignedWeekKey = weekStartKey;
       } catch (_) {}
+    }
+
+    function bindProjectsTimelineScrollSync(scrollEl) {
+      if (!scrollEl || scrollEl.dataset.weekSyncBound === '1') return;
+      scrollEl.dataset.weekSyncBound = '1';
+      let syncRaf = null;
+
+      const resolveVisibleSaturdayCol = () => {
+        const weekCols = [...scrollEl.querySelectorAll('[data-projects-week-start="true"]')];
+        if (weekCols.length === 0) return null;
+        const calBtn0 = document.querySelector('#unified-calendar-rows .cal-week-row:first-child [data-cal-date]');
+        const scrollRect = scrollEl.getBoundingClientRect();
+        const leftInset = parseFloat(scrollEl.dataset.leftInset || '26');
+        const targetLeft = calBtn0
+          ? calBtn0.getBoundingClientRect().left
+          : scrollRect.left + (Number.isFinite(leftInset) ? leftInset : 26);
+
+        let bestIdx = 0;
+        let bestDist = Infinity;
+        for (let i = 0; i < weekCols.length; i++) {
+          const dist = Math.abs(weekCols[i].getBoundingClientRect().left - targetLeft);
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestIdx = i;
+          }
+        }
+        return {
+          weekStartKey: weekCols[bestIdx].getAttribute('data-projects-date-col'),
+          bestIdx,
+          totalWeeks: weekCols.length,
+        };
+      };
+
+      scrollEl.addEventListener(
+        'scroll',
+        () => {
+          if (Date.now() < projectsTimelineProgrammaticScrollUntil) return;
+          if (state.activeTab !== 'timeline' || state.timelineViewMode !== 'projects') return;
+          if (state.monthExpanded) return;
+
+          projectsTimelineUserScrolling = true;
+
+          if (!syncRaf) {
+            syncRaf = requestAnimationFrame(() => {
+              syncRaf = null;
+              if (state.monthExpanded || state.timelineViewMode !== 'projects') return;
+              const match = resolveVisibleSaturdayCol();
+              if (!match || !CalLogic.isValidDateKey(match.weekStartKey)) return;
+
+              const currentSelectedKey = CalLogic.isValidDateKey(state.selectedDate)
+                ? state.selectedDate
+                : getTodayDateKey();
+              const currentWeekStart = CalLogic.getMondayDateKey(currentSelectedKey);
+
+              if (match.weekStartKey !== currentWeekStart) {
+                // Keep the same SAT..FRI weekday offset so the sticky project-name side stays steady while scrolling
+                const weekdayOffset = (CalLogic.parseDateKey(currentSelectedKey).getDay() + 1) % 7;
+                const nextDateKey = CalLogic.addDaysToDateKey(match.weekStartKey, weekdayOffset);
+                const parsed = CalLogic.parseDateKey(nextDateKey);
+                const nextYear = parsed.getFullYear();
+                const nextMonth = parsed.getMonth();
+
+                state.selectedDate = nextDateKey;
+                state.selectedDay = parsed.getDate();
+                state.desktopMiniCalYear = nextYear;
+                state.desktopMiniCalMonth = nextMonth;
+
+                const hasInGrid =
+                  Array.isArray(state.monthCells) && state.monthCells.some((c) => c.dateKey === nextDateKey);
+                if (nextYear !== state.calendarYear || nextMonth !== state.calendarMonth || !hasInGrid) {
+                  state.calendarYear = nextYear;
+                  state.calendarMonth = nextMonth;
+                  state.monthCells = CalLogic.buildMonthGrid(nextYear, nextMonth);
+                }
+
+                projectsTimelineLastAlignedWeekKey = match.weekStartKey;
+                computeSelectedDayRings();
+                syncCalendarHeader();
+                renderUnifiedCalendar();
+              }
+            });
+          }
+
+          if (projectsTimelineScrollSettleTimer) clearTimeout(projectsTimelineScrollSettleTimer);
+          projectsTimelineScrollSettleTimer = setTimeout(() => {
+            projectsTimelineScrollSettleTimer = null;
+            projectsTimelineUserScrolling = false;
+            if (state.activeTab !== 'timeline' || state.timelineViewMode !== 'projects' || state.monthExpanded) return;
+
+            const match = resolveVisibleSaturdayCol();
+            saveState();
+            if (match && match.totalWeeks > 2 && (match.bestIdx <= 1 || match.bestIdx >= match.totalWeeks - 2)) {
+              // Approaching edge of rendered columns -> seamlessly extend buffer weeks and lock 1:1
+              projectsTimelineLastAlignedWeekKey = null;
+              renderTimeline();
+            } else {
+              syncProjectsTimelineScrollToDate(state.selectedDate, true);
+            }
+          }, 170);
+        },
+        { passive: true }
+      );
     }
 
     function scrollProjectsTimelineToToday(smooth = false) {
@@ -11087,7 +11512,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               // Attach date-column alignment attributes to the first project row so syncProjectsTimelineScrollToDate locks 1:1 with the top calendar
               const colAnchorAttrs =
                 pIdx === 0
-                  ? `${row.isToday ? 'id="projects-today-col" ' : ''}data-projects-date-col="${row.dateKey}"`
+                  ? `${row.isToday ? 'id="projects-today-col" ' : ''}data-projects-date-col="${row.dateKey}"${row.isWeekStart ? ' data-projects-week-start="true"' : ''}`
                   : '';
 
               return `
@@ -11142,16 +11567,20 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       // Apply exact pixel metrics from the top 7-day calendar strip and lock 1:1 scroll alignment
       applyProjectsTimelineCalendarMetrics(shouldAlignSelectedWeek ? selectedDateKey : null, false);
-      if (!shouldAlignSelectedWeek && prevScrollLeft !== null) {
-        const nextScrollEl = document.getElementById('projects-matrix-scroll');
-        if (nextScrollEl) nextScrollEl.scrollLeft = prevScrollLeft;
+      const nextScrollElNow = document.getElementById('projects-matrix-scroll');
+      if (!shouldAlignSelectedWeek && prevScrollLeft !== null && nextScrollElNow) {
+        projectsTimelineProgrammaticScrollUntil = Date.now() + 120;
+        nextScrollElNow.scrollLeft = prevScrollLeft;
       }
+      bindProjectsTimelineScrollSync(nextScrollElNow);
       requestAnimationFrame(() => {
         applyProjectsTimelineCalendarMetrics(shouldAlignSelectedWeek ? selectedDateKey : null, false);
-        if (!shouldAlignSelectedWeek && prevScrollLeft !== null) {
-          const nextScrollEl = document.getElementById('projects-matrix-scroll');
-          if (nextScrollEl) nextScrollEl.scrollLeft = prevScrollLeft;
+        const nextScrollEl = document.getElementById('projects-matrix-scroll');
+        if (!shouldAlignSelectedWeek && prevScrollLeft !== null && nextScrollEl) {
+          projectsTimelineProgrammaticScrollUntil = Date.now() + 120;
+          nextScrollEl.scrollLeft = prevScrollLeft;
         }
+        bindProjectsTimelineScrollSync(nextScrollEl);
       });
     }
 
@@ -11272,9 +11701,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           ${celestialHtml}
           <!-- Opaque base cuts cleanly mask the sun/moon behind the hills -->
           <path d="${ridgeBackPath}" fill="rgb(var(--color-appbg))"/>
-          <path d="${ridgeBackPath}" fill="rgb(var(--color-sheetbg))" opacity="0.52"/>
+          <path d="${ridgeBackPath}" fill="rgb(var(--color-cal-hill-far, var(--color-sheetbg)))" opacity="0.72"/>
           <path d="${ridgeFrontPath}" fill="rgb(var(--color-appbg))"/>
-          <path d="${ridgeFrontPath}" fill="rgb(var(--color-sheetbg))" opacity="0.88"/>
+          <path d="${ridgeFrontPath}" fill="rgb(var(--color-cal-hill-near, var(--color-sheetbg)))" opacity="0.92"/>
         </svg>
       `;
     }
@@ -12940,6 +13369,26 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     // =========================================================================
     // PROJECT MODAL CRUD (NO ICONS — COLOR, DATE SPAN, DATED CHECKPOINTS)
     // =========================================================================
+    function applyProjectModalColorTheme(colorKey) {
+      const modal = document.getElementById('project-modal');
+      if (!modal) return;
+      const activeColor = CAPSULE_COLORS[colorKey] || CAPSULE_COLORS[state.accentKey] || CAPSULE_COLORS.coral;
+      const accentRgb = parseHexToRgbTuple(activeColor.hex);
+      const onAccentRgb = parseHexToRgbTuple(activeColor.text);
+
+      modal.style.setProperty('--color-accent', `${accentRgb[0]} ${accentRgb[1]} ${accentRgb[2]}`);
+      modal.style.setProperty('--color-on-accent', `${onAccentRgb[0]} ${onAccentRgb[1]} ${onAccentRgb[2]}`);
+      modal.style.setProperty('--color-accent-hex', activeColor.hex);
+    }
+
+    function resetProjectModalColorTheme() {
+      const modal = document.getElementById('project-modal');
+      if (!modal) return;
+      ['--color-accent', '--color-on-accent', '--color-accent-hex'].forEach((prop) =>
+        modal.style.removeProperty(prop)
+      );
+    }
+
     function openProjectModal(projectId = null) {
       toggleTimelineFabMenu(false);
       const modal = document.getElementById('project-modal');
@@ -12956,7 +13405,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       if (existing) {
         state.editingProjectId = existing.id;
-        state.projectModalColor = existing.color || 'coral';
+        state.projectModalColor = CAPSULE_COLORS[existing.color] ? existing.color : 'coral';
         state.projectModalCheckpoints = (Array.isArray(existing.checkpoints) ? existing.checkpoints : []).map((cp) => ({
           id: cp.id || `cp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
           title: cp.title || '',
@@ -12976,7 +13425,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         if (deleteBtn) deleteBtn.classList.remove('hidden');
       } else {
         state.editingProjectId = null;
-        state.projectModalColor = state.accentKey || 'coral';
+        state.projectModalColor = CAPSULE_COLORS[state.accentKey] ? state.accentKey : 'coral';
         const defaultStart = baseDate;
         const defaultEnd = CalLogic.addDaysToDateKey(baseDate, 14);
         state.projectModalCheckpoints = [
@@ -12994,6 +13443,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         if (deleteBtn) deleteBtn.classList.add('hidden');
       }
 
+      applyProjectModalColorTheme(state.projectModalColor);
       syncProjectModalMeta();
       renderProjectModalControls();
       renderModalDriveFiles('project');
@@ -13003,6 +13453,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
     function closeProjectModal() {
       state.editingProjectId = null;
+      resetProjectModalColorTheme();
       document.getElementById('project-modal')?.classList.add('hidden');
     }
 
@@ -13020,7 +13471,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function setProjectModalColor(colorKey) {
-      state.projectModalColor = colorKey;
+      state.projectModalColor = CAPSULE_COLORS[colorKey] ? colorKey : 'coral';
+      applyProjectModalColorTheme(state.projectModalColor);
       renderProjectModalControls();
     }
 
@@ -13062,9 +13514,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const colorNameEl = document.getElementById('project-color-name');
       const swatchesEl = document.getElementById('project-color-swatches');
       const activeC = CAPSULE_COLORS[state.projectModalColor] || CAPSULE_COLORS.coral;
+      applyProjectModalColorTheme(state.projectModalColor);
 
       if (colorNameEl) {
-        colorNameEl.textContent = state.projectModalColor;
+        colorNameEl.textContent = activeC.label || state.projectModalColor;
         colorNameEl.style.color = activeC.hex;
       }
       if (swatchesEl) {
@@ -13073,7 +13526,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             const active = key === state.projectModalColor;
             return `<button type="button" onclick="setProjectModalColor('${key}')" style="background-color:${val.hex};" class="tactile-btn w-7 h-7 rounded-full transition ${
               active ? 'ring-2 ring-primarytext ring-offset-2 ring-offset-cardbg scale-110' : 'opacity-80 hover:opacity-100'
-            }" title="${key}"></button>`;
+            }" title="${val.label || key}"></button>`;
           })
           .join('');
       }
@@ -14419,7 +14872,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         const raw = getComputedStyle(document.documentElement).getPropertyValue('--color-accent-hex').trim();
         if (raw) accentHex = raw;
       } catch (_) {}
-      const isLight = document.documentElement.dataset.theme === 'paper';
+      const isLight =
+        document.documentElement.dataset.themeMode === 'light' ||
+        document.documentElement.dataset.theme === 'paper';
       return {
         isLight,
         outerBg: rgbVar('--color-outerbg', 1, '13 13 14'),
@@ -18786,12 +19241,23 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     const STICKY_NOTE_COLORS = {
-      coral: { label: 'Coral', hex: '#EA7E7E' },
-      amber: { label: 'Amber', hex: '#EAB866' },
-      sky: { label: 'Sky', hex: '#7AAAE6' },
-      lime: { label: 'Sage', hex: '#7AC48E' },
-      violet: { label: 'Violet', hex: '#A58AE8' },
+      coral: { label: 'Coral', hex: '#F28B82' },
+      terracotta: { label: 'Terracotta', hex: '#E07A5F' },
+      amber: { label: 'Amber', hex: '#F6C244' },
+      lime: { label: 'Lime', hex: '#81C953' },
+      emerald: { label: 'Emerald', hex: '#169859' },
+      teal: { label: 'Teal', hex: '#2DD4BF' },
+      sky: { label: 'Sky', hex: '#6EA8D8' },
+      indigo: { label: 'Indigo', hex: '#818CF8' },
+      plum: { label: 'Plum', hex: '#C47B9B' },
+      rose: { label: 'Rose', hex: '#F472B6' },
     };
+
+    function getStickyNoteColor(colorKey) {
+      if (STICKY_NOTE_COLORS[colorKey]) return STICKY_NOTE_COLORS[colorKey];
+      if (colorKey === 'violet') return { label: 'Indigo', hex: '#818CF8' };
+      return STICKY_NOTE_COLORS.coral;
+    }
 
     function handleRoutinesFabClick() {
       if (state.routinesSubTab === 'automate') {
@@ -18805,7 +19271,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       state.editingRoutineNoteId = editNoteId;
       state.routineAddMode = editNoteId !== null ? 'routine' : defaultMode;
       const existing = editNoteId !== null ? state.routines.find((r) => String(r.id) === String(editNoteId)) : null;
-      state.routineModalColor = existing?.color || 'coral';
+      const initialColor = existing?.color === 'violet' ? 'indigo' : existing?.color;
+      state.routineModalColor = STICKY_NOTE_COLORS[initialColor] ? initialColor : (STICKY_NOTE_COLORS[state.accentKey] ? state.accentKey : 'coral');
       state.routineAddModalOpen = true;
       syncRoutinesFabVisibility();
       renderRoutineAddModal();
@@ -18826,11 +19293,17 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function selectRoutineModalColor(colorKey) {
       state.routineModalColor = STICKY_NOTE_COLORS[colorKey] ? colorKey : 'coral';
       const wrap = document.getElementById('modal-routine-color-swatches');
+      const nameEl = document.getElementById('modal-routine-color-name');
+      const activeSticky = getStickyNoteColor(state.routineModalColor);
+      if (nameEl) {
+        nameEl.textContent = activeSticky.label;
+        nameEl.style.color = activeSticky.hex;
+      }
       if (wrap) {
         wrap.innerHTML = Object.entries(STICKY_NOTE_COLORS)
           .map(
-            ([k, v]) => `<button type="button" onclick="selectRoutineModalColor('${k}')" title="${v.label}" style="background-color:${v.hex};" class="tactile-btn w-6 h-6 rounded-full transition ${
-              state.routineModalColor === k ? 'ring-2 ring-primarytext ring-offset-2 ring-offset-cardbg scale-110' : 'opacity-75 hover:opacity-100'
+            ([k, v]) => `<button type="button" onclick="selectRoutineModalColor('${k}')" title="${v.label}" style="background-color:${v.hex};" class="tactile-btn w-7 h-7 rounded-full transition ${
+              state.routineModalColor === k ? 'ring-2 ring-primarytext ring-offset-2 ring-offset-pillbg scale-110' : 'opacity-75 hover:opacity-100'
             }"></button>`
           )
           .join('');
@@ -18866,7 +19339,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
 
       if (mode === 'routine') {
-        const curColor = state.routineModalColor || existing?.color || 'coral';
+        const rawColor = state.routineModalColor || existing?.color || 'coral';
+        const curColor = STICKY_NOTE_COLORS[rawColor] ? rawColor : (rawColor === 'violet' ? 'indigo' : 'coral');
+        const curColorInfo = getStickyNoteColor(curColor);
         const curWin = existing?.window || 'Morning';
         formEl.innerHTML = `
           <div class="bg-cardbg border border-borderline rounded-2xl p-3.5 space-y-3">
@@ -18874,26 +19349,27 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               <label class="text-[10.5px] font-semibold uppercase tracking-wider text-secondarytext">Sticky Note Title</label>
               <input id="modal-routine-title" type="text" required value="${escapeHtml(existing?.title || '')}" placeholder="e.g. Gym Warmup Protocol" class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3.5 py-2.5 rounded-xl border border-borderline focus:border-coral focus:outline-none" />
             </div>
-            <div class="grid grid-cols-2 gap-2.5 items-center">
-              <div class="space-y-1">
-                <label class="text-[10.5px] font-semibold uppercase tracking-wider text-secondarytext">Tag / Window</label>
-                <select id="modal-routine-window" class="w-full bg-pillbg text-xs font-semibold text-coral px-2.5 py-2.5 rounded-xl border border-borderline focus:border-coral focus:outline-none">
-                  ${['Dawn', 'Morning', 'Afternoon', 'Evening', 'Anywhere']
-                    .map((w) => `<option value="${w}" ${curWin === w ? 'selected' : ''}>${w}</option>`)
-                    .join('')}
-                </select>
-              </div>
-              <div class="space-y-1.5">
+            <div class="space-y-1">
+              <label class="text-[10.5px] font-semibold uppercase tracking-wider text-secondarytext">Tag / Window</label>
+              <select id="modal-routine-window" class="w-full bg-pillbg text-xs font-semibold text-coral px-2.5 py-2.5 rounded-xl border border-borderline focus:border-coral focus:outline-none">
+                ${['Dawn', 'Morning', 'Afternoon', 'Evening', 'Anywhere']
+                  .map((w) => `<option value="${w}" ${curWin === w ? 'selected' : ''}>${w}</option>`)
+                  .join('')}
+              </select>
+            </div>
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
                 <label class="text-[10.5px] font-semibold uppercase tracking-wider text-secondarytext">Sticky Color</label>
-                <div id="modal-routine-color-swatches" class="flex items-center gap-2 pt-0.5">
-                  ${Object.entries(STICKY_NOTE_COLORS)
-                    .map(
-                      ([k, v]) => `<button type="button" onclick="selectRoutineModalColor('${k}')" title="${v.label}" style="background-color:${v.hex};" class="tactile-btn w-6 h-6 rounded-full transition ${
-                        curColor === k ? 'ring-2 ring-primarytext ring-offset-2 ring-offset-cardbg scale-110' : 'opacity-75 hover:opacity-100'
-                      }"></button>`
-                    )
-                    .join('')}
-                </div>
+                <span id="modal-routine-color-name" style="color:${curColorInfo.hex};" class="text-[11px] font-semibold">${curColorInfo.label}</span>
+              </div>
+              <div id="modal-routine-color-swatches" class="bg-pillbg border border-borderline rounded-xl px-3 py-2.5 grid grid-cols-5 gap-2.5 place-items-center">
+                ${Object.entries(STICKY_NOTE_COLORS)
+                  .map(
+                    ([k, v]) => `<button type="button" onclick="selectRoutineModalColor('${k}')" title="${v.label}" style="background-color:${v.hex};" class="tactile-btn w-7 h-7 rounded-full transition ${
+                      curColor === k ? 'ring-2 ring-primarytext ring-offset-2 ring-offset-pillbg scale-110' : 'opacity-75 hover:opacity-100'
+                    }"></button>`
+                  )
+                  .join('')}
               </div>
             </div>
             <div class="space-y-1">
@@ -21738,7 +22214,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 activeIndex: steps.findIndex((s) => !s.done),
                 isComplete: steps.length > 0 && steps.every((s) => s.done),
               };
-          const colorInfo = STICKY_NOTE_COLORS[r.color] || STICKY_NOTE_COLORS.coral;
+          const colorInfo = getStickyNoteColor(r.color);
           const activeStep = prog.activeIndex >= 0 ? steps[prog.activeIndex] : null;
           const driveFiles = Array.isArray(r.driveFiles) ? r.driveFiles : [];
 
@@ -23372,7 +23848,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         }
         if (state.activeTab !== 'timeline') return;
         if (state.timelineViewMode === 'projects') {
-          renderTimeline();
+          if (!projectsTimelineUserScrolling) renderTimeline();
           return;
         }
         if (
@@ -24096,33 +24572,33 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           ${routinesCompanionHtml}
 
           <div class="space-y-3 pt-3 border-t border-borderline/70">
-            <p class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Theme & Accent</p>
-            <div class="grid grid-cols-2 gap-2">
-              ${Object.entries(THEMES)
-                .map(([id, t]) => {
-                  const active = id === state.themeId;
-                  return `
-                    <button
-                      type="button"
-                      onclick="applyThemeAndAccent('${id}', state.accentKey)"
-                      class="tactile-btn text-left p-2.5 rounded-xl border transition ${
-                        active ? 'bg-pillbg border-coral' : 'bg-cardbg border-borderline hover:border-secondarytext/60'
-                      }"
-                    >
-                      <div class="flex items-center gap-1 mb-1.5">
-                        ${t.preview.map((hex) => `<span class="w-3.5 h-3.5 rounded-full border border-borderline" style="background-color:${hex};"></span>`).join('')}
-                      </div>
-                      <p class="text-[11px] font-semibold text-primarytext truncate">${escapeHtml(t.name)}</p>
-                    </button>
-                  `;
-                })
-                .join('')}
+            <div class="flex items-center justify-between">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Theme & Accent</p>
+              <span class="text-[10.5px] font-semibold text-coral">${escapeHtml((THEMES[state.themeId] || THEMES.charcoal).name)}</span>
             </div>
-            <div class="flex items-center justify-between gap-2 pt-1">
+            <div class="space-y-2">
+              <p class="text-[9.5px] font-semibold uppercase tracking-wider text-mutedtext">Dark</p>
+              <div class="grid grid-cols-2 gap-1.5">
+                ${Object.entries(THEMES)
+                  .filter(([, t]) => t.mode !== 'light')
+                  .map(([id, t]) => renderThemePreviewCardHtml(id, t, id === state.themeId, true))
+                  .join('')}
+              </div>
+              <p class="text-[9.5px] font-semibold uppercase tracking-wider text-mutedtext pt-1">Light</p>
+              <div class="grid grid-cols-2 gap-1.5">
+                ${Object.entries(THEMES)
+                  .filter(([, t]) => t.mode === 'light')
+                  .map(([id, t]) => renderThemePreviewCardHtml(id, t, id === state.themeId, true))
+                  .join('')}
+              </div>
+            </div>
+            <div class="grid grid-cols-5 gap-2 place-items-center pt-1.5">
               ${Object.entries(ACCENT_RGB)
                 .map(([key, val]) => {
                   const active = key === state.accentKey;
-                  return `<button type="button" onclick="applyThemeAndAccent(state.themeId, '${key}')" style="background-color:${val.hex};" title="${key}" class="tactile-btn w-7 h-7 rounded-full transition ${active ? 'ring-2 ring-primarytext ring-offset-2 ring-offset-appbg scale-105' : 'opacity-80 hover:opacity-100'}"></button>`;
+                  const isLight = (THEMES[state.themeId] || THEMES.charcoal).mode === 'light';
+                  const swatchHex = isLight && val.lightHex ? val.lightHex : val.hex;
+                  return `<button type="button" onclick="applyThemeAndAccent(state.themeId, '${key}')" style="background-color:${swatchHex};" title="${escapeHtml(val.label || key)}" class="tactile-btn w-6 h-6 rounded-full transition ${active ? 'ring-2 ring-primarytext ring-offset-2 ring-offset-appbg scale-105' : 'opacity-85 hover:opacity-100'}"></button>`;
                 })
                 .join('')}
             </div>
