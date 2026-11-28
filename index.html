@@ -65,6 +65,37 @@
       --color-ring-physical: #169859;
       --color-ring-mental: #F28B82;
       --color-ring-gained: #81C953;
+      --color-pocket-schedule: #F28B82;
+      --color-pocket-notes: #6EA8D8;
+      --color-pocket-journal: #81C953;
+      --color-pocket-archive: #A1A1AA;
+    }
+
+    .carrom-pocket-btn {
+      background-color: rgb(var(--color-cardbg));
+      border-width: 1px;
+      border-style: solid;
+      border-color: rgb(var(--color-borderline));
+      transition: background-color 0.16s ease, border-color 0.16s ease, transform 0.14s cubic-bezier(0.2, 0, 0, 1), opacity 0.16s ease;
+    }
+    .carrom-pocket-btn:hover {
+      background-color: rgb(var(--color-pillbg));
+    }
+    .carrom-pocket-btn[data-carrom-flick="scheduling"] {
+      color: var(--color-pocket-schedule);
+      border-color: color-mix(in srgb, var(--color-pocket-schedule) 48%, rgb(var(--color-borderline)));
+    }
+    .carrom-pocket-btn[data-carrom-flick="notes"] {
+      color: var(--color-pocket-notes);
+      border-color: color-mix(in srgb, var(--color-pocket-notes) 48%, rgb(var(--color-borderline)));
+    }
+    .carrom-pocket-btn[data-carrom-flick="journal"] {
+      color: var(--color-pocket-journal);
+      border-color: color-mix(in srgb, var(--color-pocket-journal) 48%, rgb(var(--color-borderline)));
+    }
+    .carrom-pocket-btn[data-carrom-flick="archive"] {
+      color: var(--color-pocket-archive);
+      border-color: rgb(var(--color-borderline));
     }
 
     body {
@@ -1842,15 +1873,15 @@
       <!-- VIEW 2: BRAIN DUMP (Flat Embedded 4-Pocket Carrom + Collapsible Archive Footer) -->
       <section id="view-inbox" class="hidden relative z-10 flex-1 overflow-y-auto no-scrollbar px-4 lg:px-8 pb-24 lg:pb-14 pt-3 lg:pt-5">
         <div class="max-w-[440px] mx-auto">
-          <!-- Top: Recessed Matte Active Thought Bar with Switcher & Queue Dots -->
-          <div id="carrom-active-coin-bar" class="mb-2 rounded-[18px] bg-appbg border border-borderline px-2 py-2.5">
+          <!-- Top: Theme-Matched Matte Active Thought Bar with Switcher & Queue Dots -->
+          <div id="carrom-active-coin-bar" class="mb-2.5 rounded-[22px] bg-cardbg border border-borderline px-2.5 py-2.5">
             <div class="flex items-center justify-between gap-2">
               <button
                 type="button"
                 id="carrom-prev-coin-btn"
                 onclick="cycleActiveBrainDumpCoin(-1)"
                 aria-label="Previous thought"
-                class="tactile-btn w-8 h-8 rounded-xl text-secondarytext hover:text-primarytext hover:bg-cardbg disabled:opacity-25 disabled:pointer-events-none flex items-center justify-center shrink-0 transition"
+                class="tactile-btn w-8 h-8 rounded-xl text-secondarytext hover:text-primarytext hover:bg-pillbg disabled:opacity-25 disabled:pointer-events-none flex items-center justify-center shrink-0 transition"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                   <path d="M15 18l-6-6 6-6"/>
@@ -1868,7 +1899,7 @@
                 id="carrom-next-coin-btn"
                 onclick="cycleActiveBrainDumpCoin(1)"
                 aria-label="Next thought"
-                class="tactile-btn w-8 h-8 rounded-xl text-secondarytext hover:text-primarytext hover:bg-cardbg disabled:opacity-25 disabled:pointer-events-none flex items-center justify-center shrink-0 transition"
+                class="tactile-btn w-8 h-8 rounded-xl text-secondarytext hover:text-primarytext hover:bg-pillbg disabled:opacity-25 disabled:pointer-events-none flex items-center justify-center shrink-0 transition"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                   <path d="M9 18l6-6-6-6"/>
@@ -1877,7 +1908,7 @@
             </div>
           </div>
 
-          <!-- Middle: Borderless Recessed Theme-Matched Carrom Board -->
+          <!-- Middle: Theme-Matched Carrom Board -->
           <div class="py-1">
             <div class="relative w-full aspect-square select-none">
               <canvas
@@ -1901,13 +1932,13 @@
             </div>
           </div>
 
-          <!-- Below Board: Color-Coded Pocket Action Strip -->
-          <div id="carrom-pocket-actions" class="pt-2 pb-2.5 grid grid-cols-4 gap-2">
+          <!-- Below Board: Theme-Adaptive Pocket Action Strip -->
+          <div id="carrom-pocket-actions" class="pt-2.5 pb-2.5 grid grid-cols-4 gap-2">
             <button
               type="button"
               data-carrom-flick="scheduling"
               onclick="flickSelectedCoinToPocket('scheduling')"
-              class="tactile-btn py-2.5 px-2 rounded-xl bg-appbg hover:bg-cardbg border border-[#F28B82]/55 text-[#C85A52] dark:text-[#F28B82] text-[11.5px] font-semibold whitespace-nowrap flex items-center justify-center"
+              class="tactile-btn carrom-pocket-btn py-2.5 px-2 rounded-2xl text-[11.5px] font-semibold whitespace-nowrap flex items-center justify-center"
             >
               Schedule
             </button>
@@ -1915,7 +1946,7 @@
               type="button"
               data-carrom-flick="notes"
               onclick="flickSelectedCoinToPocket('notes')"
-              class="tactile-btn py-2.5 px-2 rounded-xl bg-appbg hover:bg-cardbg border border-[#6EA8D8]/55 text-[#356FA1] dark:text-[#6EA8D8] text-[11.5px] font-semibold whitespace-nowrap flex items-center justify-center"
+              class="tactile-btn carrom-pocket-btn py-2.5 px-2 rounded-2xl text-[11.5px] font-semibold whitespace-nowrap flex items-center justify-center"
             >
               Notes
             </button>
@@ -1923,7 +1954,7 @@
               type="button"
               data-carrom-flick="journal"
               onclick="flickSelectedCoinToPocket('journal')"
-              class="tactile-btn py-2.5 px-2 rounded-xl bg-appbg hover:bg-cardbg border border-[#81C953]/55 text-[#468522] dark:text-[#81C953] text-[11.5px] font-semibold whitespace-nowrap flex items-center justify-center"
+              class="tactile-btn carrom-pocket-btn py-2.5 px-2 rounded-2xl text-[11.5px] font-semibold whitespace-nowrap flex items-center justify-center"
             >
               Journal
             </button>
@@ -1931,7 +1962,7 @@
               type="button"
               data-carrom-flick="archive"
               onclick="flickSelectedCoinToPocket('archive')"
-              class="tactile-btn py-2.5 px-2 rounded-xl bg-appbg hover:bg-cardbg border border-borderline text-[#606068] dark:text-[#B5B5BD] text-[11.5px] font-semibold whitespace-nowrap flex items-center justify-center"
+              class="tactile-btn carrom-pocket-btn py-2.5 px-2 rounded-2xl text-[11.5px] font-semibold whitespace-nowrap flex items-center justify-center"
             >
               Archive
             </button>
@@ -1974,6 +2005,7 @@
       <!-- VIEW 3: HABIT -->
       <section id="view-habit" class="hidden flex-1 overflow-y-auto no-scrollbar px-5 lg:px-8 pb-24 lg:pb-16 pt-3 lg:pt-4 space-y-4">
         <div id="habit-list-container" class="space-y-3 lg:space-y-5"></div>
+        <div id="habit-routines-container" class="space-y-3 lg:space-y-4 pt-1"></div>
       </section>
 
       <!-- VIEW 4: JOURNAL TIMELINE -->
@@ -3072,6 +3104,51 @@
       </button>
     </div>
 
+    <!-- Floating Habit Speed-Dial Rows (Habit / Routine) -->
+    <div
+      id="habit-fab-menu"
+      role="menu"
+      aria-label="Habit and routine actions"
+      aria-hidden="true"
+      class="speed-dial-menu absolute right-5 lg:right-7 bottom-[150px] lg:bottom-[96px] z-[46] flex flex-col items-end gap-3.5 pr-[4px]"
+    >
+      <button
+        type="button"
+        role="menuitem"
+        onclick="handleHabitFabOption('habit')"
+        style="--sd-in-delay: 50ms; --sd-out-delay: 0ms;"
+        class="speed-dial-item group flex items-center gap-3.5 text-right focus:outline-none"
+      >
+        <span class="flex flex-col items-end">
+          <span class="speed-dial-title font-display text-[15px] font-bold tracking-tight leading-tight">Habit</span>
+          <span class="speed-dial-subtitle text-[12px] font-medium leading-snug mt-0.5">Build a daily check-in</span>
+        </span>
+        <span class="speed-dial-circle flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.95" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </span>
+      </button>
+
+      <button
+        type="button"
+        role="menuitem"
+        onclick="handleHabitFabOption('routine')"
+        style="--sd-in-delay: 0ms; --sd-out-delay: 30ms;"
+        class="speed-dial-item group flex items-center gap-3.5 text-right focus:outline-none"
+      >
+        <span class="flex flex-col items-end">
+          <span class="speed-dial-title font-display text-[15px] font-bold tracking-tight leading-tight">Routine</span>
+          <span class="speed-dial-subtitle text-[12px] font-medium leading-snug mt-0.5">Step-by-step checklist</span>
+        </span>
+        <span class="speed-dial-circle flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.95" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+          </svg>
+        </span>
+      </button>
+    </div>
+
     <!-- Floating + / × Action Button for Timeline, Habit & Journal -->
     <button
       id="fab-action-btn"
@@ -3188,6 +3265,251 @@
           </button>
         </div>
       </form>
+    </div>
+
+    <!-- Mini Creation Sheet for Tasks & Projects -->
+    <div
+      id="quick-create-modal"
+      class="hidden absolute inset-0 z-[48] flex flex-col justify-end theme-modal-scrim backdrop-blur-[1.5px]"
+      onclick="if (event.target === this) closeQuickCreateModal()"
+    >
+      <form
+        id="quick-create-sheet"
+        onsubmit="handleQuickCreateSubmit(event)"
+        class="inbox-quick-panel-enter relative w-full bg-sheetbg border-t border-borderline rounded-t-[26px] px-4 pt-4 pb-3.5 space-y-3 theme-popover-shadow lg:max-w-[480px] lg:mx-auto lg:mb-6 lg:rounded-[24px] lg:border"
+      >
+        <!-- Title & Description -->
+        <div class="space-y-1">
+          <input
+            id="qc-title-input"
+            type="text"
+            autocomplete="off"
+            placeholder="What would you like to do?"
+            class="w-full bg-transparent font-display text-[17px] font-bold text-primarytext placeholder-mutedtext py-0.5 focus:outline-none"
+          />
+          <input
+            id="qc-desc-input"
+            type="text"
+            autocomplete="off"
+            placeholder="Description"
+            class="w-full bg-transparent text-[13.5px] text-secondarytext placeholder-mutedtext py-0.5 focus:outline-none"
+          />
+        </div>
+
+        <!-- Task Mode Segmented Switch (Completed / Upcoming) — Task mode only -->
+        <div id="qc-mode-switch" class="bg-cardbg border border-borderline rounded-xl p-1 grid grid-cols-2 gap-1">
+          <button
+            type="button"
+            id="qc-mode-completed-btn"
+            onclick="setQuickCreateTaskMode('completed')"
+            class="tactile-btn py-1.5 px-2.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition bg-coral text-onaccent"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <path d="M5 13l4 4L19 7"/>
+            </svg>
+            <span>Completed</span>
+          </button>
+          <button
+            type="button"
+            id="qc-mode-future-btn"
+            onclick="setQuickCreateTaskMode('future')"
+            class="tactile-btn py-1.5 px-2.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition text-secondarytext hover:text-primarytext"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="M12 7v5l3 2"/>
+            </svg>
+            <span>Upcoming</span>
+          </button>
+        </div>
+
+        <!-- Compact Active Selection Chips (only visible when non-default metadata is set) -->
+        <div id="qc-meta-chips" class="hidden flex flex-wrap items-center gap-1.5"></div>
+
+        <!-- Inline Micro-Popover Tray (Priority / Energy+Color / Link / Location / Checkpoint) -->
+        <div id="qc-inline-popover" class="hidden bg-cardbg border border-borderline rounded-2xl p-3 space-y-2.5"></div>
+
+        <!-- Floating ••• Overflow Card (anchored above ••• button) -->
+        <div
+          id="qc-more-menu"
+          role="menu"
+          class="hidden absolute right-4 bottom-[62px] z-[50] min-w-[196px] bg-cardbg border border-borderline rounded-2xl py-1.5 theme-popover-shadow"
+        ></div>
+
+        <!-- Bottom Action Toolbar + Circular Send Button -->
+        <div class="flex items-center justify-between gap-2 pt-0.5">
+          <div class="flex items-center gap-1 min-w-0 flex-wrap">
+            <!-- Calendar + Date/Span Button -->
+            <button
+              type="button"
+              id="qc-date-btn"
+              onclick="openQuickScheduleModal()"
+              title="Schedule & Duration"
+              class="tactile-btn inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[13px] font-semibold text-coral hover:bg-cardbg transition max-w-[195px]"
+            >
+              <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="17" rx="3"/>
+                <path d="M8 2v4M16 2v4M3 9h18"/>
+              </svg>
+              <span id="qc-date-label" class="truncate">Today</span>
+            </button>
+
+            <!-- Flag (Priority — Task only) -->
+            <button
+              type="button"
+              id="qc-priority-btn"
+              onclick="toggleQuickCreatePopover('priority')"
+              title="Priority"
+              class="tactile-btn w-9 h-9 rounded-xl flex items-center justify-center text-secondarytext hover:text-primarytext hover:bg-cardbg transition"
+            >
+              <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M4 21V4m0 0h11l-1.8 4.5L15 13H4"/>
+              </svg>
+            </button>
+
+            <!-- Energy Lightning Bolt (Task: Energy + Color) / Color Dot (Project: Color only) -->
+            <button
+              type="button"
+              id="qc-energy-btn"
+              onclick="toggleQuickCreatePopover('energy')"
+              title="Energy & Color"
+              class="tactile-btn w-9 h-9 rounded-xl flex items-center justify-center text-secondarytext hover:text-primarytext hover:bg-cardbg transition"
+            >
+              <svg id="qc-energy-bolt-icon" class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <polygon points="13 2 4 14 12 14 11 22 20 10 12 10 13 2"/>
+              </svg>
+              <span id="qc-project-color-dot" class="hidden w-4 h-4 rounded-full border border-borderline"></span>
+            </button>
+
+            <!-- Folder / Link Project or Habit (Task only) -->
+            <button
+              type="button"
+              id="qc-link-btn"
+              onclick="toggleQuickCreatePopover('link')"
+              title="Link Project or Habit"
+              class="tactile-btn w-9 h-9 rounded-xl flex items-center justify-center text-secondarytext hover:text-primarytext hover:bg-cardbg transition"
+            >
+              <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>
+              </svg>
+            </button>
+
+            <!-- ••• Overflow Menu -->
+            <button
+              type="button"
+              id="qc-more-btn"
+              onclick="toggleQuickCreateMoreMenu()"
+              title="More options"
+              class="tactile-btn w-9 h-9 rounded-xl flex items-center justify-center text-secondarytext hover:text-primarytext hover:bg-cardbg transition"
+            >
+              <svg class="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 24 24">
+                <circle cx="5.5" cy="12" r="1.6"/>
+                <circle cx="12" cy="12" r="1.6"/>
+                <circle cx="18.5" cy="12" r="1.6"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Circular Accent Submit Button (→) -->
+          <button
+            type="submit"
+            id="qc-submit-btn"
+            title="Save"
+            aria-label="Save"
+            class="tactile-btn w-10 h-10 rounded-full bg-coral text-onaccent flex items-center justify-center theme-fab-shadow flex-shrink-0"
+          >
+            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <path d="M5 12h14m0 0l-6-6m6 6l-6 6"/>
+            </svg>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Merged Calendar & Duration Bottom Sheet -->
+    <div
+      id="quick-schedule-modal"
+      class="hidden absolute inset-0 z-[52] flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px]"
+      onclick="if (event.target === this) closeQuickScheduleModal(false)"
+    >
+      <div class="inbox-quick-panel-enter w-full bg-sheetbg border-t border-borderline rounded-t-[26px] px-4 pt-3.5 pb-5 space-y-3.5 max-h-[90%] overflow-y-auto no-scrollbar theme-popover-shadow lg:max-w-[440px] lg:mx-auto lg:mb-6 lg:rounded-[24px] lg:border">
+        <!-- Header: × | Title | ✓ -->
+        <div class="flex items-center justify-between gap-2">
+          <button
+            type="button"
+            onclick="closeQuickScheduleModal(false)"
+            title="Cancel"
+            class="tactile-btn w-9 h-9 rounded-full flex items-center justify-center text-secondarytext hover:text-primarytext hover:bg-cardbg transition"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <path d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+
+          <h3 id="qs-header-title" class="font-display text-[15px] font-bold text-primarytext tracking-tight">Schedule &amp; Duration</h3>
+
+          <button
+            type="button"
+            onclick="closeQuickScheduleModal(true)"
+            title="Apply"
+            class="tactile-btn w-9 h-9 rounded-full flex items-center justify-center text-coral hover:bg-cardbg transition"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <path d="M5 13l4 4L19 7"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Month Navigation Header -->
+        <div class="flex items-center justify-between px-1">
+          <span id="qs-month-label" class="font-display text-[16px] font-bold text-primarytext tracking-tight">November</span>
+          <div class="flex items-center gap-1">
+            <button
+              type="button"
+              onclick="shiftQuickScheduleMonth(-1)"
+              title="Previous month"
+              class="tactile-btn w-8 h-8 rounded-full flex items-center justify-center text-secondarytext hover:text-primarytext hover:bg-cardbg transition"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M15 18l-6-6 6-6"/>
+              </svg>
+            </button>
+            <button
+              type="button"
+              onclick="shiftQuickScheduleMonth(1)"
+              title="Next month"
+              class="tactile-btn w-8 h-8 rounded-full flex items-center justify-center text-secondarytext hover:text-primarytext hover:bg-cardbg transition"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Weekday Labels (Mon-Sun) + Calendar Grid -->
+        <div class="space-y-1.5">
+          <div class="grid grid-cols-7 text-center text-[11px] font-semibold text-mutedtext">
+            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+          </div>
+          <div id="qs-calendar-grid" class="grid grid-cols-7 gap-y-1 text-center"></div>
+        </div>
+
+        <!-- Unified Settings Card (Time + Duration + Reminder + Repeat for Task; Start/End + Span for Project) -->
+        <div id="qs-settings-card" class="bg-cardbg border border-borderline rounded-2xl divide-y divide-borderline overflow-hidden"></div>
+
+        <!-- Bottom Centered Clear Button -->
+        <div class="flex justify-center pt-0.5">
+          <button
+            type="button"
+            id="qs-clear-btn"
+            onclick="clearQuickScheduleDraft()"
+            class="tactile-btn px-4 py-1.5 rounded-xl text-[13.5px] font-semibold text-coral hover:bg-cardbg transition"
+          >
+            Clear
+          </button>
+        </div>
+      </div>
     </div>
     </div><!-- /#workspace-center-col -->
 
@@ -8021,6 +8343,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       timelineViewMode: 'daily',
       focusedProjectId: null,
       timelineFabMenuOpen: false,
+      habitFabMenuOpen: false,
       compartmentFilter: 'all',
       compartmentAutoTracking: true,
       compartments: [
@@ -8835,6 +9158,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           '--color-ring-physical': '#169859',
           '--color-ring-mental': '#F28B82',
           '--color-ring-gained': '#81C953',
+          '--color-pocket-notes': '#6EA8D8',
+          '--color-pocket-journal': '#81C953',
+          '--color-pocket-archive': '#A1A1AA',
         },
       },
       slate: {
@@ -8857,6 +9183,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           '--color-ring-physical': '#38BDF8',
           '--color-ring-mental': '#A78BFA',
           '--color-ring-gained': '#34D399',
+          '--color-pocket-notes': '#A78BFA',
+          '--color-pocket-journal': '#34D399',
+          '--color-pocket-archive': '#94A3B8',
         },
       },
       espresso: {
@@ -8879,6 +9208,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           '--color-ring-physical': '#D97706',
           '--color-ring-mental': '#FB7185',
           '--color-ring-gained': '#A3E635',
+          '--color-pocket-notes': '#E08B73',
+          '--color-pocket-journal': '#A3C962',
+          '--color-pocket-archive': '#B5A69C',
         },
       },
       forest: {
@@ -8901,6 +9233,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           '--color-ring-physical': '#34D399',
           '--color-ring-mental': '#81C953',
           '--color-ring-gained': '#F6C244',
+          '--color-pocket-notes': '#5CC8B0',
+          '--color-pocket-journal': '#E6BE5A',
+          '--color-pocket-archive': '#98B2A4',
         },
       },
       plum: {
@@ -8923,6 +9258,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           '--color-ring-physical': '#A78BFA',
           '--color-ring-mental': '#F472B6',
           '--color-ring-gained': '#34D399',
+          '--color-pocket-notes': '#A78BFA',
+          '--color-pocket-journal': '#5ED3A6',
+          '--color-pocket-archive': '#AEA3C2',
         },
       },
       obsidian: {
@@ -8945,6 +9283,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           '--color-ring-physical': '#2DD4BF',
           '--color-ring-mental': '#F28B82',
           '--color-ring-gained': '#A3E635',
+          '--color-pocket-notes': '#7BAFD4',
+          '--color-pocket-journal': '#A3D96C',
+          '--color-pocket-archive': '#9C9CA6',
         },
       },
       paper: {
@@ -8967,6 +9308,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           '--color-ring-physical': '#059669',
           '--color-ring-mental': '#C85A3F',
           '--color-ring-gained': '#65A30D',
+          '--color-pocket-notes': '#2B6EA8',
+          '--color-pocket-journal': '#4D8A24',
+          '--color-pocket-archive': '#645D57',
         },
       },
       linen: {
@@ -8989,6 +9333,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           '--color-ring-physical': '#D97706',
           '--color-ring-mental': '#C4840A',
           '--color-ring-gained': '#65A30D',
+          '--color-pocket-notes': '#B85A4A',
+          '--color-pocket-journal': '#558429',
+          '--color-pocket-archive': '#6E5F52',
         },
       },
       sage: {
@@ -9011,6 +9358,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           '--color-ring-physical': '#059669',
           '--color-ring-mental': '#0D9488',
           '--color-ring-gained': '#65A30D',
+          '--color-pocket-notes': '#1D7A8A',
+          '--color-pocket-journal': '#7D8F26',
+          '--color-pocket-archive': '#54685D',
         },
       },
     };
@@ -9076,6 +9426,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       root.style.setProperty('--color-on-accent', accent.fg || '20 20 20');
       root.style.setProperty('--color-accent-hex', accent.hex);
       root.style.setProperty('--color-ring-mental', accent.hex);
+      root.style.setProperty('--color-pocket-schedule', accent.hex);
 
       renderSettingsThemeControls();
       renderUnifiedCalendar();
@@ -13545,7 +13896,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     let gymSliderDragging = false;
 
     function getDefaultFabTitleForTab(tab) {
-      if (tab === 'habit') return 'New Habit';
+      if (tab === 'habit') return 'Add Habit or Routine';
       if (tab === 'journal') return 'Add Journal Entry or Check-In';
       if (tab === 'inbox') return 'Dump a thought';
       return 'New Task or Project';
@@ -13555,12 +13906,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const backdrop = document.getElementById('fab-speed-dial-backdrop');
       const journalMenu = document.getElementById('journal-fab-menu');
       const timelineMenu = document.getElementById('timeline-fab-menu');
+      const habitMenu = document.getElementById('habit-fab-menu');
       const fabBtn = document.getElementById('fab-action-btn');
       const desktopAddBtn = document.getElementById('header-desktop-add-btn');
 
       const journalOpen = Boolean(state.journalFabMenuOpen);
       const timelineOpen = Boolean(state.timelineFabMenuOpen);
-      const anyOpen = journalOpen || timelineOpen;
+      const habitOpen = Boolean(state.habitFabMenuOpen);
+      const anyOpen = journalOpen || timelineOpen || habitOpen;
 
       if (backdrop) {
         backdrop.classList.toggle('is-open', anyOpen);
@@ -13574,6 +13927,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         timelineMenu.classList.toggle('is-open', timelineOpen);
         timelineMenu.setAttribute('aria-hidden', String(!timelineOpen));
       }
+      if (habitMenu) {
+        habitMenu.classList.toggle('is-open', habitOpen);
+        habitMenu.setAttribute('aria-hidden', String(!habitOpen));
+      }
       if (fabBtn) {
         fabBtn.classList.toggle('is-speed-dial-open', anyOpen);
         fabBtn.setAttribute('aria-expanded', String(anyOpen));
@@ -13586,9 +13943,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function closeAllFabMenus(opts = {}) {
-      const wasOpen = Boolean(state.journalFabMenuOpen || state.timelineFabMenuOpen);
+      const wasOpen = Boolean(state.journalFabMenuOpen || state.timelineFabMenuOpen || state.habitFabMenuOpen);
       state.journalFabMenuOpen = false;
       state.timelineFabMenuOpen = false;
+      state.habitFabMenuOpen = false;
       syncFabSpeedDialUi();
       if (wasOpen && !opts.silent) {
         playSfx('drawerClose');
@@ -13600,7 +13958,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (!menu) return;
       const nextOpen = typeof force === 'boolean' ? force : !state.journalFabMenuOpen;
       const changed = nextOpen !== state.journalFabMenuOpen;
-      if (nextOpen) state.timelineFabMenuOpen = false;
+      if (nextOpen) {
+        state.timelineFabMenuOpen = false;
+        state.habitFabMenuOpen = false;
+      }
       state.journalFabMenuOpen = nextOpen;
       syncFabSpeedDialUi();
       if (changed && !opts.silent) {
@@ -13626,7 +13987,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (!menu) return;
       const nextOpen = typeof force === 'boolean' ? force : !state.timelineFabMenuOpen;
       const changed = nextOpen !== state.timelineFabMenuOpen;
-      if (nextOpen) state.journalFabMenuOpen = false;
+      if (nextOpen) {
+        state.journalFabMenuOpen = false;
+        state.habitFabMenuOpen = false;
+      }
       state.timelineFabMenuOpen = nextOpen;
       syncFabSpeedDialUi();
       if (changed && !opts.silent) {
@@ -13634,24 +13998,1370 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
     }
 
+    function toggleHabitFabMenu(force, opts = {}) {
+      const menu = document.getElementById('habit-fab-menu');
+      if (!menu) return;
+      const nextOpen = typeof force === 'boolean' ? force : !state.habitFabMenuOpen;
+      const changed = nextOpen !== state.habitFabMenuOpen;
+      if (nextOpen) {
+        state.journalFabMenuOpen = false;
+        state.timelineFabMenuOpen = false;
+      }
+      state.habitFabMenuOpen = nextOpen;
+      syncFabSpeedDialUi();
+      if (changed && !opts.silent) {
+        playSfx(nextOpen ? 'drawerOpen' : 'drawerClose');
+      }
+    }
+
+    function handleHabitFabOption(choice) {
+      toggleHabitFabMenu(false, { silent: true });
+      if (choice === 'habit') {
+        openHabitModal();
+      } else if (choice === 'routine') {
+        openRoutineAddModal('routine');
+      }
+    }
+
     function handleTimelineFabOption(choice) {
       toggleTimelineFabMenu(false, { silent: true });
       if (choice === 'task') {
-        openTaskModal();
+        openQuickCreateModal('task');
       } else if (choice === 'project') {
-        openProjectModal();
+        openQuickCreateModal('project');
       }
     }
 
     function handleFabAction() {
       if (state.activeTab === 'habit') {
-        openHabitModal();
+        toggleHabitFabMenu();
       } else if (state.activeTab === 'inbox') {
         openInboxQuickAddPanel();
       } else if (state.activeTab === 'journal') {
         toggleJournalFabMenu();
       } else if (state.activeTab === 'timeline') {
         toggleTimelineFabMenu();
+      }
+    }
+
+    // =========================================================================
+    // MINI CREATION SHEET (TASKS & PROJECTS) + MERGED CALENDAR & DURATION SHEET
+    // =========================================================================
+    const qcDraft = {
+      open: false,
+      kind: 'task', // 'task' | 'project'
+      activePopover: null, // 'priority' | 'energy' | 'link' | 'location' | 'checkpoint' | null
+      moreOpen: false,
+      // Task fields
+      taskMode: 'completed', // 'completed' | 'future'
+      dateKey: INITIAL_TODAY_KEY,
+      allDay: false,
+      startMin: 510,
+      durationMin: 30,
+      priority: 2,
+      energy: 1,
+      color: 'coral',
+      projectId: null,
+      habitId: null,
+      pinned: false,
+      location: '',
+      repeat: 'once',
+      weekDays: ['Mon'],
+      alertStart: false,
+      alertEnd: false,
+      // Project fields
+      startDate: INITIAL_TODAY_KEY,
+      endDate: INITIAL_TODAY_KEY,
+      checkpoints: [],
+    };
+
+    const qsDraft = {
+      open: false,
+      viewYear: INITIAL_TODAY_DATE.getFullYear(),
+      viewMonth: INITIAL_TODAY_DATE.getMonth(),
+      dateKey: INITIAL_TODAY_KEY,
+      allDay: false,
+      startMin: 510,
+      durationMin: 30,
+      repeat: 'once',
+      weekDays: ['Mon'],
+      alertStart: false,
+      alertEnd: false,
+      // Project range fields
+      startDate: INITIAL_TODAY_KEY,
+      endDate: INITIAL_TODAY_KEY,
+      pickingBound: 'start', // 'start' | 'end'
+    };
+
+    function formatMinutesToTimeInput(mins) {
+      const clamped = Math.max(0, Math.min(1439, Number(mins) || 0));
+      const h = Math.floor(clamped / 60);
+      const m = clamped % 60;
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    }
+
+    function parseTimeInputToMinutes(val) {
+      if (!val || typeof val !== 'string' || !val.includes(':')) return 510;
+      const [hStr, mStr] = val.split(':');
+      const h = Math.max(0, Math.min(23, parseInt(hStr, 10) || 0));
+      const m = Math.max(0, Math.min(59, parseInt(mStr, 10) || 0));
+      return h * 60 + m;
+    }
+
+    function formatCompactDuration(mins) {
+      const n = Number(mins) || 0;
+      if (n <= 0) return 'All day';
+      const h = Math.floor(n / 60);
+      const m = n % 60;
+      if (h > 0 && m > 0) return `${h}h ${m}m`;
+      if (h > 0) return `${h}h`;
+      return `${m}m`;
+    }
+
+    function formatShortDateLabel(dateKey) {
+      const todayKey = getTodayDateKey();
+      if (!CalLogic.isValidDateKey(dateKey)) return 'Today';
+      if (dateKey === todayKey) return 'Today';
+      if (dateKey === CalLogic.addDaysToDateKey(todayKey, 1)) return 'Tomorrow';
+      if (dateKey === CalLogic.addDaysToDateKey(todayKey, -1)) return 'Yesterday';
+      const d = CalLogic.parseDateKey(dateKey);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    function clampQuickCreateCompletedTime() {
+      if (qcDraft.kind !== 'task' || qcDraft.taskMode !== 'completed') return;
+      const todayKey = getTodayDateKey();
+      if (CalLogic.compareDateKeys(qcDraft.dateKey, todayKey) > 0) {
+        qcDraft.dateKey = todayKey;
+      }
+      if (qcDraft.dateKey === todayKey && !qcDraft.allDay) {
+        const now = new Date();
+        const nowMins = now.getHours() * 60 + now.getMinutes();
+        if (qcDraft.startMin > nowMins) {
+          qcDraft.startMin = Math.max(0, nowMins - (qcDraft.durationMin || 30));
+        }
+      }
+    }
+
+    function openQuickCreateModal(kind = 'task', prefillStartMin = null) {
+      closeAllFabMenus({ silent: true });
+      qcDraft.open = true;
+      qcDraft.kind = kind === 'project' ? 'project' : 'task';
+      qcDraft.activePopover = null;
+      qcDraft.moreOpen = false;
+
+      const baseDate = state.selectedDate || getTodayDateKey();
+      const now = new Date();
+      const nowMins = now.getHours() * 60 + now.getMinutes();
+
+      if (qcDraft.kind === 'task') {
+        const taskColorKeys = Object.keys(CAPSULE_COLORS);
+        qcDraft.taskMode = 'completed';
+        qcDraft.dateKey = baseDate;
+        qcDraft.allDay = false;
+        qcDraft.durationMin = 30;
+        qcDraft.startMin =
+          typeof prefillStartMin === 'number' && !Number.isNaN(prefillStartMin)
+            ? Math.max(0, Math.min(1435, Math.round(prefillStartMin)))
+            : Math.max(0, nowMins - 30);
+        qcDraft.priority = 2;
+        qcDraft.energy = 1;
+        qcDraft.color = taskColorKeys[Math.floor(Math.random() * taskColorKeys.length)] || 'coral';
+        qcDraft.projectId = null;
+        qcDraft.habitId = null;
+        qcDraft.pinned = false;
+        qcDraft.location = '';
+        qcDraft.repeat = 'once';
+        qcDraft.weekDays = [CalLogic.getWeekdayShort(baseDate)];
+        qcDraft.alertStart = false;
+        qcDraft.alertEnd = false;
+        clampQuickCreateCompletedTime();
+      } else {
+        qcDraft.startDate = baseDate;
+        qcDraft.endDate = CalLogic.addDaysToDateKey(baseDate, 14);
+        qcDraft.color = CAPSULE_COLORS[state.accentKey] ? state.accentKey : 'coral';
+        qcDraft.checkpoints = [];
+      }
+
+      const titleInput = document.getElementById('qc-title-input');
+      const descInput = document.getElementById('qc-desc-input');
+      if (titleInput) {
+        titleInput.value = '';
+        titleInput.placeholder = qcDraft.kind === 'project' ? 'Project title...' : 'What would you like to do?';
+      }
+      if (descInput) {
+        descInput.value = '';
+        descInput.placeholder = qcDraft.kind === 'project' ? 'Description or goal...' : 'Description';
+      }
+
+      renderQuickCreateUI();
+      const modal = document.getElementById('quick-create-modal');
+      modal?.classList.remove('hidden');
+      playSfx('drawerOpen');
+      setTimeout(() => titleInput?.focus(), 40);
+    }
+
+    function closeQuickCreateModal(opts = {}) {
+      if (!qcDraft.open) return;
+      qcDraft.open = false;
+      qcDraft.activePopover = null;
+      qcDraft.moreOpen = false;
+      document.getElementById('quick-create-modal')?.classList.add('hidden');
+      if (qsDraft.open) closeQuickScheduleModal(false, { silent: true });
+      if (!opts.silent) playSfx('drawerClose');
+    }
+
+    function setQuickCreateTaskMode(mode) {
+      qcDraft.taskMode = mode === 'future' ? 'future' : 'completed';
+      if (qcDraft.taskMode === 'completed') {
+        clampQuickCreateCompletedTime();
+      } else {
+        // Default upcoming start time to next clean 30m slot if it was behind now
+        const todayKey = getTodayDateKey();
+        if (qcDraft.dateKey === todayKey && !qcDraft.allDay) {
+          const now = new Date();
+          const nextSlot = Math.min(1410, Math.ceil((now.getHours() * 60 + now.getMinutes() + 15) / 30) * 30);
+          if (qcDraft.startMin < nextSlot) qcDraft.startMin = nextSlot;
+        }
+      }
+      playSfx('tick');
+      renderQuickCreateUI();
+    }
+
+    function toggleQuickCreatePopover(name) {
+      qcDraft.moreOpen = false;
+      qcDraft.activePopover = qcDraft.activePopover === name ? null : name;
+      playSfx('tick');
+      renderQuickCreateUI();
+      if (qcDraft.activePopover === 'location') {
+        setTimeout(() => document.getElementById('qc-location-input')?.focus(), 30);
+      } else if (qcDraft.activePopover === 'checkpoint') {
+        setTimeout(() => document.getElementById('qc-checkpoint-title-input')?.focus(), 30);
+      }
+    }
+
+    function toggleQuickCreateMoreMenu() {
+      qcDraft.activePopover = null;
+      qcDraft.moreOpen = !qcDraft.moreOpen;
+      playSfx('tick');
+      renderQuickCreateUI();
+    }
+
+    function setQuickCreatePriority(p) {
+      qcDraft.priority = Number(p);
+      qcDraft.activePopover = null;
+      playSfx('tick');
+      renderQuickCreateUI();
+    }
+
+    function setQuickCreateEnergy(tier) {
+      qcDraft.energy = Number(tier);
+      playSfx('tick');
+      renderQuickCreateUI();
+    }
+
+    function setQuickCreateColor(colorKey) {
+      if (CAPSULE_COLORS[colorKey]) {
+        qcDraft.color = colorKey;
+        playSfx('tick');
+        renderQuickCreateUI();
+      }
+    }
+
+    function setQuickCreateProjectLink(projectId) {
+      qcDraft.projectId = qcDraft.projectId === projectId ? null : projectId;
+      if (qcDraft.projectId) {
+        const proj = (state.projects || []).find((p) => p.id === qcDraft.projectId);
+        if (proj && proj.color && CAPSULE_COLORS[proj.color]) qcDraft.color = proj.color;
+      }
+      playSfx('tick');
+      renderQuickCreateUI();
+    }
+
+    function setQuickCreateHabitLink(habitId) {
+      qcDraft.habitId = String(qcDraft.habitId) === String(habitId) ? null : habitId;
+      if (qcDraft.habitId !== null) {
+        const h = (state.habits || []).find((item) => String(item.id) === String(qcDraft.habitId));
+        if (h && h.color && CAPSULE_COLORS[h.color]) qcDraft.color = h.color;
+      }
+      playSfx('tick');
+      renderQuickCreateUI();
+    }
+
+    function toggleQuickCreatePinned() {
+      qcDraft.pinned = !qcDraft.pinned;
+      qcDraft.moreOpen = false;
+      playSfx('tick');
+      renderQuickCreateUI();
+    }
+
+    function saveQuickCreateLocation() {
+      const inp = document.getElementById('qc-location-input');
+      qcDraft.location = inp ? inp.value.trim() : '';
+      qcDraft.activePopover = null;
+      playSfx('tick');
+      renderQuickCreateUI();
+    }
+
+    function addQuickCreateCheckpoint() {
+      const titleEl = document.getElementById('qc-checkpoint-title-input');
+      const dateEl = document.getElementById('qc-checkpoint-date-input');
+      const title = titleEl ? titleEl.value.trim() : '';
+      if (!title) return;
+      const date = dateEl && CalLogic.isValidDateKey(dateEl.value) ? dateEl.value : qcDraft.startDate;
+      qcDraft.checkpoints.push({
+        id: `cp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        title,
+        date,
+        note: '',
+        done: false,
+      });
+      if (titleEl) titleEl.value = '';
+      playSfx('tick');
+      renderQuickCreateUI();
+      setTimeout(() => document.getElementById('qc-checkpoint-title-input')?.focus(), 20);
+    }
+
+    function removeQuickCreateCheckpoint(cpId) {
+      qcDraft.checkpoints = qcDraft.checkpoints.filter((c) => c.id !== cpId);
+      playSfx('tick');
+      renderQuickCreateUI();
+    }
+
+    function expandQuickCreateToFullScreen() {
+      const titleVal = document.getElementById('qc-title-input')?.value.trim() || '';
+      const descVal = document.getElementById('qc-desc-input')?.value.trim() || '';
+      const kind = qcDraft.kind;
+      const snapshot = {
+        ...qcDraft,
+        weekDays: [...qcDraft.weekDays],
+        checkpoints: qcDraft.checkpoints.map((c) => ({ ...c })),
+      };
+      closeQuickCreateModal({ silent: true });
+
+      if (kind === 'project') {
+        openProjectModal(null);
+        const titleEl = document.getElementById('project-title-input');
+        const descEl = document.getElementById('project-desc-input');
+        const startEl = document.getElementById('project-start-date');
+        const endEl = document.getElementById('project-end-date');
+        if (titleEl) titleEl.value = titleVal;
+        if (descEl) descEl.value = descVal;
+        if (startEl) startEl.value = snapshot.startDate;
+        if (endEl) endEl.value = snapshot.endDate;
+        state.projectModalColor = CAPSULE_COLORS[snapshot.color] ? snapshot.color : 'coral';
+        if (snapshot.checkpoints.length > 0) {
+          state.projectModalCheckpoints = snapshot.checkpoints;
+        }
+        applyProjectModalColorTheme(state.projectModalColor);
+        syncProjectModalMeta();
+        renderProjectModalControls();
+      } else {
+        openTaskModal(snapshot.startMin);
+        const titleEl = document.getElementById('modal-task-title');
+        const noteEl = document.getElementById('modal-task-note');
+        const locEl = document.getElementById('modal-task-location');
+        if (titleEl) titleEl.value = titleVal;
+        if (noteEl) noteEl.value = descVal;
+        if (locEl) locEl.value = snapshot.location || '';
+        state.modalTaskMode = snapshot.taskMode;
+        state.modalDateKey = snapshot.dateKey;
+        state.modalAllDay = snapshot.allDay;
+        state.modalStartMin = snapshot.startMin;
+        state.modalDurationMin = snapshot.durationMin || 30;
+        state.modalPriority = snapshot.priority;
+        state.modalEnergyTier = snapshot.energy;
+        state.modalColor = snapshot.color;
+        state.modalProjectId = snapshot.projectId;
+        state.modalHabitId = snapshot.habitId;
+        state.modalPinned = snapshot.pinned;
+        state.modalRepeat = snapshot.repeat;
+        state.modalWeekDays = snapshot.weekDays.length > 0 ? snapshot.weekDays : [CalLogic.getWeekdayShort(snapshot.dateKey)];
+        state.modalAlertStart = snapshot.alertStart;
+        state.modalAlertEnd = snapshot.alertEnd;
+        if (state.modalTaskMode === 'completed') clampModalCompletedDateTime(false);
+        syncModalControls();
+      }
+    }
+
+    function renderQuickCreateUI() {
+      const isTask = qcDraft.kind === 'task';
+      const modeSwitch = document.getElementById('qc-mode-switch');
+      const prioBtn = document.getElementById('qc-priority-btn');
+      const linkBtn = document.getElementById('qc-link-btn');
+      const energyBtn = document.getElementById('qc-energy-btn');
+      const energyBolt = document.getElementById('qc-energy-bolt-icon');
+      const projDot = document.getElementById('qc-project-color-dot');
+      const dateLabelEl = document.getElementById('qc-date-label');
+      const chipsEl = document.getElementById('qc-meta-chips');
+      const popoverEl = document.getElementById('qc-inline-popover');
+      const moreEl = document.getElementById('qc-more-menu');
+
+      if (modeSwitch) modeSwitch.classList.toggle('hidden', !isTask);
+      if (prioBtn) prioBtn.classList.toggle('hidden', !isTask);
+      if (linkBtn) linkBtn.classList.toggle('hidden', !isTask);
+
+      // Completed / Upcoming buttons
+      if (isTask) {
+        const compBtn = document.getElementById('qc-mode-completed-btn');
+        const futBtn = document.getElementById('qc-mode-future-btn');
+        const isComp = qcDraft.taskMode === 'completed';
+        if (compBtn) {
+          compBtn.className = `tactile-btn py-1.5 px-2.5 rounded-lg text-xs flex items-center justify-center gap-1.5 transition ${
+            isComp ? 'bg-coral text-onaccent font-bold' : 'text-secondarytext hover:text-primarytext font-medium'
+          }`;
+        }
+        if (futBtn) {
+          futBtn.className = `tactile-btn py-1.5 px-2.5 rounded-lg text-xs flex items-center justify-center gap-1.5 transition ${
+            !isComp ? 'bg-coral text-onaccent font-bold' : 'text-secondarytext hover:text-primarytext font-medium'
+          }`;
+        }
+      }
+
+      // Date/Span label on Calendar button
+      if (dateLabelEl) {
+        if (isTask) {
+          const dayTxt = formatShortDateLabel(qcDraft.dateKey);
+          if (qcDraft.allDay) {
+            dateLabelEl.textContent = `${dayTxt} · All day`;
+          } else {
+            const durTxt = formatCompactDuration(qcDraft.durationMin);
+            dateLabelEl.textContent = `${dayTxt} · ${durTxt}`;
+          }
+        } else {
+          const sTxt = formatShortDateLabel(qcDraft.startDate);
+          const eTxt = formatShortDateLabel(qcDraft.endDate);
+          dateLabelEl.textContent = qcDraft.startDate === qcDraft.endDate ? sTxt : `${sTxt} – ${eTxt}`;
+        }
+      }
+
+      // Energy / Color icon
+      const activeColor = CAPSULE_COLORS[qcDraft.color] || CAPSULE_COLORS.coral;
+      if (energyBolt) energyBolt.classList.toggle('hidden', !isTask);
+      if (projDot) {
+        projDot.classList.toggle('hidden', isTask);
+        projDot.style.backgroundColor = activeColor.hex;
+      }
+      if (energyBtn) {
+        energyBtn.title = isTask ? 'Energy & Color' : 'Project Color';
+        energyBtn.style.color = isTask ? activeColor.hex : '';
+        energyBtn.classList.toggle('bg-cardbg', qcDraft.activePopover === 'energy');
+      }
+      if (prioBtn) {
+        const prioActive = qcDraft.priority !== 2 || qcDraft.activePopover === 'priority';
+        prioBtn.classList.toggle('text-coral', prioActive);
+        prioBtn.classList.toggle('text-secondarytext', !prioActive);
+        prioBtn.classList.toggle('bg-cardbg', qcDraft.activePopover === 'priority');
+      }
+      if (linkBtn) {
+        const linkActive = Boolean(qcDraft.projectId || qcDraft.habitId !== null || qcDraft.activePopover === 'link');
+        linkBtn.classList.toggle('text-coral', linkActive);
+        linkBtn.classList.toggle('text-secondarytext', !linkActive);
+        linkBtn.classList.toggle('bg-cardbg', qcDraft.activePopover === 'link');
+      }
+
+      // Compact active meta chips
+      if (chipsEl) {
+        const chips = [];
+        if (isTask) {
+          if (qcDraft.priority !== 2) {
+            const pNames = ['Optional', 'Low', 'Normal', 'High', 'Urgent'];
+            chips.push(
+              `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-cardbg border border-borderline text-[11px] font-semibold text-primarytext">Flag: ${pNames[qcDraft.priority] || 'Normal'}</span>`
+            );
+          }
+          if (qcDraft.taskMode === 'future' && qcDraft.repeat !== 'once') {
+            chips.push(
+              `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-cardbg border border-borderline text-[11px] font-semibold text-secondarytext capitalize">${escapeHtml(qcDraft.repeat)}</span>`
+            );
+          }
+          if (qcDraft.taskMode === 'future' && (qcDraft.alertStart || qcDraft.alertEnd)) {
+            const remTxt = qcDraft.alertStart && qcDraft.alertEnd ? 'Start & End' : qcDraft.alertStart ? 'At start' : 'At end';
+            chips.push(
+              `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-cardbg border border-borderline text-[11px] font-semibold text-secondarytext">Alert: ${remTxt}</span>`
+            );
+          }
+          if (qcDraft.projectId) {
+            const p = (state.projects || []).find((item) => item.id === qcDraft.projectId);
+            if (p) {
+              chips.push(
+                `<button type="button" onclick="setQuickCreateProjectLink('${escapeHtml(p.id)}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-cardbg border border-borderline text-[11px] font-semibold text-primarytext hover:border-coral">${escapeHtml(p.title)} <span class="text-mutedtext">&times;</span></button>`
+              );
+            }
+          }
+          if (qcDraft.habitId !== null) {
+            const h = (state.habits || []).find((item) => String(item.id) === String(qcDraft.habitId));
+            if (h) {
+              chips.push(
+                `<button type="button" onclick="setQuickCreateHabitLink(${JSON.stringify(h.id)})" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-cardbg border border-borderline text-[11px] font-semibold text-primarytext hover:border-coral">${escapeHtml(h.title)} <span class="text-mutedtext">&times;</span></button>`
+              );
+            }
+          }
+          if (qcDraft.pinned) {
+            chips.push(
+              `<button type="button" onclick="toggleQuickCreatePinned()" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-cardbg border border-borderline text-[11px] font-semibold text-coral">Pinned <span class="text-mutedtext">&times;</span></button>`
+            );
+          }
+          if (qcDraft.location) {
+            chips.push(
+              `<button type="button" onclick="toggleQuickCreatePopover('location')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-cardbg border border-borderline text-[11px] font-semibold text-secondarytext max-w-[160px] truncate">${escapeHtml(qcDraft.location)}</button>`
+            );
+          }
+        } else {
+          qcDraft.checkpoints.forEach((cp) => {
+            chips.push(
+              `<button type="button" onclick="removeQuickCreateCheckpoint('${escapeHtml(cp.id)}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-cardbg border border-borderline text-[11px] font-semibold text-primarytext hover:border-coral">${escapeHtml(cp.title)} · ${formatShortDateLabel(cp.date)} <span class="text-mutedtext">&times;</span></button>`
+            );
+          });
+        }
+        chipsEl.innerHTML = chips.join('');
+        chipsEl.classList.toggle('hidden', chips.length === 0);
+      }
+
+      // Inline Micro-Popover
+      if (popoverEl) {
+        if (!qcDraft.activePopover) {
+          popoverEl.classList.add('hidden');
+          popoverEl.innerHTML = '';
+        } else {
+          popoverEl.classList.remove('hidden');
+          if (qcDraft.activePopover === 'priority' && isTask) {
+            const prioList = [
+              { idx: 0, label: 'Optional' },
+              { idx: 1, label: 'Low' },
+              { idx: 2, label: 'Normal' },
+              { idx: 3, label: 'High' },
+              { idx: 4, label: 'Urgent' },
+            ];
+            popoverEl.innerHTML = `
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Priority</span>
+                <button type="button" onclick="toggleQuickCreatePopover(null)" class="text-xs font-semibold text-mutedtext hover:text-primarytext">Done</button>
+              </div>
+              <div class="grid grid-cols-5 gap-1">
+                ${prioList
+                  .map(
+                    (p) => `<button type="button" onclick="setQuickCreatePriority(${p.idx})" class="tactile-btn py-1.5 px-1 rounded-xl text-[11px] font-semibold transition ${
+                      qcDraft.priority === p.idx
+                        ? 'bg-coral text-onaccent font-bold'
+                        : 'bg-pillbg text-secondarytext hover:text-primarytext'
+                    }">${p.label}</button>`
+                  )
+                  .join('')}
+              </div>
+            `;
+          } else if (qcDraft.activePopover === 'energy') {
+            const energyNames = ['Restorative', 'Balanced', 'Steady', 'Deep Focus', 'High Output'];
+            const swatchesHtml = Object.entries(CAPSULE_COLORS)
+              .map(([key, val]) => {
+                const active = key === qcDraft.color;
+                return `<button type="button" onclick="setQuickCreateColor('${key}')" title="${key}" style="background-color:${val.hex};" class="tactile-btn w-6 h-6 rounded-full transition ${
+                  active ? 'ring-2 ring-primarytext ring-offset-2 ring-offset-cardbg scale-110' : 'opacity-80 hover:opacity-100'
+                }"></button>`;
+              })
+              .join('');
+            popoverEl.innerHTML = `
+              ${
+                isTask
+                  ? `
+                <div class="space-y-1.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Energy · <span class="text-primarytext">${energyNames[qcDraft.energy] || 'Balanced'}</span></span>
+                    <button type="button" onclick="toggleQuickCreatePopover(null)" class="text-xs font-semibold text-mutedtext hover:text-primarytext">Done</button>
+                  </div>
+                  <div class="grid grid-cols-5 gap-1">
+                    ${[0, 1, 2, 3, 4]
+                      .map(
+                        (t) => `<button type="button" onclick="setQuickCreateEnergy(${t})" class="tactile-btn py-1.5 rounded-xl text-xs font-bold transition ${
+                          qcDraft.energy === t ? 'bg-coral text-onaccent' : 'bg-pillbg text-secondarytext hover:text-primarytext'
+                        }">${t + 1}</button>`
+                      )
+                      .join('')}
+                  </div>
+                </div>
+                <div class="border-t border-borderline pt-2.5 space-y-1.5">
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-secondarytext block">Color</span>
+                  <div class="flex items-center gap-2 flex-wrap">${swatchesHtml}</div>
+                </div>
+              `
+                  : `
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Project Color</span>
+                    <button type="button" onclick="toggleQuickCreatePopover(null)" class="text-xs font-semibold text-mutedtext hover:text-primarytext">Done</button>
+                  </div>
+                  <div class="flex items-center gap-2 flex-wrap">${swatchesHtml}</div>
+                </div>
+              `
+              }
+            `;
+          } else if (qcDraft.activePopover === 'link' && isTask) {
+            const projects = Array.isArray(state.projects) ? state.projects : [];
+            const habits = Array.isArray(state.habits) ? state.habits : [];
+            popoverEl.innerHTML = `
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Link Project or Habit</span>
+                <button type="button" onclick="toggleQuickCreatePopover(null)" class="text-xs font-semibold text-mutedtext hover:text-primarytext">Done</button>
+              </div>
+              <div class="space-y-2 max-h-[150px] overflow-y-auto no-scrollbar">
+                ${
+                  projects.length > 0
+                    ? `<div class="space-y-1">
+                        <span class="text-[10px] font-semibold text-mutedtext uppercase tracking-wider">Projects</span>
+                        <div class="flex flex-wrap gap-1.5">
+                          ${projects
+                            .map((p) => {
+                              const active = qcDraft.projectId === p.id;
+                              return `<button type="button" onclick="setQuickCreateProjectLink('${escapeHtml(p.id)}')" class="tactile-btn px-2.5 py-1 rounded-xl text-xs font-semibold border transition ${
+                                active ? 'bg-coral text-onaccent border-coral' : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext'
+                              }">${escapeHtml(p.title)}</button>`;
+                            })
+                            .join('')}
+                        </div>
+                      </div>`
+                    : ''
+                }
+                ${
+                  habits.length > 0
+                    ? `<div class="space-y-1">
+                        <span class="text-[10px] font-semibold text-mutedtext uppercase tracking-wider">Habits</span>
+                        <div class="flex flex-wrap gap-1.5">
+                          ${habits
+                            .map((h) => {
+                              const active = String(qcDraft.habitId) === String(h.id);
+                              return `<button type="button" onclick="setQuickCreateHabitLink(${JSON.stringify(h.id)})" class="tactile-btn px-2.5 py-1 rounded-xl text-xs font-semibold border transition ${
+                                active ? 'bg-coral text-onaccent border-coral' : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext'
+                              }">${escapeHtml(h.title)}</button>`;
+                            })
+                            .join('')}
+                        </div>
+                      </div>`
+                    : ''
+                }
+                ${
+                  projects.length === 0 && habits.length === 0
+                    ? `<p class="text-xs text-mutedtext">No projects or habits created yet.</p>`
+                    : ''
+                }
+              </div>
+            `;
+          } else if (qcDraft.activePopover === 'location' && isTask) {
+            popoverEl.innerHTML = `
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Location</span>
+                <button type="button" onclick="saveQuickCreateLocation()" class="text-xs font-semibold text-coral">Apply</button>
+              </div>
+              <div class="flex items-center gap-2">
+                <input
+                  id="qc-location-input"
+                  type="text"
+                  value="${escapeHtml(qcDraft.location || '')}"
+                  placeholder="Add place or room..."
+                  onkeydown="if(event.key==='Enter'){event.preventDefault();saveQuickCreateLocation();}"
+                  class="flex-1 bg-pillbg border border-borderline rounded-xl px-3 py-2 text-xs text-primarytext placeholder-mutedtext focus:border-coral focus:outline-none"
+                />
+                ${
+                  qcDraft.location
+                    ? `<button type="button" onclick="qcDraft.location='';qcDraft.activePopover=null;renderQuickCreateUI();" class="px-2.5 py-2 rounded-xl bg-pillbg border border-borderline text-xs text-secondarytext hover:text-coral">Clear</button>`
+                    : ''
+                }
+              </div>
+            `;
+          } else if (qcDraft.activePopover === 'checkpoint' && !isTask) {
+            popoverEl.innerHTML = `
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Add Checkpoint</span>
+                <button type="button" onclick="toggleQuickCreatePopover(null)" class="text-xs font-semibold text-mutedtext hover:text-primarytext">Done</button>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <input
+                  id="qc-checkpoint-title-input"
+                  type="text"
+                  placeholder="Milestone name..."
+                  onkeydown="if(event.key==='Enter'){event.preventDefault();addQuickCreateCheckpoint();}"
+                  class="flex-1 min-w-0 bg-pillbg border border-borderline rounded-xl px-3 py-2 text-xs text-primarytext placeholder-mutedtext focus:border-coral focus:outline-none"
+                />
+                <input
+                  id="qc-checkpoint-date-input"
+                  type="date"
+                  value="${escapeHtml(qcDraft.startDate)}"
+                  class="w-[120px] bg-pillbg border border-borderline rounded-xl px-2 py-2 text-[11px] text-primarytext focus:border-coral focus:outline-none"
+                />
+                <button type="button" onclick="addQuickCreateCheckpoint()" class="tactile-btn px-3 py-2 rounded-xl bg-coral text-onaccent text-xs font-bold">Add</button>
+              </div>
+            `;
+          }
+        }
+      }
+
+      // Floating ••• Overflow Card
+      if (moreEl) {
+        if (!qcDraft.moreOpen) {
+          moreEl.classList.add('hidden');
+          moreEl.innerHTML = '';
+        } else {
+          moreEl.classList.remove('hidden');
+          if (isTask) {
+            moreEl.innerHTML = `
+              <button type="button" onclick="toggleQuickCreatePinned()" class="w-full px-3.5 py-2.5 text-left text-[13.5px] font-medium text-primarytext hover:bg-pillbg flex items-center justify-between gap-3 transition">
+                <span class="flex items-center gap-3">
+                  <svg class="w-[17px] h-[17px] text-secondarytext" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M12 17v5M9 4h6l1 6 2 2v2H6v-2l2-2 1-6z"/>
+                  </svg>
+                  <span>Pin to Top</span>
+                </span>
+                ${qcDraft.pinned ? '<span class="text-xs font-bold text-coral">✓</span>' : ''}
+              </button>
+              <button type="button" onclick="toggleQuickCreatePopover('location')" class="w-full px-3.5 py-2.5 text-left text-[13.5px] font-medium text-primarytext hover:bg-pillbg flex items-center justify-between gap-3 transition">
+                <span class="flex items-center gap-3">
+                  <svg class="w-[17px] h-[17px] text-secondarytext" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M12 21s-6-5.2-6-10a6 6 0 1112 0c0 4.8-6 10-6 10z"/>
+                    <circle cx="12" cy="11" r="2.2"/>
+                  </svg>
+                  <span>Location</span>
+                </span>
+                ${qcDraft.location ? '<span class="text-[10.5px] font-semibold text-coral truncate max-w-[68px]">Set</span>' : ''}
+              </button>
+              <button type="button" onclick="expandQuickCreateToFullScreen()" class="w-full px-3.5 py-2.5 text-left text-[13.5px] font-medium text-primarytext hover:bg-pillbg flex items-center gap-3 transition">
+                <svg class="w-[17px] h-[17px] text-secondarytext" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                  <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+                </svg>
+                <span>Full-Screen</span>
+              </button>
+            `;
+          } else {
+            moreEl.innerHTML = `
+              <button type="button" onclick="toggleQuickCreatePopover('checkpoint')" class="w-full px-3.5 py-2.5 text-left text-[13.5px] font-medium text-primarytext hover:bg-pillbg flex items-center justify-between gap-3 transition">
+                <span class="flex items-center gap-3">
+                  <svg class="w-[17px] h-[17px] text-secondarytext" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M4 21V4m0 0h11l-1.8 4.5L15 13H4"/>
+                  </svg>
+                  <span>Add Checkpoint</span>
+                </span>
+                ${qcDraft.checkpoints.length > 0 ? `<span class="text-[11px] font-bold text-coral">${qcDraft.checkpoints.length}</span>` : ''}
+              </button>
+              <button type="button" onclick="expandQuickCreateToFullScreen()" class="w-full px-3.5 py-2.5 text-left text-[13.5px] font-medium text-primarytext hover:bg-pillbg flex items-center gap-3 transition">
+                <svg class="w-[17px] h-[17px] text-secondarytext" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                  <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+                </svg>
+                <span>Full-Screen</span>
+              </button>
+            `;
+          }
+        }
+      }
+    }
+
+    function handleQuickCreateSubmit(e) {
+      e.preventDefault();
+      const title = document.getElementById('qc-title-input')?.value.trim() || '';
+      if (!title) {
+        document.getElementById('qc-title-input')?.focus();
+        return;
+      }
+      const desc = document.getElementById('qc-desc-input')?.value.trim() || '';
+
+      if (qcDraft.kind === 'project') {
+        let startDate = CalLogic.isValidDateKey(qcDraft.startDate) ? qcDraft.startDate : (state.selectedDate || getTodayDateKey());
+        let endDate = CalLogic.isValidDateKey(qcDraft.endDate) ? qcDraft.endDate : startDate;
+        if (CalLogic.compareDateKeys(endDate, startDate) < 0) {
+          const tmp = startDate;
+          startDate = endDate;
+          endDate = tmp;
+        }
+        if (!Array.isArray(state.projects)) state.projects = [];
+        state.projects.push({
+          id: `proj-${Date.now()}`,
+          title,
+          description: desc,
+          color: CAPSULE_COLORS[qcDraft.color] ? qcDraft.color : 'coral',
+          startDate,
+          endDate,
+          checkpoints: qcDraft.checkpoints.map((cp) => ({
+            id: cp.id || `cp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+            title: (cp.title || '').trim(),
+            date: CalLogic.isValidDateKey(cp.date) ? cp.date : startDate,
+            note: (cp.note || '').trim(),
+            done: false,
+          })),
+          driveFiles: [],
+        });
+
+        saveState();
+        playSfx('create');
+        closeQuickCreateModal({ silent: true });
+        renderUnifiedCalendar();
+        setTimelineViewMode('projects', true);
+        if (typeof renderDesktopInspector === 'function') renderDesktopInspector();
+        return;
+      }
+
+      // Task Creation
+      const isNewCompletedTask = qcDraft.taskMode === 'completed';
+      if (isNewCompletedTask) clampQuickCreateCompletedTime();
+
+      const todayKey = getTodayDateKey();
+      let resolvedDateKey = CalLogic.isValidDateKey(qcDraft.dateKey)
+        ? qcDraft.dateKey
+        : (state.selectedDate || todayKey);
+      if (isNewCompletedTask && CalLogic.compareDateKeys(resolvedDateKey, todayKey) > 0) {
+        resolvedDateKey = todayKey;
+      }
+      const resolvedDay = CalLogic.parseDateKey(resolvedDateKey).getDate();
+      const nowTs = Date.now();
+      const newTask = {
+        id: nowTs,
+        title,
+        dateKey: resolvedDateKey,
+        day: resolvedDay,
+        projectId: qcDraft.projectId || null,
+        habitId: qcDraft.habitId ?? null,
+        startMin: qcDraft.startMin,
+        durationMin: qcDraft.allDay ? 0 : (qcDraft.durationMin || 30),
+        color: CAPSULE_COLORS[qcDraft.color] ? qcDraft.color : 'coral',
+        icon: 'at',
+        recurring: isNewCompletedTask ? false : qcDraft.repeat !== 'once',
+        repeat: isNewCompletedTask ? 'once' : qcDraft.repeat,
+        weekDays: isNewCompletedTask ? null : (qcDraft.repeat === 'weekly' ? [...qcDraft.weekDays] : null),
+        energy: qcDraft.energy,
+        priority: qcDraft.priority,
+        alertStart: isNewCompletedTask ? false : qcDraft.alertStart,
+        alertEnd: isNewCompletedTask ? false : qcDraft.alertEnd,
+        pinned: Boolean(qcDraft.pinned),
+        location: qcDraft.location || '',
+        locationPlaceId: '',
+        locationLat: null,
+        locationLng: null,
+        locationRadiusMeters: 150,
+        locationVerifyMode: 'off',
+        driveFiles: [],
+        note: desc,
+        prePrompts: '',
+        intraPrompts: '',
+        postPrompts: '',
+        subtasks: null,
+        done: isNewCompletedTask,
+        doneDays: isNewCompletedTask ? { [resolvedDateKey]: true } : {},
+        ...(isNewCompletedTask ? { completedAt: nowTs } : {}),
+        compartment: inferCompartment(qcDraft.startMin),
+      };
+
+      state.tasks.push(newTask);
+
+      let punchedTaskId = null;
+      if (isNewCompletedTask) {
+        punchedTaskId = newTask.id;
+        if (typeof syncHabitAutoPunchFromTask === 'function') {
+          syncHabitAutoPunchFromTask(newTask, resolvedDateKey, true);
+        }
+      }
+
+      if (resolvedDateKey !== state.selectedDate) {
+        const parsed = CalLogic.parseDateKey(resolvedDateKey);
+        state.selectedDate = resolvedDateKey;
+        state.selectedDay = parsed.getDate();
+        if (parsed.getFullYear() !== state.calendarYear || parsed.getMonth() !== state.calendarMonth) {
+          state.calendarYear = parsed.getFullYear();
+          state.calendarMonth = parsed.getMonth();
+          state.monthCells = CalLogic.buildMonthGrid(state.calendarYear, state.calendarMonth);
+        }
+      }
+
+      if (punchedTaskId !== null) {
+        state.compartmentFilter = 'completed';
+        state.newlyCompletedTaskId = punchedTaskId;
+        state.inspectedMemoTaskId = null;
+        state.memoSpikeJustEntered = false;
+      }
+
+      saveState();
+      playSfx(punchedTaskId !== null ? 'paperStab' : 'create');
+      closeQuickCreateModal({ silent: true });
+      computeSelectedDayRings();
+      renderUnifiedCalendar();
+      if (punchedTaskId !== null && state.activeTab !== 'timeline') {
+        switchBottomTab('timeline');
+      } else {
+        if (typeof renderCompartmentBar === 'function') renderCompartmentBar();
+        renderTimeline();
+      }
+      if (state.activeTab === 'habit') renderHabits();
+      if (typeof renderDesktopInspector === 'function') renderDesktopInspector();
+    }
+
+    // --- MERGED CALENDAR & DURATION SHEET CONTROLLER ---
+    function openQuickScheduleModal() {
+      qcDraft.activePopover = null;
+      qcDraft.moreOpen = false;
+      renderQuickCreateUI();
+
+      qsDraft.open = true;
+      const anchorKey = qcDraft.kind === 'project' ? qcDraft.startDate : qcDraft.dateKey;
+      const parsed = CalLogic.parseDateKey(anchorKey || getTodayDateKey());
+      qsDraft.viewYear = parsed.getFullYear();
+      qsDraft.viewMonth = parsed.getMonth();
+
+      qsDraft.dateKey = qcDraft.dateKey;
+      qsDraft.allDay = qcDraft.allDay;
+      qsDraft.startMin = qcDraft.startMin;
+      qsDraft.durationMin = qcDraft.durationMin || 30;
+      qsDraft.repeat = qcDraft.repeat;
+      qsDraft.weekDays = [...qcDraft.weekDays];
+      qsDraft.alertStart = qcDraft.alertStart;
+      qsDraft.alertEnd = qcDraft.alertEnd;
+
+      qsDraft.startDate = qcDraft.startDate;
+      qsDraft.endDate = qcDraft.endDate;
+      qsDraft.pickingBound = 'start';
+
+      renderQuickScheduleModal();
+      document.getElementById('quick-schedule-modal')?.classList.remove('hidden');
+      playSfx('drawerOpen');
+    }
+
+    function closeQuickScheduleModal(applyChanges = false, opts = {}) {
+      if (!qsDraft.open) return;
+      if (applyChanges) {
+        if (qcDraft.kind === 'project') {
+          let s = qsDraft.startDate;
+          let e = qsDraft.endDate;
+          if (CalLogic.compareDateKeys(e, s) < 0) {
+            const tmp = s;
+            s = e;
+            e = tmp;
+          }
+          qcDraft.startDate = s;
+          qcDraft.endDate = e;
+        } else {
+          qcDraft.dateKey = qsDraft.dateKey;
+          qcDraft.allDay = qsDraft.allDay;
+          qcDraft.startMin = qsDraft.startMin;
+          qcDraft.durationMin = qsDraft.durationMin || 30;
+          qcDraft.repeat = qsDraft.repeat;
+          qcDraft.weekDays = qsDraft.weekDays.length > 0 ? [...qsDraft.weekDays] : [CalLogic.getWeekdayShort(qsDraft.dateKey)];
+          qcDraft.alertStart = qsDraft.alertStart;
+          qcDraft.alertEnd = qsDraft.alertEnd;
+          if (qcDraft.taskMode === 'completed') clampQuickCreateCompletedTime();
+        }
+        renderQuickCreateUI();
+      }
+      qsDraft.open = false;
+      document.getElementById('quick-schedule-modal')?.classList.add('hidden');
+      if (!opts.silent) playSfx(applyChanges ? 'tick' : 'drawerClose');
+    }
+
+    function shiftQuickScheduleMonth(delta) {
+      let m = qsDraft.viewMonth + delta;
+      let y = qsDraft.viewYear;
+      while (m < 0) {
+        m += 12;
+        y -= 1;
+      }
+      while (m > 11) {
+        m -= 12;
+        y += 1;
+      }
+      qsDraft.viewMonth = m;
+      qsDraft.viewYear = y;
+      playSfx('tick');
+      renderQuickScheduleModal();
+    }
+
+    function selectQuickScheduleDate(dateKey) {
+      if (!CalLogic.isValidDateKey(dateKey)) return;
+      if (qcDraft.kind === 'project') {
+        if (qsDraft.pickingBound === 'start') {
+          qsDraft.startDate = dateKey;
+          if (CalLogic.compareDateKeys(qsDraft.endDate, dateKey) < 0) {
+            qsDraft.endDate = dateKey;
+          }
+          qsDraft.pickingBound = 'end';
+        } else {
+          if (CalLogic.compareDateKeys(dateKey, qsDraft.startDate) < 0) {
+            qsDraft.endDate = qsDraft.startDate;
+            qsDraft.startDate = dateKey;
+          } else {
+            qsDraft.endDate = dateKey;
+          }
+          qsDraft.pickingBound = 'start';
+        }
+      } else {
+        const todayKey = getTodayDateKey();
+        if (qcDraft.taskMode === 'completed' && CalLogic.compareDateKeys(dateKey, todayKey) > 0) {
+          // If user picks a future date, automatically switch to Upcoming so it isn't blocked!
+          qcDraft.taskMode = 'future';
+        }
+        qsDraft.dateKey = dateKey;
+      }
+      playSfx('tick');
+      renderQuickScheduleModal();
+    }
+
+    function setQuickScheduleTimeValue(timeStr) {
+      qsDraft.allDay = false;
+      qsDraft.startMin = parseTimeInputToMinutes(timeStr);
+      renderQuickScheduleModal();
+    }
+
+    function clearQuickScheduleTimeToAllDay() {
+      qsDraft.allDay = !qsDraft.allDay;
+      playSfx('tick');
+      renderQuickScheduleModal();
+    }
+
+    function setQuickScheduleDuration(mins) {
+      const val = Math.max(5, Math.min(720, parseInt(mins, 10) || 30));
+      qsDraft.allDay = false;
+      qsDraft.durationMin = val;
+      playSfx('tick');
+      renderQuickScheduleModal();
+    }
+
+    function cycleQuickScheduleReminder() {
+      if (!qsDraft.alertStart && !qsDraft.alertEnd) {
+        qsDraft.alertStart = true;
+        qsDraft.alertEnd = false;
+      } else if (qsDraft.alertStart && !qsDraft.alertEnd) {
+        qsDraft.alertStart = false;
+        qsDraft.alertEnd = true;
+      } else if (!qsDraft.alertStart && qsDraft.alertEnd) {
+        qsDraft.alertStart = true;
+        qsDraft.alertEnd = true;
+      } else {
+        qsDraft.alertStart = false;
+        qsDraft.alertEnd = false;
+      }
+      playSfx('tick');
+      renderQuickScheduleModal();
+    }
+
+    function clearQuickScheduleReminder() {
+      qsDraft.alertStart = false;
+      qsDraft.alertEnd = false;
+      playSfx('tick');
+      renderQuickScheduleModal();
+    }
+
+    function cycleQuickScheduleRepeat() {
+      const order = ['once', 'daily', 'weekdays', 'weekly'];
+      const idx = order.indexOf(qsDraft.repeat);
+      qsDraft.repeat = order[(idx + 1) % order.length];
+      if (qsDraft.repeat === 'weekly' && qsDraft.weekDays.length === 0) {
+        qsDraft.weekDays = [CalLogic.getWeekdayShort(qsDraft.dateKey)];
+      }
+      playSfx('tick');
+      renderQuickScheduleModal();
+    }
+
+    function toggleQuickScheduleWeekday(dayShort) {
+      if (qsDraft.weekDays.includes(dayShort)) {
+        if (qsDraft.weekDays.length > 1) {
+          qsDraft.weekDays = qsDraft.weekDays.filter((d) => d !== dayShort);
+        }
+      } else {
+        qsDraft.weekDays = [...qsDraft.weekDays, dayShort];
+      }
+      playSfx('tick');
+      renderQuickScheduleModal();
+    }
+
+    function setQuickScheduleProjectSpanDays(days) {
+      qsDraft.endDate = CalLogic.addDaysToDateKey(qsDraft.startDate, Math.max(1, Number(days) || 7));
+      playSfx('tick');
+      renderQuickScheduleModal();
+    }
+
+    function clearQuickScheduleDraft() {
+      const baseDate = state.selectedDate || getTodayDateKey();
+      if (qcDraft.kind === 'project') {
+        qsDraft.startDate = baseDate;
+        qsDraft.endDate = CalLogic.addDaysToDateKey(baseDate, 14);
+        qsDraft.pickingBound = 'start';
+      } else {
+        qsDraft.dateKey = baseDate;
+        qsDraft.allDay = false;
+        qsDraft.durationMin = 30;
+        qsDraft.repeat = 'once';
+        qsDraft.weekDays = [CalLogic.getWeekdayShort(baseDate)];
+        qsDraft.alertStart = false;
+        qsDraft.alertEnd = false;
+      }
+      const parsed = CalLogic.parseDateKey(baseDate);
+      qsDraft.viewYear = parsed.getFullYear();
+      qsDraft.viewMonth = parsed.getMonth();
+      playSfx('tick');
+      renderQuickScheduleModal();
+    }
+
+    function renderQuickScheduleModal() {
+      const isProject = qcDraft.kind === 'project';
+      const titleEl = document.getElementById('qs-header-title');
+      const monthLabelEl = document.getElementById('qs-month-label');
+      const gridEl = document.getElementById('qs-calendar-grid');
+      const cardEl = document.getElementById('qs-settings-card');
+
+      if (titleEl) titleEl.textContent = isProject ? 'Project Span' : 'Schedule & Duration';
+
+      const monthDate = new Date(qsDraft.viewYear, qsDraft.viewMonth, 1);
+      const currentYear = new Date().getFullYear();
+      if (monthLabelEl) {
+        monthLabelEl.textContent =
+          qsDraft.viewYear === currentYear
+            ? monthDate.toLocaleDateString('en-US', { month: 'long' })
+            : monthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      }
+
+      // Render Mon-Sun month grid
+      if (gridEl) {
+        const firstDayJs = new Date(qsDraft.viewYear, qsDraft.viewMonth, 1).getDay(); // 0=Sun..6=Sat
+        const leadingBlanks = (firstDayJs + 6) % 7; // Mon=0..Sun=6
+        const daysInMonth = new Date(qsDraft.viewYear, qsDraft.viewMonth + 1, 0).getDate();
+        const todayKey = getTodayDateKey();
+        const cells = [];
+
+        for (let i = 0; i < leadingBlanks; i++) {
+          cells.push(`<div class="h-9"></div>`);
+        }
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const dk = `${qsDraft.viewYear}-${String(qsDraft.viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          const isToday = dk === todayKey;
+          let btnClasses = 'text-primarytext hover:bg-cardbg';
+          let wrapClasses = '';
+
+          if (isProject) {
+            const isStart = dk === qsDraft.startDate;
+            const isEnd = dk === qsDraft.endDate;
+            const inRange =
+              CalLogic.compareDateKeys(dk, qsDraft.startDate) > 0 &&
+              CalLogic.compareDateKeys(dk, qsDraft.endDate) < 0;
+            if (isStart || isEnd) {
+              btnClasses = 'bg-coral text-onaccent font-bold';
+            } else if (inRange) {
+              wrapClasses = 'bg-pillbg';
+              btnClasses = 'text-primarytext font-semibold';
+            } else if (isToday) {
+              btnClasses = 'border border-borderline text-coral font-bold';
+            }
+          } else {
+            const isSelected = dk === qsDraft.dateKey;
+            if (isSelected) {
+              btnClasses = 'bg-coral text-onaccent font-bold';
+            } else if (isToday) {
+              btnClasses = 'border border-borderline text-coral font-bold';
+            }
+          }
+
+          cells.push(`
+            <div class="flex items-center justify-center h-9 ${wrapClasses}">
+              <button
+                type="button"
+                onclick="selectQuickScheduleDate('${dk}')"
+                class="tactile-btn w-9 h-9 rounded-full text-[13.5px] font-medium flex items-center justify-center transition ${btnClasses}"
+              >
+                ${d}
+              </button>
+            </div>
+          `);
+        }
+
+        gridEl.innerHTML = cells.join('');
+      }
+
+      // Render unified settings card
+      if (cardEl) {
+        if (isProject) {
+          const d1 = CalLogic.parseDateKey(qsDraft.startDate);
+          const d2 = CalLogic.parseDateKey(qsDraft.endDate);
+          const spanDays = Math.abs(Math.round((d2 - d1) / 86400000)) + 1;
+          cardEl.innerHTML = `
+            <button type="button" onclick="qsDraft.pickingBound='start';renderQuickScheduleModal();" class="w-full px-4 py-3 flex items-center justify-between gap-2 text-left hover:bg-pillbg/60 transition">
+              <span class="flex items-center gap-3 text-[13.5px] font-medium ${qsDraft.pickingBound === 'start' ? 'text-coral' : 'text-primarytext'}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 9h18"/>
+                </svg>
+                <span>Start Date</span>
+              </span>
+              <span class="text-[13.5px] font-semibold ${qsDraft.pickingBound === 'start' ? 'text-coral' : 'text-secondarytext'}">${formatShortDateLabel(qsDraft.startDate)}</span>
+            </button>
+            <button type="button" onclick="qsDraft.pickingBound='end';renderQuickScheduleModal();" class="w-full px-4 py-3 flex items-center justify-between gap-2 text-left hover:bg-pillbg/60 transition">
+              <span class="flex items-center gap-3 text-[13.5px] font-medium ${qsDraft.pickingBound === 'end' ? 'text-coral' : 'text-primarytext'}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                  <path d="M4 21V4m0 0h11l-1.8 4.5L15 13H4"/>
+                </svg>
+                <span>End Date</span>
+              </span>
+              <span class="text-[13.5px] font-semibold ${qsDraft.pickingBound === 'end' ? 'text-coral' : 'text-secondarytext'}">${formatShortDateLabel(qsDraft.endDate)}</span>
+            </button>
+            <div class="px-4 py-3 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="flex items-center gap-3 text-[13.5px] font-medium text-primarytext">
+                  <svg class="w-[18px] h-[18px] text-secondarytext" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+                  </svg>
+                  <span>Duration</span>
+                </span>
+                <span class="text-[13px] font-semibold text-coral">${spanDays} ${spanDays === 1 ? 'day' : 'days'}</span>
+              </div>
+              <div class="grid grid-cols-4 gap-1.5">
+                ${[
+                  { label: '1w', days: 7 },
+                  { label: '2w', days: 14 },
+                  { label: '1m', days: 30 },
+                  { label: '3m', days: 90 },
+                ]
+                  .map(
+                    (p) => `<button type="button" onclick="setQuickScheduleProjectSpanDays(${p.days})" class="tactile-btn py-1.5 rounded-xl text-xs font-semibold transition ${
+                      spanDays === p.days + 1 ? 'bg-coral text-onaccent font-bold' : 'bg-pillbg text-secondarytext hover:text-primarytext'
+                    }">${p.label}</button>`
+                  )
+                  .join('')}
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        const isUpcoming = qcDraft.taskMode === 'future';
+        const timeStr = formatMinutesToTimeInput(qsDraft.startMin);
+        const remLabel =
+          qsDraft.alertStart && qsDraft.alertEnd
+            ? 'Start & End'
+            : qsDraft.alertStart
+              ? 'At start'
+              : qsDraft.alertEnd
+                ? 'At end'
+                : 'None';
+        const remActive = qsDraft.alertStart || qsDraft.alertEnd;
+        const repLabels = { once: 'None', daily: 'Daily', weekdays: 'Weekdays', weekly: 'Weekly' };
+        const repLabel = repLabels[qsDraft.repeat] || 'None';
+        const durPresets = [
+          { label: '15m', mins: 15 },
+          { label: '30m', mins: 30 },
+          { label: '45m', mins: 45 },
+          { label: '1h', mins: 60 },
+          { label: '2h', mins: 120 },
+        ];
+
+        cardEl.innerHTML = `
+          <!-- Time Row -->
+          <div class="px-4 py-3 flex items-center justify-between gap-2">
+            <span class="flex items-center gap-3 text-[13.5px] font-medium ${!qsDraft.allDay ? 'text-coral' : 'text-primarytext'}">
+              <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+              </svg>
+              <span>Time</span>
+            </span>
+            <div class="flex items-center gap-2">
+              ${
+                qsDraft.allDay
+                  ? `<button type="button" onclick="clearQuickScheduleTimeToAllDay()" class="tactile-btn px-2.5 py-1 rounded-lg bg-pillbg text-xs font-semibold text-secondarytext hover:text-primarytext">All day · Set time</button>`
+                  : `<input
+                      type="time"
+                      value="${timeStr}"
+                      onchange="setQuickScheduleTimeValue(this.value)"
+                      class="bg-transparent text-[13.5px] font-semibold text-coral focus:outline-none cursor-pointer"
+                    />
+                    <button type="button" onclick="clearQuickScheduleTimeToAllDay()" title="Switch to All day" class="text-coral hover:opacity-75 p-0.5">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>`
+              }
+            </div>
+          </div>
+
+          <!-- Duration Row (Merged directly into Calendar sheet) -->
+          <div class="px-4 py-3 space-y-2.5">
+            <div class="flex items-center justify-between gap-2">
+              <span class="flex items-center gap-3 text-[13.5px] font-medium ${!qsDraft.allDay ? 'text-coral' : 'text-primarytext'}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                  <path d="M6 2h12M6 22h12M7 2v4.5a5 5 0 002.4 4.3L12 12l2.6-1.2A5 5 0 0017 6.5V2M7 22v-4.5a5 5 0 012.4-4.3L12 12l2.6 1.2a5 5 0 012.4 4.3V22"/>
+                </svg>
+                <span>Duration</span>
+              </span>
+              <span class="text-[13.5px] font-semibold ${!qsDraft.allDay ? 'text-coral' : 'text-secondarytext'}">${qsDraft.allDay ? 'All day' : formatCompactDuration(qsDraft.durationMin)}</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <div class="grid grid-cols-5 gap-1 flex-1">
+                ${durPresets
+                  .map(
+                    (p) => `<button type="button" onclick="setQuickScheduleDuration(${p.mins})" class="tactile-btn py-1.5 rounded-xl text-[11.5px] font-semibold transition ${
+                      !qsDraft.allDay && qsDraft.durationMin === p.mins
+                        ? 'bg-coral text-onaccent font-bold'
+                        : 'bg-pillbg text-secondarytext hover:text-primarytext'
+                    }">${p.label}</button>`
+                  )
+                  .join('')}
+              </div>
+              <input
+                type="number"
+                min="5"
+                max="720"
+                step="5"
+                value="${qsDraft.durationMin || 30}"
+                onchange="setQuickScheduleDuration(this.value)"
+                title="Custom minutes"
+                aria-label="Custom duration minutes"
+                class="w-14 bg-pillbg border border-borderline rounded-xl px-2 py-1.5 text-[11.5px] font-semibold text-primarytext text-center focus:border-coral focus:outline-none"
+              />
+            </div>
+          </div>
+
+          ${
+            isUpcoming
+              ? `
+            <!-- Reminder Row -->
+            <div class="px-4 py-3 flex items-center justify-between gap-2">
+              <button type="button" onclick="cycleQuickScheduleReminder()" class="flex-1 flex items-center justify-between gap-2 text-left">
+                <span class="flex items-center gap-3 text-[13.5px] font-medium ${remActive ? 'text-coral' : 'text-primarytext'}">
+                  <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5M5 3L2 6M22 6l-3-3"/>
+                  </svg>
+                  <span>Reminder</span>
+                </span>
+                <span class="text-[13.5px] font-semibold ${remActive ? 'text-coral' : 'text-secondarytext'}">${remLabel}</span>
+              </button>
+              ${
+                remActive
+                  ? `<button type="button" onclick="clearQuickScheduleReminder()" title="Clear reminder" class="text-coral hover:opacity-75 p-0.5">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>`
+                  : `<svg class="w-4 h-4 text-mutedtext" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>`
+              }
+            </div>
+
+            <!-- Repeat Row -->
+            <div class="px-4 py-3 space-y-2">
+              <button type="button" onclick="cycleQuickScheduleRepeat()" class="w-full flex items-center justify-between gap-2 text-left">
+                <span class="flex items-center gap-3 text-[13.5px] font-medium ${qsDraft.repeat !== 'once' ? 'text-coral' : 'text-primarytext'}">
+                  <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M17 2l4 4-4 4M3 11V9a4 4 0 014-4h14M7 22l-4-4 4-4M21 13v2a4 4 0 01-4 4H3"/>
+                  </svg>
+                  <span>Repeat</span>
+                </span>
+                <span class="flex items-center gap-1 text-[13.5px] font-semibold ${qsDraft.repeat !== 'once' ? 'text-coral' : 'text-secondarytext'}">
+                  <span>${repLabel}</span>
+                  <svg class="w-4 h-4 text-mutedtext" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </span>
+              </button>
+              ${
+                qsDraft.repeat === 'weekly'
+                  ? `<div class="grid grid-cols-7 gap-1 pt-1">
+                      ${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+                        .map((d) => {
+                          const active = qsDraft.weekDays.includes(d);
+                          return `<button type="button" onclick="toggleQuickScheduleWeekday('${d}')" class="tactile-btn py-1 rounded-lg text-[10.5px] font-bold transition ${
+                            active ? 'bg-coral text-onaccent' : 'bg-pillbg text-secondarytext hover:text-primarytext'
+                          }">${d.slice(0, 2)}</button>`;
+                        })
+                        .join('')}
+                    </div>`
+                  : ''
+              }
+            </div>
+          `
+              : ''
+          }
+        `;
       }
     }
 
@@ -15157,11 +16867,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function getCarromThemePalette() {
-      let accentHex = '#F28B82';
-      try {
-        const raw = getComputedStyle(document.documentElement).getPropertyValue('--color-accent-hex').trim();
-        if (raw) accentHex = raw;
-      } catch (_) {}
+      const readHexVar = (varName, fallback) => {
+        try {
+          const raw = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+          if (raw) return raw;
+        } catch (_) {}
+        return fallback;
+      };
+      const accentHex = readHexVar('--color-accent-hex', '#F28B82');
       const isLight =
         document.documentElement.dataset.themeMode === 'light' ||
         document.documentElement.dataset.theme === 'paper';
@@ -15181,6 +16894,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         accent: accentHex,
         accentSoft: rgbVar('--color-accent', 0.24, '242 139 130'),
         accentMid: rgbVar('--color-accent', 0.55, '242 139 130'),
+        pockets: {
+          scheduling: readHexVar('--color-pocket-schedule', accentHex),
+          notes: readHexVar('--color-pocket-notes', '#6EA8D8'),
+          journal: readHexVar('--color-pocket-journal', '#81C953'),
+          archive: readHexVar('--color-pocket-archive', rgbVar('--color-secondarytext', 1, '154 154 160')),
+        },
       };
     }
 
@@ -15357,7 +17076,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (!Array.isArray(state.swipeHistory)) state.swipeHistory = [];
       state.swipeHistory.push(record);
 
-      spawnCarromPocketBurst(pocket.x, pocket.y, pocket.color, `+ ${pocket.label.toUpperCase()}`);
+      const burstPal = getCarromThemePalette();
+      const burstColor = (burstPal.pockets && burstPal.pockets[pocket.id]) || pocket.color;
+      spawnCarromPocketBurst(pocket.x, pocket.y, burstColor, `+ ${pocket.label.toUpperCase()}`);
 
       // Drop the next queued thought coin cleanly onto the center of the board
       syncCarromCoinsFromState(true);
@@ -15684,10 +17405,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         ctx.fillStyle = pal.outerBg;
         ctx.fill();
 
-        // Crisp colored destination ring (strictly inside playing surface)
+        // Crisp theme-matched destination ring (strictly inside playing surface)
         ctx.beginPath();
         ctx.arc(p.x, p.y, rimR, 0, Math.PI * 2);
-        ctx.strokeStyle = p.color;
+        ctx.strokeStyle = (pal.pockets && pal.pockets[p.id]) || p.color;
         ctx.lineWidth = 2;
         ctx.stroke();
       });
@@ -15767,14 +17488,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         ctx.strokeStyle = pal.border;
         ctx.lineWidth = 1;
         ctx.stroke();
-
-        // Crisp monogram letter from active thought
-        const initial = String(coin.text || '•').trim().charAt(0).toUpperCase() || '•';
-        ctx.font = `700 ${Math.max(8, Math.round(11.5 * carromGame.spawnScale))}px "Plus Jakarta Sans", sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = pal.primaryText;
-        ctx.fillText(initial, coin.x, coin.y + 0.5);
       });
 
       // 8. Pocket Celebration Particles & Floating Labels
@@ -17244,6 +18957,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       if (state.habits.length === 0) {
         container.innerHTML = `<p class="text-sm text-mutedtext text-center py-8">No habits tracked yet. Tap + below to start one.</p>`;
+        if (typeof renderHabitRoutinesSection === 'function') renderHabitRoutinesSection();
         if (typeof renderDesktopInspector === 'function') renderDesktopInspector();
         return;
       }
@@ -17319,6 +19033,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           .join('');
       }
 
+      if (typeof renderHabitRoutinesSection === 'function') renderHabitRoutinesSection();
       if (typeof renderDesktopInspector === 'function') renderDesktopInspector();
     }
 
@@ -19522,8 +21237,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const fabEl = document.getElementById('routines-fab');
       const modalEl = document.getElementById('routine-add-modal');
       const showFab = state.activeTab === 'profile' && state.profileSubView === 'routines';
+      const canShowModal = showFab || state.activeTab === 'habit';
       if (fabEl) fabEl.classList.toggle('hidden', !showFab);
-      if (modalEl) modalEl.classList.toggle('hidden', !(showFab && state.routineAddModalOpen));
+      if (modalEl) modalEl.classList.toggle('hidden', !(canShowModal && state.routineAddModalOpen));
     }
 
     function syncPromptsFabVisibility() {
@@ -22540,221 +24256,243 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       syncLiveLocationIndicators();
     }
 
-    function renderStickyNotesList() {
-      const listEl = document.getElementById('profile-routines-list');
-      if (!listEl) return;
-
-      if (state.routines.length === 0) {
-        listEl.innerHTML = `
-          <div class="col-span-full bg-cardbg border border-borderline rounded-[22px] p-6 text-center space-y-2">
-            <p class="text-xs font-semibold text-primarytext">No Step-by-Step Sticky Notes yet</p>
-            <p class="text-[11px] text-secondarytext">Create guided checklists here — and link them to Automate rules to launch automatically.</p>
-          </div>
-        `;
-        return;
-      }
-
+    function renderRoutineCardMarkup(r, idPrefix = '') {
       const logic = getRoutinesLogic();
+      const steps = Array.isArray(r.steps) ? r.steps : [];
+      const prog = logic
+        ? logic.computeStickyNoteProgress(steps)
+        : {
+            total: steps.length,
+            done: steps.filter((s) => s.done).length,
+            pct: steps.length === 0 ? 0 : Math.round((steps.filter((s) => s.done).length / steps.length) * 100),
+            activeIndex: steps.findIndex((s) => !s.done),
+            isComplete: steps.length > 0 && steps.every((s) => s.done),
+          };
+      const colorInfo = getStickyNoteColor(r.color);
+      const activeStep = prog.activeIndex >= 0 ? steps[prog.activeIndex] : null;
+      const driveFiles = Array.isArray(r.driveFiles) ? r.driveFiles : [];
 
-      listEl.innerHTML = state.routines
-        .map((r) => {
-          const steps = Array.isArray(r.steps) ? r.steps : [];
-          const prog = logic
-            ? logic.computeStickyNoteProgress(steps)
-            : {
-                total: steps.length,
-                done: steps.filter((s) => s.done).length,
-                pct: steps.length === 0 ? 0 : Math.round((steps.filter((s) => s.done).length / steps.length) * 100),
-                activeIndex: steps.findIndex((s) => !s.done),
-                isComplete: steps.length > 0 && steps.every((s) => s.done),
-              };
-          const colorInfo = getStickyNoteColor(r.color);
-          const activeStep = prog.activeIndex >= 0 ? steps[prog.activeIndex] : null;
-          const driveFiles = Array.isArray(r.driveFiles) ? r.driveFiles : [];
-
-          return `
-            <div data-sticky-note-card="${r.id}" class="bg-cardbg border border-borderline rounded-[22px] overflow-hidden flex flex-col justify-between transition">
-              <div class="h-1.5 w-full" style="background-color:${colorInfo.hex};"></div>
-              <div class="p-3.5 space-y-3 flex-1 flex flex-col">
-                <!-- Header -->
-                <div class="flex items-start justify-between gap-2">
-                  <button
-                    type="button"
-                    onclick="toggleRoutineExpanded(${r.id})"
-                    class="tactile-btn flex-1 min-w-0 text-left space-y-1"
-                  >
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                      <span class="px-2 py-0.5 rounded-full text-[9.5px] font-bold uppercase tracking-wider" style="background-color:${colorInfo.hex}24; color:${colorInfo.hex};">
-                        ${escapeHtml(r.window || 'Daily')}
-                      </span>
-                      <span class="text-[10px] font-semibold ${prog.isComplete ? 'text-lime' : 'text-secondarytext'}">
-                        ${prog.total === 0 ? 'No steps yet' : prog.isComplete ? 'All steps done ✓' : `Step ${prog.activeIndex + 1} of ${prog.total}`}
-                      </span>
-                    </div>
-                    <p class="text-sm font-bold text-primarytext leading-snug">${escapeHtml(r.title)}</p>
-                    ${r.note ? `<p class="text-[11px] text-secondarytext leading-snug">${escapeHtml(r.note)}</p>` : ''}
-                  </button>
-
-                  <div class="flex items-center gap-0.5 flex-shrink-0">
-                    <button
-                      type="button"
-                      onclick="openRoutineAddModal('routine', ${r.id})"
-                      title="Edit sticky note"
-                      class="tactile-btn p-1.5 rounded-full text-secondarytext hover:text-primarytext"
-                    >
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
-                    </button>
-                    <button
-                      type="button"
-                      onclick="toggleRoutineExpanded(${r.id})"
-                      title="${r.expanded ? 'Collapse steps' : 'Expand all steps'}"
-                      class="tactile-btn p-1.5 rounded-full text-secondarytext hover:text-primarytext"
-                    >
-                      <svg class="w-3.5 h-3.5 transition-transform ${r.expanded ? 'rotate-180' : ''}" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                    </button>
-                    <button
-                      type="button"
-                      onclick="removeRoutine(${r.id})"
-                      title="Delete sticky note"
-                      class="tactile-btn p-1.5 rounded-full text-secondarytext hover:text-coral"
-                    >
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                  </div>
+      return `
+        <div data-sticky-note-card="${r.id}" class="bg-cardbg border border-borderline rounded-[22px] overflow-hidden flex flex-col justify-between transition">
+          <div class="h-1.5 w-full" style="background-color:${colorInfo.hex};"></div>
+          <div class="p-3.5 space-y-3 flex-1 flex flex-col">
+            <!-- Header -->
+            <div class="flex items-start justify-between gap-2">
+              <button
+                type="button"
+                onclick="toggleRoutineExpanded(${r.id})"
+                class="tactile-btn flex-1 min-w-0 text-left space-y-1"
+              >
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="px-2 py-0.5 rounded-full text-[9.5px] font-bold uppercase tracking-wider bg-pillbg border border-borderline" style="color:${colorInfo.hex};">
+                    ${escapeHtml(r.window || 'Daily')}
+                  </span>
+                  <span class="text-[10px] font-semibold ${prog.isComplete ? 'text-lime' : 'text-secondarytext'}">
+                    ${prog.total === 0 ? 'No steps yet' : prog.isComplete ? 'All steps done ✓' : `Step ${prog.activeIndex + 1} of ${prog.total}`}
+                  </span>
                 </div>
+                <p class="text-sm font-bold text-primarytext leading-snug">${escapeHtml(r.title)}</p>
+                ${r.note ? `<p class="text-[11px] text-secondarytext leading-snug">${escapeHtml(r.note)}</p>` : ''}
+              </button>
 
-                <!-- Progress Bar -->
-                <div class="w-full h-1.5 rounded-full bg-pillbg overflow-hidden">
-                  <div class="h-full rounded-full transition-all duration-300" style="width: ${prog.pct}%; background-color:${colorInfo.hex};"></div>
-                </div>
-
-                <!-- Current Active Step Spotlight -->
-                ${
-                  activeStep
-                    ? `
-                    <div class="rounded-2xl bg-pillbg border border-borderline p-3 space-y-2" style="border-left: 3px solid ${colorInfo.hex};">
-                      <div class="flex items-center justify-between gap-2">
-                        <span class="text-[10px] font-extrabold uppercase tracking-wider" style="color:${colorInfo.hex};">Current Step ${prog.activeIndex + 1}</span>
-                        ${activeStep.duration ? `<span class="text-[10px] font-semibold text-secondarytext">${escapeHtml(activeStep.duration)}</span>` : ''}
-                      </div>
-                      <p class="text-xs font-semibold text-primarytext leading-snug">${escapeHtml(activeStep.title)}</p>
-                      ${activeStep.note ? `<p class="text-[11px] text-secondarytext">${escapeHtml(activeStep.note)}</p>` : ''}
-                      <button
-                        type="button"
-                        onclick="completeCurrentStickyNoteStep(${r.id})"
-                        class="tactile-btn w-full py-2 px-3 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition"
-                        style="background-color:${colorInfo.hex}; color:#141414;"
-                      >
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                        <span>${prog.activeIndex + 1 < prog.total ? 'Complete &amp; Next Step →' : 'Complete Final Step ✓'}</span>
-                      </button>
-                    </div>
-                  `
-                    : prog.isComplete
-                      ? `
-                      <div class="rounded-2xl bg-pillbg border border-borderline px-3 py-2.5 flex items-center justify-between gap-2">
-                        <span class="text-xs font-semibold text-lime">All ${prog.total} steps completed!</span>
-                        <button type="button" onclick="resetRoutineSteps(${r.id})" class="tactile-btn px-2.5 py-1 rounded-lg bg-cardbg border border-borderline text-[10.5px] font-semibold text-primarytext hover:border-coral">
-                          Restart
-                        </button>
-                      </div>
-                    `
-                      : ''
-                }
-
-                <!-- Full Step-by-Step Sequence (Expanded) -->
-                ${
-                  r.expanded
-                    ? `
-                    <div class="space-y-1.5 pt-0.5">
-                      ${steps
-                        .map(
-                          (s, idx) => `
-                          <div class="bg-pillbg/80 border ${idx === prog.activeIndex ? 'border-coral/60' : 'border-borderline'} rounded-xl px-2.5 py-2 flex items-start justify-between gap-2">
-                            <button
-                              type="button"
-                              onclick="toggleRoutineStepDone(${r.id}, '${s.id}')"
-                              class="tactile-btn flex items-start gap-2 min-w-0 flex-1 text-left"
-                            >
-                              <span class="w-5 h-5 mt-0.5 rounded-full border-2 flex items-center justify-center text-[10px] font-bold flex-shrink-0 transition ${
-                                s.done ? 'bg-coral border-coral text-onaccent' : 'border-borderline bg-cardbg text-secondarytext'
-                              }">
-                                ${s.done ? '<svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : idx + 1}
-                              </span>
-                              <div class="min-w-0 flex-1">
-                                <p class="text-xs leading-snug ${s.done ? 'line-through text-secondarytext' : 'text-primarytext font-medium'}">${escapeHtml(s.title)}</p>
-                                ${s.note ? `<p class="text-[10.5px] text-mutedtext mt-0.5">${escapeHtml(s.note)}</p>` : ''}
-                              </div>
-                            </button>
-                            <div class="flex items-center gap-0.5 flex-shrink-0">
-                              ${s.duration ? `<span class="text-[10px] text-secondarytext mr-1">${escapeHtml(s.duration)}</span>` : ''}
-                              ${idx > 0 ? `<button type="button" onclick="moveRoutineStep(${r.id}, '${s.id}', -1)" title="Move step up" class="p-1 text-secondarytext hover:text-primarytext"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg></button>` : ''}
-                              ${idx < steps.length - 1 ? `<button type="button" onclick="moveRoutineStep(${r.id}, '${s.id}', 1)" title="Move step down" class="p-1 text-secondarytext hover:text-primarytext"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></button>` : ''}
-                              <button type="button" onclick="removeRoutineStep(${r.id}, '${s.id}')" title="Remove step" class="p-1 text-secondarytext hover:text-coral">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                              </button>
-                            </div>
-                          </div>
-                        `
-                        )
-                        .join('')}
-
-                      <form onsubmit="handleAddRoutineStep(event, ${r.id})" class="flex items-center gap-1.5 pt-1">
-                        <input
-                          id="new-routine-step-${r.id}"
-                          type="text"
-                          placeholder="Add next step..."
-                          class="flex-1 bg-pillbg text-[11px] text-primarytext placeholder-mutedtext px-3 py-2 rounded-xl border border-borderline focus:border-coral focus:outline-none"
-                        />
-                        <input
-                          id="new-routine-step-dur-${r.id}"
-                          type="text"
-                          placeholder="5m"
-                          class="w-12 bg-pillbg text-[11px] text-primarytext placeholder-mutedtext px-2 py-2 rounded-xl border border-borderline focus:border-coral focus:outline-none text-center"
-                        />
-                        <button type="submit" title="Add step" class="tactile-btn w-8 h-8 rounded-xl bg-coral text-onaccent flex items-center justify-center flex-shrink-0">
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                        </button>
-                      </form>
-                    </div>
-                  `
-                    : ''
-                }
-
-                <!-- Attached Google Drive Files -->
-                ${
-                  driveFiles.length > 0
-                    ? `<div class="flex flex-wrap gap-1.5 pt-1 border-t border-borderline/60">
-                        ${driveFiles
-                          .map(
-                            (f) => `
-                            <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-pillbg border border-borderline text-[10.5px] text-primarytext max-w-full">
-                              ${f.iconLink ? `<img src="${escapeHtml(f.iconLink)}" alt="" class="w-3 h-3 flex-shrink-0" />` : ''}
-                              <a href="${escapeHtml(f.webViewLink || '#')}" target="_blank" rel="noopener noreferrer" class="truncate max-w-[140px] hover:text-coral transition">${escapeHtml(f.name || 'Drive File')}</a>
-                              <button type="button" onclick="removeRoutineNoteDriveFile(${r.id}, '${escapeHtml(f.id)}')" class="text-secondarytext hover:text-coral font-bold">&times;</button>
-                            </span>
-                          `
-                          )
-                          .join('')}
-                      </div>`
-                    : ''
-                }
-
-                <!-- Card Footer Actions -->
-                <div class="flex items-center justify-between gap-1.5 pt-2 border-t border-borderline/60 mt-auto flex-wrap">
-                  <button
-                    type="button"
-                    onclick="resetRoutineSteps(${r.id})"
-                    class="tactile-btn px-2 py-1 rounded-lg bg-pillbg border border-borderline hover:border-coral text-[10.5px] font-semibold text-secondarytext hover:text-primarytext"
-                  >
-                    Reset Steps
-                  </button>
-                </div>
+              <div class="flex items-center gap-0.5 flex-shrink-0">
+                <button
+                  type="button"
+                  onclick="openRoutineAddModal('routine', ${r.id})"
+                  title="Edit routine"
+                  class="tactile-btn p-1.5 rounded-full text-secondarytext hover:text-primarytext"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+                </button>
+                <button
+                  type="button"
+                  onclick="toggleRoutineExpanded(${r.id})"
+                  title="${r.expanded ? 'Collapse steps' : 'Expand all steps'}"
+                  class="tactile-btn p-1.5 rounded-full text-secondarytext hover:text-primarytext"
+                >
+                  <svg class="w-3.5 h-3.5 transition-transform ${r.expanded ? 'rotate-180' : ''}" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <button
+                  type="button"
+                  onclick="removeRoutine(${r.id})"
+                  title="Delete routine"
+                  class="tactile-btn p-1.5 rounded-full text-secondarytext hover:text-coral"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
               </div>
             </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full h-1.5 rounded-full bg-pillbg overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-300" style="width: ${prog.pct}%; background-color:${colorInfo.hex};"></div>
+            </div>
+
+            <!-- Current Active Step Spotlight -->
+            ${
+              activeStep
+                ? `
+                <div class="rounded-2xl bg-pillbg border border-borderline p-3 space-y-2" style="border-left: 3px solid ${colorInfo.hex};">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider" style="color:${colorInfo.hex};">Current Step ${prog.activeIndex + 1}</span>
+                    ${activeStep.duration ? `<span class="text-[10px] font-semibold text-secondarytext">${escapeHtml(activeStep.duration)}</span>` : ''}
+                  </div>
+                  <p class="text-xs font-semibold text-primarytext leading-snug">${escapeHtml(activeStep.title)}</p>
+                  ${activeStep.note ? `<p class="text-[11px] text-secondarytext">${escapeHtml(activeStep.note)}</p>` : ''}
+                  <button
+                    type="button"
+                    onclick="completeCurrentStickyNoteStep(${r.id})"
+                    class="tactile-btn w-full py-2 px-3 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition"
+                    style="background-color:${colorInfo.hex}; color:#141414;"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    <span>${prog.activeIndex + 1 < prog.total ? 'Complete &amp; Next Step →' : 'Complete Final Step ✓'}</span>
+                  </button>
+                </div>
+              `
+                : prog.isComplete
+                  ? `
+                  <div class="rounded-2xl bg-pillbg border border-borderline px-3 py-2.5 flex items-center justify-between gap-2">
+                    <span class="text-xs font-semibold text-lime">All ${prog.total} steps completed!</span>
+                    <button type="button" onclick="resetRoutineSteps(${r.id})" class="tactile-btn px-2.5 py-1 rounded-lg bg-cardbg border border-borderline text-[10.5px] font-semibold text-primarytext hover:border-coral">
+                      Restart
+                    </button>
+                  </div>
+                `
+                  : ''
+            }
+
+            <!-- Full Step-by-Step Sequence (Expanded) -->
+            ${
+              r.expanded
+                ? `
+                <div class="space-y-1.5 pt-0.5">
+                  ${steps
+                    .map(
+                      (s, idx) => `
+                      <div class="bg-pillbg border ${idx === prog.activeIndex ? 'border-coral' : 'border-borderline'} rounded-xl px-2.5 py-2 flex items-start justify-between gap-2">
+                        <button
+                          type="button"
+                          onclick="toggleRoutineStepDone(${r.id}, '${s.id}')"
+                          class="tactile-btn flex items-start gap-2 min-w-0 flex-1 text-left"
+                        >
+                          <span class="w-5 h-5 mt-0.5 rounded-full border-2 flex items-center justify-center text-[10px] font-bold flex-shrink-0 transition ${
+                            s.done ? 'bg-coral border-coral text-onaccent' : 'border-borderline bg-cardbg text-secondarytext'
+                          }">
+                            ${s.done ? '<svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : idx + 1}
+                          </span>
+                          <div class="min-w-0 flex-1">
+                            <p class="text-xs leading-snug ${s.done ? 'line-through text-secondarytext' : 'text-primarytext font-medium'}">${escapeHtml(s.title)}</p>
+                            ${s.note ? `<p class="text-[10.5px] text-mutedtext mt-0.5">${escapeHtml(s.note)}</p>` : ''}
+                          </div>
+                        </button>
+                        <div class="flex items-center gap-0.5 flex-shrink-0">
+                          ${s.duration ? `<span class="text-[10px] text-secondarytext mr-1">${escapeHtml(s.duration)}</span>` : ''}
+                          ${idx > 0 ? `<button type="button" onclick="moveRoutineStep(${r.id}, '${s.id}', -1)" title="Move step up" class="p-1 text-secondarytext hover:text-primarytext"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg></button>` : ''}
+                          ${idx < steps.length - 1 ? `<button type="button" onclick="moveRoutineStep(${r.id}, '${s.id}', 1)" title="Move step down" class="p-1 text-secondarytext hover:text-primarytext"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></button>` : ''}
+                          <button type="button" onclick="removeRoutineStep(${r.id}, '${s.id}')" title="Remove step" class="p-1 text-secondarytext hover:text-coral">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                          </button>
+                        </div>
+                      </div>
+                    `
+                    )
+                    .join('')}
+
+                  <form onsubmit="handleAddRoutineStep(event, ${r.id})" class="flex items-center gap-1.5 pt-1">
+                    <input
+                      id="${idPrefix}new-routine-step-${r.id}"
+                      data-step-title="1"
+                      type="text"
+                      placeholder="Add next step..."
+                      class="flex-1 bg-pillbg text-[11px] text-primarytext placeholder-mutedtext px-3 py-2 rounded-xl border border-borderline focus:border-coral focus:outline-none"
+                    />
+                    <input
+                      id="${idPrefix}new-routine-step-dur-${r.id}"
+                      data-step-dur="1"
+                      type="text"
+                      placeholder="5m"
+                      class="w-12 bg-pillbg text-[11px] text-primarytext placeholder-mutedtext px-2 py-2 rounded-xl border border-borderline focus:border-coral focus:outline-none text-center"
+                    />
+                    <button type="submit" title="Add step" class="tactile-btn w-8 h-8 rounded-xl bg-coral text-onaccent flex items-center justify-center flex-shrink-0">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                    </button>
+                  </form>
+                </div>
+              `
+                : ''
+            }
+
+            <!-- Attached Google Drive Files -->
+            ${
+              driveFiles.length > 0
+                ? `<div class="flex flex-wrap gap-1.5 pt-1 border-t border-borderline/60">
+                    ${driveFiles
+                      .map(
+                        (f) => `
+                        <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-pillbg border border-borderline text-[10.5px] text-primarytext max-w-full">
+                          ${f.iconLink ? `<img src="${escapeHtml(f.iconLink)}" alt="" class="w-3 h-3 flex-shrink-0" />` : ''}
+                          <a href="${escapeHtml(f.webViewLink || '#')}" target="_blank" rel="noopener noreferrer" class="truncate max-w-[140px] hover:text-coral transition">${escapeHtml(f.name || 'Drive File')}</a>
+                          <button type="button" onclick="removeRoutineNoteDriveFile(${r.id}, '${escapeHtml(f.id)}')" class="text-secondarytext hover:text-coral font-bold">&times;</button>
+                        </span>
+                      `
+                      )
+                      .join('')}
+                  </div>`
+                : ''
+            }
+
+            <!-- Card Footer Actions -->
+            <div class="flex items-center justify-between gap-1.5 pt-2 border-t border-borderline/60 mt-auto flex-wrap">
+              <button
+                type="button"
+                onclick="resetRoutineSteps(${r.id})"
+                class="tactile-btn px-2 py-1 rounded-lg bg-pillbg border border-borderline hover:border-coral text-[10.5px] font-semibold text-secondarytext hover:text-primarytext"
+              >
+                Reset Steps
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderHabitRoutinesSection() {
+      const container = document.getElementById('habit-routines-container');
+      if (!container) return;
+      const routines = Array.isArray(state.routines) ? state.routines : [];
+      if (routines.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+      container.innerHTML = `
+        <div class="flex items-center justify-between pt-2">
+          <div class="flex items-center gap-2">
+            <h3 class="font-display text-sm font-bold text-primarytext tracking-tight">Routines</h3>
+            <span class="text-xs font-semibold text-mutedtext tabular-nums">${routines.length}</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-3.5">
+          ${routines.map((r) => renderRoutineCardMarkup(r, 'habit-')).join('')}
+        </div>
+      `;
+    }
+
+    function renderStickyNotesList() {
+      const listEl = document.getElementById('profile-routines-list');
+      if (listEl) {
+        if (state.routines.length === 0) {
+          listEl.innerHTML = `
+            <div class="col-span-full bg-cardbg border border-borderline rounded-[22px] p-6 text-center space-y-2">
+              <p class="text-xs font-semibold text-primarytext">No Step-by-Step Sticky Notes yet</p>
+              <p class="text-[11px] text-secondarytext">Create guided checklists here — and link them to Automate rules to launch automatically.</p>
+            </div>
           `;
-        })
-        .join('');
+        } else {
+          listEl.innerHTML = state.routines.map((r) => renderRoutineCardMarkup(r, '')).join('');
+        }
+      }
+      renderHabitRoutinesSection();
     }
 
     function completeCurrentStickyNoteStep(routineId) {
@@ -22840,8 +24578,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function handleAddRoutineStep(e, routineId) {
       e.preventDefault();
       const r = state.routines.find((item) => item.id === routineId);
-      const input = document.getElementById(`new-routine-step-${routineId}`);
-      const durInput = document.getElementById(`new-routine-step-dur-${routineId}`);
+      const formEl = e.target;
+      const input = formEl?.querySelector('input[data-step-title]') || document.getElementById(`new-routine-step-${routineId}`);
+      const durInput = formEl?.querySelector('input[data-step-dur]') || document.getElementById(`new-routine-step-dur-${routineId}`);
       const title = input ? input.value.trim() : '';
       const duration = durInput ? durInput.value.trim() : '';
       if (!r || !title) return;
@@ -24227,11 +25966,18 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
 
       document.addEventListener('pointerdown', (e) => {
-        if (!state.timelineFabMenuOpen && !state.journalFabMenuOpen) return;
+        if (qcDraft.open && qcDraft.moreOpen) {
+          if (!e.target.closest('#qc-more-menu') && !e.target.closest('#qc-more-btn')) {
+            qcDraft.moreOpen = false;
+            renderQuickCreateUI();
+          }
+        }
+        if (!state.timelineFabMenuOpen && !state.journalFabMenuOpen && !state.habitFabMenuOpen) return;
         if (
           e.target.closest('#fab-speed-dial-backdrop') ||
           e.target.closest('#timeline-fab-menu') ||
           e.target.closest('#journal-fab-menu') ||
+          e.target.closest('#habit-fab-menu') ||
           e.target.closest('#fab-action-btn') ||
           e.target.closest('#header-desktop-add-btn')
         ) {
@@ -24242,7 +25988,21 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-          if (state.timelineFabMenuOpen || state.journalFabMenuOpen) {
+          if (qsDraft.open) {
+            closeQuickScheduleModal(false);
+            return;
+          }
+          if (qcDraft.open) {
+            if (qcDraft.moreOpen || qcDraft.activePopover) {
+              qcDraft.moreOpen = false;
+              qcDraft.activePopover = null;
+              renderQuickCreateUI();
+            } else {
+              closeQuickCreateModal();
+            }
+            return;
+          }
+          if (state.timelineFabMenuOpen || state.journalFabMenuOpen || state.habitFabMenuOpen) {
             closeAllFabMenus();
           }
           closeInboxQuickAddPanel();
