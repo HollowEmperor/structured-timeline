@@ -72,8 +72,11 @@
       --color-secondary-3-hex: #E5B96A;
       --color-secondary-3-fg: 20 20 20;
       --color-ring-physical: #6FC49A;
+      --color-ring-physical-soft: #4F9874;
       --color-ring-mental: #F28B82;
+      --color-ring-mental-soft: #C6675F;
       --color-ring-gained: #E5B96A;
+      --color-ring-gained-soft: #BA8F46;
       --color-pocket-schedule: #F28B82;
       --color-pocket-notes: #7EA8D6;
       --color-pocket-journal: #6FC49A;
@@ -2096,7 +2099,7 @@
                     <span class="text-[13px] font-medium text-primarytext">Physical fatigue</span>
                   </div>
                   <div class="w-full h-2 rounded-full bg-pillbg overflow-hidden">
-                    <div id="bar-physical-fatigue" class="h-full rounded-full transition-all duration-300" style="width: 24%; background-color: var(--color-ring-physical);"></div>
+                    <div id="bar-physical-fatigue" class="h-full rounded-full transition-all duration-300" style="width: 24%; background: linear-gradient(90deg, var(--color-ring-physical-soft), var(--color-ring-physical));"></div>
                   </div>
                 </div>
 
@@ -2105,7 +2108,7 @@
                     <span class="text-[13px] font-medium text-primarytext">Mental drain</span>
                   </div>
                   <div class="w-full h-2 rounded-full bg-pillbg overflow-hidden">
-                    <div id="bar-mental-drain" class="h-full rounded-full transition-all duration-300" style="width: 43%; background-color: var(--color-ring-mental);"></div>
+                    <div id="bar-mental-drain" class="h-full rounded-full transition-all duration-300" style="width: 43%; background: linear-gradient(90deg, var(--color-ring-mental-soft), var(--color-ring-mental));"></div>
                   </div>
                 </div>
 
@@ -2114,7 +2117,7 @@
                     <span class="text-[13px] font-medium text-primarytext">Energy gained</span>
                   </div>
                   <div class="w-full h-2 rounded-full bg-pillbg overflow-hidden">
-                    <div id="bar-energy-gained" class="h-full rounded-full transition-all duration-300" style="width: 62%; background-color: var(--color-ring-gained);"></div>
+                    <div id="bar-energy-gained" class="h-full rounded-full transition-all duration-300" style="width: 62%; background: linear-gradient(90deg, var(--color-ring-gained-soft), var(--color-ring-gained));"></div>
                   </div>
                 </div>
               </div>
@@ -3740,7 +3743,7 @@
               <span class="text-sm font-semibold text-primarytext">What color?</span>
               <span id="modal-color-name" class="text-xs font-medium text-coral capitalize">Coral</span>
             </div>
-            <div id="modal-color-swatches" class="bg-cardbg border border-borderline rounded-2xl px-3 py-3 grid grid-cols-5 gap-2.5 place-items-center"></div>
+            <div id="modal-color-swatches" class="bg-cardbg border border-borderline rounded-2xl px-3.5 py-3 space-y-2.5"></div>
           </div>
 
           <div id="modal-repeat-section" class="space-y-2.5">
@@ -3995,7 +3998,7 @@
               <span class="text-sm font-semibold text-primarytext">Timeline Color</span>
               <span id="project-color-name" class="text-xs font-medium text-coral capitalize">Coral</span>
             </div>
-            <div id="project-color-swatches" class="bg-cardbg border border-borderline rounded-2xl px-3 py-3 grid grid-cols-5 gap-2.5 place-items-center"></div>
+            <div id="project-color-swatches" class="bg-cardbg border border-borderline rounded-2xl px-3.5 py-3 space-y-2.5"></div>
           </div>
 
           <div class="space-y-2.5">
@@ -4729,7 +4732,7 @@
               <span class="text-sm font-semibold text-primarytext">What color?</span>
               <span id="habit-modal-color-name" class="text-xs font-medium text-coral capitalize">Coral</span>
             </div>
-            <div id="habit-modal-color-swatches" class="bg-cardbg border border-borderline rounded-2xl px-3 py-3 grid grid-cols-5 gap-2.5 place-items-center"></div>
+            <div id="habit-modal-color-swatches" class="bg-cardbg border border-borderline rounded-2xl px-3.5 py-3 space-y-2.5"></div>
           </div>
 
           <!-- Connect & Auto-Schedule on Timeline -->
@@ -5428,7 +5431,7 @@
         </div>
 
         <div id="spatial-island-progress-track" class="absolute bottom-0 left-0 right-0 h-[2px] bg-pillbg/60 pointer-events-none">
-          <div id="spatial-island-progress-fill" class="h-full bg-coral spatial-island-timer-bar"></div>
+          <div id="spatial-island-progress-fill" class="h-full spatial-island-timer-bar" style="background: linear-gradient(90deg, rgb(var(--color-secondary-1)) 0%, rgb(var(--color-secondary-2)) 50%, rgb(var(--color-secondary-3)) 100%);"></div>
         </div>
       </div>
     </div>
@@ -8052,7 +8055,24 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     // =========================================================================
     // DATA, PALETTE & ICON DEFINITIONS
     // =========================================================================
+    const SECONDARY_COLOR_KEYS = ['secondary1', 'secondary2', 'secondary3'];
+    const STANDARD_COLOR_KEYS = [
+      'coral',
+      'terracotta',
+      'amber',
+      'lime',
+      'emerald',
+      'teal',
+      'sky',
+      'indigo',
+      'plum',
+      'rose',
+    ];
+
     const CAPSULE_COLORS = {
+      secondary1: { label: 'Harmony 1', hex: '#6FC49A', text: '#141414', isHarmony: true },
+      secondary2: { label: 'Harmony 2', hex: '#7EA8D6', text: '#141414', isHarmony: true },
+      secondary3: { label: 'Harmony 3', hex: '#E5B96A', text: '#141414', isHarmony: true },
       coral: { label: 'Coral', hex: '#F28B82', text: '#141414' },
       terracotta: { label: 'Terracotta', hex: '#E07A5F', text: '#FFFFFF' },
       amber: { label: 'Amber', hex: '#F6C244', text: '#141414' },
@@ -8064,6 +8084,36 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       plum: { label: 'Plum', hex: '#C47B9B', text: '#141414' },
       rose: { label: 'Rose', hex: '#F472B6', text: '#141414' },
     };
+
+    function pickRandomSecondaryColorKey() {
+      return SECONDARY_COLOR_KEYS[Math.floor(Math.random() * SECONDARY_COLOR_KEYS.length)] || 'secondary1';
+    }
+
+    function renderPaletteSwatchesHtml(activeKey, onSelectFnName, ringOffsetCls = 'ring-offset-cardbg', swatchSizeCls = 'w-7 h-7') {
+      const harmonyBtns = SECONDARY_COLOR_KEYS.map((key) => {
+        const val = CAPSULE_COLORS[key];
+        const active = key === activeKey;
+        return `<button type="button" onclick="${onSelectFnName}('${key}')" title="${val.label} (Auto)" aria-label="${val.label}" style="background-color:${val.hex};" class="tactile-btn ${swatchSizeCls} rounded-full transition ${
+          active ? `ring-2 ring-primarytext ring-offset-2 ${ringOffsetCls} scale-110` : 'opacity-85 hover:opacity-100'
+        }"></button>`;
+      }).join('');
+
+      const standardBtns = STANDARD_COLOR_KEYS.map((key) => {
+        const val = CAPSULE_COLORS[key];
+        const active = key === activeKey;
+        return `<button type="button" onclick="${onSelectFnName}('${key}')" title="${val.label}" aria-label="${val.label}" style="background-color:${val.hex};" class="tactile-btn ${swatchSizeCls} rounded-full transition ${
+          active ? `ring-2 ring-primarytext ring-offset-2 ${ringOffsetCls} scale-110` : 'opacity-80 hover:opacity-100'
+        }"></button>`;
+      }).join('');
+
+      return `
+        <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-borderline/60">
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-secondarytext">Auto Harmony</span>
+          <div class="flex items-center gap-2.5">${harmonyBtns}</div>
+        </div>
+        <div class="grid grid-cols-5 gap-2.5 place-items-center pt-0.5">${standardBtns}</div>
+      `;
+    }
 
     const LIFE_AREAS = [
       'Karma',
@@ -9565,6 +9615,21 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       };
     }
 
+    function getHarmonyTonalScale(baseHex, steps = 6, isLightTheme = false) {
+      const { h, s, l } = hexToHsl(baseHex || '#6FC49A');
+      const count = Math.max(2, steps);
+      const shades = [];
+      for (let i = 0; i < count; i++) {
+        const t = i / (count - 1);
+        const shadeL = isLightTheme
+          ? Math.max(26, Math.min(72, l + 22 - t * 30))
+          : Math.max(30, Math.min(76, l - 18 + t * 26));
+        const shadeS = Math.max(22, Math.min(76, s * (0.72 + t * 0.34)));
+        shades.push(hslToColorTokens(h, shadeS, shadeL).hex);
+      }
+      return shades;
+    }
+
     function getContrastTextForHex(hex) {
       const clean = String(hex || '#F28B82').replace('#', '');
       if (clean.length !== 6) return '#141414';
@@ -9607,10 +9672,31 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       root.style.setProperty('--color-secondary-3-hex', harmony.secondary3.hex);
       root.style.setProperty('--color-secondary-3-fg', harmony.secondary3.fg);
 
+      // Sync live auto-derived secondary colors into shared creation palettes
+      CAPSULE_COLORS.secondary1.hex = harmony.secondary1.hex;
+      CAPSULE_COLORS.secondary1.text = getContrastTextForHex(harmony.secondary1.hex);
+      CAPSULE_COLORS.secondary2.hex = harmony.secondary2.hex;
+      CAPSULE_COLORS.secondary2.text = getContrastTextForHex(harmony.secondary2.hex);
+      CAPSULE_COLORS.secondary3.hex = harmony.secondary3.hex;
+      CAPSULE_COLORS.secondary3.text = getContrastTextForHex(harmony.secondary3.hex);
+      if (typeof STICKY_NOTE_COLORS !== 'undefined' && STICKY_NOTE_COLORS) {
+        STICKY_NOTE_COLORS.secondary1.hex = harmony.secondary1.hex;
+        STICKY_NOTE_COLORS.secondary2.hex = harmony.secondary2.hex;
+        STICKY_NOTE_COLORS.secondary3.hex = harmony.secondary3.hex;
+      }
+
+      // Compute clean tonal shade bases for single-hue energy bars
+      const physSoft = getHarmonyTonalScale(harmony.secondary1.hex, 3, isLightTheme)[0];
+      const mentSoft = getHarmonyTonalScale(accent.hex, 3, isLightTheme)[0];
+      const gainSoft = getHarmonyTonalScale(harmony.secondary3.hex, 3, isLightTheme)[0];
+
       // Propagate auto-derived harmony into energy rings, energy bars, and action pockets
       root.style.setProperty('--color-ring-physical', harmony.secondary1.hex);
+      root.style.setProperty('--color-ring-physical-soft', physSoft);
       root.style.setProperty('--color-ring-mental', accent.hex);
+      root.style.setProperty('--color-ring-mental-soft', mentSoft);
       root.style.setProperty('--color-ring-gained', harmony.secondary3.hex);
+      root.style.setProperty('--color-ring-gained-soft', gainSoft);
       root.style.setProperty('--color-pocket-schedule', accent.hex);
       root.style.setProperty('--color-pocket-notes', harmony.secondary2.hex);
       root.style.setProperty('--color-pocket-journal', harmony.secondary1.hex);
@@ -9630,6 +9716,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (!document.getElementById('habit-modal')?.classList.contains('hidden')) syncHabitModalControls();
       if (!document.getElementById('habit-wheel-modal')?.classList.contains('hidden')) renderHabitWheelModal();
       if (!document.getElementById('project-modal')?.classList.contains('hidden')) renderProjectModalControls();
+      if (!document.getElementById('quick-create-modal')?.classList.contains('hidden')) renderQuickCreateUI();
+      if (state.routineAddModalOpen && typeof renderRoutineAddModal === 'function') renderRoutineAddModal();
       if (!document.getElementById('journal-energy-modal')?.classList.contains('hidden')) renderJournalEnergyModal();
       if (!document.getElementById('journal-mood-modal')?.classList.contains('hidden')) renderJournalMoodModal();
       if (typeof renderDesktopInspector === 'function') renderDesktopInspector();
@@ -13352,7 +13440,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   >
                     <div
                       class="absolute inset-x-0 top-0"
-                      style="height:${gapPct}%; background-image: ${colorDashBg};"
+                      style="height:${gapPct}%; background: linear-gradient(to bottom, rgb(var(--color-secondary-1)), rgb(var(--color-secondary-2)), rgb(var(--color-secondary-3))); -webkit-mask-image: repeating-linear-gradient(to bottom, #000 0px, #000 5px, transparent 5px, transparent 10px); mask-image: repeating-linear-gradient(to bottom, #000 0px, #000 5px, transparent 5px, transparent 10px);"
                     ></div>
                   </div>
                 </div>
@@ -13376,7 +13464,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   >
                     <div
                       class="absolute inset-x-0 top-0"
-                      style="height:${gapPct}%; background: linear-gradient(to bottom, ${prevColor}, ${c.hex});"
+                      style="height:${gapPct}%; background: linear-gradient(to bottom, rgb(var(--color-secondary-1)), rgb(var(--color-secondary-2)), rgb(var(--color-secondary-3)));"
                     ></div>
                   </div>
                 </div>
@@ -14391,7 +14479,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const nowMins = now.getHours() * 60 + now.getMinutes();
 
       if (qcDraft.kind === 'task') {
-        const taskColorKeys = Object.keys(CAPSULE_COLORS);
         qcDraft.taskMode = 'completed';
         qcDraft.dateKey = baseDate;
         qcDraft.allDay = false;
@@ -14402,7 +14489,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             : Math.max(0, nowMins - 30);
         qcDraft.priority = 2;
         qcDraft.energy = 1;
-        qcDraft.color = taskColorKeys[Math.floor(Math.random() * taskColorKeys.length)] || 'coral';
+        qcDraft.color = pickRandomSecondaryColorKey();
         qcDraft.projectId = null;
         qcDraft.habitId = null;
         qcDraft.pinned = false;
@@ -14415,7 +14502,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       } else {
         qcDraft.startDate = baseDate;
         qcDraft.endDate = CalLogic.addDaysToDateKey(baseDate, 14);
-        qcDraft.color = CAPSULE_COLORS[state.accentKey] ? state.accentKey : 'coral';
+        qcDraft.color = pickRandomSecondaryColorKey();
         qcDraft.checkpoints = [];
       }
 
@@ -14788,14 +14875,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             `;
           } else if (qcDraft.activePopover === 'energy') {
             const energyNames = ['Restorative', 'Balanced', 'Steady', 'Deep Focus', 'High Output'];
-            const swatchesHtml = Object.entries(CAPSULE_COLORS)
-              .map(([key, val]) => {
-                const active = key === qcDraft.color;
-                return `<button type="button" onclick="setQuickCreateColor('${key}')" title="${key}" style="background-color:${val.hex};" class="tactile-btn w-6 h-6 rounded-full transition ${
-                  active ? 'ring-2 ring-primarytext ring-offset-2 ring-offset-cardbg scale-110' : 'opacity-80 hover:opacity-100'
-                }"></button>`;
-              })
-              .join('');
+            const activeQcColor = CAPSULE_COLORS[qcDraft.color] || CAPSULE_COLORS.secondary1;
+            const swatchesHtml = renderPaletteSwatchesHtml(qcDraft.color, 'setQuickCreateColor', 'ring-offset-cardbg', 'w-6 h-6');
             popoverEl.innerHTML = `
               ${
                 isTask
@@ -14815,18 +14896,21 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                       .join('')}
                   </div>
                 </div>
-                <div class="border-t border-borderline pt-2.5 space-y-1.5">
-                  <span class="text-[11px] font-bold uppercase tracking-wider text-secondarytext block">Color</span>
-                  <div class="flex items-center gap-2 flex-wrap">${swatchesHtml}</div>
+                <div class="border-t border-borderline pt-2.5 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Color</span>
+                    <span class="text-[11px] font-semibold" style="color:${activeQcColor.hex};">${activeQcColor.label || qcDraft.color}</span>
+                  </div>
+                  <div class="space-y-2">${swatchesHtml}</div>
                 </div>
               `
                   : `
                 <div class="space-y-2">
                   <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Project Color</span>
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-secondarytext">Project Color · <span style="color:${activeQcColor.hex};">${activeQcColor.label || qcDraft.color}</span></span>
                     <button type="button" onclick="toggleQuickCreatePopover(null)" class="text-xs font-semibold text-mutedtext hover:text-primarytext">Done</button>
                   </div>
-                  <div class="flex items-center gap-2 flex-wrap">${swatchesHtml}</div>
+                  <div class="space-y-2">${swatchesHtml}</div>
                 </div>
               `
               }
@@ -15660,7 +15744,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         if (deleteBtn) deleteBtn.classList.remove('hidden');
       } else {
         state.editingProjectId = null;
-        state.projectModalColor = CAPSULE_COLORS[state.accentKey] ? state.accentKey : 'coral';
+        state.projectModalColor = pickRandomSecondaryColorKey();
         const defaultStart = baseDate;
         const defaultEnd = CalLogic.addDaysToDateKey(baseDate, 14);
         state.projectModalCheckpoints = [
@@ -15756,14 +15840,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         colorNameEl.style.color = activeC.hex;
       }
       if (swatchesEl) {
-        swatchesEl.innerHTML = Object.entries(CAPSULE_COLORS)
-          .map(([key, val]) => {
-            const active = key === state.projectModalColor;
-            return `<button type="button" onclick="setProjectModalColor('${key}')" style="background-color:${val.hex};" class="tactile-btn w-7 h-7 rounded-full transition ${
-              active ? 'ring-2 ring-primarytext ring-offset-2 ring-offset-cardbg scale-110' : 'opacity-80 hover:opacity-100'
-            }" title="${val.label || key}"></button>`;
-          })
-          .join('');
+        swatchesEl.innerHTML = renderPaletteSwatchesHtml(state.projectModalColor, 'setProjectModalColor', 'ring-offset-cardbg');
       }
 
       const cpListEl = document.getElementById('project-checkpoints-editor');
@@ -15929,8 +16006,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       state.modalTaskMode = 'completed';
       state.modalProjectId = null;
       state.modalHabitId = null;
-      const taskColorKeys = Object.keys(CAPSULE_COLORS);
-      state.modalColor = taskColorKeys[Math.floor(Math.random() * taskColorKeys.length)] || 'coral';
+      state.modalColor = pickRandomSecondaryColorKey();
       state.modalIcon = 'at';
       state.modalAllDay = false;
       state.modalStartMin =
@@ -16541,18 +16617,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const colorNameEl = document.getElementById('modal-color-name');
       const swatchesEl = document.getElementById('modal-color-swatches');
       if (colorNameEl) {
-        colorNameEl.textContent = state.modalColor;
+        colorNameEl.textContent = activeColor.label || state.modalColor;
         colorNameEl.style.color = activeColor.hex;
       }
       if (swatchesEl) {
-        swatchesEl.innerHTML = Object.entries(CAPSULE_COLORS)
-          .map(([key, val]) => {
-            const active = key === state.modalColor;
-            return `<button type="button" onclick="setModalColor('${key}')" style="background-color:${val.hex};" class="tactile-btn w-7 h-7 rounded-full transition ${
-              active ? 'ring-2 ring-primarytext ring-offset-2 ring-offset-cardbg scale-110' : 'opacity-80 hover:opacity-100'
-            }"></button>`;
-          })
-          .join('');
+        swatchesEl.innerHTML = renderPaletteSwatchesHtml(state.modalColor, 'setModalColor', 'ring-offset-cardbg');
       }
 
       const repeatSummary = document.getElementById('modal-repeat-summary');
@@ -18695,10 +18764,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         .join('');
 
       const cardAttr = interactive ? `data-habit-card-id="${h.id}"` : `data-habit-clone-id="${h.id}"`;
-      const fillStart = isStale ? 'rgb(var(--color-mutedtext) / 0.75)' : 'rgb(var(--color-accent))';
-      const fillEnd = isStale ? 'rgb(var(--color-mutedtext) / 0.75)' : 'rgb(var(--color-secondary-3))';
+      const habitColor = CAPSULE_COLORS[h.color] || CAPSULE_COLORS.coral;
       const trackColor = isStale ? 'rgb(var(--color-borderline) / 0.55)' : 'rgb(var(--color-borderline) / 0.85)';
-      const borderProgressStyle = `background: linear-gradient(90deg, ${fillStart} 0%, ${fillEnd} ${pct}%, ${trackColor} ${pct}%, ${trackColor} 100%);`;
+      const midPct = Math.round(pct * 0.5);
+      const borderProgressStyle = pct <= 0
+        ? `background: ${trackColor};`
+        : isStale
+          ? `background: linear-gradient(90deg, rgb(var(--color-mutedtext) / 0.75) 0%, rgb(var(--color-mutedtext) / 0.75) ${pct}%, ${trackColor} ${pct}%, ${trackColor} 100%);`
+          : `background: linear-gradient(90deg, rgb(var(--color-secondary-1)) 0%, rgb(var(--color-secondary-2)) ${midPct}%, rgb(var(--color-secondary-3)) ${pct}%, ${trackColor} ${pct}%, ${trackColor} 100%);`;
       const staleCardCls = isStale ? 'opacity-60 grayscale' : '';
       const progressSummaryHtml = formatHabitProgressSummaryHtml(completedDays, masteryDays, isStale);
 
@@ -18776,7 +18849,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 ${interactive ? `onclick="openHabitHistoryModal(${h.id})"` : 'tabindex="-1"'}
                 class="tactile-btn flex items-center gap-2.5 min-w-0 flex-1 text-left"
               >
-                <span data-habit-icon-box="${h.id}" class="w-10 h-10 rounded-xl ${isStale ? 'bg-pillbg text-mutedtext border border-borderline' : 'bg-coral text-onaccent'} flex items-center justify-center flex-shrink-0">
+                <span data-habit-icon-box="${h.id}" ${isStale ? '' : `style="background-color:${habitColor.hex}; color:${habitColor.text};"`} class="w-10 h-10 rounded-xl ${isStale ? 'bg-pillbg text-mutedtext border border-borderline' : ''} flex items-center justify-center flex-shrink-0">
                   ${ICONS[h.icon] || ICONS.spark}
                 </span>
                 <div class="min-w-0">
@@ -20015,7 +20088,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const modal = document.getElementById('habit-modal');
       const titleInput = document.getElementById('habit-modal-title');
       if (titleInput) titleInput.value = '';
-      state.habitModalColor = state.accentKey || 'coral';
+      state.habitModalColor = pickRandomSecondaryColorKey();
       state.habitModalIcon = 'spark';
       state.habitModalTimeMin = 480;
       state.habitModalCadence = 'daily';
@@ -20109,8 +20182,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function syncHabitModalControls() {
+      const activeHabitColor = CAPSULE_COLORS[state.habitModalColor] || CAPSULE_COLORS.secondary1;
       const badge = document.getElementById('habit-modal-icon-badge');
-      if (badge) badge.innerHTML = ICONS[state.habitModalIcon] || ICONS.spark;
+      if (badge) {
+        badge.innerHTML = ICONS[state.habitModalIcon] || ICONS.spark;
+        badge.style.backgroundColor = activeHabitColor.hex;
+        badge.style.color = activeHabitColor.text;
+        badge.style.borderColor = activeHabitColor.hex;
+      }
 
       const grid = document.getElementById('habit-modal-icon-grid');
       if (grid) {
@@ -20158,20 +20237,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       const colorName = document.getElementById('habit-modal-color-name');
       const swatches = document.getElementById('habit-modal-color-swatches');
-      const activeHabitColor = CAPSULE_COLORS[state.habitModalColor] || CAPSULE_COLORS.coral;
       if (colorName) {
-        colorName.textContent = state.habitModalColor;
+        colorName.textContent = activeHabitColor.label || state.habitModalColor;
         colorName.style.color = activeHabitColor.hex;
       }
       if (swatches) {
-        swatches.innerHTML = Object.entries(CAPSULE_COLORS)
-          .map(([key, val]) => {
-            const active = key === state.habitModalColor;
-            return `<button type="button" onclick="setHabitModalColor('${key}')" style="background-color:${val.hex};" class="tactile-btn w-7 h-7 rounded-full ${
-              active ? 'ring-2 ring-primarytext ring-offset-2 ring-offset-cardbg scale-110' : 'opacity-80'
-            }"></button>`;
-          })
-          .join('');
+        swatches.innerHTML = renderPaletteSwatchesHtml(state.habitModalColor, 'setHabitModalColor', 'ring-offset-cardbg');
       }
 
       const autoOn = state.habitModalAutoTask !== false;
@@ -21976,6 +22047,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function renderBatterySliderHtml(energyLevel, scope = 'modal', labelText = 'Energy Level') {
       const level = Math.max(0, Math.min(6, Math.round(Number(energyLevel) || 0)));
       const info = BATTERY_ENERGY_LEVELS[level] || BATTERY_ENERGY_LEVELS[3];
+      const isLight = (THEMES[state.themeId]?.mode || 'dark') === 'light';
+      const batteryShades = getHarmonyTonalScale(CAPSULE_COLORS.secondary1.hex, 6, isLight);
+      const badgeColor = CAPSULE_COLORS.secondary3.hex;
+      const badgeText = getContrastTextForHex(badgeColor);
       // Seated right on the left edge at 0%, centered on seams at 1..5, right on the right edge at 100%
       const thumbLeft = `${(level / 6) * 100}%`;
 
@@ -21983,7 +22058,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         <div class="space-y-2">
           <div class="flex items-center justify-between text-xs">
             <span class="font-semibold text-primarytext">${escapeHtml(labelText)}</span>
-            <span class="text-secondarytext font-medium tabular-nums">${info.label} · ${info.pct}%</span>
+            <span class="font-medium tabular-nums" style="color:${batteryShades[Math.max(0, level - 1)]};">${info.label} · ${info.pct}%</span>
           </div>
           <div
             onpointerdown="startBatteryDrag(event, '${scope}')"
@@ -21998,7 +22073,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             <div data-battery-track="${scope}" class="relative">
               <div class="grid grid-cols-6 gap-1.5">
                 ${[1, 2, 3, 4, 5, 6]
-                  .map((cell) => {
+                  .map((cell, idx) => {
                     const filled = cell <= level;
                     const radius =
                       cell === 1
@@ -22011,7 +22086,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                         class="h-9 ${radius} border transition-colors duration-150 ${
                           filled ? 'border-transparent' : 'bg-pillbg border-borderline'
                         }"
-                        style="${filled ? 'background-color:#98C96D;' : ''}"
+                        style="${filled ? `background-color:${batteryShades[idx]};` : ''}"
                       ></div>
                     `;
                   })
@@ -22021,7 +22096,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               <!-- Tactile Lightning-Bolt Charge Badge (seated right at edge at 0% & 100%) -->
               <div
                 class="pointer-events-none absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-[34px] h-[34px] rounded-[11px] flex items-center justify-center border-[3px] border-sheetbg transition-all duration-150"
-                style="left:${thumbLeft}; background-color:#F2B84B; color:#1E2024;"
+                style="left:${thumbLeft}; background-color:${badgeColor}; color:${badgeText};"
               >
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <polygon points="13 2 4 14 12 14 11 22 20 10 12 10 13 2"/>
@@ -22036,6 +22111,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function renderClaritySliderHtml(clarityLevel, scope = 'energy', labelText = 'Mental Clarity') {
       const level = Math.max(0, Math.min(6, Math.round(Number(clarityLevel) || 0)));
       const info = CLARITY_METER_LEVELS[level] || CLARITY_METER_LEVELS[3];
+      const isLight = (THEMES[state.themeId]?.mode || 'dark') === 'light';
+      const clarityShades = getHarmonyTonalScale(CAPSULE_COLORS.secondary2.hex, 6, isLight);
+      const activeShade = clarityShades[Math.max(0, level - 1)];
+      const activeFg = getContrastTextForHex(activeShade);
       // Exact same 6-segment h-9 track & edge-seated geometry as Physical Energy Battery
       const thumbLeft = `${(level / 6) * 100}%`;
 
@@ -22043,7 +22122,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         <div class="space-y-2">
           <div class="flex items-center justify-between text-xs">
             <span class="font-semibold text-primarytext">${escapeHtml(labelText)}</span>
-            <span class="font-medium tabular-nums" style="color:${info.color};">${info.label} · ${info.pct}%</span>
+            <span class="font-medium tabular-nums" style="color:${activeShade};">${info.label} · ${info.pct}%</span>
           </div>
           <div
             onpointerdown="startClarityDrag(event, '${scope}')"
@@ -22071,7 +22150,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                         class="h-9 ${radius} border transition-colors duration-150 ${
                           filled ? 'border-transparent' : 'bg-pillbg border-borderline'
                         }"
-                        style="${filled ? `background-color:${CLARITY_CELL_COLORS[idx]};` : ''}"
+                        style="${filled ? `background-color:${clarityShades[idx]};` : ''}"
                       ></div>
                     `;
                   })
@@ -22081,7 +22160,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               <!-- Tactile Focus-Aperture Clarity Badge (seated right at edge at 0% & 100%) -->
               <div
                 class="pointer-events-none absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-[34px] h-[34px] rounded-[11px] flex items-center justify-center border-[3px] border-sheetbg transition-all duration-150"
-                style="left:${thumbLeft}; background-color:${info.color}; color:#1E2024;"
+                style="left:${thumbLeft}; background-color:${activeShade}; color:${activeFg};"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="5"/>
@@ -22100,11 +22179,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function renderMiniBatteryBarHtml(energyLevel) {
       const level = Math.max(0, Math.min(6, Math.round(Number(energyLevel) || 0)));
       const pct = Math.round((level / 6) * 100);
+      const isLight = (THEMES[state.themeId]?.mode || 'dark') === 'light';
+      const batteryShades = getHarmonyTonalScale(CAPSULE_COLORS.secondary1.hex, 6, isLight);
       return `
         <span class="inline-flex items-center gap-0.5 align-middle" title="Energy ${pct}%">
           ${[1, 2, 3, 4, 5, 6]
             .map(
-              (c) => `<span class="w-2.5 h-1.5 rounded-full ${c <= level ? '' : 'bg-borderline'}" style="${c <= level ? 'background-color:#98C96D;' : ''}"></span>`
+              (c, idx) => `<span class="w-2.5 h-1.5 rounded-full ${c <= level ? '' : 'bg-borderline'}" style="${c <= level ? `background-color:${batteryShades[idx]};` : ''}"></span>`
             )
             .join('')}
         </span>
@@ -22114,13 +22195,19 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function renderStressMeterHtml(stressLevel, scope = 'modal', labelText = 'Stress Level') {
       const level = Math.max(1, Math.min(6, Math.round(Number(stressLevel) || 2)));
       const info = STRESS_METER_LEVELS[level - 1] || STRESS_METER_LEVELS[1];
+      const isLight = (THEMES[state.themeId]?.mode || 'dark') === 'light';
+      const sec3Shades = getHarmonyTonalScale(CAPSULE_COLORS.secondary3.hex, 4, isLight);
+      const accentHex = getActiveAccentPalette(state.themeId, state.accentKey).hex;
+      const accentShades = getHarmonyTonalScale(accentHex, 3, isLight);
+      const stressShades = [sec3Shades[0], sec3Shades[1], sec3Shades[2], sec3Shades[3], accentShades[1], accentShades[2]];
+      const activeStressColor = stressShades[level - 1] || info.color;
       const pointerLeftPct = ((level - 0.5) / 6) * 100;
 
       return `
         <div class="space-y-2">
           <div class="flex items-center justify-between text-xs">
             <span class="font-semibold text-primarytext">${escapeHtml(labelText)}</span>
-            <span class="font-semibold tabular-nums" style="color:${info.color};">${info.label} · ${info.pct}%</span>
+            <span class="font-semibold tabular-nums" style="color:${activeStressColor};">${info.label} · ${info.pct}%</span>
           </div>
           <div
             data-stress-track="${scope}"
@@ -22133,15 +22220,15 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             aria-valuemax="100"
             aria-valuenow="${info.pct}"
           >
-            <!-- 6-Band Rounded Segmented Stress Track (exact h-9 thickness matched to Battery & Clarity) -->
+            <!-- 6-Band Rounded Segmented Stress Track (stepped tonal shades of secondary3 into accent) -->
             <div class="h-9 bg-pillbg border border-borderline rounded-[14px] p-1">
               <div class="grid grid-cols-6 gap-[3px] h-full rounded-[10px] overflow-hidden">
-                ${STRESS_METER_LEVELS.map((band) => {
+                ${STRESS_METER_LEVELS.map((band, idx) => {
                   const isCurrent = band.level === level;
                   return `
                     <div
                       class="h-full transition-opacity duration-150"
-                      style="background-color:${band.color}; opacity:${isCurrent ? '1' : '0.82'};"
+                      style="background-color:${stressShades[idx]}; opacity:${isCurrent ? '1' : '0.82'};"
                     ></div>
                   `;
                 }).join('')}
@@ -23784,6 +23871,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     const STICKY_NOTE_COLORS = {
+      secondary1: { label: 'Harmony 1', hex: '#6FC49A' },
+      secondary2: { label: 'Harmony 2', hex: '#7EA8D6' },
+      secondary3: { label: 'Harmony 3', hex: '#E5B96A' },
       coral: { label: 'Coral', hex: '#F28B82' },
       terracotta: { label: 'Terracotta', hex: '#E07A5F' },
       amber: { label: 'Amber', hex: '#F6C244' },
@@ -23815,7 +23905,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       state.routineAddMode = editNoteId !== null ? 'routine' : defaultMode;
       const existing = editNoteId !== null ? state.routines.find((r) => String(r.id) === String(editNoteId)) : null;
       const initialColor = existing?.color === 'violet' ? 'indigo' : existing?.color;
-      state.routineModalColor = STICKY_NOTE_COLORS[initialColor] ? initialColor : (STICKY_NOTE_COLORS[state.accentKey] ? state.accentKey : 'coral');
+      state.routineModalColor = existing && STICKY_NOTE_COLORS[initialColor]
+        ? initialColor
+        : pickRandomSecondaryColorKey();
       state.routineAddModalOpen = true;
       syncRoutinesFabVisibility();
       renderRoutineAddModal();
@@ -23843,13 +23935,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         nameEl.style.color = activeSticky.hex;
       }
       if (wrap) {
-        wrap.innerHTML = Object.entries(STICKY_NOTE_COLORS)
-          .map(
-            ([k, v]) => `<button type="button" onclick="selectRoutineModalColor('${k}')" title="${v.label}" style="background-color:${v.hex};" class="tactile-btn w-7 h-7 rounded-full transition ${
-              state.routineModalColor === k ? 'ring-2 ring-primarytext ring-offset-2 ring-offset-pillbg scale-110' : 'opacity-75 hover:opacity-100'
-            }"></button>`
-          )
-          .join('');
+        wrap.innerHTML = renderPaletteSwatchesHtml(state.routineModalColor, 'selectRoutineModalColor', 'ring-offset-pillbg');
       }
     }
 
@@ -23905,14 +23991,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 <label class="text-[10.5px] font-semibold uppercase tracking-wider text-secondarytext">Sticky Color</label>
                 <span id="modal-routine-color-name" style="color:${curColorInfo.hex};" class="text-[11px] font-semibold">${curColorInfo.label}</span>
               </div>
-              <div id="modal-routine-color-swatches" class="bg-pillbg border border-borderline rounded-xl px-3 py-2.5 grid grid-cols-5 gap-2.5 place-items-center">
-                ${Object.entries(STICKY_NOTE_COLORS)
-                  .map(
-                    ([k, v]) => `<button type="button" onclick="selectRoutineModalColor('${k}')" title="${v.label}" style="background-color:${v.hex};" class="tactile-btn w-7 h-7 rounded-full transition ${
-                      curColor === k ? 'ring-2 ring-primarytext ring-offset-2 ring-offset-pillbg scale-110' : 'opacity-75 hover:opacity-100'
-                    }"></button>`
-                  )
-                  .join('')}
+              <div id="modal-routine-color-swatches" class="bg-pillbg border border-borderline rounded-xl px-3.5 py-3 space-y-2.5">
+                ${renderPaletteSwatchesHtml(curColor, 'selectRoutineModalColor', 'ring-offset-pillbg')}
               </div>
             </div>
             <div class="space-y-1">
@@ -29536,7 +29616,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         clearTimeout(sp.islandTimer);
         if (duration > 0 && !sp.islandExpanded) {
           islandProgressTrack.classList.remove('hidden');
-          islandProgressFill.style.backgroundColor = barHex;
+          islandProgressFill.style.background = 'linear-gradient(90deg, rgb(var(--color-secondary-1)) 0%, rgb(var(--color-secondary-2)) 50%, rgb(var(--color-secondary-3)) 100%)';
           islandProgressFill.style.setProperty('--island-duration', `${duration}ms`);
           islandProgressFill.classList.remove('spatial-island-timer-bar');
           void islandProgressFill.offsetWidth;
