@@ -3167,23 +3167,33 @@
       </svg>
     </button>
 
-    <!-- Journal Mood Tracker Modal (Interactive Circular Wheel + Branching + Merging) -->
+    <!-- Journal Mood Tracker Modal (Clean Centered Full-View + Bottom-Flush Rotatable Stacked Wheel) -->
     <div
       id="journal-mood-modal"
-      class="hidden absolute inset-0 z-40 flex flex-col justify-end theme-modal-scrim backdrop-blur-[2px] transition-opacity"
-      onclick="if (event.target === this) closeJournalToolModal('mood')"
+      class="hidden absolute inset-0 z-50 flex flex-col bg-sheetbg transition-opacity"
     >
-      <div class="w-full bg-sheetbg border-t border-borderline rounded-t-[28px] p-5 pb-24 lg:pb-6 space-y-4 max-h-[92%] overflow-y-auto no-scrollbar lg:max-w-[540px] lg:mx-auto lg:mb-5 lg:rounded-[26px] lg:border theme-popover-shadow">
-        <div class="flex items-center justify-between gap-2">
-          <div>
-            <p class="text-[11px] font-semibold text-coral">Mood Wheel · Depth Check-In</p>
-            <h3 class="font-display text-lg font-bold text-primarytext tracking-tight">Mood Tracker</h3>
-          </div>
-          <button type="button" onclick="closeJournalToolModal('mood')" class="tactile-btn w-9 h-9 rounded-full bg-cardbg border border-borderline text-secondarytext hover:text-primarytext flex items-center justify-center" title="Close">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      <div class="w-full h-full flex flex-col max-w-[540px] mx-auto overflow-hidden">
+        <div class="flex items-center justify-between px-5 pt-4 pb-1 flex-shrink-0">
+          <button
+            type="button"
+            onclick="closeJournalToolModal('mood')"
+            class="tactile-btn w-9 h-9 rounded-full text-secondarytext hover:text-primarytext hover:bg-pillbg flex items-center justify-center transition"
+            title="Close"
+            aria-label="Close Mood Tracker"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
+          <button
+            type="button"
+            onclick="saveJournalMoodLog()"
+            class="tactile-btn px-4 py-1.5 rounded-full bg-coral text-onaccent text-xs font-bold tracking-wide"
+          >
+            Save
           </button>
         </div>
-        <div id="journal-mood-modal-body" class="space-y-4"></div>
+        <div id="journal-mood-modal-body" class="flex-1 min-h-0 flex flex-col justify-between"></div>
       </div>
     </div>
 
@@ -8415,8 +8425,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         stateKey: 'happy',
         focusedCore: 'happy',
         focusedMid: 'Peaceful',
-        selections: [{ coreKey: 'happy', mid: 'Peaceful', outer: null }],
-        energyLevel: 3, // 0..4 battery cells
+        focusedOuter: 'Hopeful',
+        activeSlotIdx: 0,
+        showBranchList: false,
+        selections: [{ coreKey: 'happy', mid: 'Peaceful', outer: 'Hopeful' }],
+        energyLevel: 4, // 0..6 battery cells
         stressLevel: 2, // 1..6 stress meter bands
         intensity: 7,
         emotions: [],
@@ -8424,11 +8437,11 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         targetEntryId: null,
       },
       journalEnergyTracker: {
-        batteryLevel: 3, // 0..4 physical battery cells
-        clarityLevel: 3, // 0..4 mental clarity cells
+        batteryLevel: 4, // 0..6 physical battery cells
+        clarityLevel: 4, // 0..6 mental clarity cells
         stressLevel: 2, // 1..6 emotional stress meter bands
-        physical: 8,
-        mental: 8,
+        physical: 7,
+        mental: 7,
         emotional: 8,
         tags: ['Deep Focus', 'Hydrated'],
         note: '',
@@ -20361,21 +20374,25 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
     const BATTERY_ENERGY_LEVELS = [
       { level: 0, pct: 0, label: 'Drained', sub: 'No energy left' },
-      { level: 1, pct: 25, label: 'Low energy', sub: 'Running light' },
-      { level: 2, pct: 50, label: 'A little energy', sub: 'Steady pace' },
-      { level: 3, pct: 75, label: 'Good energy', sub: 'Feeling capable' },
-      { level: 4, pct: 100, label: 'Full charge', sub: 'Charged & ready' },
+      { level: 1, pct: 17, label: 'Exhausted', sub: 'Running on empty' },
+      { level: 2, pct: 33, label: 'Low energy', sub: 'Take it gently' },
+      { level: 3, pct: 50, label: 'Steady', sub: 'Balanced pace' },
+      { level: 4, pct: 67, label: 'Good energy', sub: 'Feeling capable' },
+      { level: 5, pct: 83, label: 'High energy', sub: 'Strong momentum' },
+      { level: 6, pct: 100, label: 'Full charge', sub: 'Charged & ready' },
     ];
 
     const CLARITY_METER_LEVELS = [
       { level: 0, pct: 0, label: 'Foggy', color: '#7A90A6' },
-      { level: 1, pct: 25, label: 'Hazy', color: '#7A90A6' },
-      { level: 2, pct: 50, label: 'Clear', color: '#69A7C9' },
-      { level: 3, pct: 75, label: 'Sharp', color: '#55B8C4' },
-      { level: 4, pct: 100, label: 'Laser Sharp', color: '#4EC9B0' },
+      { level: 1, pct: 17, label: 'Clouded', color: '#7A90A6' },
+      { level: 2, pct: 33, label: 'Hazy', color: '#729CB8' },
+      { level: 3, pct: 50, label: 'Clear', color: '#69A7C9' },
+      { level: 4, pct: 67, label: 'Focused', color: '#5EB0C7' },
+      { level: 5, pct: 83, label: 'Sharp', color: '#55B8C4' },
+      { level: 6, pct: 100, label: 'Laser Sharp', color: '#4EC9B0' },
     ];
 
-    const CLARITY_CELL_COLORS = ['#7A90A6', '#69A7C9', '#55B8C4', '#4EC9B0'];
+    const CLARITY_CELL_COLORS = ['#7A90A6', '#729CB8', '#69A7C9', '#5EB0C7', '#55B8C4', '#4EC9B0'];
 
     const STRESS_METER_LEVELS = [
       { level: 1, pct: 0, label: 'Relaxed', color: '#5AB96A' },
@@ -20599,23 +20616,32 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
       const mt = state.journalMoodTracker;
       if (!Array.isArray(mt.selections) || mt.selections.length === 0) {
-        mt.selections = [{ coreKey: 'happy', mid: 'Peaceful', outer: null }];
+        mt.selections = [{ coreKey: 'happy', mid: 'Peaceful', outer: 'Hopeful' }];
       }
       mt.selections = mt.selections
         .filter((s) => s && EMOTION_WHEEL_CORES.some((c) => c.key === s.coreKey))
         .slice(0, 3);
       if (mt.selections.length === 0) {
-        mt.selections = [{ coreKey: 'happy', mid: 'Peaceful', outer: null }];
+        mt.selections = [{ coreKey: 'happy', mid: 'Peaceful', outer: 'Hopeful' }];
+      }
+      if (typeof mt.activeSlotIdx !== 'number' || mt.activeSlotIdx < 0 || mt.activeSlotIdx >= mt.selections.length) {
+        mt.activeSlotIdx = 0;
       }
       if (!EMOTION_WHEEL_CORES.some((c) => c.key === mt.focusedCore)) {
-        mt.focusedCore = mt.selections[0].coreKey;
+        mt.focusedCore = mt.selections[mt.activeSlotIdx].coreKey;
       }
       const focusedCoreObj = getEmotionCoreMeta(mt.focusedCore);
       if (!mt.focusedMid || !focusedCoreObj.branches.some((b) => b.mid === mt.focusedMid)) {
         mt.focusedMid = focusedCoreObj.branches[0].mid;
       }
-      if (typeof mt.energyLevel !== 'number' || Number.isNaN(mt.energyLevel)) mt.energyLevel = 2;
-      mt.energyLevel = Math.max(0, Math.min(4, Math.round(mt.energyLevel)));
+      const focusedBranchObj =
+        focusedCoreObj.branches.find((b) => b.mid === mt.focusedMid) || focusedCoreObj.branches[0];
+      if (mt.focusedOuter && !focusedBranchObj.outer.includes(mt.focusedOuter)) {
+        mt.focusedOuter = null;
+      }
+      if (typeof mt.showBranchList !== 'boolean') mt.showBranchList = false;
+      if (typeof mt.energyLevel !== 'number' || Number.isNaN(mt.energyLevel)) mt.energyLevel = 4;
+      mt.energyLevel = Math.max(0, Math.min(6, Math.round(mt.energyLevel)));
       if (typeof mt.stressLevel !== 'number' || Number.isNaN(mt.stressLevel)) mt.stressLevel = 2;
       mt.stressLevel = Math.max(1, Math.min(6, Math.round(mt.stressLevel)));
       return mt;
@@ -20632,10 +20658,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           const latest = entry.moodLogs[0];
           if (Array.isArray(latest.selections) && latest.selections.length > 0) {
             mt.selections = latest.selections.map((s) => ({ ...s }));
+            mt.activeSlotIdx = 0;
             mt.focusedCore = mt.selections[0].coreKey;
             mt.focusedMid = mt.selections[0].mid || getEmotionCoreMeta(mt.focusedCore).branches[0].mid;
+            mt.focusedOuter = mt.selections[0].outer || null;
           }
-          if (typeof latest.energyLevel === 'number') mt.energyLevel = latest.energyLevel;
+          if (typeof latest.energyLevel === 'number') {
+            mt.energyLevel = Math.max(0, Math.min(6, Math.round(latest.energyLevel)));
+          }
           if (typeof latest.stressLevel === 'number') mt.stressLevel = latest.stressLevel;
         }
       }
@@ -20644,65 +20674,117 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       playSfx('drawerOpen');
     }
 
-    function focusEmotionWheelCore(coreKey) {
+    let wheelJustDraggedUntil = 0;
+
+    function syncActiveSlotFromWheel(coreKey, mid, outer) {
       const mt = ensureMoodTrackerState();
       const core = getEmotionCoreMeta(coreKey);
+      const branch = core.branches.find((b) => b.mid === mid) || core.branches[0];
+      const validOuter = outer && branch.outer.includes(outer) ? outer : null;
       mt.focusedCore = core.key;
-      const existingForCore = mt.selections.find((s) => s.coreKey === core.key);
-      mt.focusedMid = (existingForCore && existingForCore.mid) || core.branches[0].mid;
-      // If user hasn't picked this core yet and has room (<3), add it cleanly; if already sole selection, keep it
-      if (!existingForCore && mt.selections.length < 3) {
-        mt.selections.push({ coreKey: core.key, mid: null, outer: null });
-      }
+      mt.focusedMid = branch.mid;
+      mt.focusedOuter = validOuter;
+      const slotIdx = Math.max(0, Math.min(mt.selections.length - 1, mt.activeSlotIdx || 0));
+      mt.selections[slotIdx] = { coreKey: core.key, mid: branch.mid, outer: validOuter };
+    }
+
+    function spinEmotionWheelTo(coreKey, mid = null, outer = null) {
+      if (Date.now() < wheelJustDraggedUntil) return;
+      const core = getEmotionCoreMeta(coreKey);
+      const branch = mid ? core.branches.find((b) => b.mid === mid) || core.branches[0] : core.branches[0];
+      syncActiveSlotFromWheel(core.key, branch.mid, outer);
+      playSfx('tick');
+      renderJournalMoodModal();
+      if (quickCheckinState.open) renderJournalQuickCheckin();
+    }
+
+    function addEmotionMergeSlot() {
+      const mt = ensureMoodTrackerState();
+      if (mt.selections.length >= 3) return;
+      const usedCores = new Set(mt.selections.map((s) => s.coreKey));
+      const nextCore = EMOTION_WHEEL_CORES.find((c) => !usedCores.has(c.key)) || EMOTION_WHEEL_CORES[0];
+      const nextBranch = nextCore.branches[0];
+      mt.selections.push({ coreKey: nextCore.key, mid: nextBranch.mid, outer: nextBranch.outer[0] });
+      mt.activeSlotIdx = mt.selections.length - 1;
+      mt.focusedCore = nextCore.key;
+      mt.focusedMid = nextBranch.mid;
+      mt.focusedOuter = nextBranch.outer[0];
+      playSfx('tick');
+      renderJournalMoodModal();
+    }
+
+    function activateEmotionSlot(index) {
+      const mt = ensureMoodTrackerState();
+      if (index < 0 || index >= mt.selections.length) return;
+      mt.activeSlotIdx = index;
+      const sel = mt.selections[index];
+      const core = getEmotionCoreMeta(sel.coreKey);
+      mt.focusedCore = core.key;
+      mt.focusedMid = sel.mid || core.branches[0].mid;
+      mt.focusedOuter = sel.outer || null;
+      playSfx('tick');
+      renderJournalMoodModal();
+    }
+
+    function toggleMoodBranchList() {
+      const mt = ensureMoodTrackerState();
+      mt.showBranchList = !mt.showBranchList;
+      playSfx('tick');
+      renderJournalMoodModal();
+    }
+
+    function focusEmotionWheelCore(coreKey) {
+      const core = getEmotionCoreMeta(coreKey);
+      syncActiveSlotFromWheel(core.key, core.branches[0].mid, null);
       playSfx('tick');
       renderJournalMoodModal();
     }
 
     function toggleEmotionSelection(coreKey, mid = null, outer = null) {
       const mt = ensureMoodTrackerState();
+      const core = getEmotionCoreMeta(coreKey);
+      const branch = mid ? core.branches.find((b) => b.mid === mid) || core.branches[0] : null;
+      const validMid = branch ? branch.mid : null;
+      const validOuter = branch && outer && branch.outer.includes(outer) ? outer : null;
+
       const idx = mt.selections.findIndex(
-        (s) => s.coreKey === coreKey && (s.mid || null) === (mid || null) && (s.outer || null) === (outer || null)
+        (s) => s.coreKey === core.key && (s.mid || null) === validMid && (s.outer || null) === validOuter
       );
       if (idx >= 0) {
         if (mt.selections.length > 1) {
           mt.selections.splice(idx, 1);
+          mt.activeSlotIdx = Math.min(mt.activeSlotIdx, mt.selections.length - 1);
         }
       } else {
-        // Refine existing shallower selection for the same core (or same core+mid) instead of duplicating
-        const shallowIdx = mt.selections.findIndex(
-          (s) =>
-            s.coreKey === coreKey &&
-            ((mid && !s.mid) || (outer && s.mid === mid && !s.outer))
-        );
-        if (shallowIdx >= 0) {
-          mt.selections[shallowIdx] = { coreKey, mid, outer };
-        } else if (mt.selections.length < 3) {
-          mt.selections.push({ coreKey, mid, outer });
-        } else {
-          // Replace oldest selection so merging stays fluid
-          mt.selections.shift();
-          mt.selections.push({ coreKey, mid, outer });
-        }
+        const slotIdx = Math.max(0, Math.min(mt.selections.length - 1, mt.activeSlotIdx || 0));
+        mt.selections[slotIdx] = { coreKey: core.key, mid: validMid, outer: validOuter };
       }
-      mt.focusedCore = coreKey;
-      if (mid) mt.focusedMid = mid;
+      mt.focusedCore = core.key;
+      if (validMid) mt.focusedMid = validMid;
+      mt.focusedOuter = validOuter;
       playSfx('tick');
       renderJournalMoodModal();
       if (quickCheckinState.open) renderJournalQuickCheckin();
     }
 
     function selectEmotionMidBranch(coreKey, mid) {
-      const mt = ensureMoodTrackerState();
-      mt.focusedCore = coreKey;
-      mt.focusedMid = mid;
-      toggleEmotionSelection(coreKey, mid, null);
+      if (Date.now() < wheelJustDraggedUntil) return;
+      syncActiveSlotFromWheel(coreKey, mid, null);
+      playSfx('tick');
+      renderJournalMoodModal();
+      if (quickCheckinState.open) renderJournalQuickCheckin();
     }
 
     function removeEmotionSelectionAt(index) {
       const mt = ensureMoodTrackerState();
       if (mt.selections.length <= 1) return;
       mt.selections.splice(index, 1);
-      mt.focusedCore = mt.selections[0].coreKey;
+      mt.activeSlotIdx = Math.max(0, Math.min(mt.activeSlotIdx, mt.selections.length - 1));
+      const cur = mt.selections[mt.activeSlotIdx];
+      const core = getEmotionCoreMeta(cur.coreKey);
+      mt.focusedCore = core.key;
+      mt.focusedMid = cur.mid || core.branches[0].mid;
+      mt.focusedOuter = cur.outer || null;
       playSfx('tick');
       renderJournalMoodModal();
       if (quickCheckinState.open) renderJournalQuickCheckin();
@@ -20710,7 +20792,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
     function setMoodBatteryEnergy(level, rerenderTarget = 'both') {
       const mt = ensureMoodTrackerState();
-      const clamped = Math.max(0, Math.min(4, Math.round(Number(level))));
+      const clamped = Math.max(0, Math.min(6, Math.round(Number(level))));
       if (mt.energyLevel === clamped && rerenderTarget === 'drag') return;
       mt.energyLevel = clamped;
       playSfx('tick');
@@ -20731,18 +20813,18 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const et = state.journalEnergyTracker;
       if (typeof et.batteryLevel !== 'number' || Number.isNaN(et.batteryLevel)) {
         const p = typeof et.physical === 'number' ? et.physical : 7;
-        et.batteryLevel = Math.max(0, Math.min(4, Math.round((p - 1) / 2.25)));
+        et.batteryLevel = Math.max(0, Math.min(6, Math.round(((p - 1) / 9) * 6)));
       }
       if (typeof et.clarityLevel !== 'number' || Number.isNaN(et.clarityLevel)) {
-        const m = typeof et.mental === 'number' ? et.mental : 8;
-        et.clarityLevel = Math.max(0, Math.min(4, Math.round((m - 1) / 2.25)));
+        const m = typeof et.mental === 'number' ? et.mental : 7;
+        et.clarityLevel = Math.max(0, Math.min(6, Math.round(((m - 1) / 9) * 6)));
       }
       if (typeof et.stressLevel !== 'number' || Number.isNaN(et.stressLevel)) {
         const em = typeof et.emotional === 'number' ? et.emotional : 7;
         et.stressLevel = Math.max(1, Math.min(6, Math.round(6 - ((em - 1) / 9) * 5)));
       }
-      et.batteryLevel = Math.max(0, Math.min(4, Math.round(et.batteryLevel)));
-      et.clarityLevel = Math.max(0, Math.min(4, Math.round(et.clarityLevel)));
+      et.batteryLevel = Math.max(0, Math.min(6, Math.round(et.batteryLevel)));
+      et.clarityLevel = Math.max(0, Math.min(6, Math.round(et.clarityLevel)));
       et.stressLevel = Math.max(1, Math.min(6, Math.round(et.stressLevel)));
       if (!Array.isArray(et.tags)) et.tags = ['Deep Focus', 'Hydrated'];
       if (typeof et.note !== 'string') et.note = '';
@@ -20751,10 +20833,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
     function setEnergyBatteryLevel(level, rerenderTarget = 'energy') {
       const et = ensureEnergyTrackerState();
-      const clamped = Math.max(0, Math.min(4, Math.round(Number(level))));
+      const clamped = Math.max(0, Math.min(6, Math.round(Number(level))));
       if (et.batteryLevel === clamped && rerenderTarget === 'drag') return;
       et.batteryLevel = clamped;
-      et.physical = [1, 3, 6, 8, 10][clamped];
+      et.physical = [1, 2, 4, 6, 7, 9, 10][clamped];
       playSfx('tick');
       if (!document.getElementById('journal-energy-modal')?.classList.contains('hidden')) {
         renderJournalEnergyModal();
@@ -20763,10 +20845,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
     function setEnergyClarityLevel(level, rerenderTarget = 'energy') {
       const et = ensureEnergyTrackerState();
-      const clamped = Math.max(0, Math.min(4, Math.round(Number(level))));
+      const clamped = Math.max(0, Math.min(6, Math.round(Number(level))));
       if (et.clarityLevel === clamped && rerenderTarget === 'drag') return;
       et.clarityLevel = clamped;
-      et.mental = [1, 3, 6, 8, 10][clamped];
+      et.mental = [1, 2, 4, 6, 7, 9, 10][clamped];
       playSfx('tick');
       if (!document.getElementById('journal-energy-modal')?.classList.contains('hidden')) {
         renderJournalEnergyModal();
@@ -20809,7 +20891,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         const rect = track.getBoundingClientRect();
         if (rect.width <= 0) return;
         const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-        const nextLevel = Math.round(ratio * 4);
+        const nextLevel = Math.round(ratio * 6);
         if (scope === 'energy') {
           setEnergyBatteryLevel(nextLevel, 'drag');
         } else {
@@ -20836,7 +20918,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         const rect = track.getBoundingClientRect();
         if (rect.width <= 0) return;
         const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-        const nextLevel = Math.round(ratio * 4);
+        const nextLevel = Math.round(ratio * 6);
         setEnergyClarityLevel(nextLevel, 'drag');
       };
       updateFromClientX(e.clientX);
@@ -20879,15 +20961,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function renderBatterySliderHtml(energyLevel, scope = 'modal', labelText = 'Energy Level') {
-      const level = Math.max(0, Math.min(4, Math.round(Number(energyLevel) || 0)));
-      const info = BATTERY_ENERGY_LEVELS[level] || BATTERY_ENERGY_LEVELS[2];
-      // Outside left at 0%, centered on seams at 25/50/75%, outside right at 100%
-      const thumbLeft =
-        level === 0
-          ? '-22px'
-          : level === 4
-            ? 'calc(100% + 22px)'
-            : `${level * 25}%`;
+      const level = Math.max(0, Math.min(6, Math.round(Number(energyLevel) || 0)));
+      const info = BATTERY_ENERGY_LEVELS[level] || BATTERY_ENERGY_LEVELS[3];
+      // Seated right on the left edge at 0%, centered on seams at 1..5, right on the right edge at 100%
+      const thumbLeft = `${(level / 6) * 100}%`;
 
       return `
         <div class="space-y-2">
@@ -20898,7 +20975,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           <div
             onpointerdown="startBatteryDrag(event, '${scope}')"
             style="touch-action:none;"
-            class="select-none cursor-pointer px-[42px] py-1"
+            class="select-none cursor-pointer px-[18px] py-1"
             role="slider"
             aria-label="${escapeHtml(labelText)}"
             aria-valuemin="0"
@@ -20906,16 +20983,16 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             aria-valuenow="${info.pct}"
           >
             <div data-battery-track="${scope}" class="relative">
-              <div class="grid grid-cols-4 gap-1.5">
-                ${[1, 2, 3, 4]
+              <div class="grid grid-cols-6 gap-1.5">
+                ${[1, 2, 3, 4, 5, 6]
                   .map((cell) => {
                     const filled = cell <= level;
                     const radius =
                       cell === 1
-                        ? 'rounded-l-[14px] rounded-r-[6px]'
-                        : cell === 4
-                          ? 'rounded-r-[14px] rounded-l-[6px]'
-                          : 'rounded-[6px]';
+                        ? 'rounded-l-[14px] rounded-r-[5px]'
+                        : cell === 6
+                          ? 'rounded-r-[14px] rounded-l-[5px]'
+                          : 'rounded-[5px]';
                     return `
                       <div
                         class="h-9 ${radius} border transition-colors duration-150 ${
@@ -20928,7 +21005,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   .join('')}
               </div>
 
-              <!-- Tactile Lightning-Bolt Charge Badge (sits outside bar at 0% & 100%) -->
+              <!-- Tactile Lightning-Bolt Charge Badge (seated right at edge at 0% & 100%) -->
               <div
                 class="pointer-events-none absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-[34px] h-[34px] rounded-[11px] flex items-center justify-center border-[3px] border-sheetbg transition-all duration-150"
                 style="left:${thumbLeft}; background-color:#F2B84B; color:#1E2024;"
@@ -20944,15 +21021,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function renderClaritySliderHtml(clarityLevel, scope = 'energy', labelText = 'Mental Clarity') {
-      const level = Math.max(0, Math.min(4, Math.round(Number(clarityLevel) || 0)));
-      const info = CLARITY_METER_LEVELS[level] || CLARITY_METER_LEVELS[2];
-      // Exact same h-9 track & outside-edge geometry as Physical Energy Battery
-      const thumbLeft =
-        level === 0
-          ? '-22px'
-          : level === 4
-            ? 'calc(100% + 22px)'
-            : `${level * 25}%`;
+      const level = Math.max(0, Math.min(6, Math.round(Number(clarityLevel) || 0)));
+      const info = CLARITY_METER_LEVELS[level] || CLARITY_METER_LEVELS[3];
+      // Exact same 6-segment h-9 track & edge-seated geometry as Physical Energy Battery
+      const thumbLeft = `${(level / 6) * 100}%`;
 
       return `
         <div class="space-y-2">
@@ -20963,7 +21035,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           <div
             onpointerdown="startClarityDrag(event, '${scope}')"
             style="touch-action:none;"
-            class="select-none cursor-pointer px-[42px] py-1"
+            class="select-none cursor-pointer px-[18px] py-1"
             role="slider"
             aria-label="${escapeHtml(labelText)}"
             aria-valuemin="0"
@@ -20971,16 +21043,16 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             aria-valuenow="${info.pct}"
           >
             <div data-clarity-track="${scope}" class="relative">
-              <div class="grid grid-cols-4 gap-1.5">
-                ${[1, 2, 3, 4]
+              <div class="grid grid-cols-6 gap-1.5">
+                ${[1, 2, 3, 4, 5, 6]
                   .map((cell, idx) => {
                     const filled = cell <= level;
                     const radius =
                       cell === 1
-                        ? 'rounded-l-[14px] rounded-r-[6px]'
-                        : cell === 4
-                          ? 'rounded-r-[14px] rounded-l-[6px]'
-                          : 'rounded-[6px]';
+                        ? 'rounded-l-[14px] rounded-r-[5px]'
+                        : cell === 6
+                          ? 'rounded-r-[14px] rounded-l-[5px]'
+                          : 'rounded-[5px]';
                     return `
                       <div
                         class="h-9 ${radius} border transition-colors duration-150 ${
@@ -20993,7 +21065,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   .join('')}
               </div>
 
-              <!-- Tactile Focus-Aperture Clarity Badge (sits outside bar at 0% & 100%) -->
+              <!-- Tactile Focus-Aperture Clarity Badge (seated right at edge at 0% & 100%) -->
               <div
                 class="pointer-events-none absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-[34px] h-[34px] rounded-[11px] flex items-center justify-center border-[3px] border-sheetbg transition-all duration-150"
                 style="left:${thumbLeft}; background-color:${info.color}; color:#1E2024;"
@@ -21013,12 +21085,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     }
 
     function renderMiniBatteryBarHtml(energyLevel) {
-      const level = Math.max(0, Math.min(4, Math.round(Number(energyLevel) || 0)));
+      const level = Math.max(0, Math.min(6, Math.round(Number(energyLevel) || 0)));
+      const pct = Math.round((level / 6) * 100);
       return `
-        <span class="inline-flex items-center gap-0.5 align-middle" title="Energy ${level * 25}%">
-          ${[1, 2, 3, 4]
+        <span class="inline-flex items-center gap-0.5 align-middle" title="Energy ${pct}%">
+          ${[1, 2, 3, 4, 5, 6]
             .map(
-              (c) => `<span class="w-3.5 h-1.5 rounded-full ${c <= level ? '' : 'bg-borderline'}" style="${c <= level ? 'background-color:#98C96D;' : ''}"></span>`
+              (c) => `<span class="w-2.5 h-1.5 rounded-full ${c <= level ? '' : 'bg-borderline'}" style="${c <= level ? 'background-color:#98C96D;' : ''}"></span>`
             )
             .join('')}
         </span>
@@ -21076,23 +21149,168 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       `;
     }
 
-    function renderInteractiveEmotionWheelSvg(mt) {
-      const cx = 180;
-      const cy = 180;
-      const hubR = 32;
-      const r1In = 34;
-      const r1Out = 84;
-      const r2In = 86;
-      const r2Out = 131;
-      const r3In = 133;
-      const r3Out = 176;
-      const selectedCores = new Set(mt.selections.map((s) => s.coreKey));
+    // --- ROTATABLE 3-LAYER STACKED EMOTION ARC WHEEL ---
+    const STACKED_WHEEL_CX = 180;
+    const STACKED_WHEEL_CY = 342;
+    const STACKED_CORE_STEP = 60; // 6 cores × 60° = 360°
+    const STACKED_MID_STEP = 44; // Layer 2 slice width
+    const STACKED_OUTER_STEP = 22; // Layer 3 slice width (exact 2:1 stack over Layer 2)
 
-      // Proportional angular allocation matching the 36-branch / 72-nuance full wheel:
-      // 10° per Layer 2 slice, 5° per Layer 3 slice (360° total), with Anger centered at top (0°)
-      const totalBranches = EMOTION_WHEEL_CORES.reduce((acc, c) => acc + c.branches.length, 0);
-      const degPerBranch = 360 / totalBranches; // 10°
-      let cursorDeg = -(EMOTION_WHEEL_CORES[0].branches.length * degPerBranch) / 2; // -40°
+    function startStackedWheelDrag(e, ringType) {
+      const svg = document.getElementById('stacked-emotion-wheel-svg');
+      if (!svg) return;
+      const mt = ensureMoodTrackerState();
+      const coreIndex = Math.max(0, EMOTION_WHEEL_CORES.findIndex((c) => c.key === mt.focusedCore));
+      const focusedCore = EMOTION_WHEEL_CORES[coreIndex] || EMOTION_WHEEL_CORES[3];
+      const midCount = focusedCore.branches.length;
+      const midIndex = Math.max(0, focusedCore.branches.findIndex((b) => b.mid === mt.focusedMid));
+      const focusedBranch = focusedCore.branches[midIndex] || focusedCore.branches[0];
+      const outerSubIdx = mt.focusedOuter ? focusedBranch.outer.indexOf(mt.focusedOuter) : -1;
+      const baseOuterOffsetDeg = outerSubIdx === 0 ? STACKED_OUTER_STEP / 2 : outerSubIdx === 1 ? -STACKED_OUTER_STEP / 2 : 0;
+
+      const targetGroup =
+        ringType === 'core'
+          ? document.getElementById('stacked-wheel-core-ring')
+          : document.getElementById('stacked-wheel-upper-rings');
+      if (!targetGroup) return;
+
+      const rect = svg.getBoundingClientRect();
+      const pivotX = rect.left + (STACKED_WHEEL_CX / 360) * rect.width;
+      const pivotY = rect.top + (STACKED_WHEEL_CY / 236) * rect.height;
+
+      const angleOf = (clientX, clientY) => Math.atan2(clientX - pivotX, pivotY - clientY) * (180 / Math.PI);
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const startAngle = angleOf(e.clientX, e.clientY);
+
+      let didDrag = false;
+      let latestDeltaDeg = 0;
+      let lastSnappedKey = '';
+
+      const readoutEl = document.getElementById('mood-wheel-live-readout');
+
+      const onMove = (ev) => {
+        const dist = Math.hypot(ev.clientX - startX, ev.clientY - startY);
+        if (!didDrag && dist < 5) return;
+        didDrag = true;
+        ev.preventDefault();
+
+        let delta = angleOf(ev.clientX, ev.clientY) - startAngle;
+        if (delta > 180) delta -= 360;
+        if (delta < -180) delta += 360;
+        // Clamp continuous upper drag smoothly inside rendered virtual range
+        if (ringType !== 'core') {
+          delta = Math.max(-165, Math.min(165, delta));
+        }
+        latestDeltaDeg = delta;
+
+        const appliedAngle = ringType === 'core' ? delta : baseOuterOffsetDeg + delta;
+        targetGroup.setAttribute('transform', `rotate(${appliedAngle.toFixed(2)} ${STACKED_WHEEL_CX} ${STACKED_WHEEL_CY})`);
+
+        // Real-time haptic tick + live label readout while spinning
+        if (ringType === 'core') {
+          const stepShift = Math.round(-delta / STACKED_CORE_STEP);
+          const nextCoreIdx = ((coreIndex + stepShift) % 6 + 6) % 6;
+          const previewCore = EMOTION_WHEEL_CORES[nextCoreIdx];
+          if (previewCore && lastSnappedKey !== previewCore.key) {
+            lastSnappedKey = previewCore.key;
+            playSfx('tick');
+            if (readoutEl) readoutEl.textContent = `I Feel ${previewCore.label}.`;
+          }
+        } else if (ringType === 'mid') {
+          const stepShift = Math.round(-appliedAngle / STACKED_MID_STEP);
+          const nextMidIdx = ((midIndex + stepShift) % midCount + midCount) % midCount;
+          const previewBranch = focusedCore.branches[nextMidIdx];
+          if (previewBranch && lastSnappedKey !== previewBranch.mid) {
+            lastSnappedKey = previewBranch.mid;
+            playSfx('tick');
+            if (readoutEl) readoutEl.textContent = `I Feel ${previewBranch.mid}.`;
+          }
+        } else {
+          // Outer ring: each mid branch has 2 outer leaves centered at -11° and +11°
+          // Map angle so 0° -> outerIndex relative to current midIndex
+          const totalOuter = midCount * 2;
+          const currentOuterCenterPos = midIndex * 2 + 0.5;
+          const shiftedPos = currentOuterCenterPos - appliedAngle / STACKED_OUTER_STEP;
+          const snappedOuterGlobal = ((Math.round(shiftedPos - 0.5) % totalOuter) + totalOuter) % totalOuter;
+          const previewMidIdx = Math.floor(snappedOuterGlobal / 2);
+          const previewLeafIdx = snappedOuterGlobal % 2;
+          const previewBranch = focusedCore.branches[previewMidIdx];
+          const previewLeaf = previewBranch?.outer[previewLeafIdx];
+          const key = `${previewMidIdx}:${previewLeafIdx}`;
+          if (previewLeaf && lastSnappedKey !== key) {
+            lastSnappedKey = key;
+            playSfx('tick');
+            if (readoutEl) readoutEl.textContent = `I Feel ${previewLeaf}.`;
+          }
+        }
+      };
+
+      const onUp = () => {
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onUp);
+
+        if (!didDrag) return;
+        wheelJustDraggedUntil = Date.now() + 260;
+
+        if (ringType === 'core') {
+          const stepShift = Math.round(-latestDeltaDeg / STACKED_CORE_STEP);
+          const nextCoreIdx = ((coreIndex + stepShift) % 6 + 6) % 6;
+          const nextCore = EMOTION_WHEEL_CORES[nextCoreIdx];
+          if (nextCore && nextCore.key !== mt.focusedCore) {
+            syncActiveSlotFromWheel(nextCore.key, nextCore.branches[0].mid, null);
+          }
+        } else if (ringType === 'mid') {
+          const appliedAngle = baseOuterOffsetDeg + latestDeltaDeg;
+          const stepShift = Math.round(-appliedAngle / STACKED_MID_STEP);
+          const nextMidIdx = ((midIndex + stepShift) % midCount + midCount) % midCount;
+          const nextBranch = focusedCore.branches[nextMidIdx];
+          if (nextBranch) {
+            syncActiveSlotFromWheel(focusedCore.key, nextBranch.mid, null);
+          }
+        } else {
+          const appliedAngle = baseOuterOffsetDeg + latestDeltaDeg;
+          const totalOuter = midCount * 2;
+          const currentOuterCenterPos = midIndex * 2 + 0.5;
+          const shiftedPos = currentOuterCenterPos - appliedAngle / STACKED_OUTER_STEP;
+          const snappedOuterGlobal = ((Math.round(shiftedPos - 0.5) % totalOuter) + totalOuter) % totalOuter;
+          const nextMidIdx = Math.floor(snappedOuterGlobal / 2);
+          const nextLeafIdx = snappedOuterGlobal % 2;
+          const nextBranch = focusedCore.branches[nextMidIdx];
+          const nextLeaf = nextBranch?.outer[nextLeafIdx] || null;
+          if (nextBranch) {
+            syncActiveSlotFromWheel(focusedCore.key, nextBranch.mid, nextLeaf);
+          }
+        }
+
+        renderJournalMoodModal();
+        if (quickCheckinState.open) renderJournalQuickCheckin();
+      };
+
+      window.addEventListener('pointermove', onMove, { passive: false });
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
+    }
+
+    function renderInteractiveEmotionWheelSvg(mt) {
+      const cx = STACKED_WHEEL_CX;
+      const cy = STACKED_WHEEL_CY;
+      const rHub = 144;
+      const r1In = 148;
+      const r1Out = 218;
+      const r2In = 222;
+      const r2Out = 274;
+      const r3In = 278;
+      const r3Out = 328;
+
+      const coreIndex = Math.max(0, EMOTION_WHEEL_CORES.findIndex((c) => c.key === mt.focusedCore));
+      const focusedCore = EMOTION_WHEEL_CORES[coreIndex] || EMOTION_WHEEL_CORES[3];
+      const midCount = focusedCore.branches.length;
+      const midIndex = Math.max(0, focusedCore.branches.findIndex((b) => b.mid === mt.focusedMid));
+      const focusedBranch = focusedCore.branches[midIndex] || focusedCore.branches[0];
+      const outerSubIdx = mt.focusedOuter ? focusedBranch.outer.indexOf(mt.focusedOuter) : -1;
+      const upperRestAngle = outerSubIdx === 0 ? STACKED_OUTER_STEP / 2 : outerSubIdx === 1 ? -STACKED_OUTER_STEP / 2 : 0;
 
       const polar = (r, deg) => {
         const rad = ((deg - 90) * Math.PI) / 180;
@@ -21108,162 +21326,170 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         return `M ${p1.x.toFixed(1)} ${p1.y.toFixed(1)} A ${rOut} ${rOut} 0 ${large} 1 ${p2.x.toFixed(1)} ${p2.y.toFixed(1)} L ${p3.x.toFixed(1)} ${p3.y.toFixed(1)} A ${rIn} ${rIn} 0 ${large} 0 ${p4.x.toFixed(1)} ${p4.y.toFixed(1)} Z`;
       };
 
-      const radialTextTransform = (r, deg) => {
-        const pos = polar(r, deg);
-        const norm = ((deg % 360) + 360) % 360;
-        const rot = norm > 180 ? norm - 270 : norm - 90;
-        return `translate(${pos.x.toFixed(1)}, ${pos.y.toFixed(1)}) rotate(${rot.toFixed(1)})`;
-      };
-
-      const sectorsHtml = EMOTION_WHEEL_CORES.map((core) => {
-        const spanDeg = core.branches.length * degPerBranch;
-        const a0 = cursorDeg;
-        const a1 = cursorDeg + spanDeg;
-        const midA = (a0 + a1) / 2;
-        cursorDeg = a1;
-
-        const isFocused = mt.focusedCore === core.key;
-        const isSelected = selectedCores.has(core.key);
-
-        // Ring 2 (all 36 secondary emotions) + Ring 3 (all 72 outer nuances)
-        const rings23Html = core.branches
-          .map((br, bi) => {
-            const ba0 = a0 + bi * degPerBranch;
-            const ba1 = ba0 + degPerBranch;
-            const bMidA = (ba0 + ba1) / 2;
-            const isBrSelected = mt.selections.some((s) => s.coreKey === core.key && s.mid === br.mid);
-            const isBrFocused = isFocused && mt.focusedMid === br.mid;
-
-            const safeMid = escapeHtml(br.mid).replace(/'/g, "\\'");
-
-            const outerSlicesHtml = br.outer
-              .map((leaf, li) => {
-                const leafStep = degPerBranch / br.outer.length;
-                const la0 = ba0 + li * leafStep;
-                const la1 = la0 + leafStep;
-                const lMidA = (la0 + la1) / 2;
-                const isLeafSelected = mt.selections.some(
-                  (s) => s.coreKey === core.key && s.mid === br.mid && s.outer === leaf
-                );
-                const safeLeaf = escapeHtml(leaf).replace(/'/g, "\\'");
-                const leafFill = isLeafSelected ? core.hex : core.outerHex;
-                const leafOpacity = isLeafSelected ? '1' : isFocused ? '0.96' : '0.78';
-                return `
-                  <g class="cursor-pointer" onclick="toggleEmotionSelection('${core.key}', '${safeMid}', '${safeLeaf}')">
-                    <path
-                      d="${sectorPath(r3In, r3Out, la0 + 0.18, la1 - 0.18)}"
-                      fill="${leafFill}"
-                      fill-opacity="${leafOpacity}"
-                      stroke="rgb(var(--color-sheetbg))"
-                      stroke-width="${isLeafSelected ? '1.2' : '0.7'}"
-                    >
-                      <title>${core.label} › ${br.mid} › ${leaf}</title>
-                    </path>
-                    <text
-                      transform="${radialTextTransform((r3In + r3Out) / 2, lMidA)}"
-                      text-anchor="middle"
-                      dominant-baseline="central"
-                      font-size="4.6"
-                      font-weight="${isLeafSelected || isFocused ? '700' : '600'}"
-                      fill="#1E2024"
-                      opacity="${isLeafSelected ? '1' : isFocused ? '0.94' : '0.74'}"
-                      class="pointer-events-none"
-                    >${escapeHtml(leaf)}</text>
-                  </g>
-                `;
-              })
-              .join('');
-
-            const midFill = isBrSelected ? core.hex : core.midHex;
-            const midOpacity = isBrSelected ? '1' : isBrFocused ? '0.98' : isFocused ? '0.94' : '0.78';
-
-            return `
-              <g class="cursor-pointer" onclick="selectEmotionMidBranch('${core.key}', '${safeMid}')">
-                <path
-                  d="${sectorPath(r2In, r2Out, ba0 + 0.22, ba1 - 0.22)}"
-                  fill="${midFill}"
-                  fill-opacity="${midOpacity}"
-                  stroke="rgb(var(--color-sheetbg))"
-                  stroke-width="${isBrSelected || isBrFocused ? '1.3' : '0.8'}"
-                >
-                  <title>${core.label} › ${br.mid}</title>
-                </path>
-                <text
-                  transform="${radialTextTransform((r2In + r2Out) / 2, bMidA)}"
-                  text-anchor="middle"
-                  dominant-baseline="central"
-                  font-size="5.5"
-                  font-weight="${isBrSelected || isBrFocused || isFocused ? '700' : '600'}"
-                  fill="#1E2024"
-                  opacity="${isBrSelected || isFocused ? '0.98' : '0.78'}"
-                  class="pointer-events-none"
-                >${escapeHtml(br.mid)}</text>
-              </g>
-              ${outerSlicesHtml}
-            `;
-          })
-          .join('');
-
-        const iconPos = polar(54, midA);
-        const labelPos = polar(74, midA);
+      // LAYER 1 (Bottom Stacked Arc): 6 Core Fluffy Clouds rotated so focusedCore sits dead-center at 0°
+      const coreSlicesHtml = EMOTION_WHEEL_CORES.map((core, i) => {
+        let rel = i - coreIndex;
+        if (rel > 3) rel -= 6;
+        if (rel < -2) rel += 6;
+        const centerDeg = rel * STACKED_CORE_STEP;
+        const a0 = centerDeg - STACKED_CORE_STEP / 2;
+        const a1 = centerDeg + STACKED_CORE_STEP / 2;
+        const isCenter = i === coreIndex;
+        const cloudPos = polar(194, centerDeg);
+        const labelPos = polar(166, centerDeg);
 
         return `
-          <g class="cursor-pointer" onclick="focusEmotionWheelCore('${core.key}')">
+          <g class="cursor-pointer" onclick="spinEmotionWheelTo('${core.key}')">
             <path
-              d="${sectorPath(r1In, r1Out, a0 + 0.45, a1 - 0.45)}"
+              d="${sectorPath(r1In, r1Out, a0 + 0.5, a1 - 0.5)}"
               fill="${core.hex}"
-              fill-opacity="${isSelected || isFocused ? '0.98' : '0.82'}"
-              stroke="${isFocused ? 'rgb(var(--color-primarytext))' : 'rgb(var(--color-sheetbg))'}"
-              stroke-width="${isFocused ? '1.8' : '1.1'}"
+              fill-opacity="${isCenter ? '1' : '0.84'}"
+              stroke="rgb(var(--color-sheetbg))"
+              stroke-width="2"
             />
-            <g transform="translate(${(iconPos.x - 13).toFixed(1)}, ${(iconPos.y - 13).toFixed(1)})">
-              ${getEmotionCloudSvg(core.key, 26)}
+            <g transform="translate(${cloudPos.x.toFixed(1)}, ${cloudPos.y.toFixed(1)}) rotate(${centerDeg.toFixed(1)}) translate(-16, -16)">
+              ${getEmotionCloudSvg(core.key, 32)}
             </g>
             <text
-              x="${labelPos.x.toFixed(1)}"
-              y="${labelPos.y.toFixed(1)}"
+              transform="translate(${labelPos.x.toFixed(1)}, ${labelPos.y.toFixed(1)}) rotate(${centerDeg.toFixed(1)})"
               text-anchor="middle"
               dominant-baseline="central"
-              font-size="8.2"
+              font-size="11.5"
               font-weight="800"
               fill="#1E2024"
-              opacity="${isFocused || isSelected ? '1' : '0.84'}"
+              opacity="${isCenter ? '1' : '0.78'}"
               class="pointer-events-none"
             >${core.label}</text>
           </g>
-          ${rings23Html}
         `;
       }).join('');
 
+      // LAYER 2 & LAYER 3 (Middle & Top Stacked Arcs): Seamlessly tiled virtual slots [-4..+4] around focusedMid
+      const slots = [-4, -3, -2, -1, 0, 1, 2, 3, 4];
+      const midSlicesHtml = [];
+      const outerSlicesHtml = [];
+
+      slots.forEach((slotOffset) => {
+        const bIdx = ((midIndex + slotOffset) % midCount + midCount) % midCount;
+        const br = focusedCore.branches[bIdx];
+        const centerDeg = slotOffset * STACKED_MID_STEP;
+        const a0 = centerDeg - STACKED_MID_STEP / 2;
+        const a1 = centerDeg + STACKED_MID_STEP / 2;
+        const isCenterMid = slotOffset === 0;
+        const safeMid = escapeHtml(br.mid).replace(/'/g, "\\'");
+        const midLabelPos = polar((r2In + r2Out) / 2, centerDeg);
+
+        midSlicesHtml.push(`
+          <g class="cursor-pointer" onclick="selectEmotionMidBranch('${focusedCore.key}', '${safeMid}')">
+            <path
+              d="${sectorPath(r2In, r2Out, a0 + 0.45, a1 - 0.45)}"
+              fill="${isCenterMid ? focusedCore.hex : focusedCore.midHex}"
+              fill-opacity="${isCenterMid ? '0.96' : '0.78'}"
+              stroke="rgb(var(--color-sheetbg))"
+              stroke-width="2"
+            />
+            <text
+              transform="translate(${midLabelPos.x.toFixed(1)}, ${midLabelPos.y.toFixed(1)}) rotate(${centerDeg.toFixed(1)})"
+              text-anchor="middle"
+              dominant-baseline="central"
+              font-size="12"
+              font-weight="${isCenterMid ? '800' : '700'}"
+              fill="#1E2024"
+              opacity="${isCenterMid ? '1' : '0.76'}"
+              class="pointer-events-none"
+            >${escapeHtml(br.mid)}</text>
+          </g>
+        `);
+
+        br.outer.forEach((leaf, li) => {
+          const la0 = a0 + li * STACKED_OUTER_STEP;
+          const la1 = la0 + STACKED_OUTER_STEP;
+          const lMidDeg = (la0 + la1) / 2;
+          const isCenterOuter = isCenterMid && mt.focusedOuter === leaf;
+          const safeLeaf = escapeHtml(leaf).replace(/'/g, "\\'");
+          const leafPos = polar((r3In + r3Out) / 2, lMidDeg);
+
+          outerSlicesHtml.push(`
+            <g class="cursor-pointer" onclick="spinEmotionWheelTo('${focusedCore.key}', '${safeMid}', '${safeLeaf}')">
+              <path
+                d="${sectorPath(r3In, r3Out, la0 + 0.35, la1 - 0.35)}"
+                fill="${isCenterOuter ? focusedCore.hex : focusedCore.outerHex}"
+                fill-opacity="${isCenterOuter ? '1' : isCenterMid ? '0.94' : '0.76'}"
+                stroke="rgb(var(--color-sheetbg))"
+                stroke-width="1.8"
+              />
+              <text
+                transform="translate(${leafPos.x.toFixed(1)}, ${leafPos.y.toFixed(1)}) rotate(${lMidDeg.toFixed(1)})"
+                text-anchor="middle"
+                dominant-baseline="central"
+                font-size="10.2"
+                font-weight="${isCenterOuter ? '800' : '700'}"
+                fill="#1E2024"
+                opacity="${isCenterOuter ? '1' : isCenterMid ? '0.92' : '0.72'}"
+                class="pointer-events-none"
+              >${escapeHtml(leaf)}</text>
+            </g>
+          `);
+        });
+      });
+
       return `
-        <div class="relative w-full max-w-[356px] aspect-square mx-auto select-none">
-          <svg viewBox="0 0 360 360" class="w-full h-full overflow-visible">
-            ${sectorsHtml}
-            <!-- Matte Center Hub -->
-            <circle cx="${cx}" cy="${cy}" r="${hubR}" fill="rgb(var(--color-sheetbg))" stroke="rgb(var(--color-borderline))" stroke-width="1.6"/>
+        <div class="relative w-full overflow-hidden select-none">
+          <svg
+            id="stacked-emotion-wheel-svg"
+            viewBox="0 0 360 236"
+            class="w-full h-auto block"
+            style="touch-action:none;"
+          >
+            <!-- Stacked Upper Rings (Layer 3 Outer + Layer 2 Mid moving in lockstep) -->
+            <g id="stacked-wheel-upper-rings" transform="rotate(${upperRestAngle.toFixed(2)} ${cx} ${cy})">
+              <g onpointerdown="startStackedWheelDrag(event, 'outer')" class="cursor-grab active:cursor-grabbing">
+                ${outerSlicesHtml.join('')}
+              </g>
+              <g onpointerdown="startStackedWheelDrag(event, 'mid')" class="cursor-grab active:cursor-grabbing">
+                ${midSlicesHtml.join('')}
+              </g>
+            </g>
+
+            <!-- Base Stacked Ring (Layer 1: 6 Core Fluffy Clouds) -->
+            <g
+              id="stacked-wheel-core-ring"
+              transform="rotate(0 ${cx} ${cy})"
+              onpointerdown="startStackedWheelDrag(event, 'core')"
+              class="cursor-grab active:cursor-grabbing"
+            >
+              ${coreSlicesHtml}
+            </g>
+
+            <!-- Seamless Matte Bottom Hub Dome matching sheet background -->
+            <circle cx="${cx}" cy="${cy}" r="${rHub}" fill="rgb(var(--color-sheetbg))"/>
+
+            <!-- Fixed Center Teardrop Pointer Needle (matching reference dial) -->
+            <g class="pointer-events-none">
+              <path
+                d="M180 183 C184.5 193 189 204 189 211.5 A9 9 0 1 1 171 211.5 C171 204 175.5 193 180 183 Z"
+                fill="rgb(var(--color-primarytext))"
+              />
+              <circle cx="180" cy="212" r="3.4" fill="rgb(var(--color-sheetbg))"/>
+            </g>
           </svg>
-          <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div class="flex flex-col items-center justify-center">
-              ${getMergedEmotionCloudSvg(mt.selections, 44)}
-            </div>
-          </div>
         </div>
       `;
     }
 
     function computeMoodDepthAnalysis(mt) {
       const blend = getEmotionBlendSummary(mt.selections);
-      const energy = BATTERY_ENERGY_LEVELS[mt.energyLevel] || BATTERY_ENERGY_LEVELS[2];
+      const energy = BATTERY_ENERGY_LEVELS[mt.energyLevel] || BATTERY_ENERGY_LEVELS[3];
       const stress = STRESS_METER_LEVELS[mt.stressLevel - 1] || STRESS_METER_LEVELS[1];
 
       let balanceNote = 'Balanced energy and manageable load.';
-      if (mt.energyLevel >= 3 && mt.stressLevel <= 2) {
+      if (mt.energyLevel >= 4 && mt.stressLevel <= 2) {
         balanceNote = 'High battery with low stress — strong window for deep or creative work.';
-      } else if (mt.energyLevel <= 1 && mt.stressLevel >= 4) {
+      } else if (mt.energyLevel <= 2 && mt.stressLevel >= 4) {
         balanceNote = 'Low battery paired with elevated stress — prioritize rest and smaller steps.';
-      } else if (mt.energyLevel >= 3 && mt.stressLevel >= 4) {
+      } else if (mt.energyLevel >= 4 && mt.stressLevel >= 4) {
         balanceNote = 'High energy under pressure — channel momentum into one clear priority.';
-      } else if (mt.energyLevel <= 1 && mt.stressLevel <= 2) {
+      } else if (mt.energyLevel <= 2 && mt.stressLevel <= 2) {
         balanceNote = 'Quiet, low-charge state — gentle routine or restoration fits best.';
       }
 
@@ -21302,174 +21528,81 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       const mt = ensureMoodTrackerState();
       const focusedCore = getEmotionCoreMeta(mt.focusedCore);
       const analysis = computeMoodDepthAnalysis(mt);
+      const activeSel = mt.selections[mt.activeSlotIdx] || mt.selections[0];
+      const activeLeafLabel = activeSel.outer || activeSel.mid || focusedCore.label;
 
       body.innerHTML = `
-        <!-- Live Merged Cloud Header & Selected Branches -->
-        <div class="bg-cardbg border border-borderline rounded-2xl p-3.5 space-y-3">
-          <div class="flex items-center gap-3">
-            <div class="w-14 h-14 rounded-2xl bg-pillbg border border-borderline flex items-center justify-center flex-shrink-0">
-              ${getMergedEmotionCloudSvg(mt.selections, 46)}
-            </div>
-            <div class="min-w-0 flex-1">
-              <p class="font-display text-[15px] font-bold text-primarytext leading-tight truncate">${escapeHtml(analysis.blend.title)}</p>
-              <p class="text-xs text-secondarytext mt-0.5">${escapeHtml(analysis.blend.subtitle)} · Tap up to 3 to merge</p>
-            </div>
+        <!-- Clean Centered Hero Preview (Zero Cards) -->
+        <div class="flex-1 min-h-0 flex flex-col items-center justify-center text-center px-6 py-2">
+          <h3 class="font-display text-[22px] sm:text-2xl font-bold text-primarytext tracking-tight leading-snug max-w-[280px]">
+            How would you describe your mood?
+          </h3>
+
+          <p id="mood-wheel-live-readout" class="text-sm font-medium text-secondarytext mt-3">
+            I Feel ${escapeHtml(mt.selections.length > 1 ? analysis.blend.title : activeLeafLabel)}.
+          </p>
+
+          <p class="text-[11.5px] text-mutedtext mt-0.5">
+            ${escapeHtml(formatEmotionSelectionPath(activeSel))}
+          </p>
+
+          <div class="my-5 flex items-center justify-center">
+            ${getMergedEmotionCloudSvg(mt.selections, 92)}
           </div>
 
-          <div class="flex flex-wrap gap-1.5">
+          <!-- Minimal Centered Blend Chips & + Merge -->
+          <div class="flex flex-wrap items-center justify-center gap-1.5 mb-3">
             ${mt.selections
               .map((sel, idx) => {
                 const c = getEmotionCoreMeta(sel.coreKey);
+                const isEditing = idx === mt.activeSlotIdx;
                 return `
-                  <button
-                    type="button"
-                    onclick="${mt.selections.length > 1 ? `removeEmotionSelectionAt(${idx})` : `focusEmotionWheelCore('${c.key}')`}"
-                    class="tactile-btn inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-pillbg border border-borderline text-[11.5px] font-semibold text-primarytext hover:border-coral transition"
-                  >
-                    <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color:${c.hex};"></span>
-                    <span>${escapeHtml(formatEmotionSelectionPath(sel))}</span>
-                    ${mt.selections.length > 1 ? '<span class="text-mutedtext ml-0.5">&times;</span>' : ''}
-                  </button>
+                  <div class="inline-flex items-center rounded-full border transition ${
+                    isEditing ? 'border-coral text-primarytext' : 'border-borderline text-secondarytext'
+                  }">
+                    <button
+                      type="button"
+                      onclick="activateEmotionSlot(${idx})"
+                      class="tactile-btn inline-flex items-center gap-1.5 pl-2.5 ${mt.selections.length > 1 ? 'pr-1.5' : 'pr-2.5'} py-1 text-[11px] font-semibold"
+                    >
+                      <span class="w-2 h-2 rounded-full flex-shrink-0" style="background-color:${c.hex};"></span>
+                      <span>${escapeHtml(sel.outer || sel.mid || c.label)}</span>
+                    </button>
+                    ${
+                      mt.selections.length > 1
+                        ? `<button type="button" onclick="removeEmotionSelectionAt(${idx})" class="pr-2 pl-0.5 py-1 text-mutedtext hover:text-primarytext text-xs leading-none" title="Remove">&times;</button>`
+                        : ''
+                    }
+                  </div>
                 `;
               })
               .join('')}
+            ${
+              mt.selections.length < 3
+                ? `
+                  <button
+                    type="button"
+                    onclick="addEmotionMergeSlot()"
+                    class="tactile-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-full border border-dashed border-borderline text-[11px] font-semibold text-secondarytext hover:text-primarytext hover:border-coral transition"
+                  >
+                    <span>+ Merge</span>
+                  </button>
+                `
+                : ''
+            }
           </div>
+
+          <!-- Subtle Double-Chevron Cue pointing down to the bottom wheel -->
+          <svg class="w-5 h-5 text-mutedtext opacity-70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+            <polyline points="7 8 12 13 17 8"/>
+            <polyline points="7 14 12 19 17 14"/>
+          </svg>
         </div>
 
-        <!-- Full Interactive 3-Ring 6-Emotion Circular Wheel (6 Core · 36 Layer 2 · 72 Layer 3) -->
-        <div class="py-0.5">
+        <!-- Bottom-Flush Rotatable 3-Layer Stacked Emotion Wheel -->
+        <div class="w-full flex-shrink-0">
           ${renderInteractiveEmotionWheelSvg(mt)}
         </div>
-
-        <!-- Complete Branch-Off Selection Panel (All Layer 2 + All Paired Layer 3 Nuances) -->
-        <div class="bg-cardbg border border-borderline rounded-2xl p-3.5 space-y-3">
-          <div class="flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2 min-w-0">
-              ${getEmotionCloudSvg(focusedCore.key, 26)}
-              <div class="min-w-0">
-                <span class="font-display text-sm font-bold text-primarytext">${focusedCore.label}</span>
-                <span class="text-[11px] text-secondarytext ml-1.5">${focusedCore.branches.length} branches · ${focusedCore.branches.length * 2} nuances</span>
-              </div>
-            </div>
-            <button
-              type="button"
-              onclick="toggleEmotionSelection('${focusedCore.key}', null, null)"
-              class="tactile-btn px-2.5 py-1 rounded-lg bg-pillbg border border-borderline text-[11px] font-semibold text-secondarytext hover:text-primarytext transition flex-shrink-0"
-            >
-              ${mt.selections.some((s) => s.coreKey === focusedCore.key && !s.mid) ? 'Core ✓' : `Select Core`}
-            </button>
-          </div>
-
-          <!-- 6 Core Quick Switcher -->
-          <div class="grid grid-cols-6 gap-1">
-            ${EMOTION_WHEEL_CORES.map((c) => {
-              const isActive = c.key === focusedCore.key;
-              return `
-                <button
-                  type="button"
-                  onclick="focusEmotionWheelCore('${c.key}')"
-                  style="${isActive ? `background-color:${c.hex}; color:#1E2024; border-color:${c.hex};` : ''}"
-                  class="tactile-btn py-1 px-1 rounded-lg border text-[10.5px] font-bold truncate transition ${
-                    isActive ? '' : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext'
-                  }"
-                >${c.label}</button>
-              `;
-            }).join('')}
-          </div>
-
-          <!-- Every Layer 2 Secondary Emotion paired with Both Layer 3 Deep Nuances -->
-          <div class="space-y-1.5">
-            <div class="grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-2 px-1 text-[10.5px] font-semibold text-mutedtext">
-              <span>2nd Row · Specific</span>
-              <span>3rd Row · Deep Nuance</span>
-            </div>
-            <div class="space-y-1.5">
-              ${focusedCore.branches
-                .map((br) => {
-                  const safeMid = escapeHtml(br.mid).replace(/'/g, "\\'");
-                  const isFocusedMid = br.mid === mt.focusedMid;
-                  const isMidPicked = mt.selections.some(
-                    (s) => s.coreKey === focusedCore.key && s.mid === br.mid && !s.outer
-                  );
-                  const hasOuterPicked = mt.selections.some(
-                    (s) => s.coreKey === focusedCore.key && s.mid === br.mid && Boolean(s.outer)
-                  );
-                  return `
-                    <div class="grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-1.5 items-stretch">
-                      <button
-                        type="button"
-                        onclick="selectEmotionMidBranch('${focusedCore.key}', '${safeMid}')"
-                        style="${
-                          isMidPicked
-                            ? `background-color:${focusedCore.hex}; color:#1E2024; border-color:${focusedCore.hex};`
-                            : hasOuterPicked || isFocusedMid
-                              ? `border-color:${focusedCore.hex};`
-                              : ''
-                        }"
-                        class="tactile-btn px-2.5 py-2 rounded-xl border text-[11.5px] font-semibold text-left truncate transition ${
-                          isMidPicked ? '' : 'bg-pillbg border-borderline text-primarytext hover:border-coral'
-                        }"
-                      >${escapeHtml(br.mid)}</button>
-                      <div class="grid grid-cols-2 gap-1.5">
-                        ${br.outer
-                          .map((leaf) => {
-                            const safeLeaf = escapeHtml(leaf).replace(/'/g, "\\'");
-                            const isPicked = mt.selections.some(
-                              (s) => s.coreKey === focusedCore.key && s.mid === br.mid && s.outer === leaf
-                            );
-                            return `
-                              <button
-                                type="button"
-                                onclick="toggleEmotionSelection('${focusedCore.key}', '${safeMid}', '${safeLeaf}')"
-                                style="${isPicked ? `background-color:${focusedCore.hex}; color:#1E2024; border-color:${focusedCore.hex};` : ''}"
-                                class="tactile-btn px-2 py-2 rounded-xl border text-[11px] font-semibold text-left truncate transition ${
-                                  isPicked ? '' : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext hover:border-coral'
-                                }"
-                              >${escapeHtml(leaf)}</button>
-                            `;
-                          })
-                          .join('')}
-                      </div>
-                    </div>
-                  `;
-                })
-                .join('')}
-            </div>
-          </div>
-        </div>
-
-        <!-- Tactile Battery Energy Slider & Segmented Stress Meter (Matched h-9 Thickness) -->
-        <div class="bg-cardbg border border-borderline rounded-2xl p-3.5 space-y-4">
-          ${renderBatterySliderHtml(mt.energyLevel, 'modal', 'Physical Energy')}
-          <div class="border-t border-borderline pt-3.5">
-            ${renderStressMeterHtml(mt.stressLevel, 'modal', 'Emotional Battery (Stress)')}
-          </div>
-        </div>
-
-        <!-- Trigger / Context Note + Depth Analysis -->
-        <div class="bg-cardbg border border-borderline rounded-2xl p-3.5 space-y-3">
-          <input
-            type="text"
-            value="${escapeHtml(mt.note || '')}"
-            oninput="state.journalMoodTracker.note = this.value"
-            placeholder="What triggered or shaped this feeling?"
-            class="w-full bg-pillbg text-xs text-primarytext placeholder-mutedtext px-3 py-2.5 rounded-xl border border-borderline focus:border-coral focus:outline-none"
-          />
-          <div class="border-t border-borderline pt-2.5 space-y-1">
-            <p class="text-[11px] font-semibold text-coral">Depth Analysis</p>
-            <p class="text-xs text-primarytext leading-relaxed">${escapeHtml(analysis.blend.blendRead)}</p>
-            <p class="text-[11.5px] text-secondarytext leading-relaxed">${escapeHtml(analysis.balanceNote)}</p>
-            <p class="text-[11px] text-mutedtext pt-0.5">${escapeHtml(analysis.trendText)}</p>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onclick="saveJournalMoodLog()"
-          class="tactile-btn w-full py-3 rounded-2xl bg-coral text-onaccent font-bold text-xs"
-        >
-          Save Mood to Journal
-        </button>
       `;
     }
 
@@ -21733,12 +21866,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function saveJournalEnergyLog() {
       const et = ensureEnergyTrackerState();
       const entry = getActiveJournalTargetEntry();
-      const batteryMeta = BATTERY_ENERGY_LEVELS[et.batteryLevel] || BATTERY_ENERGY_LEVELS[2];
-      const clarityMeta = CLARITY_METER_LEVELS[et.clarityLevel] || CLARITY_METER_LEVELS[2];
+      const batteryMeta = BATTERY_ENERGY_LEVELS[et.batteryLevel] || BATTERY_ENERGY_LEVELS[3];
+      const clarityMeta = CLARITY_METER_LEVELS[et.clarityLevel] || CLARITY_METER_LEVELS[3];
       const stressMeta = STRESS_METER_LEVELS[et.stressLevel - 1] || STRESS_METER_LEVELS[1];
 
-      const physicalScore = [1, 3, 6, 8, 10][et.batteryLevel];
-      const mentalScore = [1, 3, 6, 8, 10][et.clarityLevel];
+      const physicalScore = [1, 2, 4, 6, 7, 9, 10][et.batteryLevel];
+      const mentalScore = [1, 2, 4, 6, 7, 9, 10][et.clarityLevel];
       const emotionalScore = [10, 8, 7, 5, 3, 1][et.stressLevel - 1];
       et.physical = physicalScore;
       et.mental = mentalScore;
