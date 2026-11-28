@@ -3183,7 +3183,7 @@
             class="tactile-btn w-10 h-10 rounded-full bg-coral text-onaccent flex items-center justify-center theme-fab-shadow flex-shrink-0"
           >
             <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-              <path d="M12 19V5m0 0l-6 6m6-6l6 6"/>
+              <path d="M5 12h14m0 0l-6-6m6 6l-6 6"/>
             </svg>
           </button>
         </div>
@@ -15965,8 +15965,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       saveState();
       renderInboxDeck(true);
 
-      if (input) input.value = '';
-      closeInboxQuickAddPanel({ silent: true });
+      if (input) {
+        input.value = '';
+        input.focus();
+      }
     }
 
     function restoreArchivedDump(id) {
