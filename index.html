@@ -1168,32 +1168,27 @@
     }
     .spatial-bubble-core.over-dismiss {
       border-color: #DC2626;
-      box-shadow: 0 4px 10px rgba(220, 38, 38, 0.32);
+      box-shadow: var(--surface-shadow-sm);
     }
 
     .spatial-text-highlight {
-      outline: 2px solid rgb(var(--color-accent) / 0.78);
+      outline: 2px solid rgb(var(--color-accent));
       outline-offset: 4px;
-      background-color: rgb(var(--color-accent) / 0.12) !important;
       border-radius: 10px;
     }
     .spatial-bubble-core.scribbling,
     .spatial-bubble-core.reading-text {
       border-color: rgb(var(--color-accent));
-      box-shadow: var(--surface-shadow-sm), 0 0 0 2px rgb(var(--color-accent) / 0.4);
+      box-shadow: var(--surface-shadow-sm);
     }
 
-    @keyframes spatialVoiceAura {
-      0%, 100% { box-shadow: var(--surface-shadow-sm), 0 0 0 2px rgb(var(--color-accent) / 0.35); }
-      50% { box-shadow: var(--surface-shadow-md), 0 0 0 4px rgb(var(--color-accent) / 0.22); }
-    }
     .spatial-bubble-core.voice-recording {
       width: 118px;
       height: 50px;
       margin-left: -32px;
       background: rgb(var(--color-sheetbg));
       border-color: rgb(var(--color-accent));
-      animation: spatialVoiceAura 1.3s ease-in-out infinite;
+      box-shadow: var(--surface-shadow-sm);
       cursor: pointer;
     }
 
@@ -1824,7 +1819,7 @@
         <div id="compartment-pills-list" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar min-w-0"></div>
 
         <div class="flex items-center gap-2 flex-shrink-0">
-          <span id="hourly-mode-badge" class="hidden text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-coral/20 text-coral border border-coral/40 whitespace-nowrap flex-shrink-0">
+          <span id="hourly-mode-badge" class="hidden text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-pillbg text-coral border border-borderline whitespace-nowrap flex-shrink-0">
             Hourly Depth
           </span>
         </div>
@@ -1847,20 +1842,43 @@
       <!-- VIEW 2: BRAIN DUMP (Flat Embedded 4-Pocket Carrom + Collapsible Archive Footer) -->
       <section id="view-inbox" class="hidden relative z-10 flex-1 overflow-y-auto no-scrollbar px-4 lg:px-8 pb-24 lg:pb-14 pt-3 lg:pt-5">
         <div class="max-w-[440px] mx-auto">
-          <!-- Top: Active Coin Readout (Flush on sheet) -->
-          <div id="carrom-active-coin-bar" class="px-1 pb-3 border-b border-borderline/50">
-            <div class="flex items-start justify-between gap-2.5">
-              <div class="min-w-0">
-                <p id="carrom-active-coin-meta" class="text-[11px] font-semibold text-secondarytext">Active Coin</p>
-                <p id="carrom-active-coin-text" class="font-display text-base font-bold text-primarytext leading-snug mt-0.5 break-words">No coins on board</p>
-                <p id="carrom-active-coin-desc" class="hidden text-xs text-secondarytext leading-snug mt-1 break-words"></p>
+          <!-- Top: Recessed Matte Active Thought Bar with Switcher & Queue Dots -->
+          <div id="carrom-active-coin-bar" class="mb-2 rounded-[18px] bg-appbg border border-borderline px-2 py-2.5">
+            <div class="flex items-center justify-between gap-2">
+              <button
+                type="button"
+                id="carrom-prev-coin-btn"
+                onclick="cycleActiveBrainDumpCoin(-1)"
+                aria-label="Previous thought"
+                class="tactile-btn w-8 h-8 rounded-xl text-secondarytext hover:text-primarytext hover:bg-cardbg disabled:opacity-25 disabled:pointer-events-none flex items-center justify-center shrink-0 transition"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                  <path d="M15 18l-6-6 6-6"/>
+                </svg>
+              </button>
+
+              <div class="flex-1 min-w-0 text-center px-1">
+                <p id="carrom-active-coin-text" class="font-display text-[17px] sm:text-lg font-bold tracking-tight text-primarytext leading-snug break-words">No coins on board</p>
+                <p id="carrom-active-coin-desc" class="hidden text-xs text-secondarytext leading-snug mt-0.5 break-words"></p>
+                <div id="carrom-queue-dots" class="hidden mt-2 flex items-center justify-center gap-1.5" aria-label="Queued thoughts"></div>
               </div>
-              <span id="carrom-coins-remaining" class="text-[11px] font-semibold text-secondarytext tabular-nums whitespace-nowrap shrink-0">0 left</span>
+
+              <button
+                type="button"
+                id="carrom-next-coin-btn"
+                onclick="cycleActiveBrainDumpCoin(1)"
+                aria-label="Next thought"
+                class="tactile-btn w-8 h-8 rounded-xl text-secondarytext hover:text-primarytext hover:bg-cardbg disabled:opacity-25 disabled:pointer-events-none flex items-center justify-center shrink-0 transition"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
+              </button>
             </div>
           </div>
 
-          <!-- Middle: Recessed Theme-Matched Carrom Board (Flush outer margin) -->
-          <div class="py-2">
+          <!-- Middle: Borderless Recessed Theme-Matched Carrom Board -->
+          <div class="py-1">
             <div class="relative w-full aspect-square select-none">
               <canvas
                 id="carrom-board-canvas"
@@ -1869,7 +1887,7 @@
                 style="touch-action: none;"
                 class="w-full h-full block cursor-crosshair"
               ></canvas>
-              <div id="carrom-empty-overlay" class="hidden absolute inset-5 rounded-2xl bg-sheetbg/94 backdrop-blur-sm border border-borderline/70 flex flex-col items-center justify-center p-5 text-center space-y-2.5">
+              <div id="carrom-empty-overlay" class="hidden absolute inset-5 rounded-2xl bg-sheetbg/94 backdrop-blur-sm flex flex-col items-center justify-center p-5 text-center space-y-2.5">
                 <p class="font-display text-base font-bold text-primarytext">Brain Dump Cleared</p>
                 <p class="text-xs text-secondarytext max-w-[230px]">Tap + to drop a thought onto the board or open Schedule to batch queued tasks.</p>
                 <button
@@ -1883,48 +1901,44 @@
             </div>
           </div>
 
-          <!-- Below Board: Flat Pocket Action Strip -->
-          <div id="carrom-pocket-actions" class="pt-2.5 pb-3 border-t border-borderline/50 grid grid-cols-4 gap-1.5">
+          <!-- Below Board: Color-Coded Pocket Action Strip -->
+          <div id="carrom-pocket-actions" class="pt-2 pb-2.5 grid grid-cols-4 gap-2">
             <button
               type="button"
               data-carrom-flick="scheduling"
               onclick="flickSelectedCoinToPocket('scheduling')"
-              class="tactile-btn py-2 px-2 rounded-xl bg-appbg/55 border border-borderline/65 hover:border-coral text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
+              class="tactile-btn py-2.5 px-2 rounded-xl bg-appbg hover:bg-cardbg border border-[#F28B82]/55 text-[#C85A52] dark:text-[#F28B82] text-[11.5px] font-semibold whitespace-nowrap flex items-center justify-center"
             >
-              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#F28B82;"></span>
-              <span>Schedule</span>
+              Schedule
             </button>
             <button
               type="button"
               data-carrom-flick="notes"
               onclick="flickSelectedCoinToPocket('notes')"
-              class="tactile-btn py-2 px-2 rounded-xl bg-appbg/55 border border-borderline/65 hover:border-sky text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
+              class="tactile-btn py-2.5 px-2 rounded-xl bg-appbg hover:bg-cardbg border border-[#6EA8D8]/55 text-[#356FA1] dark:text-[#6EA8D8] text-[11.5px] font-semibold whitespace-nowrap flex items-center justify-center"
             >
-              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#6EA8D8;"></span>
-              <span>Notes</span>
-            </button>
-            <button
-              type="button"
-              data-carrom-flick="archive"
-              onclick="flickSelectedCoinToPocket('archive')"
-              class="tactile-btn py-2 px-2 rounded-xl bg-appbg/55 border border-borderline/65 hover:border-secondarytext text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
-            >
-              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#9A9AA0;"></span>
-              <span>Archive</span>
+              Notes
             </button>
             <button
               type="button"
               data-carrom-flick="journal"
               onclick="flickSelectedCoinToPocket('journal')"
-              class="tactile-btn py-2 px-2 rounded-xl bg-appbg/55 border border-borderline/65 hover:border-lime text-[11px] font-semibold text-primarytext whitespace-nowrap flex items-center justify-center gap-1"
+              class="tactile-btn py-2.5 px-2 rounded-xl bg-appbg hover:bg-cardbg border border-[#81C953]/55 text-[#468522] dark:text-[#81C953] text-[11.5px] font-semibold whitespace-nowrap flex items-center justify-center"
             >
-              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#81C953;"></span>
-              <span>Journal</span>
+              Journal
+            </button>
+            <button
+              type="button"
+              data-carrom-flick="archive"
+              onclick="flickSelectedCoinToPocket('archive')"
+              class="tactile-btn py-2.5 px-2 rounded-xl bg-appbg hover:bg-cardbg border border-borderline text-[#606068] dark:text-[#B5B5BD] text-[11.5px] font-semibold whitespace-nowrap flex items-center justify-center"
+            >
+              Archive
             </button>
           </div>
 
           <!-- Collapsible Archived Footer Row -->
-          <div id="carrom-archive-footer" class="border-t border-borderline/50">
+          <div id="carrom-archive-footer" class="mt-1">
             <button
               type="button"
               id="inbox-archive-toggle-btn"
@@ -2185,7 +2199,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.5 10h17M8 3v4M16 3v4"/>
                   </svg>
                 </button>
-                <span id="topic-detail-level-pill" class="px-2.5 py-0.5 rounded-full bg-coral/20 border border-coral/40 text-coral text-[11px] font-bold whitespace-nowrap flex-shrink-0">
+                <span id="topic-detail-level-pill" class="px-2.5 py-0.5 rounded-full bg-pillbg border border-borderline text-coral text-[11px] font-bold whitespace-nowrap flex-shrink-0">
                   LVL 1 / 10
                 </span>
               </div>
@@ -2212,7 +2226,7 @@
                       <option value="Portfolio">Portfolio</option>
                       <option value="Aesthetic">Aesthetic</option>
                     </select>
-                    <span id="topic-detail-subtopic-badge" class="hidden px-2 py-0.5 rounded-full bg-coral/15 border border-coral/35 text-[10px] font-bold uppercase tracking-wider text-coral">Skill</span>
+                    <span id="topic-detail-subtopic-badge" class="hidden px-2 py-0.5 rounded-full bg-pillbg border border-borderline text-[10px] font-bold uppercase tracking-wider text-coral">Skill</span>
                   </div>
                   <h3 id="topic-detail-title" class="font-display text-base font-bold text-primarytext truncate">Architectural Drafting</h3>
                 </div>
@@ -3678,7 +3692,7 @@
               <button
                 type="button"
                 onclick="addProjectModalCheckpoint()"
-                class="tactile-btn text-[11px] font-semibold px-2.5 py-1 rounded-full bg-coral/15 border border-coral/40 text-coral hover:bg-coral/25"
+                class="tactile-btn text-[11px] font-semibold px-2.5 py-1 rounded-full bg-pillbg border border-borderline text-coral hover:border-coral"
               >
                 + Add Checkpoint
               </button>
@@ -3993,7 +4007,7 @@
       </div>
 
       <div class="flex-1 overflow-y-auto no-scrollbar py-4 space-y-4">
-        <p id="drive-attach-context-banner" class="hidden text-xs font-medium text-coral bg-coral/10 border border-coral/30 rounded-xl px-3.5 py-2.5"></p>
+        <p id="drive-attach-context-banner" class="hidden text-xs font-medium text-coral bg-cardbg border border-borderline rounded-xl px-3.5 py-2.5"></p>
         <p id="drive-status-banner" class="hidden text-xs px-3.5 py-2.5 rounded-xl bg-cardbg border border-borderline"></p>
 
         <!-- Signed-Out State with Official Sign in with Google Button -->
@@ -4845,13 +4859,12 @@
   <svg id="spatial-teardrop-svg" aria-hidden="true">
     <defs>
       <linearGradient id="spatial-teardrop-fill" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="rgb(var(--color-cardbg))" stop-opacity="0.96" />
-        <stop offset="65%" stop-color="rgb(var(--color-sheetbg))" stop-opacity="0.96" />
-        <stop offset="100%" stop-color="rgb(var(--color-accent))" stop-opacity="0.34" />
+        <stop offset="0%" stop-color="rgb(var(--color-cardbg))" stop-opacity="1" />
+        <stop offset="100%" stop-color="rgb(var(--color-sheetbg))" stop-opacity="1" />
       </linearGradient>
     </defs>
-    <path id="spatial-teardrop-glow" d="" fill="rgb(var(--color-accent) / 0.16)" stroke="none"></path>
-    <path id="spatial-teardrop-path" d="" fill="url(#spatial-teardrop-fill)" stroke="rgb(var(--color-accent) / 0.65)" stroke-width="1.6"></path>
+    <path id="spatial-teardrop-glow" d="" fill="none" stroke="none"></path>
+    <path id="spatial-teardrop-path" d="" fill="url(#spatial-teardrop-fill)" stroke="rgb(var(--color-borderline))" stroke-width="1.5"></path>
     <g id="spatial-teardrop-icon" opacity="0" transform="translate(0,0)">
       <path d="M0 -9 L2.2 -2.2 L9 0 L2.2 2.2 L0 9 L-2.2 2.2 L-9 0 L-2.2 -2.2 Z" fill="none" stroke="rgb(var(--color-accent))" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" />
     </g>
@@ -4965,7 +4978,7 @@
       <div id="spatial-bubble-island-card" class="hidden w-full h-full px-3.5 py-2 flex flex-col justify-between text-left relative overflow-hidden">
         <div class="flex items-center justify-between gap-2.5 min-w-0 my-auto">
           <div class="flex items-center gap-2.5 min-w-0">
-            <span id="spatial-island-badge-icon" class="w-9 h-9 rounded-xl bg-coral/15 border border-coral/35 text-coral flex items-center justify-center shrink-0">
+            <span id="spatial-island-badge-icon" class="w-9 h-9 rounded-xl bg-pillbg border border-borderline text-coral flex items-center justify-center shrink-0">
               <svg class="w-6 h-6 overflow-visible" viewBox="0 0 44 44" fill="none">
                 <line x1="22" y1="11" x2="22" y2="5.5" stroke="#F5F5F7" stroke-width="2" stroke-linecap="round" />
                 <circle id="spatial-island-bot-orb" cx="22" cy="4.2" r="2.8" fill="rgb(var(--color-accent))" stroke="#141416" stroke-width="1" />
@@ -5002,7 +5015,7 @@
             <button id="spatial-island-sim-btn" type="button" class="flex-1 py-1.5 px-2 rounded-lg bg-pillbg hover:bg-borderline text-[10.5px] font-semibold text-primarytext border border-borderline transition cursor-pointer">
               + Test Alert
             </button>
-            <button id="spatial-island-tools-btn" type="button" class="flex-1 py-1.5 px-2 rounded-lg bg-coral/15 hover:bg-coral/25 text-[10.5px] font-semibold text-coral border border-coral/35 transition cursor-pointer">
+            <button id="spatial-island-tools-btn" type="button" class="flex-1 py-1.5 px-2 rounded-lg bg-pillbg hover:bg-borderline text-[10.5px] font-semibold text-coral border border-borderline transition cursor-pointer">
               Radial Tools
             </button>
           </div>
@@ -11639,7 +11652,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 spineMarkerHtml = `
                   <div class="pointer-events-none absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-20" style="left:${liveNow.todayPct}%;">
                     <span
-                      style="background-color:${c.hex}; box-shadow: 0 0 0 3px rgb(var(--color-sheetbg)), 0 0 8px rgba(${rgb}, 0.55);"
+                      style="background-color:${c.hex}; box-shadow: 0 0 0 3px rgb(var(--color-sheetbg));"
                       class="block w-2.5 h-2.5 rounded-full"
                     ></span>
                   </div>
@@ -12809,7 +12822,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           capsuleOverlayHtml = `
             <div
               class="pointer-events-none absolute inset-x-0 top-0 transition-all duration-700"
-              style="height:${elapsedPct.toFixed(1)}%; background: linear-gradient(to bottom, ${c.hex} 0%, rgba(${rgb}, 0.92) 68%, rgba(${rgb}, 0.38) 100%); box-shadow: 0 4px 14px rgba(${rgb}, 0.34);"
+              style="height:${elapsedPct.toFixed(1)}%; background-color:${c.hex};"
             ></div>
           `;
         } else {
@@ -12900,8 +12913,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                     linkedHabit
                       ? `<button type="button" onpointerdown="event.stopPropagation()" onclick="event.stopPropagation(); jumpToHabitFromTask(${linkedHabit.id})" title="Linked habit — auto-punches when completed" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-[9.5px] ${
                           taskDone
-                            ? 'bg-lime/15 text-lime border border-lime/30'
-                            : 'bg-coral/15 text-coral border border-coral/30 hover:bg-coral/25'
+                            ? 'bg-pillbg text-lime border border-borderline'
+                            : 'bg-pillbg text-coral border border-borderline hover:border-coral'
                         } transition"><span class="w-1.5 h-1.5 rounded-full ${taskDone ? 'bg-lime' : 'bg-coral'}"></span><span>${taskDone ? `Punched · ${escapeHtml(linkedHabit.title)}` : `Habit · Auto-punch`}</span></button>`
                       : ''
                   }
@@ -12951,9 +12964,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 ${
                   task.prePrompts || task.intraPrompts || task.postPrompts
                     ? `<div class="mt-1 flex items-center flex-wrap gap-1.5 text-[9.5px] font-semibold">
-                        ${task.prePrompts ? '<span class="px-1.5 py-0.5 rounded bg-amber/15 text-amber border border-amber/30">Pre</span>' : ''}
-                        ${task.intraPrompts ? '<span class="px-1.5 py-0.5 rounded bg-coral/15 text-coral border border-coral/30">Intra</span>' : ''}
-                        ${task.postPrompts ? '<span class="px-1.5 py-0.5 rounded bg-lime/15 text-lime border border-lime/30">Post</span>' : ''}
+                        ${task.prePrompts ? '<span class="px-1.5 py-0.5 rounded bg-pillbg text-amber border border-borderline">Pre</span>' : ''}
+                        ${task.intraPrompts ? '<span class="px-1.5 py-0.5 rounded bg-pillbg text-coral border border-borderline">Intra</span>' : ''}
+                        ${task.postPrompts ? '<span class="px-1.5 py-0.5 rounded bg-pillbg text-lime border border-borderline">Post</span>' : ''}
                       </div>`
                     : ''
                 }
@@ -15122,6 +15135,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       spawnScale: 1,
       lastClackMs: 0,
       boundCanvas: null,
+      activeIndex: 0,
     };
 
     function getCarromLogic() {
@@ -15173,9 +15187,26 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     function syncCarromCoinsFromState(forceRelayout = false) {
       const logic = getCarromLogic();
       if (!logic) return;
+      const allItems = state.inboxItems || [];
       const prevHeadId = carromGame.coins[0] ? String(carromGame.coins[0].id) : null;
+
+      if (allItems.length === 0) {
+        carromGame.activeIndex = 0;
+        carromGame.coins = [];
+        carromGame.selectedCoinId = null;
+        carromGame.spawnScale = 1;
+        return;
+      }
+
+      let activeIdx = allItems.findIndex((it) => String(it.id) === String(carromGame.selectedCoinId));
+      if (activeIdx < 0) {
+        activeIdx = Math.max(0, Math.min(carromGame.activeIndex || 0, allItems.length - 1));
+      }
+      carromGame.activeIndex = activeIdx;
+      const activeItem = allItems[activeIdx];
+
       carromGame.coins = logic.layoutBrainDumpCoins(
-        state.inboxItems || [],
+        [activeItem],
         forceRelayout ? [] : carromGame.coins,
         { singleCoin: true }
       );
@@ -15189,6 +15220,28 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         carromGame.selectedCoinId = null;
         carromGame.spawnScale = 1;
       }
+    }
+
+    function cycleActiveBrainDumpCoin(delta) {
+      const allItems = state.inboxItems || [];
+      if (allItems.length <= 1) return;
+      const len = allItems.length;
+      const curIdx = Math.max(0, Math.min(carromGame.activeIndex || 0, len - 1));
+      const nextIdx = (curIdx + delta + len) % len;
+      carromGame.activeIndex = nextIdx;
+      carromGame.selectedCoinId = allItems[nextIdx].id;
+      playSfx('tick');
+      renderInboxDeck(true);
+    }
+
+    function selectBrainDumpCoinAt(index) {
+      const allItems = state.inboxItems || [];
+      if (index < 0 || index >= allItems.length) return;
+      if (index === carromGame.activeIndex && String(carromGame.selectedCoinId) === String(allItems[index].id)) return;
+      carromGame.activeIndex = index;
+      carromGame.selectedCoinId = allItems[index].id;
+      playSfx('tick');
+      renderInboxDeck(true);
     }
 
     function stopCarromLoop() {
@@ -15551,12 +15604,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       ctx.fillStyle = pal.sheetBg;
       ctx.fillRect(0, 0, S, S);
 
-      // 2. Playing Surface (Gently recessed into the page)
+      // 2. Playing Surface (Gently recessed into the page with crisp matte border)
       drawRoundedRectPath(ctx, P0, P0, P1 - P0, P1 - P0, 18);
       ctx.fillStyle = pal.appBg;
       ctx.fill();
-      ctx.strokeStyle = pal.borderSoft;
-      ctx.lineWidth = 1.25;
+      ctx.strokeStyle = pal.border;
+      ctx.lineWidth = 1.5;
       ctx.stroke();
 
       // 3. Minimal Architectural Center Reticle (Dead-Center)
@@ -15587,10 +15640,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       ctx.lineTo(0, 64);
       ctx.stroke();
 
-      ctx.fillStyle = pal.accentSoft;
-      ctx.beginPath();
-      ctx.arc(0, 0, 10, 0, Math.PI * 2);
-      ctx.fill();
       ctx.fillStyle = pal.accent;
       ctx.beginPath();
       ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
@@ -15625,7 +15674,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         ctx.stroke();
       });
 
-      // 5. Four Corner Pockets (strictly inside playing field) + Clean Outer Frame Labels
+      // 5. Four Corner Pockets (strictly inside playing field, color-ring indicators only)
       logic.CARROM_POCKETS.forEach((p) => {
         const rimR = logic.POCKET_RIM_RADIUS || (logic.POCKET_RADIUS + 2);
 
@@ -15641,24 +15690,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         ctx.strokeStyle = p.color;
         ctx.lineWidth = 2;
         ctx.stroke();
-
-        // Destination label cleanly positioned on the outer frame margin (never overlaps board)
-        const isLeft = p.corner.includes('l');
-        const isTop = p.corner.includes('t');
-        const labelY = isTop ? F / 2 : S - F / 2;
-        const dotX = isLeft ? P0 + 10 : P1 - 10;
-        const textX = isLeft ? P0 + 20 : P1 - 20;
-
-        ctx.beginPath();
-        ctx.arc(dotX, labelY, 3.2, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.fill();
-
-        ctx.font = '700 10px "Plus Jakarta Sans", sans-serif';
-        ctx.textAlign = isLeft ? 'left' : 'right';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = pal.secondaryText;
-        ctx.fillText(p.shortLabel, textX, labelY + 0.5);
       });
 
       // 6. Direct Thought Coin Aiming Slingshot Vector
@@ -15718,13 +15749,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         ctx.arc(coin.x + 1.2, coin.y + 2.8, r, 0, Math.PI * 2);
         ctx.fillStyle = pal.isLight ? 'rgba(20, 20, 24, 0.16)' : 'rgba(0, 0, 0, 0.38)';
         ctx.fill();
-
-        // Subtle outer glow ring
-        ctx.beginPath();
-        ctx.arc(coin.x, coin.y, r + 3.5, 0, Math.PI * 2);
-        ctx.strokeStyle = pal.accentSoft;
-        ctx.lineWidth = 2;
-        ctx.stroke();
 
         // Main matte puck body
         ctx.beginPath();
@@ -15795,23 +15819,59 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (remainingEl) {
         remainingEl.textContent = `${allItems.length} left`;
       }
-      if (activeMeta && activeText) {
+      if (activeText) {
         if (activeCoin) {
           const fullItem = allItems.find((it) => String(it.id) === String(activeCoin.id));
           const descStr = fullItem && fullItem.desc ? String(fullItem.desc).trim() : '';
-          activeMeta.textContent = `Current Coin · ${activeCoin.tag || 'Thought'}`;
+          if (activeMeta) activeMeta.textContent = `Current Coin · ${activeCoin.tag || 'Thought'}`;
           activeText.textContent = activeCoin.text;
           if (activeDesc) {
             activeDesc.textContent = descStr;
             activeDesc.classList.toggle('hidden', !descStr);
           }
         } else {
-          activeMeta.textContent = 'Board clear';
+          if (activeMeta) activeMeta.textContent = 'Board clear';
           activeText.textContent = 'Tap + to drop the next coin.';
           if (activeDesc) {
             activeDesc.textContent = '';
             activeDesc.classList.add('hidden');
           }
+        }
+      }
+
+      const prevBtn = document.getElementById('carrom-prev-coin-btn');
+      const nextBtn = document.getElementById('carrom-next-coin-btn');
+      const dotsEl = document.getElementById('carrom-queue-dots');
+
+      if (prevBtn) prevBtn.disabled = allItems.length <= 1;
+      if (nextBtn) nextBtn.disabled = allItems.length <= 1;
+
+      if (dotsEl) {
+        if (allItems.length <= 0) {
+          dotsEl.innerHTML = '';
+          dotsEl.classList.add('hidden');
+        } else {
+          const total = allItems.length;
+          const activeIdx = Math.max(0, Math.min(carromGame.activeIndex || 0, total - 1));
+          const maxDots = 7;
+          let start = 0;
+          let end = total;
+          if (total > maxDots) {
+            start = Math.max(0, Math.min(activeIdx - Math.floor(maxDots / 2), total - maxDots));
+            end = start + maxDots;
+          }
+          let html = '';
+          for (let i = start; i < end; i += 1) {
+            const isActive = i === activeIdx;
+            html += `<button
+              type="button"
+              onclick="selectBrainDumpCoinAt(${i})"
+              aria-label="Thought ${i + 1} of ${total}"
+              class="${isActive ? 'w-4 h-1.5 bg-coral' : 'w-1.5 h-1.5 bg-borderline hover:bg-secondarytext'} rounded-full transition-all duration-150"
+            ></button>`;
+          }
+          dotsEl.innerHTML = html;
+          dotsEl.classList.remove('hidden');
         }
       }
 
@@ -16767,13 +16827,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       let dotCls = 'bg-secondarytext';
 
       if (status.state === 'active') {
-        badgeCls = 'bg-coral/15 border-coral/40 text-coral';
-        dotCls = 'bg-coral animate-pulse';
+        badgeCls = 'bg-pillbg border-coral/55 text-coral';
+        dotCls = 'bg-coral';
       } else if (status.state === 'completed') {
-        badgeCls = 'bg-lime/15 border-lime/35 text-lime';
+        badgeCls = 'bg-pillbg border-borderline text-lime';
         dotCls = 'bg-lime';
       } else if (status.state === 'overdue') {
-        badgeCls = 'bg-amber/15 border-amber/40 text-amber';
+        badgeCls = 'bg-pillbg border-borderline text-amber';
         dotCls = 'bg-amber';
       } else if (status.state === 'upcoming') {
         badgeCls = 'bg-pillbg border-borderline text-primarytext';
@@ -18902,7 +18962,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 ${DBT_SKILLS.map((s) => {
                   const on = dbt.skill === s.key;
                   return `<button type="button" onclick="state.journalExercise.dbt.skill = '${s.key}'; renderJournalExerciseModal();" class="tactile-btn px-3 py-2 rounded-xl text-left border transition ${
-                    on ? 'bg-coral/15 border-coral text-coral font-bold' : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext font-medium'
+                    on ? 'bg-appbg border-coral text-coral font-bold' : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext font-medium'
                   }">
                     <p class="text-xs">${s.key}</p>
                   </button>`;
@@ -19290,9 +19350,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         yesterdayPill.textContent = yest.label;
         yesterdayPill.className = `text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap border ${
           yest.deltaPct > 0
-            ? 'text-lime bg-lime/10 border-lime/30'
+            ? 'text-lime bg-pillbg border-borderline'
             : yest.deltaPct < 0
-              ? 'text-coral bg-coral/10 border-coral/30'
+              ? 'text-coral bg-pillbg border-borderline'
               : 'text-secondarytext bg-pillbg border-borderline'
         }`;
       }
@@ -20482,7 +20542,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   </span>
                   <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-1.5">
-                      <span class="px-2 py-0.5 rounded-full bg-coral/15 border border-coral/35 text-[9.5px] font-bold uppercase tracking-wider text-coral flex-shrink-0">
+                      <span class="px-2 py-0.5 rounded-full bg-pillbg border border-borderline text-[9.5px] font-bold uppercase tracking-wider text-coral flex-shrink-0">
                         ${escapeHtml(topic.lifeArea)}
                       </span>
                       ${
@@ -20499,7 +20559,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                     type="button"
                     onclick="toggleTopicPin(${topic.id})"
                     class="tactile-btn px-2 py-1 rounded-full text-[10px] font-semibold border ${
-                      topic.pinned ? 'bg-coral/15 border-coral/40 text-coral' : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext'
+                      topic.pinned ? 'bg-appbg border-coral/55 text-coral' : 'bg-pillbg border-borderline text-secondarytext hover:text-primarytext'
                     }"
                   >${topic.pinned ? 'Pinned' : 'Pin'}</button>
                   <button
@@ -20726,8 +20786,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         levelPill.textContent = stats.isMaxLevel ? 'LVL 10 · MAX' : `LVL ${stats.level} / ${stats.maxLevel}`;
         levelPill.className = `px-2.5 py-0.5 rounded-full text-[11px] font-bold whitespace-nowrap flex-shrink-0 border ${
           stats.isMaxLevel
-            ? 'bg-lime/20 border-lime/40 text-lime'
-            : 'bg-coral/20 border-coral/40 text-coral'
+            ? 'bg-pillbg border-borderline text-lime'
+            : 'bg-pillbg border-borderline text-coral'
         }`;
       }
 
@@ -20770,7 +20830,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               onclick="setTopicDetailTab('milestone')"
               class="tactile-btn px-3 py-2 rounded-xl border text-[11px] flex items-center justify-between transition ${
                 isMilestoneActive
-                  ? 'bg-coral/15 border-coral text-coral font-semibold'
+                  ? 'bg-appbg border-coral text-coral font-semibold'
                   : 'bg-pillbg border-borderline text-secondarytext hover:border-coral hover:text-primarytext font-medium'
               }"
             >
@@ -20785,7 +20845,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               onclick="setTopicDetailTab('achievement')"
               class="tactile-btn px-3 py-2 rounded-xl border text-[11px] flex items-center justify-between transition ${
                 isAchievementActive
-                  ? 'bg-amber/15 border-amber text-amber font-semibold'
+                  ? 'bg-appbg border-amber text-amber font-semibold'
                   : 'bg-pillbg border-borderline text-secondarytext hover:border-amber hover:text-primarytext font-medium'
               }"
             >
@@ -20924,11 +20984,6 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 transform="translate(${node.x}, ${node.y})"
                 style="opacity:${nodeOpacity}; cursor:grab;"
               >
-                ${
-                  isFocused || node.isRoot
-                    ? `<circle r="${(node.radius + (isFocused ? 7 : 5)).toFixed(1)}" fill="${fillHex}" fill-opacity="${isFocused ? '0.22' : '0.14'}" />`
-                    : ''
-                }
                 <circle
                   r="${(node.radius + 2.2).toFixed(1)}"
                   fill="none"
@@ -20972,7 +21027,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               <button
                 type="button"
                 onclick="openTopicAddModal('branches')"
-                class="tactile-btn px-2.5 py-1 rounded-full bg-coral/15 border border-coral/40 text-coral text-[10.5px] font-bold whitespace-nowrap flex-shrink-0"
+                class="tactile-btn px-2.5 py-1 rounded-full bg-pillbg border border-borderline hover:border-coral text-coral text-[10.5px] font-bold whitespace-nowrap flex-shrink-0"
               >+ Skill</button>
             </div>
 
@@ -21017,16 +21072,16 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
           const isUnlocked = selectedBranch.status === 'unlocked' || skillStats.doneMilestones > 0;
           const statusLabel = isMastered ? 'Mastered' : isUnlocked ? 'Unlocked' : 'Locked';
           const statusPillClass = isMastered
-            ? 'bg-lime/20 border-lime/50 text-lime'
+            ? 'bg-pillbg border-borderline text-lime'
             : isUnlocked
-              ? 'bg-coral/20 border-coral/50 text-coral'
+              ? 'bg-pillbg border-borderline text-coral'
               : 'bg-pillbg border-borderline text-secondarytext';
           const skillBarPct = skillStats.totalMilestones > 0 ? skillStats.rawCompletionPct : computeBranchCompletionPct(selectedBranch);
           const pathKeyEsc = escapeHtml(focusedGraphNode.key);
           const nestedCount = Array.isArray(selectedBranch.branches) ? selectedBranch.branches.length : 0;
 
           treeHtml += `
-            <div class="bg-cardbg border border-coral/45 rounded-[24px] p-4 space-y-3" data-selected-skill-card="${pathKeyEsc}">
+            <div class="bg-cardbg border border-borderline rounded-[24px] p-4 space-y-3" data-selected-skill-card="${pathKeyEsc}">
               <div class="flex items-start justify-between gap-2">
                 <button
                   type="button"
@@ -21035,7 +21090,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   title="Open ${escapeHtml(selectedBranch.title)} as a full topic"
                 >
                   <div class="flex items-center gap-1.5 flex-wrap">
-                    <span class="px-1.5 py-0.5 rounded-md bg-coral/15 border border-coral/35 text-[9.5px] font-bold text-coral">LVL ${skillStats.level}/${skillStats.maxLevel}</span>
+                    <span class="px-1.5 py-0.5 rounded-md bg-pillbg border border-borderline text-[9.5px] font-bold text-coral">LVL ${skillStats.level}/${skillStats.maxLevel}</span>
                     <span class="text-[10px] font-semibold text-secondarytext">${skillStats.doneMilestones}/${skillStats.totalMilestones} milestones</span>
                     ${nestedCount > 0 ? `<span class="text-[10px] text-mutedtext">· ${nestedCount} ${nestedCount === 1 ? 'skill' : 'skills'}</span>` : ''}
                   </div>
@@ -21264,7 +21319,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               <button
                 type="button"
                 onclick="openTopicAddModal('milestone')"
-                class="tactile-btn px-2.5 py-1 rounded-full bg-coral/15 border border-coral/40 text-[10.5px] font-bold text-coral whitespace-nowrap"
+                class="tactile-btn px-2.5 py-1 rounded-full bg-pillbg border border-borderline hover:border-coral text-[10.5px] font-bold text-coral whitespace-nowrap"
               >+ Milestone</button>
             </div>
             <div class="w-full h-1.5 rounded-full bg-pillbg overflow-hidden">
@@ -21383,14 +21438,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                             class="tactile-btn flex items-center gap-3 min-w-0 flex-1 text-left"
                           >
                             <span class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                              a.unlocked ? 'bg-amber/20 text-amber border border-amber/40' : 'bg-pillbg text-mutedtext border border-borderline'
+                              a.unlocked ? 'bg-appbg text-amber border border-amber/55' : 'bg-pillbg text-mutedtext border border-borderline'
                             }">
                               ${iconSvg}
                             </span>
                             <div class="min-w-0">
                               <div class="flex items-center gap-1.5">
                                 <span class="text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
-                                  a.unlocked ? 'bg-amber/20 text-amber' : 'bg-pillbg text-secondarytext'
+                                  a.unlocked ? 'bg-pillbg text-amber' : 'bg-pillbg text-secondarytext'
                                 }">
                                   ${escapeHtml(pType)}
                                 </span>
@@ -22325,10 +22380,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       if (status.isInside) {
         if (taskDone) {
-          return `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-lime/15 border border-lime/40 text-[9.5px] font-bold text-lime">✓ Verified at Place</span>`;
+          return `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-pillbg border border-borderline text-[9.5px] font-bold text-lime">✓ Verified at Place</span>`;
         }
         return `
-          <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-lime/15 border border-lime/40 text-[9.5px] font-bold text-lime">At Location (${logic.formatDistanceMeters(status.distanceMeters)})</span>
+          <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-pillbg border border-borderline text-[9.5px] font-bold text-lime">At Location (${logic.formatDistanceMeters(status.distanceMeters)})</span>
           <button
             type="button"
             onpointerdown="event.stopPropagation()"
@@ -22595,7 +22650,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                   `
                     : prog.isComplete
                       ? `
-                      <div class="rounded-2xl bg-lime/10 border border-lime/30 px-3 py-2.5 flex items-center justify-between gap-2">
+                      <div class="rounded-2xl bg-pillbg border border-borderline px-3 py-2.5 flex items-center justify-between gap-2">
                         <span class="text-xs font-semibold text-lime">All ${prog.total} steps completed!</span>
                         <button type="button" onclick="resetRoutineSteps(${r.id})" class="tactile-btn px-2.5 py-1 rounded-lg bg-cardbg border border-borderline text-[10.5px] font-semibold text-primarytext hover:border-coral">
                           Restart
@@ -24853,7 +24908,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                     onclick="openProfileSubView('${s.id}')"
                     class="tactile-btn w-full px-3.5 py-2.5 rounded-xl border text-left text-xs font-semibold transition ${
                       activeSub === s.id
-                        ? 'bg-coral/15 border-coral/50 text-coral'
+                        ? 'bg-appbg border-coral text-coral'
                         : 'bg-cardbg border-borderline text-primarytext hover:border-secondarytext/50'
                     }"
                   >
