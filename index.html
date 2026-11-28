@@ -62,13 +62,22 @@
       --color-accent: 242 139 130;
       --color-on-accent: 20 20 20;
       --color-accent-hex: #F28B82;
-      --color-ring-physical: #169859;
+      --color-secondary-1: 111 196 154;
+      --color-secondary-1-hex: #6FC49A;
+      --color-secondary-1-fg: 20 20 20;
+      --color-secondary-2: 126 168 214;
+      --color-secondary-2-hex: #7EA8D6;
+      --color-secondary-2-fg: 20 20 20;
+      --color-secondary-3: 229 185 106;
+      --color-secondary-3-hex: #E5B96A;
+      --color-secondary-3-fg: 20 20 20;
+      --color-ring-physical: #6FC49A;
       --color-ring-mental: #F28B82;
-      --color-ring-gained: #81C953;
+      --color-ring-gained: #E5B96A;
       --color-pocket-schedule: #F28B82;
-      --color-pocket-notes: #6EA8D8;
-      --color-pocket-journal: #81C953;
-      --color-pocket-archive: #A1A1AA;
+      --color-pocket-notes: #7EA8D6;
+      --color-pocket-journal: #6FC49A;
+      --color-pocket-archive: #E5B96A;
     }
 
     .carrom-pocket-btn {
@@ -95,7 +104,7 @@
     }
     .carrom-pocket-btn[data-carrom-flick="archive"] {
       color: var(--color-pocket-archive);
-      border-color: rgb(var(--color-borderline));
+      border-color: color-mix(in srgb, var(--color-pocket-archive) 44%, rgb(var(--color-borderline)));
     }
 
     body {
@@ -458,17 +467,18 @@
         transform 280ms cubic-bezier(0.22, 1, 0.36, 1) var(--sd-in-delay, 0ms);
     }
     .speed-dial-circle {
+      --sd-slot-rgb: var(--color-accent);
       width: 48px;
       height: 48px;
       border-radius: 9999px;
       background-color: var(--speed-dial-circle-bg);
       background-image: linear-gradient(
         180deg,
-        rgb(var(--color-accent) / 0.11) 0%,
-        rgb(var(--color-accent) / 0.03) 100%
+        rgb(var(--sd-slot-rgb) / 0.13) 0%,
+        rgb(var(--sd-slot-rgb) / 0.03) 100%
       );
-      color: var(--speed-dial-circle-color);
-      border: 1.5px solid var(--speed-dial-circle-border);
+      color: rgb(var(--sd-slot-rgb));
+      border: 1.5px solid color-mix(in srgb, rgb(var(--sd-slot-rgb)) 42%, rgb(var(--color-borderline)));
       box-shadow: var(--speed-dial-circle-shadow);
       transform: scale(0.84);
       transition:
@@ -476,13 +486,22 @@
         border-color 140ms ease,
         background-color 140ms ease;
     }
+    .speed-dial-circle[data-palette-slot="1"] {
+      --sd-slot-rgb: var(--color-secondary-1);
+    }
+    .speed-dial-circle[data-palette-slot="2"] {
+      --sd-slot-rgb: var(--color-secondary-2);
+    }
+    .speed-dial-circle[data-palette-slot="3"] {
+      --sd-slot-rgb: var(--color-secondary-3);
+    }
     .speed-dial-menu.is-open .speed-dial-circle {
       transform: scale(1);
     }
     .speed-dial-item:hover .speed-dial-circle {
       transform: scale(1.06);
       background-color: var(--speed-dial-circle-hover-bg);
-      border-color: rgb(var(--color-accent) / 0.8);
+      border-color: rgb(var(--sd-slot-rgb) / 0.85);
     }
     .speed-dial-item:active .speed-dial-circle {
       transform: scale(0.93);
@@ -2112,7 +2131,7 @@
                 class="tactile-btn bg-cardbg/90 border border-borderline/75 hover:border-borderline rounded-2xl p-4 flex flex-col justify-between gap-4 text-left transition"
               >
                 <div class="flex items-center justify-between gap-2 w-full">
-                  <svg class="w-5 h-5 text-secondarytext" fill="none" stroke="currentColor" stroke-width="1.85" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5l-3.9 19.5m-2.1-19.5l-3.9 19.5"/></svg>
+                  <svg class="w-5 h-5 text-coral" fill="none" stroke="currentColor" stroke-width="1.85" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5l-3.9 19.5m-2.1-19.5l-3.9 19.5"/></svg>
                   <span id="profile-topics-count" class="text-sm font-semibold text-secondarytext tabular-nums">4</span>
                 </div>
                 <p class="font-display text-[15px] font-bold text-primarytext truncate">Topics</p>
@@ -2124,7 +2143,7 @@
                 class="tactile-btn bg-cardbg/90 border border-borderline/75 hover:border-borderline rounded-2xl p-4 flex flex-col justify-between gap-4 text-left transition"
               >
                 <div class="flex items-center justify-between gap-2 w-full">
-                  <svg class="w-5 h-5 text-secondarytext" fill="none" stroke="currentColor" stroke-width="1.85" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
+                  <svg class="w-5 h-5" style="color: rgb(var(--color-secondary-1));" fill="none" stroke="currentColor" stroke-width="1.85" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
                   <span id="profile-inventory-count" class="text-sm font-semibold text-secondarytext tabular-nums">4</span>
                 </div>
                 <p class="font-display text-[15px] font-bold text-primarytext truncate">Inventory</p>
@@ -2136,7 +2155,7 @@
                 class="tactile-btn bg-cardbg/90 border border-borderline/75 hover:border-borderline rounded-2xl p-4 flex flex-col justify-between gap-4 text-left transition"
               >
                 <div class="flex items-center justify-between gap-2 w-full">
-                  <svg class="w-5 h-5 text-secondarytext" fill="none" stroke="currentColor" stroke-width="1.85" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                  <svg class="w-5 h-5" style="color: rgb(var(--color-secondary-2));" fill="none" stroke="currentColor" stroke-width="1.85" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
                   <span id="profile-routines-count" class="text-sm font-semibold text-secondarytext tabular-nums">3</span>
                 </div>
                 <p class="font-display text-[15px] font-bold text-primarytext truncate">Routines</p>
@@ -2148,7 +2167,7 @@
                 class="tactile-btn bg-cardbg/90 border border-borderline/75 hover:border-borderline rounded-2xl p-4 flex flex-col justify-between gap-4 text-left transition"
               >
                 <div class="flex items-center justify-between gap-2 w-full">
-                  <svg class="w-5 h-5 text-secondarytext" fill="none" stroke="currentColor" stroke-width="1.85" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+                  <svg class="w-5 h-5" style="color: rgb(var(--color-secondary-3));" fill="none" stroke="currentColor" stroke-width="1.85" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
                   <span id="profile-prompts-count" class="text-sm font-semibold text-secondarytext tabular-nums">5</span>
                 </div>
                 <p class="font-display text-[15px] font-bold text-primarytext truncate">Prompts</p>
@@ -2439,9 +2458,10 @@
                   </div>
                   <div class="flex items-center gap-2 flex-shrink-0">
                     <div class="flex items-center gap-1">
-                      <span class="w-2 h-2 rounded-full" style="background-color: var(--color-ring-physical);"></span>
-                      <span class="w-2 h-2 rounded-full" style="background-color: var(--color-ring-mental);"></span>
-                      <span class="w-2 h-2 rounded-full" style="background-color: var(--color-ring-gained);"></span>
+                      <span class="w-2 h-2 rounded-full" style="background-color: var(--color-accent-hex);"></span>
+                      <span class="w-2 h-2 rounded-full" style="background-color: var(--color-secondary-1-hex);"></span>
+                      <span class="w-2 h-2 rounded-full" style="background-color: var(--color-secondary-2-hex);"></span>
+                      <span class="w-2 h-2 rounded-full" style="background-color: var(--color-secondary-3-hex);"></span>
                     </div>
                     <svg id="settings-chev-theme" class="w-4 h-4 text-mutedtext transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                   </div>
@@ -2460,6 +2480,7 @@
                       <span id="settings-accent-name" class="text-xs font-medium text-primarytext capitalize">Coral</span>
                     </div>
                     <div id="settings-accent-grid" class="bg-pillbg/70 rounded-2xl px-3 py-3 grid grid-cols-5 gap-2.5 place-items-center"></div>
+                    <div id="settings-harmony-preview" class="flex items-center justify-between gap-2 pt-1 px-0.5"></div>
                   </div>
                 </div>
               </div>
@@ -2963,7 +2984,7 @@
           <span class="speed-dial-title font-display text-[15px] font-bold tracking-tight leading-tight">Mood Tracker</span>
           <span class="speed-dial-subtitle text-[12px] font-medium leading-snug mt-0.5">Log how you're feeling</span>
         </span>
-        <span class="speed-dial-circle flex items-center justify-center flex-shrink-0">
+        <span data-palette-slot="1" class="speed-dial-circle flex items-center justify-center flex-shrink-0">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.95" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="9"/>
             <path d="M8.5 14.5s1.3 1.75 3.5 1.75 3.5-1.75 3.5-1.75"/>
@@ -2984,7 +3005,7 @@
           <span class="speed-dial-title font-display text-[15px] font-bold tracking-tight leading-tight">Energy Tracker</span>
           <span class="speed-dial-subtitle text-[12px] font-medium leading-snug mt-0.5">Check your battery level</span>
         </span>
-        <span class="speed-dial-circle flex items-center justify-center flex-shrink-0">
+        <span data-palette-slot="3" class="speed-dial-circle flex items-center justify-center flex-shrink-0">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.95" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
             <polygon points="13 2 4 14 12 14 11 22 20 10 12 10 13 2"/>
           </svg>
@@ -3002,7 +3023,7 @@
           <span class="speed-dial-title font-display text-[15px] font-bold tracking-tight leading-tight">Mindset Exercise</span>
           <span class="speed-dial-subtitle text-[12px] font-medium leading-snug mt-0.5">Guided CBT, DBT &amp; ACT tools</span>
         </span>
-        <span class="speed-dial-circle flex items-center justify-center flex-shrink-0">
+        <span data-palette-slot="2" class="speed-dial-circle flex items-center justify-center flex-shrink-0">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.95" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
             <path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
           </svg>
@@ -3048,7 +3069,7 @@
           <span class="speed-dial-title font-display text-[15px] font-bold tracking-tight leading-tight">Project</span>
           <span class="speed-dial-subtitle text-[12px] font-medium leading-snug mt-0.5">Track a multi-day timeframe</span>
         </span>
-        <span class="speed-dial-circle flex items-center justify-center flex-shrink-0">
+        <span data-palette-slot="2" class="speed-dial-circle flex items-center justify-center flex-shrink-0">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.95" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
             <path d="M6 4v16M18 4v16M6 8h5M13 14h5M6 16h4"/>
           </svg>
@@ -3093,7 +3114,7 @@
           <span class="speed-dial-title font-display text-[15px] font-bold tracking-tight leading-tight">Routine</span>
           <span class="speed-dial-subtitle text-[12px] font-medium leading-snug mt-0.5">Step-by-step checklist</span>
         </span>
-        <span class="speed-dial-circle flex items-center justify-center flex-shrink-0">
+        <span data-palette-slot="1" class="speed-dial-circle flex items-center justify-center flex-shrink-0">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.95" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
             <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
           </svg>
@@ -9471,6 +9492,79 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       applyThemeAndAccent(themeId, pairedAccent);
     }
 
+    function hexToHsl(hex) {
+      const clean = String(hex || '#F28B82').replace('#', '');
+      const full = clean.length === 3 ? clean.split('').map((c) => c + c).join('') : clean;
+      const r = parseInt(full.slice(0, 2), 16) / 255;
+      const g = parseInt(full.slice(2, 4), 16) / 255;
+      const b = parseInt(full.slice(4, 6), 16) / 255;
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      const d = max - min;
+      let h = 0;
+      const l = (max + min) / 2;
+      let s = 0;
+      if (d !== 0) {
+        s = d / (1 - Math.abs(2 * l - 1));
+        if (max === r) h = 60 * (((g - b) / d) % 6);
+        else if (max === g) h = 60 * ((b - r) / d + 2);
+        else h = 60 * ((r - g) / d + 4);
+      }
+      if (h < 0) h += 360;
+      return { h, s: s * 100, l: l * 100 };
+    }
+
+    function hslToColorTokens(h, s, l) {
+      const hue = ((h % 360) + 360) % 360;
+      const sat = Math.max(12, Math.min(82, s)) / 100;
+      const lig = Math.max(18, Math.min(82, l)) / 100;
+      const c = (1 - Math.abs(2 * lig - 1)) * sat;
+      const x = c * (1 - Math.abs(((hue / 60) % 2) - 1));
+      const m = lig - c / 2;
+      let r1 = 0, g1 = 0, b1 = 0;
+      if (hue < 60) [r1, g1, b1] = [c, x, 0];
+      else if (hue < 120) [r1, g1, b1] = [x, c, 0];
+      else if (hue < 180) [r1, g1, b1] = [0, c, x];
+      else if (hue < 240) [r1, g1, b1] = [0, x, c];
+      else if (hue < 300) [r1, g1, b1] = [x, 0, c];
+      else [r1, g1, b1] = [c, 0, x];
+      const r = Math.round((r1 + m) * 255);
+      const g = Math.round((g1 + m) * 255);
+      const b = Math.round((b1 + m) * 255);
+      const hex = `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
+      const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      return {
+        rgb: `${r} ${g} ${b}`,
+        hex,
+        fg: lum > 0.56 ? '20 20 20' : '248 248 250',
+      };
+    }
+
+    function deriveAccentHarmony(accentHex, isLightTheme = false) {
+      const { h, s } = hexToHsl(accentHex);
+      const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+      const calibrateLightness = (hue, baseDark, baseLight) => {
+        const normH = ((hue % 360) + 360) % 360;
+        const brightZone = normH >= 52 && normH <= 160;
+        if (isLightTheme) return brightZone ? baseLight - 5 : baseLight;
+        return brightZone ? baseDark - 5 : baseDark;
+      };
+
+      const h1 = (h + 148) % 360; // Split-complement fresh counterpart (Physical ring, Journal, Wheel)
+      const h2 = (h + 218) % 360; // Split-complement cool/warm partner (Notes, Wheel, Backdrops)
+      const h3 = (h + 44) % 360;  // Analogous golden bridge (Energy gained, Progress bars, Archive)
+
+      const s1 = clamp(s * (isLightTheme ? 0.86 : 0.80), isLightTheme ? 44 : 40, isLightTheme ? 66 : 60);
+      const s2 = clamp(s * (isLightTheme ? 0.82 : 0.76), isLightTheme ? 42 : 38, isLightTheme ? 64 : 58);
+      const s3 = clamp(s * (isLightTheme ? 0.88 : 0.84), isLightTheme ? 46 : 42, isLightTheme ? 68 : 62);
+
+      return {
+        secondary1: hslToColorTokens(h1, s1, calibrateLightness(h1, 63, 40)),
+        secondary2: hslToColorTokens(h2, s2, calibrateLightness(h2, 65, 42)),
+        secondary3: hslToColorTokens(h3, s3, calibrateLightness(h3, 66, 41)),
+      };
+    }
+
     function getContrastTextForHex(hex) {
       const clean = String(hex || '#F28B82').replace('#', '');
       if (clean.length !== 6) return '#141414';
@@ -9487,8 +9581,9 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       const theme = THEMES[state.themeId];
       const accent = getActiveAccentPalette(state.themeId, state.accentKey);
-      const root = document.documentElement;
       const isLightTheme = theme.mode === 'light';
+      const harmony = deriveAccentHarmony(accent.hex, isLightTheme);
+      const root = document.documentElement;
       root.dataset.theme = state.themeId;
       root.dataset.themeMode = isLightTheme ? 'light' : 'dark';
       root.classList.toggle('dark', !isLightTheme);
@@ -9500,12 +9595,31 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       root.style.setProperty('--color-accent', accent.rgb);
       root.style.setProperty('--color-on-accent', accent.fg || '20 20 20');
       root.style.setProperty('--color-accent-hex', accent.hex);
+
+      // Auto-derived 3 complementary secondary palette tokens
+      root.style.setProperty('--color-secondary-1', harmony.secondary1.rgb);
+      root.style.setProperty('--color-secondary-1-hex', harmony.secondary1.hex);
+      root.style.setProperty('--color-secondary-1-fg', harmony.secondary1.fg);
+      root.style.setProperty('--color-secondary-2', harmony.secondary2.rgb);
+      root.style.setProperty('--color-secondary-2-hex', harmony.secondary2.hex);
+      root.style.setProperty('--color-secondary-2-fg', harmony.secondary2.fg);
+      root.style.setProperty('--color-secondary-3', harmony.secondary3.rgb);
+      root.style.setProperty('--color-secondary-3-hex', harmony.secondary3.hex);
+      root.style.setProperty('--color-secondary-3-fg', harmony.secondary3.fg);
+
+      // Propagate auto-derived harmony into energy rings, energy bars, and action pockets
+      root.style.setProperty('--color-ring-physical', harmony.secondary1.hex);
       root.style.setProperty('--color-ring-mental', accent.hex);
+      root.style.setProperty('--color-ring-gained', harmony.secondary3.hex);
       root.style.setProperty('--color-pocket-schedule', accent.hex);
+      root.style.setProperty('--color-pocket-notes', harmony.secondary2.hex);
+      root.style.setProperty('--color-pocket-journal', harmony.secondary1.hex);
+      root.style.setProperty('--color-pocket-archive', harmony.secondary3.hex);
 
       renderSettingsThemeControls();
       renderUnifiedCalendar();
       renderTimeline();
+      if (typeof syncTimelineAmbientBackdrop === 'function') syncTimelineAmbientBackdrop(true);
       renderHabits();
       renderProfileRadar();
       renderProfileEnergyBars();
@@ -9514,6 +9628,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       }
       if (!document.getElementById('task-modal')?.classList.contains('hidden')) syncModalControls();
       if (!document.getElementById('habit-modal')?.classList.contains('hidden')) syncHabitModalControls();
+      if (!document.getElementById('habit-wheel-modal')?.classList.contains('hidden')) renderHabitWheelModal();
       if (!document.getElementById('project-modal')?.classList.contains('hidden')) renderProjectModalControls();
       if (!document.getElementById('journal-energy-modal')?.classList.contains('hidden')) renderJournalEnergyModal();
       if (!document.getElementById('journal-mood-modal')?.classList.contains('hidden')) renderJournalMoodModal();
@@ -9640,6 +9755,32 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             `;
           })
           .join('');
+      }
+
+      const harmonyEl = document.getElementById('settings-harmony-preview');
+      if (harmonyEl) {
+        const activePal = getActiveAccentPalette(state.themeId, state.accentKey);
+        const harm = deriveAccentHarmony(activePal.hex, activeTheme.mode === 'light');
+        const swatches = [
+          { hex: activePal.hex, label: 'Accent' },
+          { hex: harm.secondary1.hex, label: 'Sec 1' },
+          { hex: harm.secondary2.hex, label: 'Sec 2' },
+          { hex: harm.secondary3.hex, label: 'Sec 3' },
+        ];
+        harmonyEl.innerHTML = `
+          <span class="text-[11px] text-secondarytext">Auto harmony</span>
+          <div class="flex items-center gap-2">
+            ${swatches
+              .map(
+                (s) => `
+                  <span class="inline-flex items-center gap-1" title="${s.label}: ${s.hex}">
+                    <span class="w-3.5 h-3.5 rounded-full border border-borderline/80" style="background-color:${s.hex};"></span>
+                  </span>
+                `
+              )
+              .join('')}
+          </div>
+        `;
       }
     }
 
@@ -12299,70 +12440,78 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         // Dawn: Rising sun tucked behind the left (East) hills + lingering stars
         ridgeBackPath = 'M-10 175 L-10 116 C48 96 106 102 172 122 C238 140 304 106 368 102 C394 100 412 106 430 114 L430 175 Z';
         celestialHtml = `
-          <circle cx="88" cy="108" r="64" fill="rgb(var(--color-accent))" opacity="0.06"/>
-          <circle cx="88" cy="108" r="40" fill="rgb(var(--color-accent))" opacity="0.11"/>
-          <circle cx="88" cy="108" r="22" fill="rgb(var(--color-accent))" opacity="0.22"/>
-          <path d="M248 24 L250 29.5 L255.5 31.5 L250 33.5 L248 39 L246 33.5 L240.5 31.5 L246 29.5 Z" fill="rgb(var(--color-borderline))" opacity="0.72"/>
-          <path d="M330 34 L331.8 38.5 L336.3 40.3 L331.8 42.1 L330 46.6 L328.2 42.1 L323.7 40.3 L328.2 38.5 Z" fill="rgb(var(--color-accent))" opacity="0.34"/>
-          <path d="M376 22 L377.4 25.8 L381.2 27.2 L377.4 28.6 L376 32.4 L374.6 28.6 L370.8 27.2 L374.6 25.8 Z" fill="rgb(var(--color-borderline))" opacity="0.62"/>
-          <circle cx="192" cy="36" r="1.8" fill="rgb(var(--color-borderline))" opacity="0.56"/>
-          <circle cx="294" cy="54" r="1.6" fill="rgb(var(--color-borderline))" opacity="0.48"/>
-          <circle cx="358" cy="60" r="1.8" fill="rgb(var(--color-accent))" opacity="0.3"/>
-          <rect x="276" y="78" width="66" height="8" rx="4" fill="rgb(var(--color-sheetbg))" opacity="0.46"/>
+          <circle cx="88" cy="108" r="66" fill="rgb(var(--color-secondary-3))" opacity="0.08"/>
+          <circle cx="88" cy="108" r="40" fill="rgb(var(--color-accent))" opacity="0.12"/>
+          <circle cx="88" cy="108" r="22" fill="rgb(var(--color-accent))" opacity="0.24"/>
+          <path d="M248 24 L250 29.5 L255.5 31.5 L250 33.5 L248 39 L246 33.5 L240.5 31.5 L246 29.5 Z" fill="rgb(var(--color-secondary-2))" opacity="0.52"/>
+          <path d="M330 34 L331.8 38.5 L336.3 40.3 L331.8 42.1 L330 46.6 L328.2 42.1 L323.7 40.3 L328.2 38.5 Z" fill="rgb(var(--color-secondary-3))" opacity="0.46"/>
+          <path d="M376 22 L377.4 25.8 L381.2 27.2 L377.4 28.6 L376 32.4 L374.6 28.6 L370.8 27.2 L374.6 25.8 Z" fill="rgb(var(--color-secondary-1))" opacity="0.42"/>
+          <circle cx="192" cy="36" r="1.8" fill="rgb(var(--color-secondary-2))" opacity="0.46"/>
+          <circle cx="294" cy="54" r="1.6" fill="rgb(var(--color-secondary-3))" opacity="0.42"/>
+          <circle cx="358" cy="60" r="1.8" fill="rgb(var(--color-accent))" opacity="0.34"/>
+          <rect x="276" y="78" width="66" height="8" rx="4" fill="rgb(var(--color-secondary-2))" opacity="0.14"/>
         `;
       } else if (sceneKey === 'morning') {
         // Morning: Sun climbing higher in the East (left), tucked cleanly behind the hill, no stars
         ridgeBackPath = 'M-10 175 L-10 118 C58 94 120 102 184 122 C248 140 310 104 372 100 C396 98 414 104 430 112 L430 175 Z';
         celestialHtml = `
-          <circle cx="106" cy="92" r="66" fill="rgb(var(--color-accent))" opacity="0.06"/>
-          <circle cx="106" cy="92" r="42" fill="rgb(var(--color-accent))" opacity="0.11"/>
-          <circle cx="106" cy="92" r="23" fill="rgb(var(--color-accent))" opacity="0.22"/>
-          <rect x="258" y="30" width="68" height="10" rx="5" fill="rgb(var(--color-sheetbg))" opacity="0.52"/>
-          <rect x="334" y="46" width="52" height="8" rx="4" fill="rgb(var(--color-cardbg))" opacity="0.44"/>
+          <circle cx="106" cy="92" r="68" fill="rgb(var(--color-secondary-3))" opacity="0.08"/>
+          <circle cx="106" cy="92" r="42" fill="rgb(var(--color-accent))" opacity="0.12"/>
+          <circle cx="106" cy="92" r="23" fill="rgb(var(--color-accent))" opacity="0.24"/>
+          <rect x="258" y="30" width="68" height="10" rx="5" fill="rgb(var(--color-secondary-2))" opacity="0.16"/>
+          <rect x="334" y="46" width="52" height="8" rx="4" fill="rgb(var(--color-secondary-1))" opacity="0.14"/>
         `;
       } else if (sceneKey === 'afternoon') {
         // Afternoon / Noon: Bright harsh sun high at top center (clean concentric circles, no ray lines)
         ridgeBackPath = 'M-10 175 L-10 120 C68 104 136 114 206 128 C274 140 340 104 430 112 L430 175 Z';
         celestialHtml = `
-          <circle cx="210" cy="22" r="82" fill="rgb(var(--color-accent))" opacity="0.06"/>
-          <circle cx="210" cy="22" r="54" fill="rgb(var(--color-accent))" opacity="0.10"/>
+          <circle cx="210" cy="22" r="84" fill="rgb(var(--color-secondary-3))" opacity="0.08"/>
+          <circle cx="210" cy="22" r="54" fill="rgb(var(--color-secondary-3))" opacity="0.12"/>
           <circle cx="210" cy="22" r="32" fill="rgb(var(--color-accent))" opacity="0.16"/>
           <circle cx="210" cy="22" r="18" fill="rgb(var(--color-accent))" opacity="0.28"/>
-          <rect x="44" y="38" width="68" height="10" rx="5" fill="rgb(var(--color-sheetbg))" opacity="0.50"/>
-          <rect x="314" y="34" width="64" height="9" rx="4.5" fill="rgb(var(--color-cardbg))" opacity="0.46"/>
+          <rect x="44" y="38" width="68" height="10" rx="5" fill="rgb(var(--color-secondary-2))" opacity="0.16"/>
+          <rect x="314" y="34" width="64" height="9" rx="4.5" fill="rgb(var(--color-secondary-1))" opacity="0.14"/>
         `;
       } else if (sceneKey === 'evening') {
         // Evening: Setting sun descending behind the right (West) hills
         ridgeBackPath = 'M-10 175 L-10 122 C60 108 124 116 190 132 C254 144 306 98 360 98 C388 98 410 104 430 114 L430 175 Z';
         celestialHtml = `
-          <circle cx="332" cy="108" r="68" fill="rgb(var(--color-accent))" opacity="0.07"/>
-          <circle cx="332" cy="108" r="42" fill="rgb(var(--color-accent))" opacity="0.12"/>
-          <circle cx="332" cy="108" r="23" fill="rgb(var(--color-accent))" opacity="0.24"/>
-          <rect x="52" y="40" width="68" height="9" rx="4.5" fill="rgb(var(--color-sheetbg))" opacity="0.48"/>
-          <rect x="134" y="58" width="50" height="7.5" rx="3.75" fill="rgb(var(--color-cardbg))" opacity="0.40"/>
+          <circle cx="332" cy="108" r="70" fill="rgb(var(--color-secondary-3))" opacity="0.09"/>
+          <circle cx="332" cy="108" r="42" fill="rgb(var(--color-accent))" opacity="0.14"/>
+          <circle cx="332" cy="108" r="23" fill="rgb(var(--color-accent))" opacity="0.26"/>
+          <rect x="52" y="40" width="68" height="9" rx="4.5" fill="rgb(var(--color-secondary-2))" opacity="0.16"/>
+          <rect x="134" y="58" width="50" height="7.5" rx="3.75" fill="rgb(var(--color-secondary-3))" opacity="0.14"/>
         `;
       } else {
         // Night (live late-night time): Crescent moon + stars
         celestialHtml = `
-          <circle cx="334" cy="56" r="56" fill="rgb(var(--color-accent))" opacity="0.05"/>
-          <circle cx="334" cy="56" r="32" fill="rgb(var(--color-accent))" opacity="0.09"/>
-          <path d="M340 38 A19 19 0 1 0 350 69 A15 15 0 1 1 340 38 Z" fill="rgb(var(--color-accent))" opacity="0.25"/>
-          <path d="M96 30 L98 35.5 L103.5 37.5 L98 39.5 L96 45 L94 39.5 L88.5 37.5 L94 35.5 Z" fill="rgb(var(--color-borderline))" opacity="0.7"/>
-          <path d="M226 24 L227.6 28.2 L231.8 29.8 L227.6 31.4 L226 35.6 L224.4 31.4 L220.2 29.8 L224.4 28.2 Z" fill="rgb(var(--color-accent))" opacity="0.34"/>
-          <path d="M288 44 L289.4 47.6 L293 49 L289.4 50.4 L288 54 L286.6 50.4 L283 49 L286.6 47.6 Z" fill="rgb(var(--color-borderline))" opacity="0.62"/>
-          <circle cx="164" cy="40" r="1.8" fill="rgb(var(--color-borderline))" opacity="0.6"/>
-          <circle cx="378" cy="30" r="1.8" fill="rgb(var(--color-accent))" opacity="0.32"/>
+          <circle cx="334" cy="56" r="58" fill="rgb(var(--color-secondary-2))" opacity="0.08"/>
+          <circle cx="334" cy="56" r="32" fill="rgb(var(--color-secondary-2))" opacity="0.13"/>
+          <path d="M340 38 A19 19 0 1 0 350 69 A15 15 0 1 1 340 38 Z" fill="rgb(var(--color-secondary-3))" opacity="0.34"/>
+          <path d="M96 30 L98 35.5 L103.5 37.5 L98 39.5 L96 45 L94 39.5 L88.5 37.5 L94 35.5 Z" fill="rgb(var(--color-secondary-2))" opacity="0.54"/>
+          <path d="M226 24 L227.6 28.2 L231.8 29.8 L227.6 31.4 L226 35.6 L224.4 31.4 L220.2 29.8 L224.4 28.2 Z" fill="rgb(var(--color-accent))" opacity="0.40"/>
+          <path d="M288 44 L289.4 47.6 L293 49 L289.4 50.4 L288 54 L286.6 50.4 L283 49 L286.6 47.6 Z" fill="rgb(var(--color-secondary-1))" opacity="0.48"/>
+          <circle cx="164" cy="40" r="1.8" fill="rgb(var(--color-secondary-3))" opacity="0.48"/>
+          <circle cx="378" cy="30" r="1.8" fill="rgb(var(--color-secondary-2))" opacity="0.44"/>
         `;
       }
 
       return `
         <svg viewBox="0 0 420 175" preserveAspectRatio="xMidYMax slice" class="w-full h-full block">
+          <defs>
+            <linearGradient id="cal-sky-harmony-${sceneKey}" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="rgb(var(--color-secondary-2))" stop-opacity="0.10"/>
+              <stop offset="52%" stop-color="rgb(var(--color-secondary-1))" stop-opacity="0.04"/>
+              <stop offset="100%" stop-color="rgb(var(--color-secondary-3))" stop-opacity="0.09"/>
+            </linearGradient>
+          </defs>
+          <rect x="0" y="0" width="420" height="175" fill="url(#cal-sky-harmony-${sceneKey})"/>
           ${celestialHtml}
           <!-- Opaque base cuts cleanly mask the sun/moon behind the hills -->
           <path d="${ridgeBackPath}" fill="rgb(var(--color-appbg))"/>
-          <path d="${ridgeBackPath}" fill="rgb(var(--color-cal-hill-far, var(--color-sheetbg)))" opacity="0.72"/>
+          <path d="${ridgeBackPath}" fill="color-mix(in srgb, rgb(var(--color-secondary-1)) 12%, rgb(var(--color-cal-hill-far, var(--color-sheetbg))))" opacity="0.78"/>
           <path d="${ridgeFrontPath}" fill="rgb(var(--color-appbg))"/>
-          <path d="${ridgeFrontPath}" fill="rgb(var(--color-cal-hill-near, var(--color-sheetbg)))" opacity="0.92"/>
+          <path d="${ridgeFrontPath}" fill="color-mix(in srgb, rgb(var(--color-secondary-2)) 9%, rgb(var(--color-cal-hill-near, var(--color-sheetbg))))" opacity="0.92"/>
         </svg>
       `;
     }
@@ -12429,7 +12578,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 <path d="M160 130.5 L152 133.5 L154.5 129 Z"/>
               </g>
               <!-- Low valley mist strip -->
-              <rect x="196" y="176" width="118" height="8" rx="4" fill="rgb(var(--color-borderline))" opacity="0.28"/>
+              <rect x="196" y="176" width="118" height="8" rx="4" fill="rgb(var(--color-secondary-2))" opacity="0.18"/>
               <!-- Quiet grazing deer firmly planted into the mid-meadow slope -->
               <g fill="rgb(var(--color-pillbg))" opacity="0.78" transform="translate(314, 174) scale(0.92)">
                 <path d="M14 28 C20 22 40 21 52 25 C57 27 59 32 56 38 L52 38 L50 66 L46 66 L46 39 L26 39 L24 66 L20 66 L21 38 L16 66 L12 66 L15 36 C12 34 11 30 14 28 Z"/>
@@ -12442,14 +12591,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               <!-- Mid misty meadow (solidly grounds pine bases and deer hooves) -->
               <path
                 d="M-20 280 L-20 192 C72 170 162 198 256 218 C348 238 432 194 514 176 C542 170 564 174 580 184 L580 280 Z"
-                fill="rgb(var(--color-cardbg))"
+                fill="color-mix(in srgb, rgb(var(--color-secondary-1)) 8%, rgb(var(--color-cardbg)))"
                 opacity="0.96"
               />
               <!-- Foreground curving woodland mounds -->
               <path
                 d="M-20 280 L-20 228 C70 206 156 226 254 246 C356 264 454 216 580 228 L580 280 Z"
-                fill="rgb(var(--color-pillbg))"
-                opacity="0.58"
+                fill="color-mix(in srgb, rgb(var(--color-secondary-2)) 10%, rgb(var(--color-pillbg)))"
+                opacity="0.62"
               />
               <!-- Fern fronds rooted all the way down into the foreground earth -->
               <g fill="rgb(var(--color-borderline))" opacity="0.56">
@@ -12462,12 +12611,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 <ellipse cx="462" cy="236" rx="9" ry="3.4" transform="rotate(-24 462 236)"/>
                 <ellipse cx="474" cy="248" rx="9" ry="3.4" transform="rotate(24 474 248)"/>
               </g>
-              <!-- Subtle dawn dew droplets on fern tips -->
-              <g fill="rgb(var(--color-accent))" opacity="0.28">
-                <circle cx="70" cy="204" r="2.4"/>
-                <circle cx="494" cy="202" r="2.4"/>
-                <circle cx="176" cy="228" r="2"/>
-                <circle cx="392" cy="230" r="2"/>
+              <!-- Subtle dawn dew droplets in auto-derived secondary harmony -->
+              <g opacity="0.38">
+                <circle cx="70" cy="204" r="2.5" fill="rgb(var(--color-secondary-1))"/>
+                <circle cx="494" cy="202" r="2.5" fill="rgb(var(--color-secondary-2))"/>
+                <circle cx="176" cy="228" r="2.2" fill="rgb(var(--color-secondary-3))"/>
+                <circle cx="392" cy="230" r="2.2" fill="rgb(var(--color-accent))"/>
               </g>
             </svg>
           </div>
@@ -12545,13 +12694,13 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 <circle cx="427" cy="110" r="4.5"/>
               </g>
               <!-- Meadow fluttering butterflies -->
-              <g transform="translate(226, 174) rotate(12)" fill="rgb(var(--color-borderline))" opacity="0.58">
+              <g transform="translate(226, 174) rotate(12)" fill="rgb(var(--color-secondary-2))" opacity="0.34">
                 <ellipse cx="-5" cy="-3" rx="5.4" ry="3.8" transform="rotate(-24 -5 -3)"/>
                 <ellipse cx="5" cy="-3" rx="5.4" ry="3.8" transform="rotate(24 5 -3)"/>
                 <ellipse cx="-3.6" cy="3" rx="3.6" ry="2.6" transform="rotate(16 -3.6 3)"/>
                 <ellipse cx="3.6" cy="3" rx="3.6" ry="2.6" transform="rotate(-16 3.6 3)"/>
               </g>
-              <g transform="translate(342, 166) rotate(-18)" fill="rgb(var(--color-accent))" opacity="0.26">
+              <g transform="translate(342, 166) rotate(-18)" fill="rgb(var(--color-secondary-3))" opacity="0.34">
                 <ellipse cx="-5" cy="-3" rx="5.4" ry="3.8" transform="rotate(-24 -5 -3)"/>
                 <ellipse cx="5" cy="-3" rx="5.4" ry="3.8" transform="rotate(24 5 -3)"/>
                 <ellipse cx="-3.6" cy="3" rx="3.6" ry="2.6" transform="rotate(16 -3.6 3)"/>
@@ -12560,14 +12709,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               <!-- Mid rolling meadow (solidly grounds all tree trunks) -->
               <path
                 d="M-20 280 L-20 190 C62 164 142 182 224 214 C312 246 402 206 488 180 C526 168 556 174 580 186 L580 280 Z"
-                fill="rgb(var(--color-cardbg))"
+                fill="color-mix(in srgb, rgb(var(--color-secondary-1)) 8%, rgb(var(--color-cardbg)))"
                 opacity="0.96"
               />
               <!-- Foreground lush bush mounds -->
               <path
                 d="M-16 280 L-16 226 C26 202 74 210 108 236 C142 216 182 224 212 250 C272 242 338 248 398 254 C432 224 474 218 508 240 C536 216 560 212 580 228 L580 280 Z"
-                fill="rgb(var(--color-pillbg))"
-                opacity="0.58"
+                fill="color-mix(in srgb, rgb(var(--color-secondary-2)) 10%, rgb(var(--color-pillbg)))"
+                opacity="0.62"
               />
               <!-- Blooming meadow wildflowers rooted all the way down into foreground mounds -->
               <g stroke="rgb(var(--color-borderline))" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.54">
@@ -12576,15 +12725,15 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 <path d="M376 284 Q372 258 378 236"/>
                 <path d="M436 284 Q440 254 432 228"/>
               </g>
-              <g fill="rgb(var(--color-borderline))" opacity="0.56">
+              <g fill="rgb(var(--color-secondary-1))" opacity="0.34">
                 <circle cx="136" cy="226" r="3"/><circle cx="140.5" cy="230" r="3"/><circle cx="136" cy="234" r="3"/><circle cx="131.5" cy="230" r="3"/>
                 <circle cx="432" cy="224" r="3"/><circle cx="436.5" cy="228" r="3"/><circle cx="432" cy="232" r="3"/><circle cx="427.5" cy="228" r="3"/>
               </g>
-              <g fill="rgb(var(--color-accent))" opacity="0.28">
-                <circle cx="136" cy="230" r="2.5"/>
-                <circle cx="188" cy="237" r="2.8"/>
-                <circle cx="378" cy="235" r="2.8"/>
-                <circle cx="432" cy="228" r="2.5"/>
+              <g opacity="0.40">
+                <circle cx="136" cy="230" r="2.5" fill="rgb(var(--color-secondary-3))"/>
+                <circle cx="188" cy="237" r="2.8" fill="rgb(var(--color-accent))"/>
+                <circle cx="378" cy="235" r="2.8" fill="rgb(var(--color-secondary-2))"/>
+                <circle cx="432" cy="228" r="2.5" fill="rgb(var(--color-secondary-3))"/>
               </g>
             </svg>
           </div>
@@ -12657,29 +12806,29 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               <!-- Hovering dragonflies over the reeds -->
               <g transform="translate(222, 156) rotate(-18)">
                 <line x1="-11" y1="0" x2="9" y2="0" stroke="rgb(var(--color-borderline))" stroke-width="1.8" stroke-linecap="round" opacity="0.72"/>
-                <ellipse cx="1" cy="-5.5" rx="7.2" ry="2.4" transform="rotate(-20 1 -5.5)" fill="rgb(var(--color-accent))" opacity="0.28"/>
-                <ellipse cx="-2" cy="-4.5" rx="6" ry="2" transform="rotate(-38 -2 -4.5)" fill="rgb(var(--color-borderline))" opacity="0.52"/>
-                <ellipse cx="1" cy="5.5" rx="7.2" ry="2.4" transform="rotate(20 1 5.5)" fill="rgb(var(--color-accent))" opacity="0.24"/>
-                <circle cx="10" cy="0" r="2" fill="rgb(var(--color-borderline))" opacity="0.74"/>
+                <ellipse cx="1" cy="-5.5" rx="7.2" ry="2.4" transform="rotate(-20 1 -5.5)" fill="rgb(var(--color-secondary-2))" opacity="0.38"/>
+                <ellipse cx="-2" cy="-4.5" rx="6" ry="2" transform="rotate(-38 -2 -4.5)" fill="rgb(var(--color-secondary-1))" opacity="0.34"/>
+                <ellipse cx="1" cy="5.5" rx="7.2" ry="2.4" transform="rotate(20 1 5.5)" fill="rgb(var(--color-secondary-2))" opacity="0.32"/>
+                <circle cx="10" cy="0" r="2" fill="rgb(var(--color-accent))" opacity="0.55"/>
               </g>
               <g transform="translate(342, 150) rotate(16)">
                 <line x1="-9" y1="0" x2="11" y2="0" stroke="rgb(var(--color-borderline))" stroke-width="1.8" stroke-linecap="round" opacity="0.72"/>
-                <ellipse cx="-1" cy="-5.5" rx="7.2" ry="2.4" transform="rotate(20 -1 -5.5)" fill="rgb(var(--color-accent))" opacity="0.28"/>
-                <ellipse cx="2" cy="-4.5" rx="6" ry="2" transform="rotate(38 2 -4.5)" fill="rgb(var(--color-borderline))" opacity="0.52"/>
-                <ellipse cx="-1" cy="5.5" rx="7.2" ry="2.4" transform="rotate(-20 -1 5.5)" fill="rgb(var(--color-accent))" opacity="0.24"/>
-                <circle cx="-10" cy="0" r="2" fill="rgb(var(--color-borderline))" opacity="0.74"/>
+                <ellipse cx="-1" cy="-5.5" rx="7.2" ry="2.4" transform="rotate(20 -1 -5.5)" fill="rgb(var(--color-secondary-3))" opacity="0.38"/>
+                <ellipse cx="2" cy="-4.5" rx="6" ry="2" transform="rotate(38 2 -4.5)" fill="rgb(var(--color-secondary-1))" opacity="0.34"/>
+                <ellipse cx="-1" cy="5.5" rx="7.2" ry="2.4" transform="rotate(-20 -1 5.5)" fill="rgb(var(--color-secondary-3))" opacity="0.32"/>
+                <circle cx="-10" cy="0" r="2" fill="rgb(var(--color-accent))" opacity="0.55"/>
               </g>
               <!-- Mid layered lush botanical bushes (solidly grounds fronds and reeds) -->
               <path
                 d="M-16 280 L-16 184 C14 156 54 158 78 190 C102 166 144 168 168 204 C198 194 228 210 244 240 C280 230 326 234 352 254 C380 216 420 204 454 224 C478 184 522 172 556 196 L580 206 L580 280 Z"
-                fill="rgb(var(--color-cardbg))"
+                fill="color-mix(in srgb, rgb(var(--color-secondary-1)) 8%, rgb(var(--color-cardbg)))"
                 opacity="0.96"
               />
               <!-- Foreground dense organic bush mounds -->
               <path
                 d="M-10 280 L-10 222 C34 198 80 210 112 242 C142 226 176 232 198 258 C248 250 314 254 370 262 C406 236 450 232 486 254 C520 228 556 222 580 240 L580 280 Z"
-                fill="rgb(var(--color-pillbg))"
-                opacity="0.58"
+                fill="color-mix(in srgb, rgb(var(--color-secondary-2)) 10%, rgb(var(--color-pillbg)))"
+                opacity="0.62"
               />
               <!-- Twin-leaf botanical sprouts rooted into foreground mounds -->
               <g fill="rgb(var(--color-borderline))" opacity="0.60">
@@ -12765,29 +12914,29 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               <!-- Mid twilight banks framing the calm pond (solidly grounds willow, cypresses, and reeds) -->
               <path
                 d="M-20 280 L-20 198 C72 178 158 206 234 226 C298 242 368 236 438 208 C492 188 538 182 580 190 L580 280 Z"
-                fill="rgb(var(--color-cardbg))"
+                fill="color-mix(in srgb, rgb(var(--color-secondary-1)) 8%, rgb(var(--color-cardbg)))"
                 opacity="0.96"
               />
               <!-- Calm pond water ripples in center valley -->
-              <g fill="rgb(var(--color-accent))" opacity="0.20">
+              <g fill="rgb(var(--color-secondary-2))" opacity="0.28">
                 <rect x="228" y="242" width="108" height="3.2" rx="1.6"/>
                 <rect x="252" y="253" width="66" height="2.6" rx="1.3"/>
               </g>
-              <rect x="212" y="263" width="136" height="2.4" rx="1.2" fill="rgb(var(--color-borderline))" opacity="0.38"/>
+              <rect x="212" y="263" width="136" height="2.4" rx="1.2" fill="rgb(var(--color-secondary-1))" opacity="0.24"/>
               <!-- Foreground dark shore banks -->
               <path
                 d="M-20 280 L-20 234 C60 220 130 238 196 260 C254 278 324 278 382 260 C448 238 514 222 580 234 L580 280 Z"
-                fill="rgb(var(--color-pillbg))"
-                opacity="0.56"
+                fill="color-mix(in srgb, rgb(var(--color-secondary-2)) 10%, rgb(var(--color-pillbg)))"
+                opacity="0.62"
               />
-              <!-- Softly glowing evening fireflies in active theme accent -->
-              <g fill="rgb(var(--color-accent))">
-                <circle cx="144" cy="166" r="7.5" opacity="0.10"/><circle cx="144" cy="166" r="2" opacity="0.38"/>
-                <circle cx="216" cy="188" r="6.5" opacity="0.09"/><circle cx="216" cy="188" r="1.9" opacity="0.34"/>
-                <circle cx="282" cy="202" r="6" opacity="0.08"/><circle cx="282" cy="202" r="1.7" opacity="0.30"/>
-                <circle cx="348" cy="192" r="7" opacity="0.10"/><circle cx="348" cy="192" r="2" opacity="0.36"/>
-                <circle cx="404" cy="158" r="7.5" opacity="0.10"/><circle cx="404" cy="158" r="2" opacity="0.38"/>
-                <circle cx="464" cy="204" r="6.5" opacity="0.09"/><circle cx="464" cy="204" r="1.9" opacity="0.34"/>
+              <!-- Softly glowing evening fireflies across the 4-color harmony -->
+              <g>
+                <circle cx="144" cy="166" r="7.5" fill="rgb(var(--color-accent))" opacity="0.11"/><circle cx="144" cy="166" r="2" fill="rgb(var(--color-accent))" opacity="0.44"/>
+                <circle cx="216" cy="188" r="6.5" fill="rgb(var(--color-secondary-3))" opacity="0.11"/><circle cx="216" cy="188" r="1.9" fill="rgb(var(--color-secondary-3))" opacity="0.42"/>
+                <circle cx="282" cy="202" r="6" fill="rgb(var(--color-secondary-1))" opacity="0.10"/><circle cx="282" cy="202" r="1.7" fill="rgb(var(--color-secondary-1))" opacity="0.38"/>
+                <circle cx="348" cy="192" r="7" fill="rgb(var(--color-secondary-2))" opacity="0.11"/><circle cx="348" cy="192" r="2" fill="rgb(var(--color-secondary-2))" opacity="0.42"/>
+                <circle cx="404" cy="158" r="7.5" fill="rgb(var(--color-secondary-3))" opacity="0.11"/><circle cx="404" cy="158" r="2" fill="rgb(var(--color-secondary-3))" opacity="0.44"/>
+                <circle cx="464" cy="204" r="6.5" fill="rgb(var(--color-accent))" opacity="0.10"/><circle cx="464" cy="204" r="1.9" fill="rgb(var(--color-accent))" opacity="0.40"/>
               </g>
             </svg>
           </div>
@@ -12818,8 +12967,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                 opacity="0.76"
               />
               <path d="M7 22 C13 24 14 35 9 41" fill="none" stroke="rgb(var(--color-sheetbg))" stroke-width="1.6" opacity="0.5"/>
-              <circle cx="14.5" cy="15.5" r="2.1" fill="rgb(var(--color-accent))" opacity="0.38"/>
-              <circle cx="23.5" cy="15.5" r="2.1" fill="rgb(var(--color-accent))" opacity="0.38"/>
+              <circle cx="14.5" cy="15.5" r="2.1" fill="rgb(var(--color-secondary-3))" opacity="0.52"/>
+              <circle cx="23.5" cy="15.5" r="2.1" fill="rgb(var(--color-secondary-3))" opacity="0.52"/>
               <polygon points="19,17 17.5,20 20.5,20" fill="rgb(var(--color-borderline))" opacity="0.65"/>
             </g>
           </svg>
@@ -12829,8 +12978,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             <!-- Far organic nocturnal bush mounds -->
             <path
               d="M-20 280 L-20 156 C24 124 68 134 102 164 C132 146 168 158 192 188 C238 206 294 224 348 216 C400 208 436 178 476 156 C512 136 548 128 580 152 L580 280 Z"
-              fill="rgb(var(--color-cardbg))"
-              opacity="0.58"
+              fill="color-mix(in srgb, rgb(var(--color-secondary-2)) 8%, rgb(var(--color-cardbg)))"
+              opacity="0.62"
             />
             <!-- Tall curving left & right botanical branches deeply rooted down behind the mid mounds -->
             <g fill="rgb(var(--color-pillbg))" opacity="0.58">
@@ -12848,14 +12997,14 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             <!-- Mid layered organic mounds (solidly grounds botanical branches) -->
             <path
               d="M-16 280 L-16 188 C16 162 56 164 80 194 C104 172 144 174 166 208 C196 198 226 214 242 244 C278 234 324 238 350 258 C378 220 418 208 452 228 C476 190 520 178 554 200 L580 212 L580 280 Z"
-              fill="rgb(var(--color-cardbg))"
+              fill="color-mix(in srgb, rgb(var(--color-secondary-1)) 8%, rgb(var(--color-cardbg)))"
               opacity="0.96"
             />
             <!-- Foreground deep bush mounds -->
             <path
               d="M-10 280 L-10 224 C34 200 80 212 112 244 C142 228 176 234 198 260 C248 252 314 256 370 264 C406 238 450 234 486 256 C520 230 556 224 580 242 L580 280 Z"
-              fill="rgb(var(--color-pillbg))"
-              opacity="0.58"
+              fill="color-mix(in srgb, rgb(var(--color-secondary-2)) 10%, rgb(var(--color-pillbg)))"
+              opacity="0.62"
             />
             <!-- Twin-leaf sprouts rooted cleanly into foreground mounds -->
             <g fill="rgb(var(--color-borderline))" opacity="0.58">
@@ -12866,26 +13015,26 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
               <path d="M440 238 C429 228 424 219 429 212 C438 212 444 224 442 238 Z"/>
               <path d="M444 238 C454 229 463 226 463 217 C454 217 446 226 444 238 Z"/>
             </g>
-            <!-- Quiet nocturnal fireflies drifting low over the bushes -->
-            <g fill="rgb(var(--color-accent))">
-              <circle cx="144" cy="172" r="7.5" opacity="0.09"/><circle cx="144" cy="172" r="2" opacity="0.34"/>
-              <circle cx="236" cy="208" r="6.5" opacity="0.08"/><circle cx="236" cy="208" r="1.8" opacity="0.30"/>
-              <circle cx="344" cy="204" r="7" opacity="0.09"/><circle cx="344" cy="204" r="1.9" opacity="0.34"/>
-              <circle cx="430" cy="166" r="7.5" opacity="0.09"/><circle cx="430" cy="166" r="2" opacity="0.34"/>
+            <!-- Quiet nocturnal fireflies drifting low in harmonic palette -->
+            <g>
+              <circle cx="144" cy="172" r="7.5" fill="rgb(var(--color-secondary-3))" opacity="0.11"/><circle cx="144" cy="172" r="2" fill="rgb(var(--color-secondary-3))" opacity="0.42"/>
+              <circle cx="236" cy="208" r="6.5" fill="rgb(var(--color-secondary-1))" opacity="0.10"/><circle cx="236" cy="208" r="1.8" fill="rgb(var(--color-secondary-1))" opacity="0.38"/>
+              <circle cx="344" cy="204" r="7" fill="rgb(var(--color-secondary-2))" opacity="0.11"/><circle cx="344" cy="204" r="1.9" fill="rgb(var(--color-secondary-2))" opacity="0.40"/>
+              <circle cx="430" cy="166" r="7.5" fill="rgb(var(--color-accent))" opacity="0.11"/><circle cx="430" cy="166" r="2" fill="rgb(var(--color-accent))" opacity="0.42"/>
             </g>
           </svg>
         </div>
       `;
     }
 
-    function syncTimelineAmbientBackdrop() {
+    function syncTimelineAmbientBackdrop(force = false) {
       const sceneKey = resolveTimelineHorizonSceneKey(state.compartmentFilter || 'all');
 
       const calBackdrop = document.getElementById('calendar-ambient-backdrop');
       if (calBackdrop) {
         const showCal = state.activeTab !== 'profile';
         calBackdrop.classList.toggle('hidden', !showCal);
-        if (showCal && calBackdrop.dataset.sceneKey !== sceneKey) {
+        if (showCal && (force || calBackdrop.dataset.sceneKey !== sceneKey)) {
           calBackdrop.dataset.sceneKey = sceneKey;
           calBackdrop.innerHTML = getCalendarSilhouetteSceneSvg(sceneKey);
         }
@@ -12895,7 +13044,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       if (tlBackdrop) {
         const showTl = state.activeTab === 'timeline' && state.timelineViewMode !== 'projects';
         tlBackdrop.classList.toggle('hidden', !showTl);
-        if (showTl && tlBackdrop.dataset.sceneKey !== sceneKey) {
+        if (showTl && (force || tlBackdrop.dataset.sceneKey !== sceneKey)) {
           tlBackdrop.dataset.sceneKey = sceneKey;
           tlBackdrop.innerHTML = getTimelineSilhouetteSceneSvg(sceneKey);
         }
@@ -18546,9 +18695,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
         .join('');
 
       const cardAttr = interactive ? `data-habit-card-id="${h.id}"` : `data-habit-clone-id="${h.id}"`;
-      const fillColor = isStale ? 'rgb(var(--color-mutedtext) / 0.75)' : 'rgb(var(--color-accent))';
+      const fillStart = isStale ? 'rgb(var(--color-mutedtext) / 0.75)' : 'rgb(var(--color-accent))';
+      const fillEnd = isStale ? 'rgb(var(--color-mutedtext) / 0.75)' : 'rgb(var(--color-secondary-3))';
       const trackColor = isStale ? 'rgb(var(--color-borderline) / 0.55)' : 'rgb(var(--color-borderline) / 0.85)';
-      const borderProgressStyle = `background: linear-gradient(90deg, ${fillColor} 0%, ${fillColor} ${pct}%, ${trackColor} ${pct}%, ${trackColor} 100%);`;
+      const borderProgressStyle = `background: linear-gradient(90deg, ${fillStart} 0%, ${fillEnd} ${pct}%, ${trackColor} ${pct}%, ${trackColor} 100%);`;
       const staleCardCls = isStale ? 'opacity-60 grayscale' : '';
       const progressSummaryHtml = formatHabitProgressSummaryHtml(completedDays, masteryDays, isStale);
 
@@ -18584,9 +18734,10 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             ${interactive ? `onclick="event.stopPropagation(); openHabitWheelModal(${h.id})"` : 'tabindex="-1"'}
             title="Spin ${escapeHtml(wheelTopicLabel)} subtopic wheel"
             aria-label="Open subtopic wheel for ${escapeHtml(h.title)}"
-            class="tactile-btn h-9 px-2.5 rounded-xl bg-pillbg border border-borderline hover:border-coral text-primarytext hover:text-coral flex items-center gap-1.5 text-[11px] font-semibold flex-shrink-0 transition"
+            style="border-color: color-mix(in srgb, rgb(var(--color-secondary-2)) 46%, rgb(var(--color-borderline))); color: rgb(var(--color-secondary-2));"
+            class="tactile-btn h-9 px-2.5 rounded-xl bg-pillbg border hover:opacity-90 flex items-center gap-1.5 text-[11px] font-semibold flex-shrink-0 transition"
           >
-            <svg class="w-4 h-4 text-coral flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="8.5"/>
               <circle cx="12" cy="12" r="2.2"/>
               <path stroke-linecap="round" d="M12 3.5v6.3M12 14.2v6.3M4.64 7.75l5.45 3.15M13.91 13.1l5.45 3.15M19.36 7.75l-5.45 3.15M10.09 13.1l-5.45 3.15"/>
@@ -18611,7 +18762,7 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
                     : 'Tap to spin a subtopic'
               }</span>
             </span>
-            <span class="text-[11px] font-semibold text-coral flex-shrink-0">Spin</span>
+            <span class="text-[11px] font-semibold flex-shrink-0" style="color: rgb(var(--color-secondary-2));">Spin</span>
           </button>`
         : '';
 
@@ -20061,12 +20212,12 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
     // HABIT SUBTOPIC WHEEL PICKER & SPINNER (TOPIC -> SUBTOPICS WHEEL)
     // =========================================================================
     const HABIT_WHEEL_SLICE_COLORS = [
-      'color-mix(in srgb, rgb(var(--color-accent)) 22%, rgb(var(--color-cardbg)))',
-      'rgb(var(--color-pillbg))',
-      'color-mix(in srgb, rgb(var(--color-accent)) 36%, rgb(var(--color-cardbg)))',
-      'rgb(var(--color-cardbg))',
-      'color-mix(in srgb, rgb(var(--color-accent)) 14%, rgb(var(--color-pillbg)))',
-      'color-mix(in srgb, rgb(var(--color-accent)) 28%, rgb(var(--color-sheetbg)))',
+      'color-mix(in srgb, rgb(var(--color-secondary-1)) 30%, rgb(var(--color-cardbg)))',
+      'color-mix(in srgb, rgb(var(--color-secondary-2)) 30%, rgb(var(--color-cardbg)))',
+      'color-mix(in srgb, rgb(var(--color-secondary-3)) 30%, rgb(var(--color-cardbg)))',
+      'color-mix(in srgb, rgb(var(--color-accent)) 22%, rgb(var(--color-pillbg)))',
+      'color-mix(in srgb, rgb(var(--color-secondary-1)) 18%, rgb(var(--color-pillbg)))',
+      'color-mix(in srgb, rgb(var(--color-secondary-2)) 18%, rgb(var(--color-pillbg)))',
     ];
     let habitWheelSpinRaf = null;
     let habitWheelDragState = null;
@@ -20257,8 +20408,8 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
             <path
               d="${teardropPath}"
               fill="rgb(var(--color-appbg))"
-              stroke="rgb(var(--color-borderline))"
-              stroke-width="1.35"
+              stroke="color-mix(in srgb, rgb(var(--color-secondary-2)) 50%, rgb(var(--color-borderline)))"
+              stroke-width="1.5"
               stroke-linejoin="round"
             />
             <text
@@ -23424,10 +23575,25 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
       });
 
       const polyStr = dataPoints.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-      svg += `<polygon points="${polyStr}" fill="rgba(${accentRgbStr}, 0.24)" stroke="${accentHex}" stroke-width="2.2" stroke-linejoin="round" />`;
+      const harmonyAreaVars = [
+        'rgb(var(--color-accent))',
+        'rgb(var(--color-secondary-1))',
+        'rgb(var(--color-secondary-2))',
+        'rgb(var(--color-secondary-3))',
+      ];
+      svg += `
+        <defs>
+          <linearGradient id="karma-radar-harmony-fill" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="rgb(var(--color-accent))" stop-opacity="0.28"/>
+            <stop offset="55%" stop-color="rgb(var(--color-secondary-2))" stop-opacity="0.20"/>
+            <stop offset="100%" stop-color="rgb(var(--color-secondary-1))" stop-opacity="0.24"/>
+          </linearGradient>
+        </defs>
+      `;
+      svg += `<polygon points="${polyStr}" fill="url(#karma-radar-harmony-fill)" stroke="${accentHex}" stroke-width="2.2" stroke-linejoin="round" />`;
       dataPoints.forEach((p, i) => {
         if ((axes[i].linearSum || 0) > 0) {
-          svg += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.2" fill="${accentHex}" />`;
+          svg += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.4" fill="${harmonyAreaVars[i % harmonyAreaVars.length]}" stroke="rgb(var(--color-sheetbg))" stroke-width="1.2" />`;
         }
       });
       svg += `</svg>`;
@@ -23435,17 +23601,20 @@ window.MemoSpikePhysics = { computeMemoSpikeLayout, buildPaperPalette, projectPo
 
       if (grid) {
         grid.innerHTML = axes
-          .map((a) => `
-            <div class="space-y-1" data-area-metric="${escapeHtml(a.label)}">
-              <div class="flex items-center justify-between gap-1">
-                <span class="text-xs font-medium text-secondarytext truncate">${escapeHtml(a.label)}</span>
-                <span class="text-xs font-bold ${a.linearSum > 0 ? 'text-primarytext' : 'text-mutedtext'}">${a.linearSum}%</span>
+          .map((a, idx) => {
+            const barColor = harmonyAreaVars[idx % harmonyAreaVars.length];
+            return `
+              <div class="space-y-1" data-area-metric="${escapeHtml(a.label)}">
+                <div class="flex items-center justify-between gap-1">
+                  <span class="text-xs font-medium text-secondarytext truncate">${escapeHtml(a.label)}</span>
+                  <span class="text-xs font-bold ${a.linearSum > 0 ? 'text-primarytext' : 'text-mutedtext'}">${a.linearSum}%</span>
+                </div>
+                <div class="w-full h-1 rounded-full bg-pillbg overflow-hidden">
+                  <div class="h-full rounded-full transition-all duration-300" style="width: ${a.barPct}%; background-color: ${barColor};"></div>
+                </div>
               </div>
-              <div class="w-full h-1 rounded-full bg-pillbg overflow-hidden">
-                <div class="h-full rounded-full bg-coral/85 transition-all duration-300" style="width: ${a.barPct}%;"></div>
-              </div>
-            </div>
-          `)
+            `;
+          })
           .join('');
       }
     }
